@@ -1,21 +1,24 @@
 const express = require("express")
 const morgan = require("morgan")
-const router = require("./router/router")
 const app = express()
 const path = require("path");
 
-app.set("port", process.env.PORT || 3030)
+
+// Motor de vistas
 app.set("view engine", "pug");// crear el archivo pug en views
-
-
-const viewsPath = path.join(__dirname, "..", "views");
-app.set("views", viewsPath);
+app.set("views", path.join(__dirname, "../views"));
 
 // Ruta a los archivos estáticos (CSS, JS, imágenes)
-const publicPath = path.join(__dirname, "..", "public");
-app.use(express.static(publicPath));
-
+app.use('/bootstrap', express.static(__dirname + '/node_modules/bootstrap/dist'))
+app.use('/sb-admin', express.static(path.join(__dirname, '../public/sb-admin')));
+app.use('/css', express.static(path.join(__dirname, '../public/css')));
+app.use('/js', express.static(path.join(__dirname, '../public/js')));
 app.use(morgan("dev"))
-app.use("/", router)
+
+// Rutas
+const indexRoutes = require("./routes/router");
+app.use('/', indexRoutes);
+
+const PORT = process.env.PORT || 3000;
 
 module.exports = app 

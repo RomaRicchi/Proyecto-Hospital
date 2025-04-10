@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "Trabajo final de Web II",
   "dependencies": {
+    "bootstrap": "^5.3.5",
     "express": "^5.1.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.9",

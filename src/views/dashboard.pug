@@ -1,0 +1,78 @@
+extends layout_modular.pug
+
+block content
+  .container-fluid.px-4
+    h1.mt-4 Panel
+    ol.breadcrumb.mb-4
+      li.breadcrumb-item.active Dashboard
+
+    .row
+      .col-xl-3.col-md-6
+        .card.bg-primary.text-white.mb-4
+          .card-body Total de pacientes
+          .card-footer.d-flex.align-items-center.justify-content-between
+            a.small.text-white.stretched-link(href="#") Ver detalles
+            div.small.text-white
+              i.fas.fa-angle-right
+
+      .col-xl-3.col-md-6
+        .card.bg-warning.text-white.mb-4
+          .card-body Habitaciones ocupadas
+          .card-footer.d-flex.align-items-center.justify-content-between
+            a.small.text-white.stretched-link(href="#") Ver habitaciones
+            div.small.text-white
+              i.fas.fa-angle-right
+
+      .col-xl-3.col-md-6
+        .card.bg-success.text-white.mb-4
+          .card-body Altas médicas hoy
+          .card-footer.d-flex.align-items-center.justify-content-between
+            a.small.text-white.stretched-link(href="#") Ver registros
+            div.small.text-white
+              i.fas.fa-angle-right
+
+      .col-xl-3.col-md-6
+        .card.bg-danger.text-white.mb-4
+          .card-body Internaciones activas
+          .card-footer.d-flex.align-items-center.justify-content-between
+            a.small.text-white.stretched-link(href="#") Ver internaciones
+            div.small.text-white
+              i.fas.fa-angle-right
+
+    .row
+      .col-xl-6
+        .card.mb-4
+          .card-header
+            i.fas.fa-chart-area.me-1
+            | Gráfico de actividad (demo)
+          .card-body
+            canvas#myAreaChart(width="100%", height="40")
+
+      .col-xl-6
+        .card.mb-4
+          .card-header
+            i.fas.fa-chart-bar.me-1
+            | Comparativa mensual (demo)
+          .card-body
+            canvas#myBarChart(width="100%", height="40")
+
+    .card.mb-4
+      .card-header
+        i.fas.fa-table.me-1
+        | Tabla de pacientes (demo)
+      .card-body
+        table.table.table-bordered
+          thead
+            tr
+              th Nombre
+              th DNI
+              th Cobertura
+          tbody
+            tr
+              td María Gómez
+              td 30333444
+              td OSDE
+            tr
+              td Juan López
+              td 27888999
+              td PAMI
