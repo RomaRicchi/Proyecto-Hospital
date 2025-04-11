@@ -1,8 +1,7 @@
-const app =require("./app/index");
-const port = app.get("port")
+const app = require("./app/index");
 
-// Servidor
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
