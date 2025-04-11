@@ -1,0 +1,53 @@
+extends layout_modular.pug
+
+block content
+  .container.mt-5
+
+    // Bienvenida
+    h1.text-center Bienvenido al Sistema HIS
+    p.text-center.text-muted Sistema de gestión hospitalaria – Clínica Santa María
+
+    // Gráfico de camas
+    .row.justify-content-center.mt-5
+      .col-md-6
+        .card.shadow
+          .card-body
+            h4.card-title.text-center Estado de camas (simulado)
+            canvas#graficoCamas(width="50%", height="50")
+
+    h2.mt-5.text-center Profesionales del área de internación
+
+    .row.row-cols-2.row-cols-sm-3.row-cols-md-4.row-cols-lg-5.g-4.mt-3.justify-content-center
+      each medico in medicos
+        .col
+          .card.expandible.h-100.shadow-sm.text-center(style="padding: 10px; cursor: pointer;")
+            img.card-img-top.mx-auto.mt-2.mb-2.rounded-circle(
+              src=medico.foto, 
+              alt=medico.nombre, 
+              style="width: 80px; height: 80px; object-fit: cover;"
+            )
+            .card-body.p-2
+              h6.card-title.mb-1= medico.nombre
+              p.card-text.text-muted.small= medico.especialidad
+
+  // Chart.js para gráfico
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+
+  script.
+    const ctx = document.getElementById('graficoCamas').getContext('2d');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Ocupadas', 'Libres'],
+        datasets: [{
+          data: [12, 8], // Simulado
+          backgroundColor: ['#dc3545', '#28a745'],
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
