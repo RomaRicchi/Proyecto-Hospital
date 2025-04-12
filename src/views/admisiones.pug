@@ -1,0 +1,35 @@
+extends layout_modular.pug
+
+block content
+  .container.mt-5.pt-5
+    h2.text-center.mb-4 Registrar internación
+
+    form(action="/admisiones/nueva" method="POST")
+      .mb-3
+        label.form-label(for="dni") DNI del paciente
+        input.form-control(type="text", name="dni", id="dni", required)
+
+      .mb-3
+        label.form-label Nombre
+        input.form-control(type="text", name="nombre", id="nombre")
+
+      .mb-3
+        label.form-label Apellido
+        input.form-control(type="text", name="apellido", id="apellido")
+
+      .mb-3
+        label.form-label Cobertura
+        input.form-control(type="text", name="cobertura", id="cobertura")
+
+      .mb-3
+        label.form-label Motivo de ingreso
+        input.form-control(type="text", name="motivo", required)
+
+      .mb-3
+        label.form-label Habitación y cama
+        select.form-select(name="id_habitacion", required)
+          option(value="") Seleccione una habitación y cama
+          each h in habitaciones
+            option(value=h.id_habitacion)= `${h.sector} - Hab ${h.num} - Cama ${h.cama}`
+
+      button.btn.btn-primary.mt-3(type="submit") Internar paciente

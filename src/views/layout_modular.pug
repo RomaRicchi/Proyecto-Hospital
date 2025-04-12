@@ -13,21 +13,23 @@ html(lang="es")
   body(class="sb-nav-fixed")
     include partials/navbar
 
-    div#layoutSidenav
-      div#layoutSidenav_nav
+    if typeof autenticado !== 'undefined' && autenticado
+      div#layoutSidenav
         include partials/sidebar
-
-      div#layoutSidenav_content
-        main
-          block content
-        footer.py-4.bg-light.mt-auto
-          div.container-fluid.px-4
-            div.d-flex.align-items-center.justify-content-between.small
-              div.text-muted © 2025 Tu Clínica
-              div
-                a(href="#") Privacy Policy
-                | ·
-                a(href="#") Terms & Conditions
+        div#layoutSidenav_content
+          main
+            block content
+    else
+      main
+        block content
+          footer.py-4.bg-light.mt-auto
+            div.container-fluid.px-4
+              div.d-flex.align-items-center.justify-content-between.small
+                div.text-muted © 2025 Tu Clínica
+                div
+                  a(href="#") Privacy Policy
+                    | ·
+                  a(href="#") Terms & Conditions
 
     style.
       .expandible {
@@ -115,3 +117,19 @@ html(lang="es")
 
       setInterval(actualizarReloj, 1000);
       actualizarReloj();
+
+    script.
+      document.getElementById('dni').addEventListener('blur', () => {
+        const dni = document.getElementById('dni').value;
+
+        fetch(`/api/paciente-por-dni?dni=${dni}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.encontrado) {
+              document.getElementById('nombre').value = data.nombre_p;
+              document.getElementById('apellido').value = data.apellido_p;
+              document.getElementById('cobertura').value = data.cobertura;
+            }
+          });
+      });
+
