@@ -1,0 +1,38 @@
+extends layout_modular.pug
+
+block content
+  .container.mt-5
+    h2 Lista de Pacientes
+
+    a.btn.btn-success.mb-3(href="/pacientes/nuevo") + Agregar Paciente
+
+    table.table.table-striped
+      thead
+        tr
+          th DNI
+          th Nombre
+          th Apellido
+          th Fecha Nac.
+          th Género
+          th Cobertura
+          th Habitación
+          th Cama
+          th Acciones
+      tbody
+        if pacientes && pacientes.length
+          each p in pacientes
+            tr
+              td= p.dni_paciente
+              td= p.nombre_p
+              td= p.apellido_p
+              td= p.fecha_nac.toISOString().slice(0,10)
+              td= p.genero
+              td= p.cobertura
+              td= p.habitacion ? `${p.sector} - ${p.habitacion}` : 'No asignada'
+              td= p.cama || '-'
+              td
+                a.btn.btn-sm.btn-primary(href=`/pacientes/editar/${p.id_paciente}`) Editar
+                a.btn.btn-sm.btn-danger(href=`/pacientes/eliminar/${p.id_paciente}`) Eliminar
+        else
+          tr
+            td(colspan="9").text-center.text-muted No hay pacientes registrados.
