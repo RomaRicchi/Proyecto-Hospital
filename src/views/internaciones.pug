@@ -1,4 +1,32 @@
 extends layout_modular.pug
 
+block content
+  .container.mt-5
+    h2 Internaciones Activas
+
+    if internaciones && internaciones.length
+      table.table.table-striped.mt-4
+        thead
+          tr
+            th Paciente
+            th DNI
+            th Habitación
+            th Cama
+            th Fecha de ingreso
+            th Acciones
+        tbody
+          each i in internaciones
+            tr
+              td= `${i.nombre_p} ${i.apellido_p}`
+              td= i.dni_paciente
+              td= `${i.sector} - Hab. ${i.num}`
+              td= i.cama
+              td= i.fecha_ingreso.toISOString().slice(0,10)
+              td
+                form(method="POST", action=`/internaciones/alta/${i.id_admision}`)
+                  button.btn.btn-sm.btn-danger(type="submit") Alta médica
+    else
+      p.text-muted No hay internaciones activas registradas.
+
 
 

@@ -1,35 +1,26 @@
 extends layout_modular.pug
 
 block content
-  .container.mt-5.pt-5
-    h2.text-center.mb-4 Registrar internación
+  .container.mt-5
+    h2 Registrar Internación
 
-    form(action="/admisiones/nueva" method="POST")
-      .mb-3
-        label.form-label(for="dni") DNI del paciente
-        input.form-control(type="text", name="dni", id="dni", required)
+    if error
+      .alert.alert-danger= error
+    if exito
+      .alert.alert-success= exito
 
+    form(action="/admisiones" method="POST")
       .mb-3
-        label.form-label Nombre
-        input.form-control(type="text", name="nombre", id="nombre")
-
-      .mb-3
-        label.form-label Apellido
-        input.form-control(type="text", name="apellido", id="apellido")
+        label.form-label(for="id_paciente") Paciente
+        input.form-control(type="number", name="id_paciente", id="id_paciente", required)
 
       .mb-3
-        label.form-label Cobertura
-        input.form-control(type="text", name="cobertura", id="cobertura")
+        label.form-label(for="id_habitacion") Habitación
+        input.form-control(type="number", name="id_habitacion", id="id_habitacion", required)
 
       .mb-3
-        label.form-label Motivo de ingreso
-        input.form-control(type="text", name="motivo", required)
+        label.form-label(for="id_cama") Cama
+        input.form-control(type="number", name="id_cama", id="id_cama", required)
 
-      .mb-3
-        label.form-label Habitación y cama
-        select.form-select(name="id_habitacion", required)
-          option(value="") Seleccione una habitación y cama
-          each h in habitaciones
-            option(value=h.id_habitacion)= `${h.sector} - Hab ${h.num} - Cama ${h.cama}`
-
-      button.btn.btn-primary.mt-3(type="submit") Internar paciente
+      button.btn.btn-primary(type="submit") Registrar Internación
+      a.btn.btn-secondary.ms-2(href="/dashboard") Cancelar
