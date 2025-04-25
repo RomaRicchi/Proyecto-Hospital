@@ -1,21 +1,21 @@
-extends layout_modular.pug
+extends layout
 
 block content
-  .container.mt-5
+  h1 Bienvenido a nuestra Clínica
+    p Ofrecemos atención de calidad.
 
-    // Bienvenida
-    h1.text-center Bienvenido al Sistema HIS
-    p.text-center.text-muted Sistema de gestión hospitalaria – Clínica Santa María
+  h2 Obras sociales que recibimos:
+    ul
+      each obra in listaObras
+        li= obra
 
-    // Gráfico de camas
-    .row.justify-content-center.mt-5
-      .col-md-6
-        .card.shadow
-          .card-body
-            h4.card-title.text-center Estado de camas (simulado)
-            canvas#graficoCamas(width="50%", height="50")
+  h2 Especialidades disponibles:
+    ul
+      each esp in listaEsp
+        li= esp
 
-    h2.mt-5.text-center Profesionales del área de internación
+
+  h2.mt-5.text-center Profesionales del área de internación
 
     .row.row-cols-2.row-cols-sm-3.row-cols-md-4.row-cols-lg-5.g-4.mt-3.justify-content-center
       each medico in medicos
@@ -30,24 +30,4 @@ block content
               h6.card-title.mb-1= medico.nombre
               p.card-text.text-muted.small= medico.especialidad
 
-  // Chart.js para gráfico
-  script(src="https://cdn.jsdelivr.net/npm/chart.js")
-
-  script.
-    const ctx = document.getElementById('graficoCamas').getContext('2d');
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Ocupadas', 'Libres'],
-        datasets: [{
-          data: [12, 8], // Simulado
-          backgroundColor: ['#dc3545', '#28a745'],
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'bottom' }
-        }
-      }
-    });
+  

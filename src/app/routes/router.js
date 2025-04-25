@@ -1,24 +1,27 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const pacienteController = require('../controllers/pacienteController');
-const admisionController = require('../controllers/admisionController');
+const publicController = require("../controllers/publicController");
+const usuarioController = require("../controllers/usuarioController");
+const pacienteController = require("../controllers/pacienteController");
+const admisionController = require("../controllers/admisionController");
 
-// Rutas públicas
-router.get('/', pacienteController.mostrarInicio);
-router.post('/login', pacienteController.login);
-router.get('/logout', pacienteController.logout);
-router.get('/usuarios', pacienteController.vistaLogin);
-router.post('/admisiones', admisionController.crearInternacion);
+// Página pública de inicio
+router.get("/", publicController.mostrarInicio);
 
+// Login / logout
+router.post("/login", usuarioController.login);
+router.get("/logout", usuarioController.logout);
+router.get("/usuarios", usuarioController.vistaLogin);
 
-// Rutas internas
-router.get('/dashboard', pacienteController.vistaDashboard);
-router.get('/internaciones', pacienteController.vistaInternaciones);
-router.get('/pacientes', pacienteController.listarPacientes);
-router.get('/api/paciente-por-dni', pacienteController.buscarPorDni);
+// Rutas protegidas
+router.get("/dashboard", pacienteController.vistaDashboard);
+router.get("/internaciones", pacienteController.vistaInternaciones);
+router.get("/pacientes", pacienteController.listarPacientes);
+router.get("/api/paciente-por-dni", pacienteController.buscarPorDni);
 
 // Admisiones
-router.get('/admisiones', admisionController.vistaFormulario);
+router.get("/admisiones", admisionController.vistaFormulario);
+router.post("/admisiones", admisionController.crearInternacion);
 
 module.exports = router;
