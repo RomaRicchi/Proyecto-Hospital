@@ -1,6 +1,17 @@
 extends layout_modular.pug
 
 block content
+  h1 Panel de Administración
+  p Bienvenido/a al sistema de gestión.
+
+  h2 Gráfico de camas
+    .row.justify-content-center.mt-5
+      .col-md-6
+        .card.shadow
+          .card-body
+            h4.card-title.text-center Estado de camas (simulado)
+            canvas#graficoCamas(width="50%", height="50")
+  
   .container-fluid.px-4
     h1.mt-4 Panel
     ol.breadcrumb.mb-4
