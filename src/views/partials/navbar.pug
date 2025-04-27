@@ -3,9 +3,8 @@ nav.navbar.navbar-expand.navbar-dark.bg-primary.sb-topnav
     img(src="/img/logo5.png", alt="Logo", width="40", height="30", class="d-inline-block align-text-top me-2")
     | Clínica Santa María
 
-  if typeof autenticado !== 'undefined' && autenticado
-    button#sidebarToggle.btn.btn-link.btn-sm.order-1.order-lg-0.me-4.me-lg-0
-      i.fas.fa-bars
+  button#sidebarToggle.btn.btn-link.btn-sm.ms-4
+    i.fas.fa-bars
 
   span.text-white.ms-auto.me-3.fw-semibold.d-none.d-md-block#reloj
 
@@ -13,17 +12,11 @@ nav.navbar.navbar-expand.navbar-dark.bg-primary.sb-topnav
     li.nav-item.dropdown
       a.nav-link.dropdown-toggle(href="#", id="navbarDropdown", role="button", data-bs-toggle="dropdown", aria-expanded="false")
         i.fa-solid.fa-circle-user.me-1
-        span.d-none.d-md-inline Usuario
+        span.d-none.d-md-inline Admin
       ul.dropdown-menu.dropdown-menu-end(aria-labelledby="navbarDropdown")
-
-        if !autenticado
-          li: a.dropdown-item(href="/usuarios") Login
-
-        if autenticado
-          li: a.dropdown-item(href="/perfil") Mi perfil
-          li: a.dropdown-item(href="/usuarios") Gestión de usuarios
-          li: a.dropdown-item(href="/configuracion") Configuración del sistema
-          li: hr.dropdown-divider
-          li: a.dropdown-item(href="/logout") Cerrar sesión
-
+        li: a.dropdown-item(href="/perfil") Mi perfil
+        li: a.dropdown-item(href="/usuarios") Gestión de usuarios
+        li: a.dropdown-item(href="/configuracion") Configuración del sistema
+        li: hr.dropdown-divider
+        li: a.dropdown-item(href="/logout") Cerrar sesión
 
