@@ -1,5 +1,5 @@
 // src/app/models/admisionModel.js
-const connection = require('../../config/db'); // Ajustá según tu estructura
+const db = require('../bd'); 
 
 const crearInternacion = (id_paciente, callback) => {
   const sql = `

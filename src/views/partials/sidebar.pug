@@ -1,15 +1,22 @@
 nav.sb-sidenav.accordion.sb-sidenav-dark(id="sidenavAccordion")
   div.sb-sidenav-menu
     div.nav
-      a.nav-link(href="/dashboard")
+      a.nav-link(href="/dashboard" id="link-dashboard")
         div.sb-nav-link-icon
           i.fas.fa-tachometer-alt
-        | Dashboard
-      a.nav-link(href="/pacientes")
+        | Panel
+
+      a.nav-link(href="/pacientes" id="link-pacientes")
         div.sb-nav-link-icon
           i.fas.fa-user-injured
         | Pacientes
-      a.nav-link(href="/internaciones")
+
+      a.nav-link(href="/internaciones" id="link-internaciones")
         div.sb-nav-link-icon
           i.fas.fa-procedures
         | Internaciones
+
+      a.nav-link(href="/admisiones" id="link-admisiones")
+        div.sb-nav-link-icon
+          i.fas.fa-bed
+        | Admisiones
