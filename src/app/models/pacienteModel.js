@@ -1,7 +1,6 @@
 
 // src/app/models/pacienteModel.js
-const connection = require('../../config/db'); // o ajustá al path real
-
+const db = require('../bd'); 
 const listarPacientes = (callback) => {
   const sql = `
     SELECT 
