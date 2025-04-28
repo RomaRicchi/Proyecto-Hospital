@@ -1,0 +1,60 @@
+extends layout_modular
+
+block content
+  h1.text-center.mb-4 Gestión de Camas
+
+  // 👉 Formulario para agregar nueva cama
+  form(method="POST" action="/camas/nueva" class="mb-5")
+    .row
+      .col-md-4
+        input.form-control(type="text" name="sector" placeholder="Sector" required)
+      .col-md-3
+        input.form-control(type="number" name="num" placeholder="Número" required)
+      .col-md-2
+        input.form-control(type="text" name="cama" placeholder="Letra" maxlength="1" required)
+      .col-md-3
+        button.btn.btn-success(type="submit") Agregar Cama
+
+  // 👉 Tabla de camas existentes
+  table#tablaCamas.table.table-striped.table-bordered
+    thead
+      tr
+        th ID
+        th Sector
+        th Número
+        th Cama
+        th Estado
+        th Acciones
+    tbody
+      each cama in camas
+        tr
+          td= cama.id_habitacion
+          td= cama.sector
+          td= cama.num
+          td= cama.cama
+          td 
+            if cama.estado == 1
+              span.text-success Activa
+            else
+              span.text-danger Inactiva
+          td
+            form(method="POST" action=`/camas/editar/${cama.id_habitacion}` class="d-inline")
+              input(type="hidden" name="sector" value=cama.sector)
+              input(type="hidden" name="num" value=cama.num)
+              input(type="hidden" name="cama" value=cama.cama)
+              button.btn.btn-warning.btn-sm(type="submit") Editar
+            form(method="POST" action=`/camas/eliminar/${cama.id_habitacion}` class="d-inline ms-1")
+              button.btn.btn-danger.btn-sm(type="submit" onclick="return confirm('¿Seguro de eliminar?')") Eliminar
+
+  // 👉 Scripts de DataTables
+  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+  link(rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+  script.
+    $(document).ready(function() {
+      $('#tablaCamas').DataTable({
+        language: {
+          url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+        }
+      });
+    });

@@ -1,38 +1,43 @@
-extends layout_modular.pug
+extends layout_modular
 
 block content
-  .container.mt-5
-    h2 Lista de Pacientes
+  h1.text-center.mb-4 Lista de Pacientes
 
-    a.btn.btn-success.mb-3(href="/pacientes/nuevo") + Agregar Paciente
-
-    table.table.table-striped
-      thead
+  table#tablaPacientes.table.table-striped.table-bordered
+    thead
+      tr
+        th ID
+        th DNI
+        th Apellido
+        th Nombre
+        th Fecha de Nacimiento
+        th Género
+        th Cobertura
+        th Teléfono
+        th Email
+        th Nacionalidad
+    tbody
+      each paciente in pacientes
         tr
-          th DNI
-          th Nombre
-          th Apellido
-          th Fecha Nac.
-          th Género
-          th Cobertura
-          th Habitación
-          th Cama
-          th Acciones
-      tbody
-        if pacientes && pacientes.length
-          each p in pacientes
-            tr
-              td= p.dni_paciente
-              td= p.nombre_p
-              td= p.apellido_p
-              td= p.fecha_nac.toISOString().slice(0,10)
-              td= p.genero
-              td= p.cobertura
-              td= p.habitacion ? `${p.sector} - ${p.habitacion}` : 'No asignada'
-              td= p.cama || '-'
-              td
-                a.btn.btn-sm.btn-primary(href=`/pacientes/editar/${p.id_paciente}`) Editar
-                a.btn.btn-sm.btn-danger(href=`/pacientes/eliminar/${p.id_paciente}`) Eliminar
-        else
-          tr
-            td(colspan="9").text-center.text-muted No hay pacientes registrados.
+          td= paciente.id_paciente
+          td= paciente.dni_paciente
+          td= paciente.apellido_p
+          td= paciente.nombre_p
+          td= paciente.fecha_nac
+          td= paciente.genero
+          td= paciente.cobertura
+          td= paciente.telefono
+          td= paciente.email
+          td= paciente.nacionalidad
+
+  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+  link(rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+  script.
+    $(document).ready(function() {
+      $('#tablaPacientes').DataTable({
+        language: {
+          url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+        }
+      });
+    });

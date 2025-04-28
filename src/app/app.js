@@ -1,13 +1,15 @@
 require('dotenv').config();
 const express = require("express");
 const morgan = require("morgan");
-const app = express();
 const path = require("path");
 const session = require('express-session');
 
+const app = express();
+
 // Configurar sesión
 app.use(session({
-  secret: process.env.SESSION_SECRET, 
+  secret: process.env.SESSION_SECRET || 'secreto', 
+  resave: false, 
   saveUninitialized: false
 }));
 
@@ -21,21 +23,17 @@ app.use("/sb-admin", express.static(path.join(__dirname, "../public/sb-admin")))
 app.use("/css", express.static(path.join(__dirname, "../public/css")));
 app.use("/js", express.static(path.join(__dirname, "../public/js")));
 app.use(express.urlencoded({ extended: true }));
-// Bootstrap local:
-app.use("/bootstrap", express.static(path.join(__dirname, "../../node_modules/bootstrap/dist")));
 
+// Middlewares
 app.use(morgan("dev"));
-
-// Middleware para agregar autenticado a todas las vistas privadas
-app.use((req, res, next) => {
-  res.locals.autenticado = !!req.session.usuario;
-  res.locals.usuario = req.session.usuario;
-  next();
-});
-  
 app.use((req, res, next) => {
   res.locals.usuario = req.session.usuario || null;
   res.locals.autenticado = !!req.session.usuario;
+  next();
+});
+
+app.use((req, res, next) => {
+  res.locals.currentPath = req.path;
   next();
 });
 
