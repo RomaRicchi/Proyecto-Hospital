@@ -1,22 +1,24 @@
-nav.sb-sidenav.accordion.sb-sidenav-dark(id="sidenavAccordion")
-  div.sb-sidenav-menu
-    div.nav
-      a.nav-link(href="/dashboard" id="link-dashboard")
-        div.sb-nav-link-icon
-          i.fas.fa-tachometer-alt
-        | Panel
+nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 250px;" id="sidenavAccordion")
+  h4.text-white.mb-4
+    i.fas.fa-hospital-user.me-2
+    | Clínica Santa María
 
-      a.nav-link(href="/pacientes" id="link-pacientes")
-        div.sb-nav-link-icon
-          i.fas.fa-user-injured
-        | Pacientes
+  a.nav-link.text-white(class=(currentPath == '/dashboard' ? 'active' : '') href="/dashboard" id="link-dashboard")
+    i.fas.fa-tachometer-alt.me-2
+    | Panel
 
-      a.nav-link(href="/internaciones" id="link-internaciones")
-        div.sb-nav-link-icon
-          i.fas.fa-procedures
-        | Internaciones
+  a.nav-link.text-white(class=(currentPath == '/pacientes' ? 'active' : '') href="/pacientes" id="link-pacientes")
+    i.fas.fa-user-injured.me-2
+    | Pacientes
 
-      a.nav-link(href="/admisiones" id="link-admisiones")
-        div.sb-nav-link-icon
-          i.fas.fa-bed
-        | Admisiones
+  a.nav-link.text-white(class=(currentPath == '/internaciones' ? 'active' : '') href="/internaciones" id="link-internaciones")
+    i.fas.fa-procedures.me-2
+    | Internaciones
+
+  a.nav-link.text-white(class=(currentPath == '/admisiones' ? 'active' : '') href="/admisiones" id="link-admisiones")
+    i.fas.fa-bed.me-2
+    | Admisiones
+
+  a.nav-link.text-white(class=(currentPath == '/camas' ? 'active' : '') href="/camas" id="link-camas")
+    i.fas.fa-bed.me-2
+    | Habitaciones

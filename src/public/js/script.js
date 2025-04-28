@@ -76,3 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   
+  document.addEventListener('DOMContentLoaded', () => {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidenavAccordion');
+  
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('sidebar-collapsed');
+      });
+    }
+  });
+  
