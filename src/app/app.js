@@ -1,46 +1,100 @@
-require('dotenv').config();
-const express = require("express");
-const morgan = require("morgan");
-const path = require("path");
-const session = require('express-session');
+import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
+import morgan from 'morgan';
+import path from 'path';
+import session from 'express-session';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+import viewsRoutes from './routes/views.routes.js';
+
+// 🛣️ Rutas importadas
+import authRoutes from './routes/auth.routes.js';
+import pacientesRoutes from './routes/paciente.routes.js';
+import familiaresRoutes from './routes/familiar.routes.js';
+import usuariosRoutes from './routes/usuario.routes.js';
+import rolUsuarioRoutes from './routes/rolUsuario.routes.js';
+import generoRoutes from './routes/genero.routes.js';
+import localidadRoutes from './routes/localidad.routes.js';
+import obraSocialRoutes from './routes/obraSocial.routes.js';
+import parentescoRoutes from './routes/parentesco.routes.js';
+import personalAdminRoutes from './routes/personalAdministrativo.routes.js';
+import personalSaludRoutes from './routes/personalSalud.routes.js';
+import especialidadRoutes from './routes/especialidad.routes.js';
+import sectorRoutes from './routes/sector.routes.js';
+import habitacionRoutes from './routes/habitacion.routes.js';
+import camaRoutes from './routes/cama.routes.js';
+import movimientoRoutes from './routes/movimiento.routes.js';
+import movimientoHabitacionRoutes from './routes/movimientoHabitacion.routes.js';
+import admisionRoutes from './routes/admision.routes.js';
+import registroClinicoRoutes from './routes/registroHistoriaClinica.routes.js';
+
+// ✅ Simular __dirname en ESModules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 
-// Configurar sesión
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'secreto', 
-  resave: false, 
-  saveUninitialized: false
-}));
+/* 📦 Sesion */
+app.use(
+	session({
+		secret: process.env.SESSION_SECRET || 'secreto',
+		resave: false,
+		saveUninitialized: false,
+	})
+);
 
-// Motor de vistas
-app.set("view engine", "pug");
-app.set("views", path.join(__dirname, "../views"));
+/* 🎨 Motor de vistas */
+app.set('view engine', 'pug');
+app.set('views', join(__dirname, '../views'));
 
-// Archivos estáticos
-app.use(express.static(path.join(__dirname, "../public")));
-app.use("/sb-admin", express.static(path.join(__dirname, "../public/sb-admin")));
-app.use("/css", express.static(path.join(__dirname, "../public/css")));
-app.use("/js", express.static(path.join(__dirname, "../public/js")));
+/* 📁 Archivos estaticos */
+app.use(express.static(join(__dirname, '../public')));
+app.use('/sb-admin', express.static(join(__dirname, '../public/sb-admin')));
+app.use('/css', express.static(join(__dirname, '../public/css')));
+app.use('/js', express.static(join(__dirname, '../public/js')));
+
+/* 📋 Middleware */
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(morgan('dev'));
 
-// Middlewares
-app.use(morgan("dev"));
 app.use((req, res, next) => {
-  res.locals.usuario = req.session.usuario || null;
-  res.locals.autenticado = !!req.session.usuario;
-  next();
+	res.locals.usuario = req.session.usuario || null;
+	res.locals.autenticado = !!req.session.usuario;
+	next();
 });
 
 app.use((req, res, next) => {
-  res.locals.currentPath = req.path;
-  next();
+	res.locals.currentPath = req.path;
+	next();
 });
 
-// Rutas
-const indexRoutes = require("./routes/router");
-app.use("/", indexRoutes);
+/* 🛣️ Rutas principales */
+app.use('/', authRoutes);
 
-const PORT = process.env.PORT || 3000;
+/* 🛣️ Rutas API REST */
+app.use('/api/pacientes', pacientesRoutes);
+app.use('/api/familiares', familiaresRoutes);
+app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/roles', rolUsuarioRoutes);
+app.use('/api/generos', generoRoutes);
+app.use('/api/localidades', localidadRoutes);
+app.use('/api/obras-sociales', obraSocialRoutes);
+app.use('/api/parentescos', parentescoRoutes);
+app.use('/api/personal-admin', personalAdminRoutes);
+app.use('/api/personal-salud', personalSaludRoutes);
+app.use('/api/especialidades', especialidadRoutes);
+app.use('/api/sectores', sectorRoutes);
+app.use('/api/habitaciones', habitacionRoutes);
+app.use('/api/camas', camaRoutes);
+app.use('/api/movimientos', movimientoRoutes);
+app.use('/api/movimientos-habitacion', movimientoHabitacionRoutes);
+app.use('/api/admisiones', admisionRoutes);
+app.use('/api/registros-clinicos', registroClinicoRoutes);
+app.use('/', viewsRoutes);
 
-module.exports = app;
+/* 🌐 Exportar app */
+export default app;
