@@ -3,41 +3,47 @@ extends layout_modular
 block content
   h1.text-center.mb-4 Lista de Pacientes
 
-  table#tablaPacientes.table.table-striped.table-bordered
-    thead
-      tr
-        th ID
-        th DNI
-        th Apellido
-        th Nombre
-        th Fecha de Nacimiento
-        th Género
-        th Cobertura
-        th Teléfono
-        th Email
-        th Nacionalidad
-    tbody
-      each paciente in pacientes
+  .table-responsive
+    table#tablaPacientes.table.table-striped.table-bordered
+      thead
         tr
-          td= paciente.id_paciente
-          td= paciente.dni_paciente
-          td= paciente.apellido_p
-          td= paciente.nombre_p
-          td= paciente.fecha_nac
-          td= paciente.genero
-          td= paciente.cobertura
-          td= paciente.telefono
-          td= paciente.email
-          td= paciente.nacionalidad
+          th DNI
+          th Apellido
+          th Nombre
+          th Fecha de Nacimiento
+          th Género
+          th Cobertura
+          th Teléfono
+          th Email
+          th Nacionalidad
+          th Acciones
+      tbody
+        each paciente in pacientes
+          tr
+            td= paciente.dni_paciente
+            td= paciente.apellido_p
+            td= paciente.nombre_p
+            td= paciente.fecha_nac
+            td= paciente.genero
+            td= paciente.cobertura
+            td= paciente.telefono
+            td= paciente.email
+            td= paciente.nacionalidad
+            td
+              button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=paciente.id_paciente)
+                i.fas.fa-pen
+              button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=paciente.id_paciente)
+                i.fas.fa-trash
+              button.btn.btn-sm.btn-info.me-1.family-btn(data-id=paciente.id_paciente)
+                i.fas.fa-user-plus
+              button.btn.btn-sm.btn-secondary.details-btn(data-id=paciente.id_paciente)
+                i.fas.fa-eye
 
+
+  script(src="https://code.jquery.com/jquery-3.7.1.min.js") // ✅ jQuery requerido
   script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
   link(rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
-  script.
-    $(document).ready(function() {
-      $('#tablaPacientes').DataTable({
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
-        }
-      });
-    });
+  script(src="/js/pacientes.js")
+
+

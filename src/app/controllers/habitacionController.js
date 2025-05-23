@@ -48,9 +48,25 @@ const eliminarCama = (req, res) => {
   });
 };
 
+const formularioEditarCama = (req, res) => {
+  const id = req.params.id;
+  connection.query('SELECT * FROM habitacion WHERE id_habitacion = ?', [id], (err, resultado) => {
+    if (err) {
+      console.error('Error al obtener cama:', err);
+      return res.status(500).send('Error al cargar formulario');
+    }
+    if (resultado.length === 0) {
+      return res.status(404).send('Cama no encontrada');
+    }
+    res.render('editarCama', { cama: resultado[0] });
+  });
+};
+
+
 module.exports = {
   listarCamas,
   crearCama,
   editarCama,
-  eliminarCama
+  eliminarCama,
+  formularioEditarCama
 };
