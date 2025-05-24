@@ -16,6 +16,3 @@ router.put('/:id', updatePersonalAdministrativo);
 router.delete('/:id', deletePersonalAdministrativo);
 
 export default router;
-
-
-
