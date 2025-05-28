@@ -1,0 +1,83 @@
+extends layout_modular
+
+block content
+  h1.text-center.mb-4 Gestión de Movimiento de Habitación
+
+  // 👉 Formulario para agregar nuevo movimiento
+  h2 Agregar Nuevo Movimiento
+  form(method="POST" action="/movimiento_habitacion/agregar" class="mb-4")
+    .row
+      .col-md-4
+        label(for="id_admision") ID Admisión:
+        input#id_admision.form-control(type="number" name="id_admision" required)
+      .col-md-4
+        label(for="id_habitacion") ID Habitación:
+        input#id_habitacion.form-control(type="number" name="id_habitacion" required)
+      .col-md-4
+        label(for="id_mov") Tipo de Movimiento:
+        select#id_mov.form-control(name="id_mov" required)
+          option(value="") Seleccionar tipo de movimiento
+          each mov in movimientos
+            option(value=mov.id_mov)= mov.nombre
+    .row
+      .col-md-4
+        label(for="fecha_hora_ingreso") Fecha/Hora Ingreso:
+        input#fecha_hora_ingreso.form-control(type="datetime-local" name="fecha_hora_ingreso" required)
+      .col-md-4
+        label(for="fecha_hora_egreso") Fecha/Hora Egreso (opcional):
+        input#fecha_hora_egreso.form-control(type="datetime-local" name="fecha_hora_egreso")
+      .col-md-4
+        label(for="desinfeccion") Desinfección:
+        select#desinfeccion.form-control(name="desinfeccion" required)
+          option(value="1") Sí
+          option(value="0") No
+    .row
+      .col-md-2
+        label(for="estado") Estado:
+        select#estado.form-control(name="estado" required)
+          option(value="1") Activo
+          option(value="0") Inactivo
+      .col-md-10.mt-4
+        button.btn.btn-success(type="submit") Agregar Movimiento
+
+  // 👉 Tabla de movimientos existentes
+  h2 Lista de Movimientos
+  table#tablaMovimientos.table.table-striped.table-bordered
+    thead
+      tr
+        th ID
+        th Admisión
+        th Habitación
+        th Tipo Movimiento
+        th Ingreso
+        th Egreso
+        th Desinfección
+        th Estado
+        th Acciones
+    tbody
+      each mov in movimientos_habitacion
+        tr
+          td= mov.id_movimiento
+          td= mov.id_admision
+          td= mov.id_habitacion
+          td= mov.nombre_movimiento
+          td= mov.fecha_hora_ingreso
+          td= mov.fecha_hora_egreso
+          td= mov.desinfeccion ? 'Sí' : 'No'
+          td= mov.estado ? 'Activo' : 'Inactivo'
+          td
+            a.btn.btn-warning.btn-sm(href=`/movimiento_habitacion/editar/${mov.id_movimiento}`) Editar
+            form(method="POST" action=`/movimiento_habitacion/eliminar/${mov.id_movimiento}` class="d-inline ms-1")
+              button.btn.btn-danger.btn-sm(type="submit" onclick="return confirm('¿Seguro de eliminar?')") Eliminar
+
+  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+  link(rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+  script.
+    $(document).ready(function() {
+      $('#tablaMovimientos').DataTable({
+        language: {
+          url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+        }
+      });
+    });

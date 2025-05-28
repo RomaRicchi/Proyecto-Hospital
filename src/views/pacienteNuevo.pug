@@ -1,0 +1,56 @@
+extends layout_modular
+
+block content
+  h1 Agregar Paciente
+
+  form(action="/paciente/agregar" method="POST")
+    div
+      label(for="dni_paciente") DNI Paciente:
+      input#dni_paciente(type="number" name="dni_paciente" required)
+
+    div
+      label(for="apellido_p") Apellido:
+      input#apellido_p(type="text" name="apellido_p" required)
+
+    div
+      label(for="nombre_p") Nombre:
+      input#nombre_p(type="text" name="nombre_p" required)
+
+    div
+      label(for="fecha_nac") Fecha de Nacimiento:
+      input#fecha_nac(type="date" name="fecha_nac" required)
+
+    div
+      label(for="id_genero") Género:
+      select#id_genero(name="id_genero" required)
+        option(value="") Seleccionar género
+        each genero in generos
+          option(value=genero.id_genero)= genero.nombre
+
+    div
+      label(for="telefono") Teléfono:
+      input#telefono(type="text" name="telefono")
+
+    div
+      label(for="direccion") Dirección:
+      input#direccion(type="text" name="direccion")
+
+    div
+      label(for="id_localidad") Localidad:
+      select#id_localidad(name="id_localidad" required)
+        option(value="") Seleccionar localidad
+        each localidad in localidades
+          option(value=localidad.id_localidad)= localidad.nombre
+
+    div
+      label(for="email") Email:
+      input#email(type="email" name="email")
+
+    div
+      label(for="estado") Estado:
+      select#estado(name="estado" required)
+        option(value="1") Activo
+        option(value="0") Inactivo
+
+    div
+      button(type="submit") Guardar

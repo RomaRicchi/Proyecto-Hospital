@@ -23,14 +23,15 @@ export default (sequelize, DataTypes) => {
 				type: DataTypes.DATE,
 				allowNull: false,
 			},
-			motivo_ing: {
+			id_motivo: {
+				type: DataTypes.INTEGER,
+				allowNull: false,
+			},
+			descripcion: {
 				type: DataTypes.STRING(255),
 				allowNull: true,
 			},
-			fecha_hora_egreso: {
-				type: DataTypes.DATE,
-				allowNull: true,
-			},
+			fecha_hora_egreso: { type: DataTypes.DATE, allowNull: true },
 			motivo_egr: {
 				type: DataTypes.STRING(255),
 				allowNull: true,
@@ -38,10 +39,6 @@ export default (sequelize, DataTypes) => {
 			id_personal_salud: {
 				type: DataTypes.INTEGER.UNSIGNED,
 				allowNull: true,
-			},
-			id_personal_admin: {
-				type: DataTypes.INTEGER.UNSIGNED,
-				allowNull: false,
 			},
 		},
 		{

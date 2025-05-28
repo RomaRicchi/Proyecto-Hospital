@@ -1,0 +1,22 @@
+extends layout_modular
+
+block content
+  h1.text-center.mb-4 Editar Usuario
+
+  form(method="POST" action=`/usuarios/editar/${usuario.id_usuario}`)
+    .row
+      .col-md-6
+        label(for="username") Nombre de Usuario:
+        input#username.form-control(type="text" name="username" value=usuario.username required)
+      .col-md-6
+        label(for="password") Nueva Contraseña (opcional):
+        input#password.form-control(type="password" name="password")
+    .row
+      .col-md-4
+        label(for="estado") Estado:
+        select#estado.form-control(name="estado" required)
+          option(value="1" selected=usuario.estado==1) Activo
+          option(value="0" selected=usuario.estado==0) Inactivo
+      .col-md-8.mt-4
+        button.btn.btn-primary(type="submit") Guardar Cambios
+        a.btn.btn-secondary.ms-2(href="/usuarios") Cancelar

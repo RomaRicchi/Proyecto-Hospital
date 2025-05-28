@@ -3,47 +3,48 @@ extends layout_modular
 block content
   h1.text-center.mb-4 Lista de Pacientes
 
-  .table-responsive
-    table#tablaPacientes.table.table-striped.table-bordered
-      thead
-        tr
-          th DNI
-          th Apellido
-          th Nombre
-          th Fecha de Nacimiento
-          th Género
-          th Cobertura
-          th Teléfono
-          th Email
-          th Nacionalidad
-          th Acciones
-      tbody
-        each paciente in pacientes
+  if pacientes && pacientes.length
+    .table-responsive
+      table#tablaPacientes.table.table-striped.table-bordered
+        thead
           tr
-            td= paciente.dni_paciente
-            td= paciente.apellido_p
-            td= paciente.nombre_p
-            td= paciente.fecha_nac
-            td= paciente.genero
-            td= paciente.cobertura
-            td= paciente.telefono
-            td= paciente.email
-            td= paciente.nacionalidad
-            td
-              button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=paciente.id_paciente)
-                i.fas.fa-pen
-              button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=paciente.id_paciente)
-                i.fas.fa-trash
-              button.btn.btn-sm.btn-info.me-1.family-btn(data-id=paciente.id_paciente)
-                i.fas.fa-user-plus
-              button.btn.btn-sm.btn-secondary.details-btn(data-id=paciente.id_paciente)
-                i.fas.fa-eye
+            th DNI
+            th Apellido
+            th Nombre
+            th Fecha de Nacimiento
+            th Género
+            th Cobertura
+            th Teléfono
+            th Email
+            th Nacionalidad
+            th Acciones
+        tbody
+          each paciente in pacientes
+            tr
+              td= paciente.dni_paciente
+              td= paciente.apellido_p
+              td= paciente.nombre_p
+              td= paciente.fecha_nac
+              td= paciente.genero
+              td= paciente.cobertura
+              td= paciente.telefono
+              td= paciente.email
+              td= paciente.nacionalidad
+              td
+                button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=paciente.id_paciente)
+                  i.fas.fa-pen
+                button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=paciente.id_paciente)
+                  i.fas.fa-trash
+                button.btn.btn-sm.btn-info.me-1.family-btn(data-id=paciente.id_paciente)
+                  i.fas.fa-user-plus
+                button.btn.btn-sm.btn-secondary.details-btn(data-id=paciente.id_paciente)
+                  i.fas.fa-eye
+  else
+    p.text-center.text-muted No hay pacientes registrados.
 
-
-  script(src="https://code.jquery.com/jquery-3.7.1.min.js") // ✅ jQuery requerido
+  // 📚 Librerías y scripts
+  script(src="https://code.jquery.com/jquery-3.7.1.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
-  link(rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
   script(src="/js/pacientes.js")
-
-
