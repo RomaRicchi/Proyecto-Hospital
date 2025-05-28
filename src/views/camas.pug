@@ -1,60 +1,63 @@
-extends layout_modular
+ extends layout_modular
+ h1.text-center.mb-4 Agregar Nueva Cama
 
-block content
-  h1.text-center.mb-4 Gestión de Camas
-
-  // 👉 Formulario para agregar nueva cama
-  form(method="POST" action="/camas/nueva" class="mb-5")
+  form(method="POST" action="/cama/agregar" class="mb-4")
     .row
       .col-md-4
-        input.form-control(type="text" name="sector" placeholder="Sector" required)
-      .col-md-3
-        input.form-control(type="number" name="num" placeholder="Número" required)
-      .col-md-2
-        input.form-control(type="text" name="cama" placeholder="Letra" maxlength="1" required)
-      .col-md-3
+        label(for="id_sector") Sector:
+        select#id_sector.form-control(name="id_sector" required onchange="cargarHabitaciones(this.value)")
+          option(value="") Seleccionar sector
+          each sector in sectores
+            option(value=sector.id_sector)= sector.nombre
+      .col-md-4
+        label(for="id_habitacion") Habitación:
+        select#id_habitacion.form-control(name="id_habitacion" required)
+          option(value="") Seleccionar habitación
+          // Las habitaciones se cargarán dinámicamente mediante JS según el sector
+      .col-md-4
+        label(for="nombre") Letra/Nombre de la Cama:
+        input#nombre.form-control(type="text" name="nombre" maxlength="1" required)
+    .row.mt-3
+      .col-md-12
         button.btn.btn-success(type="submit") Agregar Cama
+        a.btn.btn-secondary.ms-2(href="/cama/lista") Ver Lista de Camas
 
-  // 👉 Tabla de camas existentes
-  table#tablaCamas.table.table-striped.table-bordered
+ h1.text-center.mb-4 Lista de Sectores, Habitaciones y Camas
+
+  table#tablaSectoresHabitaciones.table.table-striped.table-bordered
     thead
       tr
-        th ID
         th Sector
-        th Número
+        th Habitación
         th Cama
-        th Estado
-        th Acciones
     tbody
-      each cama in camas
+      each item in lista
         tr
-          td= cama.id_habitacion
-          td= cama.sector
-          td= cama.num
-          td= cama.cama
-          td 
-            if cama.estado == 1
-              span.text-success Activa
-            else
-              span.text-danger Inactiva
-          td
-            form(method="POST" action=`/camas/editar/${cama.id_habitacion}` class="d-inline")
-              input(type="hidden" name="sector" value=cama.sector)
-              input(type="hidden" name="num" value=cama.num)
-              input(type="hidden" name="cama" value=cama.cama)
-              button.btn.btn-warning.btn-sm(type="submit") Editar
-            form(method="POST" action=`/camas/eliminar/${cama.id_habitacion}` class="d-inline ms-1")
-              button.btn.btn-danger.btn-sm(type="submit" onclick="return confirm('¿Seguro de eliminar?')") Eliminar
+          td= item.sector_nombre
+          td= item.habitacion_num
+          td= item.cama_nombre
 
-  // 👉 Scripts de DataTables
   script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
   link(rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
   script.
     $(document).ready(function() {
-      $('#tablaCamas').DataTable({
+      $('#tablaSectoresHabitaciones').DataTable({
         language: {
           url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
         }
       });
     });
+
+  script.
+    // Suponiendo que tenemos un objeto JS 'habitacionesPorSector' pasado desde el backend
+    const habitacionesPorSector = !{JSON.stringify(habitacionesPorSector)};
+    function cargarHabitaciones(idSector) {
+      const selectHabitacion = document.getElementById('id_habitacion');
+      selectHabitacion.innerHTML = '<option value="">Seleccionar habitación</option>';
+      if (habitacionesPorSector[idSector]) {
+        habitacionesPorSector[idSector].forEach(h => {
+          selectHabitacion.innerHTML += `<option value="${h.id_habitacion}">${h.num}</option>`;
+        });
+      }
+    }

@@ -1,0 +1,25 @@
+extends layout_modular
+
+block content
+  h1.text-center.mb-4 Editar Cama
+
+  form(method="POST" action=`/camas/editar/${cama.id_habitacion}` class="mb-4")
+    .row
+      .col-md-4
+        label(for="sector") Sector:
+        input#sector.form-control(type="text" name="sector" value=cama.sector required)
+      .col-md-3
+        label(for="num") Número:
+        input#num.form-control(type="number" name="num" value=cama.num required)
+      .col-md-2
+        label(for="cama") Cama:
+        input#cama.form-control(type="text" name="cama" value=cama.cama maxlength="1" required)
+      .col-md-3
+        label(for="estado") Estado:
+        select#estado.form-control(name="estado" required)
+          option(value="1" selected=cama.estado==1) Activa
+          option(value="0" selected=cama.estado==0) Inactiva
+    .row.mt-3
+      .col-md-12
+        button.btn.btn-primary(type="submit") Guardar Cambios
+        a.btn.btn-secondary.ms-2(href="/camas") Cancelar

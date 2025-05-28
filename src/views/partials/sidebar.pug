@@ -7,18 +7,61 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 250px;" i
     i.fas.fa-tachometer-alt.me-2
     | Panel
 
-  a.nav-link.text-white(class=(currentPath == '/pacientes' ? 'active' : '') href="/pacientes" id="link-pacientes")
+  // 🔸 Pacientes
+  a.nav-link.text-white.collapsed(href="#pacientesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
     i.fas.fa-user-injured.me-2
     | Pacientes
+  ul.collapse#pacientesSubmenu
+    li
+      a.nav-link.text-white(href="/pacientes") Lista de Pacientes
+    li
+      a.nav-link.text-white(href="/paciente/nuevo") Nuevo Paciente
+    li
+      a.nav-link.text-white(href="/pacientes/camas") Camas Pacientes
 
-  a.nav-link.text-white(class=(currentPath == '/internaciones' ? 'active' : '') href="/internaciones" id="link-internaciones")
+  // 🔸 Internaciones
+  a.nav-link.text-white.collapsed(href="#internacionesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
     i.fas.fa-procedures.me-2
     | Internaciones
+  ul.collapse#internacionesSubmenu
+    li
+      a.nav-link.text-white(href="/internaciones") Lista de Internaciones
+    li
+      a.nav-link.text-white(href="/admisiones") Admisiones
+    li
+      a.nav-link.text-white(href="/motivos-ingreso") Motivos de Ingreso
 
-  a.nav-link.text-white(class=(currentPath == '/admisiones' ? 'active' : '') href="/admisiones" id="link-admisiones")
-    i.fas.fa-bed.me-2
-    | Admisiones
-
-  a.nav-link.text-white(class=(currentPath == '/camas' ? 'active' : '') href="/camas" id="link-camas")
+  // 🔸 Habitaciones y Camas
+  a.nav-link.text-white.collapsed(href="#habitacionesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
     i.fas.fa-bed.me-2
     | Habitaciones
+  ul.collapse#habitacionesSubmenu
+    li
+      a.nav-link.text-white(href="/habitaciones") Lista de Habitaciones
+    li
+      a.nav-link.text-white(href="/camas") Lista de Camas
+    li
+      a.nav-link.text-white(href="/sectores/nuevo") Nuevo Sector
+    li
+      a.nav-link.text-white(href="/habitaciones/nueva") Nueva Habitación
+    li
+      a.nav-link.text-white(href="/camas/editar") Editar Camas
+    li
+      a.nav-link.text-white(href="/movimientos-habitacion") Movimientos
+
+  // 🔸 Administración
+  a.nav-link.text-white.collapsed(href="#adminSubmenu", data-bs-toggle="collapse", aria-expanded="false")
+    i.fas.fa-cogs.me-2
+    | Administración
+  ul.collapse#adminSubmenu
+    li
+      a.nav-link.text-white(href="/usuarios") Usuarios
+    li
+      a.nav-link.text-white(href="/usuarios/editar") Editar Usuario
+    li
+      a.nav-link.text-white(href="/obras-sociales") Obras Sociales
+    li
+      a.nav-link.text-white(href="/localidades") Localidades
+    li
+      a.nav-link.text-white(href="/buscar-familiar") Buscar Familiar
+

@@ -23,6 +23,8 @@ import defineMovimiento from './Movimiento.js';
 import defineMovimientoHabitacion from './MovimientoHabitacion.js';
 import defineAdmision from './Admision.js';
 import defineRegistroHistoriaClinica from './RegistroHistoriaClinica.js';
+import defineMotivoIngreso from './MotivoIngreso.js';
+import defineTipoRegistro from './TipoRegistro.js';
 
 // Inicializar modelos
 const Genero = defineGenero(sequelize, Sequelize.DataTypes);
@@ -52,6 +54,8 @@ const RegistroHistoriaClinica = defineRegistroHistoriaClinica(
 	sequelize,
 	Sequelize.DataTypes
 );
+const MotivoIngreso = defineMotivoIngreso(sequelize, Sequelize.DataTypes);
+const TipoRegistro = defineTipoRegistro(sequelize, Sequelize.DataTypes);
 
 // Ejecutar asociaciones desde modelos que las tienen definidas internamente
 PersonalAdministrativo.associate?.({
@@ -98,6 +102,11 @@ Admision.hasMany(MovimientoHabitacion, {
 Admision.hasMany(RegistroHistoriaClinica, {
 	foreignKey: 'id_admision',
 	as: 'registros_clinicos',
+});
+Admision.belongsTo(MotivoIngreso, { foreignKey: 'id_motivo', as: 'motivo' });
+RegistroHistoriaClinica.belongsTo(TipoRegistro, {
+	foreignKey: 'id_tipo',
+	as: 'tipo_registro',
 });
 
 // Relaciones MOVIMIENTO_HABITACION
@@ -153,4 +162,6 @@ export {
 	MovimientoHabitacion,
 	Admision,
 	RegistroHistoriaClinica,
+	MotivoIngreso,
+	TipoRegistro,
 };

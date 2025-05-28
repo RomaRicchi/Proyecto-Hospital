@@ -1,0 +1,14 @@
+extends layout_modular
+
+block content
+  h1.text-center.mb-4 Gestión de Obras Sociales
+
+  // 👉 Formulario para agregar nueva obra social
+  h2 Agregar Nueva Obra Social
+  form(method="POST" action="/obra_social/agregar" class="mb-4")
+    .row
+      .col-md-6
+        label(for="nombre") Nombre de la Obra Social:
+        input#nombre.form-control(type="text" name="nombre" required)
+      .col-md-6.mt-4
+        button.btn.btn-success(type="submit") Agregar

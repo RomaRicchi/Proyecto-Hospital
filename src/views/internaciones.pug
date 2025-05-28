@@ -1,32 +1,46 @@
-extends layout_modular.pug
+extends layout_modular
 
 block content
-  .container.mt-5
-    h2 Internaciones Activas
+  h1.text-center.mb-4 Lista de Internaciones Activas
 
-    if internaciones && internaciones.length
-      table.table.table-striped.mt-4
-        thead
-          tr
-            th Paciente
-            th DNI
-            th Habitación
-            th Cama
-            th Fecha de ingreso
-            th Acciones
-        tbody
-          each i in internaciones
-            tr
-              td= `${i.nombre_p} ${i.apellido_p}`
-              td= i.dni_paciente
-              td= `${i.sector} - Hab. ${i.num}`
-              td= i.cama
-              td= i.fecha_ingreso.toISOString().slice(0,10)
-              td
-                form(method="POST", action=`/internaciones/alta/${i.id_admision}`)
-                  button.btn.btn-sm.btn-danger(type="submit") Alta médica
-    else
-      p.text-muted No hay internaciones activas registradas.
+  table#tablaAdmisiones.table.table-striped.table-bordered
+    thead
+      tr
+        th ID
+        th Paciente
+        th Obra Social
+        th Motivo
+        th Num Asociado
+        th Ingreso
+        th Egreso
+        th Personal Salud
+        th Acciones
+    tbody
+      each admision in admisiones
+        tr
+          td= admision.id_admision
+          td= admision.paciente_nombre
+          td= admision.obra_social_nombre
+          td= admision.motivo_tipo
+          td= admision.num_asociado
+          td= admision.fecha_hora_ingreso
+          td= admision.fecha_hora_egreso
+          td= admision.id_personal_salud
+          td
+            a.btn.btn-warning.btn-sm(href=`/admision/editar/${admision.id_admision}`) Editar
+            form(method="POST" action=`/admision/eliminar/${admision.id_admision}` class="d-inline ms-1")
+              button.btn.btn-danger.btn-sm(type="submit" onclick="return confirm('¿Seguro de eliminar?')") Eliminar
 
+  a.btn.btn-success.mt-3(href="/admision") Agregar Nueva Admisión
 
-
+  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+  link(rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+  script.
+    $(document).ready(function() {
+      $('#tablaAdmisiones').DataTable({
+        language: {
+          url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+        }
+      });
+    });

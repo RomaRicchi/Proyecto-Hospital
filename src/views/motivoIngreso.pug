@@ -1,0 +1,15 @@
+extends layout_modular
+
+block content
+  h1.text-center.mb-4 Gestión de Motivos de Ingreso
+
+  // 👉 Formulario para agregar nuevo motivo de ingreso
+  h2 Agregar Nuevo Motivo de Ingreso
+  form(method="POST" action="/motivo_ingreso/agregar" class="mb-4")
+    .row
+      .col-md-6
+        label(for="tipo") Tipo de Motivo:
+        input#tipo.form-control(type="text" name="tipo" required)
+      .col-md-6.mt-4
+        button.btn.btn-success(type="submit") Agregar
+

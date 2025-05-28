@@ -19,17 +19,17 @@ export default (sequelize, DataTypes) => {
 				type: DataTypes.DATE,
 				allowNull: false,
 			},
-			tipo: {
-				type: DataTypes.STRING(50),
+			id_tipo: {
+				type: DataTypes.INTEGER,
 				allowNull: false,
-			},
+			}, // Nuevo FK
 			detalle: {
 				type: DataTypes.STRING(500),
 				allowNull: false,
 			},
 			estado: {
-				type: DataTypes.BOOLEAN,
-				defaultValue: true,
+				type: DataTypes.TINYINT,
+				defaultValue: 1,
 			},
 		},
 		{
