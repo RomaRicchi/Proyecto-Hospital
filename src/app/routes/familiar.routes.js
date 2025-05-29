@@ -2,7 +2,7 @@ import { Router } from 'express';
 import {
 	getFamiliares,
 	getFamiliarById,
-	getFamiliarByPacienteId,
+	getFamiliarByPaciente,
 	createFamiliar,
 	updateFamiliar,
 	deleteFamiliar,
@@ -10,11 +10,22 @@ import {
 
 const router = Router();
 
+// ✅ Listar todos los familiares
 router.get('/', getFamiliares);
+
+// ✅ Obtener familiar por su ID
 router.get('/:id', getFamiliarById);
-router.get('/paciente/buscar', getFamiliarByPacienteId); // ?pacienteId=#
+
+// ✅ Obtener familiar asociado a un paciente (nuevo)
+router.get('/paciente/:id', getFamiliarByPaciente);
+
+// ✅ Crear nuevo familiar
 router.post('/', createFamiliar);
+
+// ✅ Actualizar familiar existente
 router.put('/:id', updateFamiliar);
+
+// ✅ Eliminar (borrado lógico) familiar por ID
 router.delete('/:id', deleteFamiliar);
 
 export default router;

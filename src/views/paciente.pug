@@ -11,12 +11,12 @@ block content
             th DNI
             th Apellido
             th Nombre
-            th Fecha de Nacimiento
+            th Fecha Nacimiento
             th Género
-            th Cobertura
             th Teléfono
+            th Dirección
+            th Localidad
             th Email
-            th Nacionalidad
             th Acciones
         tbody
           each paciente in pacientes
@@ -26,25 +26,23 @@ block content
               td= paciente.nombre_p
               td= paciente.fecha_nac
               td= paciente.genero
-              td= paciente.cobertura
               td= paciente.telefono
+              td= paciente.direccion
+              td= paciente.localidad
               td= paciente.email
-              td= paciente.nacionalidad
               td
                 button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=paciente.id_paciente)
                   i.fas.fa-pen
                 button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=paciente.id_paciente)
                   i.fas.fa-trash
-                button.btn.btn-sm.btn-info.me-1.family-btn(data-id=paciente.id_paciente)
-                  i.fas.fa-user-plus
                 button.btn.btn-sm.btn-secondary.details-btn(data-id=paciente.id_paciente)
                   i.fas.fa-eye
   else
     p.text-center.text-muted No hay pacientes registrados.
 
-  // 📚 Librerías y scripts
+  // 📚 Librerías y scripts (asegurarse de orden)
+  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")
   script(src="https://code.jquery.com/jquery-3.7.1.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
-  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
   script(src="/js/pacientes.js")

@@ -1,67 +1,100 @@
-nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 250px;" id="sidenavAccordion")
-  h4.text-white.mb-4
-    i.fas.fa-hospital-user.me-2
-    | Clínica Santa María
+nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" id="sidenavAccordion")
 
+  // 🔹 Panel
   a.nav-link.text-white(class=(currentPath == '/dashboard' ? 'active' : '') href="/dashboard" id="link-dashboard")
     i.fas.fa-tachometer-alt.me-2
     | Panel
 
-  // 🔸 Pacientes
+  // 🔹 Pacientes
   a.nav-link.text-white.collapsed(href="#pacientesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
     i.fas.fa-user-injured.me-2
     | Pacientes
-  ul.collapse#pacientesSubmenu
+  ul.collapse#pacientesSubmenu(style="list-style-type: none; padding-left: 1rem;")
     li
-      a.nav-link.text-white(href="/pacientes") Lista de Pacientes
+      a.nav-link.text-white(href="/paciente")
+        i.fas.fa-list.me-1
+        | Lista de Pacientes
     li
-      a.nav-link.text-white(href="/paciente/nuevo") Nuevo Paciente
+      a.nav-link.text-white(href="/paciente/localidad")
+        i.fas.fa-map-marker-alt.me-1
+        | Localidad
     li
-      a.nav-link.text-white(href="/pacientes/camas") Camas Pacientes
+      a.nav-link.text-white(href="/paciente/genero")
+        i.fas.fa-venus-mars.me-1
+        | Género
+    li
+      a.nav-link.text-white(href="/pacientes/camas")
+        i.fas.fa-procedures.me-1
+        | Camas Asignadas
 
-  // 🔸 Internaciones
-  a.nav-link.text-white.collapsed(href="#internacionesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
-    i.fas.fa-procedures.me-2
-    | Internaciones
-  ul.collapse#internacionesSubmenu
+  // 🔹 Familiar
+  a.nav-link.text-white.collapsed(href="#familiarSubmenu", data-bs-toggle="collapse", aria-expanded="false")
+    i.fas.fa-users.me-2
+    | Familiar
+  ul.collapse#familiarSubmenu(style="list-style-type: none; padding-left: 1rem;")
     li
-      a.nav-link.text-white(href="/internaciones") Lista de Internaciones
+      a.nav-link.text-white(href="/familiar")
+        i.fas.fa-list.me-1
+        | Lista de Familiares
     li
-      a.nav-link.text-white(href="/admisiones") Admisiones
-    li
-      a.nav-link.text-white(href="/motivos-ingreso") Motivos de Ingreso
+      a.nav-link.text-white(href="/familiar/parentesco")
+        i.fas.fa-sitemap.me-1
+        | Parentesco
 
-  // 🔸 Habitaciones y Camas
-  a.nav-link.text-white.collapsed(href="#habitacionesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
-    i.fas.fa-bed.me-2
-    | Habitaciones
-  ul.collapse#habitacionesSubmenu
+  // 🔹 Ubicación
+  a.nav-link.text-white.collapsed(href="#ubicacionSubmenu", data-bs-toggle="collapse", aria-expanded="false")
+    i.fas.fa-map-marked-alt.me-2
+    | Ubicación
+  ul.collapse#ubicacionSubmenu(style="list-style-type: none; padding-left: 1rem;")
     li
-      a.nav-link.text-white(href="/habitaciones") Lista de Habitaciones
+      a.nav-link.text-white(href="/sector")
+        i.fas.fa-th-large.me-1
+        | Lista de Sectores
     li
-      a.nav-link.text-white(href="/camas") Lista de Camas
+      a.nav-link.text-white(href="/habitacion")
+        i.fas.fa-bed.me-1
+        | Lista de Habitaciones
     li
-      a.nav-link.text-white(href="/sectores/nuevo") Nuevo Sector
-    li
-      a.nav-link.text-white(href="/habitaciones/nueva") Nueva Habitación
-    li
-      a.nav-link.text-white(href="/camas/editar") Editar Camas
-    li
-      a.nav-link.text-white(href="/movimientos-habitacion") Movimientos
+      a.nav-link.text-white(href="/camas")
+        i.fas.fa-procedures.me-1
+        | Lista de Camas
 
-  // 🔸 Administración
-  a.nav-link.text-white.collapsed(href="#adminSubmenu", data-bs-toggle="collapse", aria-expanded="false")
-    i.fas.fa-cogs.me-2
-    | Administración
-  ul.collapse#adminSubmenu
+  // 🔹 Admisiones
+  a.nav-link.text-white.collapsed(href="#admisionesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
+    i.fas.fa-hospital-user.me-2
+    | Admisiones
+  ul.collapse#admisionesSubmenu(style="list-style-type: none; padding-left: 1rem;")
     li
-      a.nav-link.text-white(href="/usuarios") Usuarios
+      a.nav-link.text-white(href="/admisiones")
+        i.fas.fa-list.me-1
+        | Lista de Admisiones
     li
-      a.nav-link.text-white(href="/usuarios/editar") Editar Usuario
+      a.nav-link.text-white(href="/emergencias")
+        i.fas.fa-ambulance.me-1
+        | Lista de Emergencias
     li
-      a.nav-link.text-white(href="/obras-sociales") Obras Sociales
+      a.nav-link.text-white(href="/obraSocial")
+        i.fas.fa-briefcase-medical.me-1
+        | Obras Sociales
     li
-      a.nav-link.text-white(href="/localidades") Localidades
+      a.nav-link.text-white(href="/motivoIngreso")
+        i.fas.fa-clipboard-list.me-1
+        | Motivos de Ingreso
     li
-      a.nav-link.text-white(href="/buscar-familiar") Buscar Familiar
+      a.nav-link.text-white(href="/movimientoHabitacion")
+        i.fas.fa-exchange-alt.me-1
+        | Movimientos de Habitación
+    li
+      a.nav-link.text-white(href="/movimientoHabitacion/movimiento")
+        i.fas.fa-exchange-alt.me-1
+        | Tipos de Movimientos
 
+  // 🔹 Usuarios
+  a.nav-link.text-white.collapsed(href="#usuariosSubmenu", data-bs-toggle="collapse", aria-expanded="false")
+    i.fas.fa-user-cog.me-2
+    | Usuarios
+  ul.collapse#usuariosSubmenu(style="list-style-type: none; padding-left: 1rem;")
+    li
+      a.nav-link.text-white(href="/usuarios")
+        i.fas.fa-users.me-1
+        | Lista de Usuarios

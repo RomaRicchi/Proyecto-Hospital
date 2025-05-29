@@ -4,9 +4,10 @@ import {
 	Localidad,
 	Admision,
 	ObraSocial,
+	Familiar,
+	Parentesco,
 } from '../models/index.js';
 
-// Vista para mostrar pacientes
 export const vistaPacientes = async (req, res) => {
 	try {
 		const pacientes = await Paciente.findAll({
@@ -20,7 +21,14 @@ export const vistaPacientes = async (req, res) => {
 						{ model: ObraSocial, as: 'obra_social', attributes: ['nombre'] },
 					],
 					limit: 1,
-					order: [['fecha_hora_ingreso', 'DESC']], // Tomar la última admisión
+					order: [['fecha_hora_ingreso', 'DESC']],
+				},
+				{
+					model: Familiar,
+					as: 'familiares',
+					include: [
+						{ model: Parentesco, as: 'parentesco', attributes: ['nombre'] },
+					],
 				},
 			],
 			where: { estado: true },
@@ -28,6 +36,7 @@ export const vistaPacientes = async (req, res) => {
 
 		const pacientesAdaptados = pacientes.map((p) => {
 			const ultimaAdmision = p.admisiones?.[0];
+			const familiar = p.familiares?.[0]; // Tomar un familiar (podrías adaptar para múltiples)
 			return {
 				id_paciente: p.id_paciente,
 				dni_paciente: p.dni_paciente,
@@ -38,7 +47,14 @@ export const vistaPacientes = async (req, res) => {
 				cobertura: ultimaAdmision?.obra_social?.nombre || '-',
 				telefono: p.telefono,
 				email: p.email,
-				nacionalidad: p.localidad?.nombre || '-',
+				direccion: p.direccion,
+				localidad: p.localidad?.nombre || '-',
+				// Familiar relacionado (opcional)
+				familiar: familiar
+					? `${familiar.nombre} ${familiar.apellido} (${
+							familiar.parentesco?.nombre || 'Sin parentesco'
+					  })`
+					: 'Sin familiar asignado',
 			};
 		});
 

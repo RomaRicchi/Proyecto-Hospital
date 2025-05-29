@@ -1,0 +1,29 @@
+extends layout_modular
+h1.text-center.mb-4 Lista de Sectores, Habitaciones y Camas
+
+  table#tablaSectoresHabitaciones.table.table-striped.table-bordered
+    thead
+      tr
+        th Sector
+        th Habitación
+        th Cama
+    tbody
+      each item in lista
+        tr
+          td= item.sector_nombre
+          td= item.habitacion_num
+          td= item.cama_nombre
+
+  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+  link(rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+  script.
+    $(document).ready(function() {
+      $('#tablaSectoresHabitaciones').DataTable({
+        language: {
+          url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+        }
+      });
+    });
+
+ 
