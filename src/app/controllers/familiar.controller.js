@@ -1,10 +1,14 @@
 import { Familiar, Paciente, Parentesco } from '../models/index.js';
 
+// ✅ Obtener todos los familiares activos
 export const getFamiliares = async (req, res) => {
 	try {
 		const familiares = await Familiar.findAll({
 			where: { estado: true },
-			include: ['paciente', 'parentesco'],
+			include: [
+				{ model: Paciente, as: 'paciente' },
+				{ model: Parentesco, as: 'parentesco' },
+			],
 		});
 		res.json(familiares);
 	} catch (error) {
@@ -12,10 +16,14 @@ export const getFamiliares = async (req, res) => {
 	}
 };
 
+// ✅ Obtener familiar por su ID
 export const getFamiliarById = async (req, res) => {
 	try {
 		const familiar = await Familiar.findByPk(req.params.id, {
-			include: ['paciente', 'parentesco'],
+			include: [
+				{ model: Paciente, as: 'paciente' },
+				{ model: Parentesco, as: 'parentesco' },
+			],
 		});
 		if (!familiar)
 			return res.status(404).json({ message: 'Familiar no encontrado' });
@@ -25,22 +33,33 @@ export const getFamiliarById = async (req, res) => {
 	}
 };
 
-export const getFamiliarByPacienteId = async (req, res) => {
+// ✅ Obtener familiar por ID de paciente
+export const getFamiliarByPaciente = async (req, res) => {
 	try {
-		const { pacienteId } = req.query;
 		const familiar = await Familiar.findOne({
-			where: {
-				id_paciente: pacienteId,
-				estado: true,
-			},
-			include: ['parentesco'],
+			where: { id_paciente: req.params.id, estado: true },
+			include: [
+				{
+					model: Paciente,
+					as: 'paciente',
+					attributes: ['nombre_p', 'apellido_p', 'dni_paciente'],
+				},
+				{ model: Parentesco, as: 'parentesco', attributes: ['nombre'] },
+			],
 		});
-		res.json(familiar || null);
+		if (!familiar)
+			return res
+				.status(404)
+				.json({ message: 'No se encontró un familiar para este paciente.' });
+
+		res.json(familiar);
 	} catch (error) {
-		res.status(500).json({ message: error.message });
+		console.error('Error al obtener el familiar:', error);
+		res.status(500).json({ message: 'Error interno al buscar el familiar.' });
 	}
 };
 
+// ✅ Crear nuevo familiar
 export const createFamiliar = async (req, res) => {
 	try {
 		const familiar = await Familiar.create(req.body);
@@ -50,6 +69,7 @@ export const createFamiliar = async (req, res) => {
 	}
 };
 
+// ✅ Actualizar datos de un familiar existente
 export const updateFamiliar = async (req, res) => {
 	try {
 		const familiar = await Familiar.findByPk(req.params.id);
@@ -62,6 +82,7 @@ export const updateFamiliar = async (req, res) => {
 	}
 };
 
+// ✅ Borrado lógico de un familiar
 export const deleteFamiliar = async (req, res) => {
 	try {
 		const familiar = await Familiar.findByPk(req.params.id);

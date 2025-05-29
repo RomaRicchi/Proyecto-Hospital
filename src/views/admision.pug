@@ -1,0 +1,49 @@
+extends layout_modular
+
+block content
+  h1.text-center.mb-4 Agregar Nueva Admisión
+
+  form(method="POST" action="/admision/agregar" class="mb-4")
+    .row
+      .col-md-3
+        label(for="id_paciente") ID Paciente:
+        input#id_paciente.form-control(type="number" name="id_paciente" required)
+      .col-md-3
+        label(for="id_obra_social") Obra Social:
+        select#id_obra_social.form-control(name="id_obra_social" required)
+          option(value="") Seleccionar obra social
+          each obra in obras_sociales
+            option(value=obra.id_obra_social)= obra.nombre
+      .col-md-3
+        label(for="num_asociado") Número de Asociado:
+        input#num_asociado.form-control(type="number" name="num_asociado" required)
+      .col-md-3
+        label(for="id_motivo") Motivo de Ingreso:
+        select#id_motivo.form-control(name="id_motivo" required)
+          option(value="") Seleccionar motivo
+          each motivo in motivos_ingreso
+            option(value=motivo.id_motivo)= motivo.tipo
+    .row
+      .col-md-4
+        label(for="fecha_hora_ingreso") Fecha/Hora Ingreso:
+        input#fecha_hora_ingreso.form-control(type="datetime-local" name="fecha_hora_ingreso" required)
+      .col-md-4
+        label(for="fecha_hora_egreso") Fecha/Hora Egreso:
+        input#fecha_hora_egreso.form-control(type="datetime-local" name="fecha_hora_egreso")
+      .col-md-4
+        label(for="id_personal_salud") ID Personal Salud:
+        input#id_personal_salud.form-control(type="number" name="id_personal_salud" required)
+    .row
+      .col-md-12
+        label(for="descripcion") Descripción:
+        textarea#descripcion.form-control(name="descripcion" rows="2")
+    .row
+      .col-md-12
+        label(for="motivo_egr") Motivo de Egreso:
+        textarea#motivo_egr.form-control(name="motivo_egr" rows="2")
+    .row.mt-3
+      .col-md-12
+        button.btn.btn-success(type="submit") Agregar Admisión
+    .row.mt-2
+      .col-md-12
+        a.btn.btn-secondary(href="/admision/lista") Ver Lista de Admisiones

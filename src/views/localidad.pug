@@ -1,0 +1,28 @@
+extends layout_modular
+
+block content
+  h1 Gestión de Localidades
+
+  // Tabla de localidades
+  table(border="1")
+    thead
+      tr
+        th Nombre
+        th Acciones
+    tbody
+      each localidad in localidades
+        tr
+          td= localidad.nombre
+          td
+            a(href=`/localidad/editar/${localidad.id_localidad}`) Editar
+            |  
+            a(href=`/localidad/eliminar/${localidad.id_localidad}`) Eliminar
+
+  // Formulario para agregar nueva localidad
+  h2 Agregar Nueva Localidad
+  form(action="/localidad/agregar" method="POST")
+    div
+      label(for="nombre") Nombre:
+      input#nombre(type="text" name="nombre" required)
+    div
+      button(type="submit") Agregar
