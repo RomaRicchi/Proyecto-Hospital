@@ -1,28 +1,34 @@
 extends layout_modular
 
 block content
-  h1 Gestión de Localidades
+  h1.text-center.mb-4 Gestión de Localidades
 
-  // Tabla de localidades
-  table(border="1")
-    thead
-      tr
-        th Nombre
-        th Acciones
-    tbody
-      each localidad in localidades
-        tr
-          td= localidad.nombre
-          td
-            a(href=`/localidad/editar/${localidad.id_localidad}`) Editar
-            |  
-            a(href=`/localidad/eliminar/${localidad.id_localidad}`) Eliminar
+  if localidades && localidades.length
+    .table-responsive
+      table#tablaLocalidades.table.table-striped.table-bordered
+        thead
+          tr
+            th Nombre
+            th Acciones
+        tbody
+          each localidad in localidades
+            tr
+              td= localidad.nombre
+              td
+                button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=localidad.id_localidad)
+                  i.fas.fa-pen
+                button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=localidad.id_localidad)
+                  i.fas.fa-trash
+  else
+    p.text-center.text-muted No hay localidades registradas.
 
-  // Formulario para agregar nueva localidad
-  h2 Agregar Nueva Localidad
-  form(action="/localidad/agregar" method="POST")
-    div
-      label(for="nombre") Nombre:
-      input#nombre(type="text" name="nombre" required)
-    div
-      button(type="submit") Agregar
+  // Botón para agregar nueva localidad
+  .mt-3.text-center
+    button.btn.btn-success#btnAgregarLocalidad Agregar Nueva Localidad
+
+  // Librerías DataTables y jQuery
+  script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+  script(src="/js/localidades.js")

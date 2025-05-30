@@ -82,7 +82,7 @@ app.use('/api/pacientes', pacientesRoutes);
 app.use('/api/familiares', familiaresRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/roles', rolUsuarioRoutes);
-app.use('/api/generos', generoRoutes);
+app.use('/api/genero', generoRoutes);
 app.use('/api/localidades', localidadRoutes);
 app.use('/api/obras-sociales', obraSocialRoutes);
 app.use('/api/parentescos', parentescoRoutes);

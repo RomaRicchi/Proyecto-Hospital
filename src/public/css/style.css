@@ -63,7 +63,7 @@
 
 /* Clase que oculta el sidebar */
 .sidebar-collapsed {
-  margin-left: -250px;
+  margin-left: -350px;
 }
 
 /* Estilo para el link activo del sidebar */
