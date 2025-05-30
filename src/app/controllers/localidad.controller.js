@@ -52,3 +52,13 @@ export const deleteLocalidad = async (req, res) => {
 		res.status(500).json({ message: error.message });
 	}
 };
+
+export const vistaLocalidades = async (req, res) => {
+	try {
+		const localidades = await Localidad.findAll();
+		res.render('localidad', { localidades }); // Renderiza la vista con los datos
+	} catch (error) {
+		console.error('Error al cargar localidades:', error);
+		res.status(500).send('Error al cargar la vista de localidades');
+	}
+};

@@ -18,5 +18,12 @@ export default (sequelize, DataTypes) => {
 		}
 	);
 
+	Parentesco.associate = (models) => {
+		Parentesco.hasMany(models.Familiar, {
+			foreignKey: 'id_parentesco',
+			as: 'familiares',
+		});
+	};
+
 	return Parentesco;
 };

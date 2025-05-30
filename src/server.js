@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 // 🌐 Conexión a la base de datos y arranque del servidor
 (async () => {
 	try {
-		await sequelize.sync({ alter: true });
+		sequelize.sync(); //({ alter: true });
 		console.log('✅ Base de datos conectada correctamente.');
 
 		app.listen(PORT, () => {

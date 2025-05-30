@@ -1,33 +1,50 @@
 extends layout_modular
 
 block content
-  h1.text-center.mb-4 Agregar Nueva Habitación
+  h1.text-center.mb-4 Gestión de Habitaciones
 
   form(method="POST" action="/habitacion/agregar" class="mb-4")
     .row
       .col-md-4
-        label(for="id_sector") Sector:
-        select#id_sector.form-control(name="id_sector" required)
-          option(value="") Seleccionar sector
-          each sector in sectores
-            option(value=sector.id_sector)= sector.nombre
-      .col-md-4
-        label(for="num") Número:
+        label(for="num") Número de Habitación:
         input#num.form-control(type="number" name="num" required)
       .col-md-4
-        label(for="id_cama") Cama:
-        select#id_cama.form-control(name="id_cama" required)
-          option(value="") Seleccionar cama
-          each cama in camas
-            option(value=cama.id_cama)= cama.nombre
-    .row
-      .col-md-2
+        label(for="id_sector") Sector:
+        input#id_sector.form-control(type="number" name="id_sector" placeholder="ID del sector")
+      .col-md-4
         label(for="estado") Estado:
-        select#estado.form-control(name="estado" required)
-          option(value="1") Activo
-          option(value="0") Inactivo
-      .col-md-10.mt-4
-        button.btn.btn-success(type="submit") Agregar Habitación
-    .row.mt-2
-      .col-md-12
-        a.btn.btn-secondary(href="/habitacion/lista") Ver Lista de Habitaciones
+        select#estado.form-control(name="estado")
+          option(value="1") Disponible
+          option(value="0") Ocupada
+      .col-md-12.mt-3
+        button.btn.btn-success(type="submit") Agregar
+
+  if habitaciones && habitaciones.length
+    .table-responsive
+      table#tablaHabitacion.table.table-striped.table-bordered
+        thead
+          tr
+            th Número
+            th Sector
+            th Estado
+            th Acciones
+        tbody
+          each habitacion in habitaciones
+            tr
+              td= habitacion.num
+              td= habitacion.id_sector
+              td= habitacion.estado === 1 ? 'Disponible' : 'Ocupada'
+              td
+                button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=habitacion.id_habitacion)
+                  i.fas.fa-pen
+                button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=habitacion.id_habitacion)
+                  i.fas.fa-trash
+  else
+    p.text-center.text-muted No hay habitaciones registradas.
+
+  // Librerías DataTables y jQuery
+  script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+  script(src="/js/habitaciones.js")  // JS específico para habitaciones

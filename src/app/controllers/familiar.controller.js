@@ -16,6 +16,53 @@ export const getFamiliares = async (req, res) => {
 	}
 };
 
+// Vista para mostrar todos los familiares
+export const vistaFamiliares = async (req, res) => {
+	try {
+		const familiares = await Familiar.findAll({
+			where: { estado: true },
+			include: [
+				{
+					model: Paciente,
+					as: 'paciente',
+					attributes: [
+						'nombre_p',
+						'apellido_p',
+						'dni_paciente',
+						'telefono',
+						'email',
+					],
+				},
+				{
+					model: Parentesco,
+					as: 'parentesco',
+					attributes: ['nombre'],
+				},
+			],
+		});
+
+		// Adaptar datos igual que en paciente
+		const familiaresAdaptados = familiares.map((f) => ({
+			id_familiar: f.id_familiar,
+			nombre: f.nombre,
+			apellido: f.apellido,
+			telefono: f.telefono,
+			paciente: f.paciente
+				? `${f.paciente.nombre_p} ${f.paciente.apellido_p}`
+				: 'Sin asignar',
+			dni_paciente: f.paciente?.dni_paciente || '-',
+			email_paciente: f.paciente?.email || '-',
+			telefono_paciente: f.paciente?.telefono || '-',
+			parentesco: f.parentesco?.nombre || '-', // Aquí ya adaptado
+		}));
+
+		res.render('familiar', { familiares: familiaresAdaptados || [] });
+	} catch (error) {
+		console.error('Error al mostrar familiares:', error);
+		res.status(500).send('Error interno al mostrar familiares');
+	}
+};
+
 // ✅ Obtener familiar por su ID
 export const getFamiliarById = async (req, res) => {
 	try {
