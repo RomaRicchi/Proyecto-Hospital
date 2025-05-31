@@ -15,20 +15,29 @@ export default (sequelize, DataTypes) => {
 				type: DataTypes.INTEGER,
 				allowNull: true,
 			},
-			id_cama: {
-				type: DataTypes.TINYINT.UNSIGNED,
-				allowNull: true,
-			},
-			estado: {
-				type: DataTypes.BOOLEAN,
-				defaultValue: true,
-			},
 		},
 		{
 			tableName: 'habitacion',
 			timestamps: false,
 		}
 	);
+
+	Habitacion.associate = (models) => {
+		Habitacion.hasMany(models.Cama, {
+			foreignKey: 'id_habitacion',
+			as: 'camas',
+		});
+
+		Habitacion.belongsTo(models.Sector, {
+			foreignKey: 'id_sector',
+			as: 'sector',
+		});
+
+		Habitacion.hasMany(models.MovimientoHabitacion, {
+			foreignKey: 'id_habitacion',
+			as: 'movimientos',
+		});
+	};
 
 	return Habitacion;
 };

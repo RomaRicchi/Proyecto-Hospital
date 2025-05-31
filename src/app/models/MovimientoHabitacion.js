@@ -27,13 +27,10 @@ export default (sequelize, DataTypes) => {
 				type: DataTypes.SMALLINT.UNSIGNED,
 				allowNull: false,
 			},
-			desinfeccion: {
-				type: DataTypes.BOOLEAN,
-				defaultValue: true,
-			},
 			estado: {
 				type: DataTypes.BOOLEAN,
-				defaultValue: true,
+				allowNull: true,
+				defaultValue: 1,
 			},
 		},
 		{
@@ -41,6 +38,23 @@ export default (sequelize, DataTypes) => {
 			timestamps: false,
 		}
 	);
+
+	MovimientoHabitacion.associate = (models) => {
+		MovimientoHabitacion.belongsTo(models.Habitacion, {
+			foreignKey: 'id_habitacion',
+			as: 'habitacion',
+		});
+
+		MovimientoHabitacion.belongsTo(models.Admision, {
+			foreignKey: 'id_admision',
+			as: 'admision',
+		});
+
+		MovimientoHabitacion.belongsTo(models.Movimiento, {
+			foreignKey: 'id_mov',
+			as: 'tipo_movimiento',
+		});
+	};
 
 	return MovimientoHabitacion;
 };

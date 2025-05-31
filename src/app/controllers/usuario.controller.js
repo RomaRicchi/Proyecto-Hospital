@@ -1,13 +1,91 @@
-import { Usuario } from '../models/index.js';
+import {
+	Usuario,
+	PersonalAdministrativo,
+	PersonalSalud,
+	RolUsuario,
+	Especialidad,
+} from '../models/index.js';
 import bcrypt from 'bcrypt';
 
-// 📥 Obtener todos los usuarios
+// 🔸 Obtener todos los usuarios con relaciones (API REST)
 export const getUsuarios = async (req, res) => {
 	try {
-		const usuarios = await Usuario.findAll();
-		res.json(usuarios);
+		const usuarios = await Usuario.findAll({
+			include: [
+				{
+					model: PersonalAdministrativo,
+					as: 'personal_administrativo',
+					include: [{ model: RolUsuario, as: 'rol', attributes: ['nombre'] }],
+				},
+				{
+					model: PersonalSalud,
+					as: 'personal_salud',
+					include: [
+						{ model: RolUsuario, as: 'rol', attributes: ['nombre'] },
+						{ model: Especialidad, as: 'especialidad', attributes: ['nombre'] },
+					],
+				},
+			],
+		});
+
+		const adaptados = usuarios.map((u) => {
+			const admin = u.personal_administrativo;
+			const salud = u.personal_salud;
+			return {
+				id_usuario: u.id_usuario,
+				username: u.username,
+				estado: u.estado ? 'Activo' : 'Inactivo',
+				tipo: admin ? 'Administrativo' : salud ? 'Salud' : '-',
+				rol: admin?.rol?.nombre || salud?.rol?.nombre || '-',
+				especialidad: salud?.especialidad?.nombre || (admin ? 'N/A' : '-'),
+			};
+		});
+
+		res.json(adaptados);
 	} catch (error) {
-		res.status(500).json({ message: error.message });
+		console.error('Error al obtener usuarios:', error);
+		res.status(500).json({ message: 'Error al obtener usuarios' });
+	}
+};
+
+// 🔸 Vista adaptada para la tabla DataTable de PUG
+export const vistaUsuarios = async (req, res) => {
+	try {
+		const usuarios = await Usuario.findAll({
+			include: [
+				{
+					model: PersonalAdministrativo,
+					as: 'personal_administrativo',
+					include: [{ model: RolUsuario, as: 'rol', attributes: ['nombre'] }],
+				},
+				{
+					model: PersonalSalud,
+					as: 'personal_salud',
+					include: [
+						{ model: RolUsuario, as: 'rol', attributes: ['nombre'] },
+						{ model: Especialidad, as: 'especialidad', attributes: ['nombre'] },
+					],
+				},
+			],
+		});
+
+		const usuariosAdaptados = usuarios.map((u) => {
+			const admin = u.personal_administrativo;
+			const salud = u.personal_salud;
+			return {
+				id_usuario: u.id_usuario,
+				username: u.username,
+				estado: u.estado ? 'Activo' : 'Inactivo',
+				tipo: admin ? 'Administrativo' : salud ? 'Salud' : '-',
+				rol: admin?.rol?.nombre || salud?.rol?.nombre || '-',
+				especialidad: salud?.especialidad?.nombre || (admin ? 'N/A' : '-'),
+			};
+		});
+
+		res.render('usuario', { usuarios: usuariosAdaptados });
+	} catch (error) {
+		console.error('Error al renderizar vista de usuarios:', error);
+		res.status(500).send('Error al mostrar usuarios');
 	}
 };
 
@@ -23,7 +101,7 @@ export const getUsuarioById = async (req, res) => {
 	}
 };
 
-// ➕ Crear usuario nuevo (con hash)
+// ➕ Crear usuario nuevo (API REST)
 export const createUsuario = async (req, res) => {
 	try {
 		const { username, password, apellido, nombre, id_rol_usuario } = req.body;
@@ -39,14 +117,12 @@ export const createUsuario = async (req, res) => {
 
 		const hashedPassword = await bcrypt.hash(password, 10);
 
-		// 1. Crear usuario
 		const nuevoUsuario = await Usuario.create({
 			username,
 			password: hashedPassword,
 			estado: true,
 		});
 
-		// 2. Crear entrada en personal_administrativo
 		const nuevoPersonal = await PersonalAdministrativo.create({
 			id_usuario: nuevoUsuario.id_usuario,
 			apellido,
@@ -73,21 +149,16 @@ export const createUsuario = async (req, res) => {
 	}
 };
 
-// ✏️ Actualizar usuario (opcionalmente password)
+// ✏️ Actualizar usuario
 export const updateUsuario = async (req, res) => {
 	try {
 		const { username, password } = req.body;
 		const usuario = await Usuario.findByPk(req.params.id);
-
 		if (!usuario)
 			return res.status(404).json({ message: 'Usuario no encontrado' });
 
-		// Actualizar campos permitidos
 		if (username) usuario.username = username;
-		if (password) {
-			const hashedPassword = await bcrypt.hash(password, 10);
-			usuario.password = hashedPassword;
-		}
+		if (password) usuario.password = await bcrypt.hash(password, 10);
 
 		await usuario.save();
 		res.json({ message: 'Usuario actualizado correctamente' });

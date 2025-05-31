@@ -38,7 +38,7 @@ $(document).ready(function () {
 		try {
 			const [localidades, generos] = await Promise.all([
 				fetch(`/api/localidades`).then((r) => r.json()),
-				fetch(`/api/generos`).then((r) => r.json()),
+				fetch(`/api/genero`).then((r) => r.json()),
 			]);
 
 			const localidadOptions = localidades
@@ -137,7 +137,7 @@ $(document).ready(function () {
 			const [paciente, localidades, generos] = await Promise.all([
 				fetch(`/api/pacientes/${id}`).then((r) => r.json()),
 				fetch(`/api/localidades`).then((r) => r.json()),
-				fetch(`/api/generos`).then((r) => r.json()),
+				fetch(`/api/genero`).then((r) => r.json()),
 			]);
 
 			if (!paciente) {

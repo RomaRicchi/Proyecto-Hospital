@@ -42,5 +42,23 @@ export default (sequelize, DataTypes) => {
 		}
 	);
 
+	// 🧩 Asociaciones
+	PersonalSalud.associate = (models) => {
+		PersonalSalud.belongsTo(models.Usuario, {
+			foreignKey: 'id_usuario',
+			as: 'usuario',
+		});
+
+		PersonalSalud.belongsTo(models.RolUsuario, {
+			foreignKey: 'id_rol_usuario',
+			as: 'rol',
+		});
+
+		PersonalSalud.belongsTo(models.Especialidad, {
+			foreignKey: 'id_especialidad',
+			as: 'especialidad',
+		});
+	};
+
 	return PersonalSalud;
 };

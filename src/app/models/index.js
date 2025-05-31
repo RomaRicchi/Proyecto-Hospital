@@ -57,81 +57,67 @@ const RegistroHistoriaClinica = defineRegistroHistoriaClinica(
 const MotivoIngreso = defineMotivoIngreso(sequelize, Sequelize.DataTypes);
 const TipoRegistro = defineTipoRegistro(sequelize, Sequelize.DataTypes);
 
-// Ejecutar asociaciones desde modelos que las tienen definidas internamente
-PersonalAdministrativo.associate?.({
-	RolUsuario,
-	Usuario,
-});
-PersonalSalud.associate?.({
-	RolUsuario,
-	Usuario,
-	Especialidad,
-});
+// Asociaciones internas (solo llama a associate si existe)
+PersonalAdministrativo.associate?.({ Usuario, RolUsuario });
+PersonalSalud.associate?.({ Usuario, RolUsuario, Especialidad });
+Cama.associate?.({ Habitacion });
+Habitacion.associate?.({ Sector, Cama, MovimientoHabitacion });
+MovimientoHabitacion.associate?.({ Admision, Habitacion, Movimiento });
 
-// Relaciones PACIENTE
+// Relaciones adicionales (solo las que no estén en associate)
 Paciente.belongsTo(Genero, { foreignKey: 'id_genero', as: 'genero' });
 Paciente.belongsTo(Localidad, { foreignKey: 'id_localidad', as: 'localidad' });
 Paciente.hasMany(Familiar, { foreignKey: 'id_paciente', as: 'familiares' });
 Paciente.hasMany(Admision, { foreignKey: 'id_paciente', as: 'admisiones' });
 
-// Relaciones FAMILIAR
 Familiar.belongsTo(Paciente, { foreignKey: 'id_paciente', as: 'paciente' });
 Familiar.belongsTo(Parentesco, {
 	foreignKey: 'id_parentesco',
 	as: 'parentesco',
 });
 
-// Relaciones ADMISION
 Admision.belongsTo(Paciente, { foreignKey: 'id_paciente', as: 'paciente' });
 Admision.belongsTo(ObraSocial, {
 	foreignKey: 'id_obra_social',
 	as: 'obra_social',
 });
 Admision.belongsTo(Usuario, {
-	foreignKey: 'id_personal_admin',
-	as: 'personal_admin',
-});
-Admision.belongsTo(Usuario, {
 	foreignKey: 'id_personal_salud',
 	as: 'personal_salud',
 });
+Admision.belongsTo(MotivoIngreso, {
+	foreignKey: 'id_motivo',
+	as: 'motivo_ingreso',
+});
 Admision.hasMany(MovimientoHabitacion, {
 	foreignKey: 'id_admision',
-	as: 'movimientos',
+	as: 'movimientos_habitacion',
 });
 Admision.hasMany(RegistroHistoriaClinica, {
 	foreignKey: 'id_admision',
 	as: 'registros_clinicos',
 });
-Admision.belongsTo(MotivoIngreso, { foreignKey: 'id_motivo', as: 'motivo' });
+
+MovimientoHabitacion.belongsTo(Admision, {
+	foreignKey: 'id_admision',
+	as: 'admision_relacionada',
+});
+MovimientoHabitacion.belongsTo(Habitacion, {
+	foreignKey: 'id_habitacion',
+	as: 'habitacion_relacionada',
+});
+// MovimientoHabitacion.belongsTo(Movimiento, { foreignKey: 'id_mov', as: 'tipo_movimiento' }); // Solo si no está en associate
+
+// Habitacion.belongsTo(Sector, { foreignKey: 'id_sector', as: 'sector' }); // Solo si no está en associate
+// Habitacion.hasMany(Cama, { foreignKey: 'id_habitacion', as: 'camas' }); // Solo si no está en associate
+// Habitacion.hasMany(MovimientoHabitacion, { foreignKey: 'id_habitacion', as: 'movimientos' }); // Solo si no está en associate
+
+// Cama.belongsTo(Habitacion, { foreignKey: 'id_habitacion', as: 'habitacion' }); // Solo si no está en associate
+
 RegistroHistoriaClinica.belongsTo(TipoRegistro, {
 	foreignKey: 'id_tipo',
 	as: 'tipo_registro',
 });
-
-// Relaciones MOVIMIENTO_HABITACION
-MovimientoHabitacion.belongsTo(Admision, {
-	foreignKey: 'id_admision',
-	as: 'admision',
-});
-MovimientoHabitacion.belongsTo(Habitacion, {
-	foreignKey: 'id_habitacion',
-	as: 'habitacion',
-});
-MovimientoHabitacion.belongsTo(Movimiento, {
-	foreignKey: 'id_mov',
-	as: 'tipo_movimiento',
-});
-
-// Relaciones HABITACION
-Habitacion.belongsTo(Sector, { foreignKey: 'id_sector', as: 'sector' });
-Habitacion.belongsTo(Cama, { foreignKey: 'id_cama', as: 'cama' });
-Habitacion.hasMany(MovimientoHabitacion, {
-	foreignKey: 'id_habitacion',
-	as: 'movimientos',
-});
-
-// Relaciones REGISTRO HISTORIA CLÍNICA
 RegistroHistoriaClinica.belongsTo(Admision, {
 	foreignKey: 'id_admision',
 	as: 'admision',
@@ -141,6 +127,16 @@ RegistroHistoriaClinica.belongsTo(Usuario, {
 	as: 'usuario',
 });
 
+Usuario.hasOne(PersonalAdministrativo, {
+	foreignKey: 'id_usuario',
+	as: 'personal_administrativo',
+});
+Usuario.hasOne(PersonalSalud, {
+	foreignKey: 'id_usuario',
+	as: 'personal_salud',
+});
+
+// Exportar cada modelo explícitamente para evitar conflictos
 export {
 	sequelize,
 	Sequelize,

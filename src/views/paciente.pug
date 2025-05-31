@@ -3,22 +3,23 @@ extends layout_modular
 block content
   h1.text-center.mb-4 Lista de Pacientes
 
-  if pacientes && pacientes.length
-    .table-responsive
-      table#tablaPacientes.table.table-striped.table-bordered
-        thead
-          tr
-            th DNI
-            th Apellido
-            th Nombre
-            th Fecha Nacimiento
-            th Género
-            th Teléfono
-            th Dirección
-            th Localidad
-            th Email
-            th Acciones
-        tbody
+  
+  .table-responsive
+    table#tablaPacientes.table.table-striped.table-bordered
+      thead
+        tr
+          th DNI
+          th Apellido
+          th Nombre
+          th Fecha Nacimiento
+          th Género
+          th Teléfono
+          th Dirección
+          th Localidad
+          th Email
+          th Acciones
+      tbody
+        if pacientes && pacientes.length
           each paciente in pacientes
             tr
               td= paciente.dni_paciente
@@ -37,8 +38,8 @@ block content
                   i.fas.fa-trash
                 button.btn.btn-sm.btn-secondary.details-btn(data-id=paciente.id_paciente)
                   i.fas.fa-eye
-  else
-    p.text-center.text-muted No hay pacientes registrados.
+        else
+          p.text-center.text-muted No hay pacientes registrados.
 
   // 📚 Librerías y scripts (asegurarse de orden)
   link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")

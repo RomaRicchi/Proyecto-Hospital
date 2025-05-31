@@ -3,14 +3,15 @@ extends layout_modular
 block content
   h1.text-center.mb-4 Gestión de Localidades
 
-  if localidades && localidades.length
-    .table-responsive
-      table#tablaLocalidades.table.table-striped.table-bordered
-        thead
-          tr
-            th Nombre
-            th Acciones
-        tbody
+
+  .table-responsive
+    table#tablaLocalidades.table.table-striped.table-bordered
+      thead
+        tr
+          th Nombre
+          th Acciones
+      tbody
+        if localidades && localidades.length
           each localidad in localidades
             tr
               td= localidad.nombre
@@ -19,8 +20,8 @@ block content
                   i.fas.fa-pen
                 button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=localidad.id_localidad)
                   i.fas.fa-trash
-  else
-    p.text-center.text-muted No hay localidades registradas.
+        else
+          p.text-center.text-muted No hay localidades registradas.
 
   // Botón para agregar nueva localidad
   .mt-3.text-center
