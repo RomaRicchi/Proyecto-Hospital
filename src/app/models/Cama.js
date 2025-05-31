@@ -8,9 +8,20 @@ export default (sequelize, DataTypes) => {
 				autoIncrement: true,
 			},
 			nombre: {
-				type: DataTypes.CHAR(1),
+				type: DataTypes.STRING(1),
 				allowNull: false,
-				unique: true,
+			},
+			id_habitacion: {
+				type: DataTypes.INTEGER.UNSIGNED,
+				allowNull: false,
+			},
+			desinfeccion: {
+				type: DataTypes.BOOLEAN,
+				allowNull: false,
+			},
+			estado: {
+				type: DataTypes.BOOLEAN,
+				allowNull: false,
 			},
 		},
 		{
@@ -18,6 +29,13 @@ export default (sequelize, DataTypes) => {
 			timestamps: false,
 		}
 	);
+
+	Cama.associate = (models) => {
+		Cama.belongsTo(models.Habitacion, {
+			foreignKey: 'id_habitacion',
+			as: 'habitacion',
+		});
+	};
 
 	return Cama;
 };

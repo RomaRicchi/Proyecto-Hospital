@@ -157,30 +157,3 @@ $(document).ready(function () {
 		});
 	});
 });
-	// 🔸 Capturar el submit del formulario de agregar sector
-	$('form').on('submit', function (e) {
-		e.preventDefault();  // Evitar recarga de la página
-
-		const nombre = $('#nombre').val().trim();
-		if (!nombre) {
-			Swal.fire('Error', 'El nombre del sector es obligatorio', 'error');
-			return;
-		}
-
-		fetch('/api/sectores', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ nombre })
-		})
-		.then(response => {
-			if (!response.ok) throw new Error('No se pudo crear el sector');
-			return response.json();
-		})
-		.then(() => {
-			Swal.fire('Guardado', 'Sector creado con éxito', 'success')
-				.then(() => location.reload());  // Recargar página para actualizar tabla
-		})
-		.catch(() => {
-			Swal.fire('Error', 'No se pudo crear el sector', 'error');
-		});
-	});

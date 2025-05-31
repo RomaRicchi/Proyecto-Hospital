@@ -1,0 +1,33 @@
+extends layout_modular
+
+block content
+  h1.text-center.mb-4 Gestión de Parentescos
+
+ 
+  .table-responsive
+    table#tablaParentesco.table.table-striped.table-bordered
+      thead
+        tr
+          th ID
+          th Nombre
+          th Acciones
+      tbody
+        if parentescos && parentescos.length
+          each parentesco in parentescos
+            tr
+              td= parentesco.id_parentesco
+              td= parentesco.nombre
+              td
+                button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=parentesco.id_parentesco)
+                  i.fas.fa-pen
+                button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=parentesco.id_parentesco)
+                  i.fas.fa-trash
+        else
+          p.text-center.text-muted No hay parentescos registrados.
+
+  // Librerías
+  script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+  script(src="/js/parentescos.js")

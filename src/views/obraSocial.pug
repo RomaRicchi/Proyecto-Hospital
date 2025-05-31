@@ -3,12 +3,29 @@ extends layout_modular
 block content
   h1.text-center.mb-4 Gestión de Obras Sociales
 
-  // 👉 Formulario para agregar nueva obra social
-  h2 Agregar Nueva Obra Social
-  form(method="POST" action="/obra_social/agregar" class="mb-4")
-    .row
-      .col-md-6
-        label(for="nombre") Nombre de la Obra Social:
-        input#nombre.form-control(type="text" name="nombre" required)
-      .col-md-6.mt-4
-        button.btn.btn-success(type="submit") Agregar
+ 
+  .table-responsive
+    table#tablaObraSocial.table.table-striped.table-bordered
+      thead
+        tr
+          th Nombre
+          th Acciones
+      tbody
+        if obras_sociales && obras_sociales.length
+          each obra in obras_sociales
+            tr
+              td= obra.nombre
+              td
+                button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=obra.id_obra_social)
+                  i.fas.fa-pen
+                button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=obra.id_obra_social)
+                  i.fas.fa-trash
+        else
+          p.text-center.text-muted No hay obras sociales registradas.
+
+  // Librerías DataTables y jQuery
+  script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+  script(src="/js/obrasSociales.js")
