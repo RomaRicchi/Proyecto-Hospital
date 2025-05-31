@@ -31,7 +31,10 @@ export default (sequelize, DataTypes) => {
 				type: DataTypes.STRING(255),
 				allowNull: true,
 			},
-			fecha_hora_egreso: { type: DataTypes.DATE, allowNull: true },
+			fecha_hora_egreso: {
+				type: DataTypes.DATE,
+				allowNull: true,
+			},
 			motivo_egr: {
 				type: DataTypes.STRING(255),
 				allowNull: true,
@@ -46,6 +49,33 @@ export default (sequelize, DataTypes) => {
 			timestamps: false,
 		}
 	);
+
+	Admision.associate = (models) => {
+		Admision.belongsTo(models.Paciente, {
+			foreignKey: 'id_paciente',
+			as: 'paciente',
+		});
+		Admision.belongsTo(models.ObraSocial, {
+			foreignKey: 'id_obra_social',
+			as: 'obra_social',
+		});
+		Admision.belongsTo(models.Usuario, {
+			foreignKey: 'id_personal_salud',
+			as: 'personal_salud',
+		});
+		Admision.belongsTo(models.MotivoIngreso, {
+			foreignKey: 'id_motivo',
+			as: 'motivo_ingreso',
+		});
+		Admision.hasMany(models.MovimientoHabitacion, {
+			foreignKey: 'id_admision',
+			as: 'movimientos_habitacion',
+		});
+		Admision.hasMany(models.RegistroHistoriaClinica, {
+			foreignKey: 'id_admision',
+			as: 'registros_clinicos',
+		});
+	};
 
 	return Admision;
 };

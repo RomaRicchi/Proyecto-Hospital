@@ -8,13 +8,16 @@ import { vistaLocalidades } from '../controllers/localidad.controller.js';
 import { vistaGeneros } from '../controllers/genero.controller.js';
 import { vistaFamiliares } from '../controllers/familiar.controller.js';
 import { vistaSectores } from '../controllers/sector.controller.js';
-import { vistaCamas } from '../controllers/cama.controller.js';
+// Cambia esta línea:
+// import { vistaCamas } from '../controllers/cama.controller.js';
+// Por esta:
+import { getCamas } from '../controllers/cama.controller.js';
 import { vistaHabitaciones } from '../controllers/habitacion.controller.js';
 import { vistaParentescos } from '../controllers/parentesco.controller.js';
 import { vistaObrasSociales } from '../controllers/obraSocial.controller.js';
 import { vistaUsuarios } from '../controllers/usuario.controller.js';
 import { vistaAdmisiones } from '../controllers/admision.controller.js';
-import { vistaMotivosIngreso }  from '../controllers/motivoIngreso.controller.js';
+import { vistaMotivosIngreso } from '../controllers/motivoIngreso.controller.js';
 import { vistaMovimientos } from '../controllers/movimiento.controller.js';
 import { vistaMovimientosHabitacion } from '../controllers/movimientoHabitacion.controller.js';
 
@@ -35,36 +38,43 @@ router.get('/pacientes/camas', isAuthenticated, (req, res) =>
 
 // 🔸 Localidad y Género
 router.get('/paciente/localidad', isAuthenticated, vistaLocalidades);
-// localidad.pug
 router.get('/paciente/genero', isAuthenticated, vistaGeneros);
-// genero.pug
 
 // 🔸 Familiar
 router.get('/familiar', isAuthenticated, vistaFamiliares);
-router.get('/familiar/parentesco', isAuthenticated, vistaParentescos); // Renderiza parentesco.pug
+router.get('/familiar/parentesco', isAuthenticated, vistaParentescos);
 
 // 🔸 Ubicación
-router.get('/sector', isAuthenticated, vistaSectores); // sector.pug
-router.get('/habitacion', isAuthenticated, vistaHabitaciones); // Renderiza habitacion.pug
-router.get('/camas', isAuthenticated, vistaCamas); // Renderiza cama.pug
+router.get('/sector', isAuthenticated, vistaSectores);
+router.get('/habitacion', isAuthenticated, vistaHabitaciones);
+// Cambia esta línea:
+// router.get('/camas', isAuthenticated, vistaCamas);
+// Por esta:
+router.get('/camas', isAuthenticated, getCamas);
 
 // 🔸 Admisiones e Internaciones
-router.get('/admisiones', isAuthenticated, vistaAdmisiones); // admision.pug
+router.get('/admisiones', isAuthenticated, vistaAdmisiones);
 router.get('/internaciones', isAuthenticated, (req, res) =>
 	res.render('internaciones')
-); // internaciones.pug
-router.get('/motivo_ingreso', isAuthenticated, vistaMotivosIngreso);
-router.get('/movimiento_habitacion', isAuthenticated, vistaMovimientosHabitacion); // movHabitacion.pug
+);
+router.get('/motivoIngreso', isAuthenticated, vistaMotivosIngreso);
+router.get(
+	'/movimiento_habitacion',
+	isAuthenticated,
+	vistaMovimientosHabitacion
+);
+
 router.get('/movimiento', isAuthenticated, vistaMovimientos);
+
 
 // 🔸 Administración
 router.get('/obraSocial', isAuthenticated, vistaObrasSociales);
-router.get('/usuarios', isAuthenticated, (req, res) => res.render('users')); // users.pug
+router.get('/usuarios', isAuthenticated, (req, res) => res.render('users'));
 
 // 🔸 Emergencias
 router.get('/emergencias', isAuthenticated, (req, res) =>
 	res.render('emergencia')
-); // emergencia.pug
+);
 
 // 🔸 Habitaciones
 router.get('/habitacion', isAuthenticated, vistaHabitaciones);

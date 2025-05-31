@@ -1,4 +1,5 @@
-import { MovimientoHabitacion, Admision, Habitacion, Movimiento, Paciente, Sector } from '../models/index.js';
+import { MovimientoHabitacion, Admision, Habitacion, Movimiento, Paciente, Sector, Cama } from '../models/index.js';
+
 
 // 🔸 Obtener todos los movimientos habitación con relaciones
 export const getMovimientosHabitacion = async (req, res) => {
@@ -99,5 +100,27 @@ export const vistaMovimientosHabitacion = async (req, res) => {
   } catch (error) {
     console.error('Error al cargar vista:', error);
     res.status(500).send('Error al cargar movimientos habitación');
+  }
+};
+
+export const reservarCama = async (req, res) => {
+  const id_cama = req.params.id_cama;
+  try {
+    // Cambiar estado de la cama a reservada (estado = 2, por ejemplo)
+    await Cama.update({ estado: true }, { where: { id_cama } });
+
+    // Crear movimiento de tipo 'Reserva' (id_mov = 3)
+    await MovimientoHabitacion.create({
+      id_admision: null, // aún no está asociada a admisión
+      id_habitacion: (await Cama.findByPk(id_cama)).id_habitacion,
+      fecha_hora_ingreso: new Date(),
+      id_mov: 3,
+      estado: 1
+    });
+
+    res.send('Cama reservada');
+  } catch (error) {
+    console.error('Error al reservar cama:', error);
+    res.status(500).send('Error al reservar cama');
   }
 };

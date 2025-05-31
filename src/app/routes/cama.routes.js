@@ -1,28 +1,22 @@
 import { Router } from 'express';
+import { isAuthenticated } from '../middlewares/auth.middleware.js';
+import { vistaReservarCama } from '../controllers/cama.controller.js'; 
 import {
-  getCamas,
-  getCamaById,
-  createCama,
-  updateCama,
-  deleteCama
+	getCamas,
+	getCamaById,
+	createCama,
+	updateCama,
+	deleteCama,
+	getCamasApi,
 } from '../controllers/cama.controller.js';
 
 const router = Router();
 
-// 🔸 GET: Obtener todas las camas
+router.get('/api/camas', getCamasApi);
 router.get('/', getCamas);
-
-// 🔸 GET: Obtener cama por ID
 router.get('/:id', getCamaById);
-
-// 🔸 POST: Crear nueva cama
 router.post('/', createCama);
-
-// 🔸 PUT: Actualizar cama por ID
 router.put('/:id', updateCama);
-
-// 🔸 DELETE: Eliminar cama por ID
-router.delete('/:id', deleteCama);
+router.delete('/:id', deleteCama);   
 
 export default router;
-

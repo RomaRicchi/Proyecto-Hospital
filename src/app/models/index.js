@@ -63,6 +63,14 @@ PersonalSalud.associate?.({ Usuario, RolUsuario, Especialidad });
 Cama.associate?.({ Habitacion });
 Habitacion.associate?.({ Sector, Cama, MovimientoHabitacion });
 MovimientoHabitacion.associate?.({ Admision, Habitacion, Movimiento });
+Admision.associate?.({
+	Paciente,
+	ObraSocial,
+	Usuario,
+	MotivoIngreso,
+	MovimientoHabitacion,
+	RegistroHistoriaClinica,
+});
 
 // Relaciones adicionales (solo las que no estén en associate)
 Paciente.belongsTo(Genero, { foreignKey: 'id_genero', as: 'genero' });
@@ -76,27 +84,7 @@ Familiar.belongsTo(Parentesco, {
 	as: 'parentesco',
 });
 
-Admision.belongsTo(Paciente, { foreignKey: 'id_paciente', as: 'paciente' });
-Admision.belongsTo(ObraSocial, {
-	foreignKey: 'id_obra_social',
-	as: 'obra_social',
-});
-Admision.belongsTo(Usuario, {
-	foreignKey: 'id_personal_salud',
-	as: 'personal_salud',
-});
-Admision.belongsTo(MotivoIngreso, {
-	foreignKey: 'id_motivo',
-	as: 'motivo_ingreso',
-});
-Admision.hasMany(MovimientoHabitacion, {
-	foreignKey: 'id_admision',
-	as: 'movimientos_habitacion',
-});
-Admision.hasMany(RegistroHistoriaClinica, {
-	foreignKey: 'id_admision',
-	as: 'registros_clinicos',
-});
+// El resto de asociaciones de Admision ya están en su método associate
 
 MovimientoHabitacion.belongsTo(Admision, {
 	foreignKey: 'id_admision',

@@ -8,9 +8,8 @@ $(document).ready(function () {
 			.then((habitaciones) => {
 				const dataSet = habitaciones.map((h) => [
 					h.num,
+					h.camas?.map((c) => c.nombre).join(', ') || 'Sin camas',
 					h.sector?.nombre || 'Sin sector',
-					h.cama?.nombre || 'Sin cama',
-					h.estado ? 'Activa' : 'Inactiva',
 					`
                     <button class="btn btn-sm btn-primary edit-btn" data-id="${h.id_habitacion}">
                         <i class="fas fa-pen"></i>
@@ -32,9 +31,8 @@ $(document).ready(function () {
 					data: dataSet,
 					columns: [
 						{ title: 'Número' },
+						{ title: 'Camas' },
 						{ title: 'Sector' },
-						{ title: 'Cama' },
-						{ title: 'Estado' },
 						{ title: 'Acciones', orderable: false, searchable: false },
 					],
 				});
@@ -65,16 +63,10 @@ $(document).ready(function () {
 	// 🔸 Botón Agregar
 	$(document).on('click', '#btnAgregarHabitacion', async function () {
 		try {
-			const [sectores, camas] = await Promise.all([
-				fetch('/api/sectores').then((r) => r.json()),
-				fetch('/api/camas').then((r) => r.json()),
-			]);
+			const sectores = await fetch('/api/sectores').then((r) => r.json());
 
 			const sectorOptions = sectores
 				.map((s) => `<option value="${s.id_sector}">${s.nombre}</option>`)
-				.join('');
-			const camaOptions = camas
-				.map((c) => `<option value="${c.id_cama}">${c.nombre}</option>`)
 				.join('');
 
 			Swal.fire({
@@ -82,11 +74,6 @@ $(document).ready(function () {
 				html: `
                     <input id="swal-num" class="swal2-input" placeholder="Número">
                     <select id="swal-sector" class="swal2-input"><option value="">(Opcional) Sector</option>${sectorOptions}</select>
-                    <select id="swal-cama" class="swal2-input"><option value="">(Opcional) Cama</option>${camaOptions}</select>
-                    <select id="swal-estado" class="swal2-input">
-                        <option value="1" selected>Activa</option>
-                        <option value="0">Inactiva</option>
-                    </select>
                 `,
 				showCancelButton: true,
 				confirmButtonText: 'Guardar',
@@ -99,8 +86,6 @@ $(document).ready(function () {
 					return {
 						num,
 						id_sector: $('#swal-sector').val() || null,
-						id_cama: $('#swal-cama').val() || null,
-						estado: $('#swal-estado').val() === '1',
 					};
 				},
 			}).then((result) => {
@@ -120,7 +105,7 @@ $(document).ready(function () {
 			});
 		} catch (error) {
 			console.error('Error cargando opciones:', error);
-			Swal.fire('Error', 'No se pudieron cargar sectores y camas.', 'error');
+			Swal.fire('Error', 'No se pudieron cargar sectores.', 'error');
 		}
 	});
 
@@ -128,10 +113,9 @@ $(document).ready(function () {
 	$(document).on('click', '.edit-btn', async function () {
 		const id = $(this).data('id');
 		try {
-			const [habitacion, sectores, camas] = await Promise.all([
+			const [habitacion, sectores] = await Promise.all([
 				fetch(`/api/habitaciones/${id}`).then((r) => r.json()),
 				fetch('/api/sectores').then((r) => r.json()),
-				fetch('/api/camas').then((r) => r.json()),
 			]);
 
 			const sectorOptions = sectores
@@ -142,31 +126,12 @@ $(document).ready(function () {
 						}>${s.nombre}</option>`
 				)
 				.join('');
-			const camaOptions = camas
-				.map(
-					(c) =>
-						`<option value="${c.id_cama}" ${
-							habitacion.id_cama == c.id_cama ? 'selected' : ''
-						}>${c.nombre}</option>`
-				)
-				.join('');
 
 			Swal.fire({
 				title: 'Editar Habitación',
 				html: `
-                    <input id="swal-num" class="swal2-input" placeholder="Número" value="${
-											habitacion.num
-										}">
+                    <input id="swal-num" class="swal2-input" placeholder="Número" value="${habitacion.num}">
                     <select id="swal-sector" class="swal2-input"><option value="">(Opcional) Sector</option>${sectorOptions}</select>
-                    <select id="swal-cama" class="swal2-input"><option value="">(Opcional) Cama</option>${camaOptions}</select>
-                    <select id="swal-estado" class="swal2-input">
-                        <option value="1" ${
-													habitacion.estado ? 'selected' : ''
-												}>Activa</option>
-                        <option value="0" ${
-													!habitacion.estado ? 'selected' : ''
-												}>Inactiva</option>
-                    </select>
                 `,
 				showCancelButton: true,
 				confirmButtonText: 'Guardar',
@@ -179,8 +144,6 @@ $(document).ready(function () {
 					return {
 						num,
 						id_sector: $('#swal-sector').val() || null,
-						id_cama: $('#swal-cama').val() || null,
-						estado: $('#swal-estado').val() === '1',
 					};
 				},
 			}).then((result) => {

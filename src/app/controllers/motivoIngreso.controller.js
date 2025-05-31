@@ -85,7 +85,7 @@ export const deleteMotivoIngreso = async (req, res) => {
 export const vistaMotivosIngreso = async (req, res) => {
   try {
     const motivos = await MotivoIngreso.findAll();
-    res.render('motivo_ingreso', { motivos });
+    res.render('motivoIngreso', { motivos });
   } catch (error) {
     console.error('Error al cargar vista de motivos:', error);
     res.status(500).send('Error al cargar motivos de ingreso');

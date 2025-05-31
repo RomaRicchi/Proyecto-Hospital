@@ -1,0 +1,36 @@
+extends layout_modular
+
+block content
+  h1.text-center.mb-4 Reserva de Cama
+
+  .table-responsive
+    table#tablaCamas.table.table-striped.table-bordered
+      thead
+        tr
+          th ID Cama
+          th Nombre
+          th Habitación
+          th Estado
+          th Acciones
+      tbody
+        if camas && camas.length
+          each cama in camas
+            if !cama.estado && cama.desinfeccion 
+              tr
+                td #{cama.id_cama}
+                td #{cama.nombre}
+                td #{cama.id_habitacion}
+                td
+                  span.badge.bg-secondary Libre
+                td
+                  button.btn.btn-sm.btn-success.reserve-btn(data-id=cama.id_cama) Reservar
+        else
+          tr
+            td(colspan="5").text-center.text-muted No hay camas disponibles.
+
+
+  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+  script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+  script(src="/js/reservar.js")

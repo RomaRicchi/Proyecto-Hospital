@@ -6,7 +6,7 @@ export const getHabitaciones = async (req, res) => {
 		const habitaciones = await Habitacion.findAll({
 			include: [
 				{ model: Sector, as: 'sector', attributes: ['nombre'] },
-				{ model: Cama, as: 'cama', attributes: ['nombre'] },
+				{ model: Cama, as: 'camas', attributes: ['nombre'] },
 			],
 		});
 		res.json(habitaciones);
@@ -22,7 +22,7 @@ export const getHabitacionById = async (req, res) => {
 		const habitacion = await Habitacion.findByPk(req.params.id, {
 			include: [
 				{ model: Sector, as: 'sector', attributes: ['nombre'] },
-				{ model: Cama, as: 'cama', attributes: ['nombre'] },
+				{ model: Cama, as: 'camas', attributes: ['nombre'] },
 			],
 		});
 		if (!habitacion) {
@@ -41,16 +41,15 @@ export const vistaHabitaciones = async (req, res) => {
 		const habitaciones = await Habitacion.findAll({
 			include: [
 				{ model: Sector, as: 'sector', attributes: ['nombre'] },
-				{ model: Cama, as: 'cama', attributes: ['nombre'] },
+				{ model: Cama, as: 'camas', attributes: ['nombre'] },
 			],
 		});
 
 		const habitacionesAdaptadas = habitaciones.map((h) => ({
 			id_habitacion: h.id_habitacion,
 			num: h.num,
-			estado: h.estado ? 'Activa' : 'Inactiva',
 			sector: h.sector?.nombre || 'Sin sector',
-			cama: h.cama?.nombre || 'Sin cama',
+			camas: h.camas?.map((c) => c.nombre).join(', ') || 'Sin camas',
 		}));
 
 		res.render('habitacion', { habitaciones: habitacionesAdaptadas });
@@ -63,7 +62,7 @@ export const vistaHabitaciones = async (req, res) => {
 // 🔸 Crear habitación
 export const createHabitacion = async (req, res) => {
 	try {
-		const { num, id_sector, id_cama, estado } = req.body;
+		const { num, id_sector } = req.body;
 		if (!num) {
 			return res.status(400).json({ message: 'El número es obligatorio' });
 		}
@@ -71,8 +70,6 @@ export const createHabitacion = async (req, res) => {
 		const habitacion = await Habitacion.create({
 			num,
 			id_sector: id_sector || null,
-			id_cama: id_cama || null,
-			estado: estado !== undefined ? estado : 1,
 		});
 		res.status(201).json(habitacion);
 	} catch (error) {
@@ -85,7 +82,7 @@ export const createHabitacion = async (req, res) => {
 export const updateHabitacion = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { num, id_sector, id_cama, estado } = req.body;
+		const { num, id_sector } = req.body;
 
 		const habitacion = await Habitacion.findByPk(id);
 		if (!habitacion) {
@@ -98,8 +95,6 @@ export const updateHabitacion = async (req, res) => {
 		await habitacion.update({
 			num,
 			id_sector: id_sector || null,
-			id_cama: id_cama || null,
-			estado: estado !== undefined ? estado : 1,
 		});
 		res.json(habitacion);
 	} catch (error) {
