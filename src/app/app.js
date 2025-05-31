@@ -30,9 +30,9 @@ import movimientoRoutes from './routes/movimiento.routes.js';
 import movimientoHabitacionRoutes from './routes/movimientoHabitacion.routes.js';
 import admisionRoutes from './routes/admision.routes.js';
 import registroClinicoRoutes from './routes/registroHistoriaClinica.routes.js';
-import motivoIngresoRoutes from './routes/motivoIngreso.routes.js'; // ✅ Nueva
-import tipoRegistroRoutes from './routes/tipoRegistro.routes.js'; // ✅ Nueva
-
+import motivoIngresoRoutes from './routes/motivoIngreso.routes.js'; 
+import tipoRegistroRoutes from './routes/tipoRegistro.routes.js'; 
+import camaViewRoutes from './routes/camaView.routes.js';
 // ✅ Simular __dirname en ESModules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -86,19 +86,18 @@ app.use('/api/genero', generoRoutes);
 app.use('/api/localidades', localidadRoutes);
 app.use('/api/obras-sociales', obraSocialRoutes);
 app.use('/api/parentescos', parentescoRoutes);
-app.use('/api/personal-admin', personalAdminRoutes);
-app.use('/api/personal-salud', personalSaludRoutes);
+app.use('/api/personal_salud', personalSaludRoutes);
 app.use('/api/especialidades', especialidadRoutes);
 app.use('/api/sectores', sectorRoutes);
 app.use('/api/habitaciones', habitacionRoutes);
 app.use('/api/camas', camaRoutes);
 app.use('/api/movimientos', movimientoRoutes);
-app.use('/api/movimientos-habitacion', movimientoHabitacionRoutes);
+app.use('/api/movimientos_habitacion', movimientoHabitacionRoutes);
 app.use('/api/admisiones', admisionRoutes);
-app.use('/api/registros-clinicos', registroClinicoRoutes);
-app.use('/api/motivos-ingreso', motivoIngresoRoutes); // ✅ Nueva
-app.use('/api/tipos-registro', tipoRegistroRoutes); // ✅ Nueva
+app.use('/api/registros_clinicos', registroClinicoRoutes);
+app.use('/api/motivos_ingreso', motivoIngresoRoutes);
+app.use('/api/tipos_registro', tipoRegistroRoutes);
 app.use('/', viewsRoutes);
-
+app.use('/', camaViewRoutes);
 /* 🌐 Exportar app */
 export default app;

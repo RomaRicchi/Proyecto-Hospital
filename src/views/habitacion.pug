@@ -8,18 +8,16 @@ block content
       thead
         tr
           th Número
-          th Cama
+          th Camas
           th Sector
-          th Estado
           th Acciones
       tbody
         if habitaciones && habitaciones.length
           each habitacion in habitaciones
             tr
               td #{habitacion.num}
-              td #{habitacion.cama}
+              td #{habitacion.camas}
               td #{habitacion.sector}
-              td #{habitacion.estado}
               td
                 button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=habitacion.id_habitacion)
                   i.fas.fa-pen
@@ -27,7 +25,7 @@ block content
                   i.fas.fa-trash
         else
           tr
-            td(colspan="5").text-center.text-muted No hay habitaciones registradas.
+            td(colspan="4").text-center.text-muted No hay habitaciones registradas.
 
   // Librerías DataTables y jQuery
   link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")

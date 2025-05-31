@@ -34,7 +34,7 @@ export const vistaAdmisiones = async (req, res) => {
 					attributes: ['apellido_p', 'nombre_p', 'dni_paciente'],
 				},
 				{ model: ObraSocial, as: 'obra_social', attributes: ['nombre'] },
-				{ model: Usuario, as: 'personal_admin', attributes: ['username'] },
+				// { model: Usuario, as: 'personal_admin', attributes: ['username'] }, // <-- QUITA ESTA LÍNEA
 				{ model: Usuario, as: 'personal_salud', attributes: ['username'] },
 			],
 		});
@@ -53,7 +53,7 @@ export const vistaAdmisiones = async (req, res) => {
 				? new Date(a.fecha_hora_egreso).toLocaleString()
 				: 'En internación',
 			motivo_ingreso: a.descripcion || '-',
-			personal_admin: a.personal_admin ? a.personal_admin.username : '-',
+			// personal_admin: a.personal_admin ? a.personal_admin.username : '-', // <-- QUITA ESTA LÍNEA
 			personal_salud: a.personal_salud ? a.personal_salud.username : '-',
 		}));
 

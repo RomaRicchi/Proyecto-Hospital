@@ -1,94 +1,98 @@
 import { Cama } from '../models/index.js';
 
-// 🔸 Obtener todas las camas
+// 🔸 API: Obtener todas las camas en formato JSON (para DataTable)
+export const getCamasApi = async (req, res) => {
+	try {
+		const camas = await Cama.findAll();
+		res.json(camas);
+	} catch (error) {
+		console.error('Error al obtener camas:', error);
+		res.status(500).json({ message: 'Error al obtener camas' });
+	}
+};
+
+// 🔸 Vista tradicional: Renderizar la vista PUG con camas
 export const getCamas = async (req, res) => {
-  try {
-    const camas = await Cama.findAll();
-    res.json(camas);
-  } catch (error) {
-    console.error('Error al obtener camas:', error);
-    res.status(500).json({ message: 'Error al obtener camas' });
-  }
+	try {
+		const camas = await Cama.findAll();
+		res.render('cama', { camas });
+	} catch (error) {
+		console.error('Error al obtener camas:', error);
+		res.status(500).send('Error interno del servidor');
+	}
 };
 
-// 🔸 Obtener cama por ID
+// 🔸 Obtener cama por ID (JSON)
 export const getCamaById = async (req, res) => {
-  try {
-    const cama = await Cama.findByPk(req.params.id);
-    if (!cama) {
-      return res.status(404).json({ message: 'Cama no encontrada' });
-    }
-    res.json(cama);
-  } catch (error) {
-    console.error('Error al obtener cama:', error);
-    res.status(500).json({ message: 'Error al obtener cama' });
-  }
+	try {
+		const cama = await Cama.findByPk(req.params.id);
+		if (cama) {
+			res.json(cama);
+		} else {
+			res.status(404).send('Cama no encontrada');
+		}
+	} catch (error) {
+		console.error('Error al obtener cama:', error);
+		res.status(500).send('Error interno del servidor');
+	}
 };
 
-// 🔸 Crear cama
+// 🔸 Crear nueva cama
 export const createCama = async (req, res) => {
-  try {
-    const { nombre } = req.body;
-    if (!nombre) {
-      return res.status(400).json({ message: 'El nombre es obligatorio' });
-    }
-
-    const cama = await Cama.create({ nombre });
-    res.status(201).json(cama);
-  } catch (error) {
-    console.error('Error al crear cama:', error);
-    res.status(500).json({ message: 'Error al crear cama' });
-  }
+	try {
+		const nuevaCama = await Cama.create(req.body);
+		res.status(201).json(nuevaCama);
+	} catch (error) {
+		console.error('Error al crear cama:', error);
+		res.status(500).send('Error interno del servidor');
+	}
 };
 
 // 🔸 Actualizar cama
 export const updateCama = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { nombre } = req.body;
-
-    const cama = await Cama.findByPk(id);
-    if (!cama) {
-      return res.status(404).json({ message: 'Cama no encontrada' });
-    }
-
-    if (!nombre) {
-      return res.status(400).json({ message: 'El nombre es obligatorio' });
-    }
-
-    await cama.update({ nombre });
-    res.json(cama);
-  } catch (error) {
-    console.error('Error al actualizar cama:', error);
-    res.status(500).json({ message: 'Error al actualizar cama' });
-  }
+	try {
+		const [updated] = await Cama.update(req.body, {
+			where: { id_cama: req.params.id },
+		});
+		if (updated) {
+			res.send('Cama actualizada correctamente');
+		} else {
+			res.status(404).send('Cama no encontrada');
+		}
+	} catch (error) {
+		console.error('Error al actualizar cama:', error);
+		res.status(500).send('Error interno del servidor');
+	}
 };
 
 // 🔸 Eliminar cama
 export const deleteCama = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const cama = await Cama.findByPk(id);
-    if (!cama) {
-      return res.status(404).json({ message: 'Cama no encontrada' });
-    }
-
-    await cama.destroy();
-    res.status(204).send();  // No Content
-  } catch (error) {
-    console.error('Error al eliminar cama:', error);
-    res.status(500).json({ message: 'Error al eliminar cama' });
-  }
+	try {
+		const deleted = await Cama.destroy({
+			where: { id_cama: req.params.id },
+		});
+		if (deleted) {
+			res.send('Cama eliminada correctamente');
+		} else {
+			res.status(404).send('Cama no encontrada');
+		}
+	} catch (error) {
+		console.error('Error al eliminar cama:', error);
+		res.status(500).send('Error interno del servidor');
+	}
 };
 
-// 🔸 Vista para mostrar todas las camas en la vista pug
-export const vistaCamas = async (req, res) => {
+export const vistaReservarCama = async (req, res) => {
   try {
-    const camas = await Cama.findAll();
-    res.render('cama', { camas });  // Renderiza cama.pug con datos
+    const camas = await Cama.findAll({
+      where: {
+        estado: false,         // libres
+        desinfeccion: true     // desinfectadas
+      }
+    });
+    res.render('reservaCama', { camas });
   } catch (error) {
     console.error('Error al cargar camas:', error);
     res.status(500).send('Error al cargar camas');
   }
 };
-
