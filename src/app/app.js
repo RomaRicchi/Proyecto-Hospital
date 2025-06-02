@@ -30,9 +30,10 @@ import movimientoRoutes from './routes/movimiento.routes.js';
 import movimientoHabitacionRoutes from './routes/movimientoHabitacion.routes.js';
 import admisionRoutes from './routes/admision.routes.js';
 import registroClinicoRoutes from './routes/registroHistoriaClinica.routes.js';
-import motivoIngresoRoutes from './routes/motivoIngreso.routes.js'; 
-import tipoRegistroRoutes from './routes/tipoRegistro.routes.js'; 
+import motivoIngresoRoutes from './routes/motivoIngreso.routes.js';
+import tipoRegistroRoutes from './routes/tipoRegistro.routes.js';
 import camaViewRoutes from './routes/camaView.routes.js';
+import emergenciaRoutes from './routes/emergencia.routes.js';
 // ✅ Simular __dirname en ESModules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -97,6 +98,7 @@ app.use('/api/admisiones', admisionRoutes);
 app.use('/api/registros_clinicos', registroClinicoRoutes);
 app.use('/api/motivos_ingreso', motivoIngresoRoutes);
 app.use('/api/tipos_registro', tipoRegistroRoutes);
+app.use('/api/emergencias', emergenciaRoutes);
 app.use('/', viewsRoutes);
 app.use('/', camaViewRoutes);
 /* 🌐 Exportar app */
