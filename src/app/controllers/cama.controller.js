@@ -50,20 +50,18 @@ export const createCama = async (req, res) => {
 
 // 🔸 Actualizar cama
 export const updateCama = async (req, res) => {
-	try {
-		const [updated] = await Cama.update(req.body, {
-			where: { id_cama: req.params.id },
-		});
-		if (updated) {
-			res.send('Cama actualizada correctamente');
-		} else {
-			res.status(404).send('Cama no encontrada');
-		}
-	} catch (error) {
-		console.error('Error al actualizar cama:', error);
-		res.status(500).send('Error interno del servidor');
-	}
+    try {
+        const cama = await Cama.findByPk(req.params.id);
+        if (!cama) {
+            return res.status(404).json({ message: 'Cama no encontrada' });
+        }
+        await cama.update(req.body);
+        res.json(cama);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
+
 
 // 🔸 Eliminar cama
 export const deleteCama = async (req, res) => {

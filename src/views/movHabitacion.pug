@@ -1,45 +1,45 @@
 extends layout_modular
 
 block content
-  h1.text-center.mb-4 Gestión de Movimientos Habitación
+  h1.text-center.mb-4 Movimientos de Habitación
 
- 
   .table-responsive
-    table#tablaMovimientoHabitacion.table.table-striped.table-bordered
+    table#tablaMovimientosHabitacion.table.table-striped.table-bordered
       thead
         tr
           th ID
           th Paciente
           th Habitación
           th Sector
-          th Ingreso
-          th Egreso
-          th Movimiento
+          th Tipo Movimiento
+          th Fecha Ingreso
+          th Fecha Egreso
           th Estado
           th Acciones
       tbody
-        if movimientos_habitacion && movimientos_habitacion.length
-          each mh in movimientos_habitacion
+        if movimientos && movimientos.length
+          each m in movimientos
             tr
-              td= mh.id_movimiento
-              td= mh.admision?.paciente?.apellido_p + ', ' + mh.admision?.paciente?.nombre_p
-              td= mh.habitacion?.num
-              td= mh.habitacion?.sector?.nombre
-              td= mh.fecha_hora_ingreso
-              td= mh.fecha_hora_egreso
-              td= mh.movimiento?.nombre
-              td= mh.estado === 1 ? 'Activo' : 'Inactivo'
+              td= m.id_movimiento
+              td= m.admision && m.admision.paciente ? m.admision.paciente.apellido_p + ', ' + m.admision.paciente.nombre_p : ''
+              td= m.habitacion ? m.habitacion.num : ''
+              td= m.habitacion && m.habitacion.sector ? m.habitacion.sector.nombre : ''
+              td= m.tipo_movimiento ? m.tipo_movimiento.nombre : ''
+              td= m.fecha_hora_ingreso
+              td= m.fecha_hora_egreso ? m.fecha_hora_egreso : ''
+              td= m.estado === 1 ? 'Activo' : 'Inactivo'
               td
-                button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=mh.id_movimiento)
+                button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=m.id_movimiento)
                   i.fas.fa-pen
-                button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=mh.id_movimiento)
+                button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=m.id_movimiento)
                   i.fas.fa-trash
         else
-          p.text-center.text-muted No hay movimientos de habitación registrados.
+          tr
+            td(colspan="9") No hay movimientos registrados.
 
   // Librerías DataTables y jQuery
+  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
   script(src="https://code.jquery.com/jquery-3.7.1.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
-  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
-  script(src="/js/movimiento_habitacion.js")  // JS específico para movimiento_habitacion
+  script(src="/js/movimiento_habitacion.js")

@@ -1,0 +1,26 @@
+extends layout_modular
+
+block content
+  h1.text-center.mb-4 Ingreso de Paciente por Emergencia
+
+  .row.justify-content-center
+    .col-md-6
+      form#formEmergencia(method="POST", action="/emergencia")
+        .mb-3
+          label.form-label(for="fecha_hora_ingreso") Fecha y hora de ingreso
+          input#fecha_hora_ingreso.form-control(type="datetime-local", name="fecha_hora_ingreso", required, value=(new Date().toISOString().slice(0,16)))
+        .mb-3
+          label.form-label(for="sexo") Sexo
+          select#sexo.form-select(name="sexo" required)
+            option(value="" disabled selected) Seleccione sexo
+            option(value="1") Masculino
+            option(value="2") Femenino
+            option(value="5") No binario
+        .mb-3
+          label.form-label(for="identificador") Número identificador (DNI temporal)
+          input#identificador.form-control(type="number", name="identificador", required, min="1")
+        button.btn.btn-success(type="submit") Admitir paciente de emergencia
+
+  // Librerías opcionales para estilos
+  link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css")
+  script(src="/js/emergencia.js")

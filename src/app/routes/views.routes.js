@@ -59,13 +59,12 @@ router.get('/internaciones', isAuthenticated, (req, res) =>
 );
 router.get('/motivoIngreso', isAuthenticated, vistaMotivosIngreso);
 router.get(
-	'/movimiento_habitacion',
+	'/movimientoHabitacion',
 	isAuthenticated,
 	vistaMovimientosHabitacion
 );
 
 router.get('/movimiento', isAuthenticated, vistaMovimientos);
-
 
 // 🔸 Administración
 router.get('/obraSocial', isAuthenticated, vistaObrasSociales);
