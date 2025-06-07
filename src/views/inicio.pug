@@ -1,8 +1,12 @@
 extends layout_modular
 
 block content
-  h1.text-center.mt-4 Bienvenido a nuestra Clínica
-  p.text-center.mb-5 Ofrecemos atención de calidad.
+    
+  .hero(style="background-color: #a8e6cf; padding: 4rem 1rem;")
+    .container.hero-content.text-center
+      h1.mt-4 Bienvenido a nuestra Clínica
+      h1.display-4 Cuidamos tu salud, acompañamos tu vida
+      p.lead Más de 25 años de experiencia brindando atención médica integral.
 
   h2.mt-4.text-center Obras sociales que recibimos:
   .text-center
@@ -16,9 +20,7 @@ block content
       each esp in listaEsp
         li= esp
 
-
   h2.mt-5.text-center Profesionales del área de internación
-
   .row.row-cols-2.row-cols-sm-3.row-cols-md-4.row-cols-lg-5.g-4.mt-3.justify-content-center
     each medico in medicos
       .col
