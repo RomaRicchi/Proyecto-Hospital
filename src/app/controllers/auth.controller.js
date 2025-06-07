@@ -3,7 +3,7 @@ import {
 	PersonalAdministrativo,
 	RolUsuario,
 } from '../models/index.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';  
 
 // 🧾 Vista para mostrar el login
 export const vistaLogin = (req, res) => {

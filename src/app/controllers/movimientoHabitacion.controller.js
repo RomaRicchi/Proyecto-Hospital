@@ -23,12 +23,13 @@ export const getMovimientosHabitacion = async (req, res) => {
 					as: 'habitacion',
 					include: [{ model: Sector, as: 'sector' }],
 				},
-				{ model: Movimiento, as: 'tipo_movimiento' }, // <--- alias corregido
+				{ model: Movimiento, as: 'tipo_movimiento' },
+				{ model: Cama, as: 'cama' }, // 👈 AGREGA ESTA LÍNEA
 			],
 		});
 		res.json(movimientos);
 	} catch (error) {
-		console.error('Error al obtener movimientos:', error);
+		console.error('Error al obtener movimientos habitación:', error);
 		res
 			.status(500)
 			.json({ message: 'Error al obtener movimientos habitación' });
@@ -68,6 +69,7 @@ export const createMovimientoHabitacion = async (req, res) => {
 		const {
 			id_admision,
 			id_habitacion,
+			id_cama, // 👈 agrega este campo
 			fecha_hora_ingreso,
 			fecha_hora_egreso,
 			id_mov,
@@ -76,6 +78,7 @@ export const createMovimientoHabitacion = async (req, res) => {
 		const nuevo = await MovimientoHabitacion.create({
 			id_admision,
 			id_habitacion,
+			id_cama, // 👈 agrega este campo
 			fecha_hora_ingreso,
 			fecha_hora_egreso: fecha_hora_egreso || null,
 			id_mov,
@@ -99,6 +102,7 @@ export const updateMovimientoHabitacion = async (req, res) => {
 		const {
 			id_admision,
 			id_habitacion,
+			id_cama, // 👈 agrega este campo
 			fecha_hora_ingreso,
 			fecha_hora_egreso,
 			id_mov,
@@ -107,6 +111,7 @@ export const updateMovimientoHabitacion = async (req, res) => {
 		await movimiento.update({
 			id_admision,
 			id_habitacion,
+			id_cama, // 👈 agrega este campo
 			fecha_hora_ingreso,
 			fecha_hora_egreso: fecha_hora_egreso || null,
 			id_mov,

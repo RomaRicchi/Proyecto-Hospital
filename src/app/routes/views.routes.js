@@ -65,7 +65,9 @@ router.get(
 );
 
 router.get('/movimiento', isAuthenticated, vistaMovimientos);
-
+router.get('/paciente/alta', isAuthenticated, (req, res) =>
+  res.render('altaPaciente')
+);
 // 🔸 Administración
 router.get('/obraSocial', isAuthenticated, vistaObrasSociales);
 router.get('/usuarios', isAuthenticated, (req, res) => res.render('users'));

@@ -21,6 +21,7 @@ $(document).ready(function () {
 					m.habitacion && m.habitacion.sector
 						? m.habitacion.sector.nombre
 						: '-',
+					m.cama && m.cama.nombre ? m.cama.nombre : m.id_cama || '-', // 👈 Mostrar cama
 					m.tipo_movimiento && m.tipo_movimiento.nombre
 						? m.tipo_movimiento.nombre
 						: '-',
@@ -51,6 +52,7 @@ $(document).ready(function () {
 						{ title: 'Paciente' },
 						{ title: 'Habitación' },
 						{ title: 'Sector' },
+						{ title: 'Cama' }, // 👈 Nueva columna
 						{ title: 'Tipo Movimiento' },
 						{ title: 'Ingreso' },
 						{ title: 'Egreso' },
@@ -77,7 +79,7 @@ $(document).ready(function () {
 			.catch((error) => {
 				console.error('Error al cargar movimientos habitación:', error);
 				$('#tablaMovimientosHabitacion').html(
-					'<tr><td colspan="9" class="text-center">No se pudo cargar los movimientos habitación.</td></tr>'
+					'<tr><td colspan="10" class="text-center">No se pudo cargar los movimientos habitación.</td></tr>'
 				);
 			});
 	}
@@ -89,6 +91,7 @@ $(document).ready(function () {
 			html: `
                 <input type="number" id="id_admision" class="swal2-input" placeholder="ID Admisión">
                 <input type="number" id="id_habitacion" class="swal2-input" placeholder="ID Habitación">
+                <input type="number" id="id_cama" class="swal2-input" placeholder="ID Cama">
                 <input type="text" id="fecha_hora_ingreso" class="swal2-input" placeholder="Fecha Ingreso">
                 <input type="text" id="fecha_hora_egreso" class="swal2-input" placeholder="Fecha Egreso (opcional)">
                 <input type="number" id="id_mov" class="swal2-input" placeholder="ID Movimiento">
@@ -113,6 +116,7 @@ $(document).ready(function () {
 				const id_admision = Swal.getPopup().querySelector('#id_admision').value;
 				const id_habitacion =
 					Swal.getPopup().querySelector('#id_habitacion').value;
+				const id_cama = Swal.getPopup().querySelector('#id_cama').value;
 				const fecha_hora_ingreso = Swal.getPopup().querySelector(
 					'#fecha_hora_ingreso'
 				).value;
@@ -120,7 +124,13 @@ $(document).ready(function () {
 					Swal.getPopup().querySelector('#fecha_hora_egreso').value;
 				const id_mov = Swal.getPopup().querySelector('#id_mov').value;
 				const estado = Swal.getPopup().querySelector('#estado').value;
-				if (!id_admision || !id_habitacion || !fecha_hora_ingreso || !id_mov) {
+				if (
+					!id_admision ||
+					!id_habitacion ||
+					!id_cama ||
+					!fecha_hora_ingreso ||
+					!id_mov
+				) {
 					Swal.showValidationMessage(
 						'Por favor, completa todos los campos obligatorios'
 					);
@@ -128,6 +138,7 @@ $(document).ready(function () {
 				return {
 					id_admision,
 					id_habitacion,
+					id_cama,
 					fecha_hora_ingreso,
 					fecha_hora_egreso,
 					id_mov,
@@ -168,6 +179,9 @@ $(document).ready(function () {
             <input type="number" id="id_habitacion" class="swal2-input" value="${
 							m.id_habitacion
 						}">
+            <input type="number" id="id_cama" class="swal2-input" value="${
+							m.id_cama || ''
+						}">
             <input type="text" id="fecha_hora_ingreso" class="swal2-input" value="${
 							m.fecha_hora_ingreso
 						}">
@@ -203,6 +217,7 @@ $(document).ready(function () {
 							Swal.getPopup().querySelector('#id_admision').value;
 						const id_habitacion =
 							Swal.getPopup().querySelector('#id_habitacion').value;
+						const id_cama = Swal.getPopup().querySelector('#id_cama').value;
 						const fecha_hora_ingreso = Swal.getPopup().querySelector(
 							'#fecha_hora_ingreso'
 						).value;
@@ -213,6 +228,7 @@ $(document).ready(function () {
 						if (
 							!id_admision ||
 							!id_habitacion ||
+							!id_cama ||
 							!fecha_hora_ingreso ||
 							!id_mov
 						) {
@@ -223,6 +239,7 @@ $(document).ready(function () {
 						return {
 							id_admision,
 							id_habitacion,
+							id_cama,
 							fecha_hora_ingreso,
 							fecha_hora_egreso,
 							id_mov,

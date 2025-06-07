@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 24-05-2025 a las 03:53:44
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Tiempo de generación: 07-06-2025 a las 04:14:53
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -37,9 +37,18 @@ CREATE TABLE `admision` (
   `descripcion` varchar(255) DEFAULT NULL,
   `fecha_hora_egreso` datetime DEFAULT NULL,
   `motivo_egr` varchar(255) DEFAULT NULL,
-  `id_personal_salud` int(10) UNSIGNED DEFAULT NULL,
-  `id_personal_admin` int(10) UNSIGNED NOT NULL
+  `id_personal_salud` int(10) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `admision`
+--
+
+INSERT INTO `admision` (`id_admision`, `id_paciente`, `id_obra_social`, `num_asociado`, `fecha_hora_ingreso`, `id_motivo`, `descripcion`, `fecha_hora_egreso`, `motivo_egr`, `id_personal_salud`) VALUES
+(101, 21, 1, 1001, '2025-06-05 10:00:00', 1, 'Internación por cirugía', NULL, NULL, NULL),
+(102, 22, 2, 1002, '2025-06-06 08:00:00', 2, 'Internación por urgencia', '2025-06-07 12:00:00', 'Alta médica', NULL),
+(103, 23, 1, 1003, '2025-06-10 09:00:00', 1, 'Reserva futura', NULL, NULL, NULL),
+(104, 11, 4, 332049, '2025-06-07 04:50:41', 8, 'estoy re loco', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -49,8 +58,20 @@ CREATE TABLE `admision` (
 
 CREATE TABLE `cama` (
   `id_cama` tinyint(3) UNSIGNED NOT NULL,
-  `nombre` char(1) NOT NULL
+  `nombre` varchar(1) NOT NULL,
+  `id_habitacion` int(10) UNSIGNED NOT NULL,
+  `desinfeccion` tinyint(1) NOT NULL,
+  `estado` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `cama`
+--
+
+INSERT INTO `cama` (`id_cama`, `nombre`, `id_habitacion`, `desinfeccion`, `estado`) VALUES
+(16, 'A', 3, 1, 0),
+(17, 'B', 3, 1, 1),
+(19, 'A', 4, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -94,6 +115,22 @@ CREATE TABLE `familiar` (
   `estado` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `familiar`
+--
+
+INSERT INTO `familiar` (`id_familiar`, `id_paciente`, `apellido`, `nombre`, `id_parentesco`, `telefono`, `estado`) VALUES
+(1, 1, 'Pérez', 'María', 1, '2664000011', 1),
+(2, 2, 'Gómez', 'Pedro', 2, '2664000012', 1),
+(3, 3, 'Rodríguez', 'Ana', 3, '2664000013', 1),
+(4, 4, 'Fernández', 'Luis', 4, '2664000014', 1),
+(5, 5, 'López', 'Jorge', 5, '2664000015', 1),
+(6, 6, 'Martínez', 'Laura', 19, '2664000016', 1),
+(7, 7, 'García', 'Miguel', 7, '2664000017', 1),
+(8, 8, 'Sánchez', 'Verónica', 8, '2664000018', 1),
+(9, 9, 'Romero', 'Carlos', 9, '2664000019', 1),
+(10, 10, 'Torres', 'Paula', 10, '2664000020', 1);
+
 -- --------------------------------------------------------
 
 --
@@ -111,7 +148,8 @@ CREATE TABLE `genero` (
 
 INSERT INTO `genero` (`id_genero`, `nombre`) VALUES
 (1, 'Masculino'),
-(2, 'Femenino');
+(2, 'Femenino'),
+(5, 'no binario');
 
 -- --------------------------------------------------------
 
@@ -122,10 +160,17 @@ INSERT INTO `genero` (`id_genero`, `nombre`) VALUES
 CREATE TABLE `habitacion` (
   `id_habitacion` int(10) UNSIGNED NOT NULL,
   `id_sector` smallint(5) UNSIGNED DEFAULT NULL,
-  `num` int(11) DEFAULT NULL,
-  `id_cama` tinyint(3) UNSIGNED DEFAULT NULL,
-  `estado` tinyint(1) DEFAULT 1
+  `num` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `habitacion`
+--
+
+INSERT INTO `habitacion` (`id_habitacion`, `id_sector`, `num`) VALUES
+(3, 1, 1),
+(4, 2, 2),
+(5, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -296,7 +341,8 @@ INSERT INTO `motivo_ingreso` (`id_motivo`, `tipo`) VALUES
 (7, 'Tratamientos como quimioterapia o diálisis'),
 (8, 'Problemas psiquiátricos agudos'),
 (9, 'Parto y cuidados postparto'),
-(10, 'Observación y diagnóstico hospitalario');
+(10, 'Observación y diagnóstico hospitalario'),
+(11, 'Ingreso por emergencia');
 
 -- --------------------------------------------------------
 
@@ -328,12 +374,22 @@ CREATE TABLE `movimiento_habitacion` (
   `id_movimiento` int(10) UNSIGNED NOT NULL,
   `id_admision` int(10) UNSIGNED NOT NULL,
   `id_habitacion` int(10) UNSIGNED NOT NULL,
+  `id_cama` tinyint(3) UNSIGNED DEFAULT NULL,
   `fecha_hora_ingreso` datetime NOT NULL,
   `fecha_hora_egreso` datetime DEFAULT NULL,
   `id_mov` smallint(5) UNSIGNED NOT NULL,
-  `desinfeccion` tinyint(1) DEFAULT 1,
   `estado` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `movimiento_habitacion`
+--
+
+INSERT INTO `movimiento_habitacion` (`id_movimiento`, `id_admision`, `id_habitacion`, `id_cama`, `fecha_hora_ingreso`, `fecha_hora_egreso`, `id_mov`, `estado`) VALUES
+(201, 101, 3, 16, '2025-06-05 10:00:00', NULL, 1, 1),
+(202, 102, 3, 17, '2025-06-06 08:00:00', '2025-06-07 12:00:00', 1, 1),
+(203, 103, 4, 19, '2025-06-10 09:00:00', NULL, 3, 1),
+(204, 104, 4, 19, '2025-06-07 04:50:41', NULL, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -356,7 +412,9 @@ INSERT INTO `obra_social` (`id_obra_social`, `nombre`) VALUES
 (3, 'Swiss Medical'),
 (4, 'Medife'),
 (5, 'Galeno'),
-(6, 'Federada Salud');
+(6, 'Federada Salud'),
+(7, 'Osecac Salud'),
+(10, 'Sin obra social');
 
 -- --------------------------------------------------------
 
@@ -377,6 +435,30 @@ CREATE TABLE `paciente` (
   `email` varchar(100) DEFAULT NULL,
   `estado` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `paciente`
+--
+
+INSERT INTO `paciente` (`id_paciente`, `dni_paciente`, `apellido_p`, `nombre_p`, `fecha_nac`, `id_genero`, `telefono`, `direccion`, `id_localidad`, `email`, `estado`) VALUES
+(1, 12345678, 'Pérez', 'Juan', '1985-05-15', 1, '2664000001', 'Calle Falsa 123', 1, 'juan.perez@mail.com', 1),
+(2, 22345678, 'Gómez', 'Ana', '1990-07-20', 2, '2664000002', 'Avenida Siempreviva 742', 2, 'ana.gomez@mail.com', 1),
+(3, 32345678, 'Rodríguez', 'Carlos', '1978-12-01', 1, '2664000003', 'Calle Mitre 456', 3, 'carlos.rodriguez@mail.com', 1),
+(4, 42345678, 'Fernández', 'Laura', '1992-09-12', 2, '2664000004', 'Calle Belgrano 789', 4, 'laura.fernandez@mail.com', 1),
+(5, 52345678, 'López', 'María', '1988-03-18', 2, '2664000005', 'Calle San Martín 321', 5, 'maria.lopez@mail.com', 1),
+(6, 62345678, 'Martínez', 'Pedro', '1995-11-30', 1, '2664000006', 'Avenida Rivadavia 555', 6, 'pedro.martinez@mail.com', 1),
+(7, 72345678, 'García', 'Lucía', '1983-02-22', 2, '2664000007', 'Calle Pueyrredón 654', 7, 'lucia.garcia@mail.com', 1),
+(8, 82345678, 'Sánchez', 'Jorge', '1975-04-10', 1, '2664000008', 'Calle Sarmiento 987', 8, 'jorge.sanchez@mail.com', 1),
+(9, 92345678, 'Romero', 'Sofía', '2000-06-05', 2, '2664000009', 'Calle 25 de Mayo 112', 9, 'sofia.romero@mail.com', 1),
+(10, 102345678, 'Torres Pacheco', 'Martín', '1999-08-25', 1, '2664000010', 'Calle España 334', 17, 'martin.torres@mail.com', 1),
+(11, 33539061, 'Fernandez', 'Fermin', '1988-03-13', 1, '2664297704', 'Barrio 123 viviendas manzana 430 casa 22', 1, 'tecdeso.fernandez@gmail.com', 1),
+(12, 33001, 'NN', 'No identificado', NULL, 1, NULL, NULL, NULL, NULL, 0),
+(13, 34001, 'NN', 'No identificado', NULL, 2, NULL, NULL, NULL, NULL, 1),
+(14, 35001, 'NN', 'No identificado', NULL, 1, NULL, NULL, NULL, NULL, 1),
+(15, 34587895, 'Richiardi', 'Romanela', '1992-12-30', 2, '2664010208', 'Barrio 123 viviendas manzana 430 casa 22', 1, 'roma@gmail.com', 1),
+(21, 11111111, 'Pérez', 'Juan', '1980-01-01', 1, '2664000101', 'Calle Uno 123', 1, 'juan.perez@demo.com', 1),
+(22, 22222222, 'Gómez', 'Ana', '1990-02-02', 2, '2664000102', 'Calle Dos 456', 2, 'ana.gomez@demo.com', 1),
+(23, 33333333, 'Fernández', 'Laura', '1985-03-03', 2, '2664000103', 'Calle Tres 789', 3, 'laura.fernandez@demo.com', 1);
 
 -- --------------------------------------------------------
 
@@ -412,7 +494,8 @@ INSERT INTO `parentesco` (`id_parentesco`, `nombre`) VALUES
 (16, 'Sobrina'),
 (17, 'Esposo'),
 (18, 'Esposa'),
-(19, 'Pareja');
+(19, 'Pareja'),
+(21, 'tatarabuelo');
 
 -- --------------------------------------------------------
 
@@ -466,7 +549,7 @@ CREATE TABLE `registro_historia_clinica` (
   `fecha_hora_reg` datetime NOT NULL,
   `id_tipo` int(50) NOT NULL,
   `detalle` varchar(500) NOT NULL,
-  `estado` tinyint(1) DEFAULT 1
+  `estado` tinyint(4) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -509,7 +592,10 @@ INSERT INTO `sector` (`id_sector`, `nombre`) VALUES
 (1, 'Ala Norte'),
 (2, 'Ala Sur'),
 (3, 'Terapia Intensiva'),
-(4, 'Quirofano');
+(4, 'Quirofano'),
+(6, 'Ala Oeste'),
+(7, 'B'),
+(8, 'B');
 
 -- --------------------------------------------------------
 
@@ -586,45 +672,17 @@ INSERT INTO `usuario` (`id_usuario`, `username`, `password`, `estado`) VALUES
 --
 ALTER TABLE `admision`
   ADD PRIMARY KEY (`id_admision`),
-  ADD UNIQUE KEY `id_motivo` (`id_motivo`),
   ADD KEY `id_paciente` (`id_paciente`),
   ADD KEY `id_obra_social` (`id_obra_social`),
-  ADD KEY `id_personal_salud` (`id_personal_salud`);
+  ADD KEY `id_personal_salud` (`id_personal_salud`),
+  ADD KEY `admision_ibfk_204` (`id_motivo`);
 
 --
 -- Indices de la tabla `cama`
 --
 ALTER TABLE `cama`
   ADD PRIMARY KEY (`id_cama`),
-  ADD UNIQUE KEY `nombre` (`nombre`),
-  ADD UNIQUE KEY `nombre_2` (`nombre`),
-  ADD UNIQUE KEY `nombre_3` (`nombre`),
-  ADD UNIQUE KEY `nombre_4` (`nombre`),
-  ADD UNIQUE KEY `nombre_5` (`nombre`),
-  ADD UNIQUE KEY `nombre_6` (`nombre`),
-  ADD UNIQUE KEY `nombre_7` (`nombre`),
-  ADD UNIQUE KEY `nombre_8` (`nombre`),
-  ADD UNIQUE KEY `nombre_9` (`nombre`),
-  ADD UNIQUE KEY `nombre_10` (`nombre`),
-  ADD UNIQUE KEY `nombre_11` (`nombre`),
-  ADD UNIQUE KEY `nombre_12` (`nombre`),
-  ADD UNIQUE KEY `nombre_13` (`nombre`),
-  ADD UNIQUE KEY `nombre_14` (`nombre`),
-  ADD UNIQUE KEY `nombre_15` (`nombre`),
-  ADD UNIQUE KEY `nombre_16` (`nombre`),
-  ADD UNIQUE KEY `nombre_17` (`nombre`),
-  ADD UNIQUE KEY `nombre_18` (`nombre`),
-  ADD UNIQUE KEY `nombre_19` (`nombre`),
-  ADD UNIQUE KEY `nombre_20` (`nombre`),
-  ADD UNIQUE KEY `nombre_21` (`nombre`),
-  ADD UNIQUE KEY `nombre_22` (`nombre`),
-  ADD UNIQUE KEY `nombre_23` (`nombre`),
-  ADD UNIQUE KEY `nombre_24` (`nombre`),
-  ADD UNIQUE KEY `nombre_25` (`nombre`),
-  ADD UNIQUE KEY `nombre_26` (`nombre`),
-  ADD UNIQUE KEY `nombre_27` (`nombre`),
-  ADD UNIQUE KEY `nombre_28` (`nombre`),
-  ADD UNIQUE KEY `nombre_29` (`nombre`);
+  ADD KEY `id_habitacion` (`id_habitacion`);
 
 --
 -- Indices de la tabla `especialidad`
@@ -651,8 +709,7 @@ ALTER TABLE `genero`
 --
 ALTER TABLE `habitacion`
   ADD PRIMARY KEY (`id_habitacion`),
-  ADD KEY `id_sector` (`id_sector`),
-  ADD KEY `id_cama` (`id_cama`);
+  ADD KEY `id_sector` (`id_sector`);
 
 --
 -- Indices de la tabla `localidad`
@@ -679,7 +736,8 @@ ALTER TABLE `movimiento_habitacion`
   ADD PRIMARY KEY (`id_movimiento`),
   ADD KEY `id_admision` (`id_admision`),
   ADD KEY `id_habitacion` (`id_habitacion`),
-  ADD KEY `id_mov` (`id_mov`);
+  ADD KEY `id_mov` (`id_mov`),
+  ADD KEY `fk_movimiento_cama` (`id_cama`);
 
 --
 -- Indices de la tabla `obra_social`
@@ -721,6 +779,28 @@ ALTER TABLE `paciente`
   ADD UNIQUE KEY `dni_paciente_27` (`dni_paciente`),
   ADD UNIQUE KEY `dni_paciente_28` (`dni_paciente`),
   ADD UNIQUE KEY `dni_paciente_29` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_30` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_31` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_32` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_33` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_34` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_35` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_36` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_37` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_38` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_39` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_40` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_41` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_42` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_43` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_44` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_45` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_46` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_47` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_48` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_49` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_50` (`dni_paciente`),
+  ADD UNIQUE KEY `dni_paciente_51` (`dni_paciente`),
   ADD KEY `id_genero` (`id_genero`),
   ADD KEY `id_localidad` (`id_localidad`);
 
@@ -807,7 +887,25 @@ ALTER TABLE `usuario`
   ADD UNIQUE KEY `username_26` (`username`),
   ADD UNIQUE KEY `username_27` (`username`),
   ADD UNIQUE KEY `username_28` (`username`),
-  ADD UNIQUE KEY `username_29` (`username`);
+  ADD UNIQUE KEY `username_29` (`username`),
+  ADD UNIQUE KEY `username_30` (`username`),
+  ADD UNIQUE KEY `username_31` (`username`),
+  ADD UNIQUE KEY `username_32` (`username`),
+  ADD UNIQUE KEY `username_33` (`username`),
+  ADD UNIQUE KEY `username_34` (`username`),
+  ADD UNIQUE KEY `username_35` (`username`),
+  ADD UNIQUE KEY `username_36` (`username`),
+  ADD UNIQUE KEY `username_37` (`username`),
+  ADD UNIQUE KEY `username_38` (`username`),
+  ADD UNIQUE KEY `username_39` (`username`),
+  ADD UNIQUE KEY `username_40` (`username`),
+  ADD UNIQUE KEY `username_41` (`username`),
+  ADD UNIQUE KEY `username_42` (`username`),
+  ADD UNIQUE KEY `username_43` (`username`),
+  ADD UNIQUE KEY `username_44` (`username`),
+  ADD UNIQUE KEY `username_45` (`username`),
+  ADD UNIQUE KEY `username_46` (`username`),
+  ADD UNIQUE KEY `username_47` (`username`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -817,13 +915,13 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `admision`
 --
 ALTER TABLE `admision`
-  MODIFY `id_admision` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id_admision` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
 
 --
 -- AUTO_INCREMENT de la tabla `cama`
 --
 ALTER TABLE `cama`
-  MODIFY `id_cama` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id_cama` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `especialidad`
@@ -835,19 +933,19 @@ ALTER TABLE `especialidad`
 -- AUTO_INCREMENT de la tabla `familiar`
 --
 ALTER TABLE `familiar`
-  MODIFY `id_familiar` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id_familiar` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `genero`
 --
 ALTER TABLE `genero`
-  MODIFY `id_genero` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_genero` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `habitacion`
 --
 ALTER TABLE `habitacion`
-  MODIFY `id_habitacion` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id_habitacion` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `localidad`
@@ -859,7 +957,7 @@ ALTER TABLE `localidad`
 -- AUTO_INCREMENT de la tabla `motivo_ingreso`
 --
 ALTER TABLE `motivo_ingreso`
-  MODIFY `id_motivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id_motivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `movimiento`
@@ -871,25 +969,25 @@ ALTER TABLE `movimiento`
 -- AUTO_INCREMENT de la tabla `movimiento_habitacion`
 --
 ALTER TABLE `movimiento_habitacion`
-  MODIFY `id_movimiento` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id_movimiento` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=205;
 
 --
 -- AUTO_INCREMENT de la tabla `obra_social`
 --
 ALTER TABLE `obra_social`
-  MODIFY `id_obra_social` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_obra_social` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `paciente`
 --
 ALTER TABLE `paciente`
-  MODIFY `id_paciente` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id_paciente` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT de la tabla `parentesco`
 --
 ALTER TABLE `parentesco`
-  MODIFY `id_parentesco` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id_parentesco` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `personal_administrativo`
@@ -919,7 +1017,7 @@ ALTER TABLE `rol_usuario`
 -- AUTO_INCREMENT de la tabla `sector`
 --
 ALTER TABLE `sector`
-  MODIFY `id_sector` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_sector` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `tipo_registro`
@@ -941,47 +1039,52 @@ ALTER TABLE `usuario`
 -- Filtros para la tabla `admision`
 --
 ALTER TABLE `admision`
-  ADD CONSTRAINT `admision_ibfk_113` FOREIGN KEY (`id_paciente`) REFERENCES `paciente` (`id_paciente`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `admision_ibfk_114` FOREIGN KEY (`id_obra_social`) REFERENCES `obra_social` (`id_obra_social`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  ADD CONSTRAINT `admision_ibfk_115` FOREIGN KEY (`id_personal_salud`) REFERENCES `usuario` (`id_usuario`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `admision_ibfk_116` FOREIGN KEY (`id_personal_admin`) REFERENCES `usuario` (`id_usuario`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  ADD CONSTRAINT `admision_ibfk_117` FOREIGN KEY (`id_motivo`) REFERENCES `motivo_ingreso` (`id_motivo`);
+  ADD CONSTRAINT `admision_ibfk_202` FOREIGN KEY (`id_paciente`) REFERENCES `paciente` (`id_paciente`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `admision_ibfk_203` FOREIGN KEY (`id_obra_social`) REFERENCES `obra_social` (`id_obra_social`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `admision_ibfk_204` FOREIGN KEY (`id_motivo`) REFERENCES `motivo_ingreso` (`id_motivo`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `admision_ibfk_205` FOREIGN KEY (`id_personal_salud`) REFERENCES `usuario` (`id_usuario`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `cama`
+--
+ALTER TABLE `cama`
+  ADD CONSTRAINT `fk_cama_habitacion` FOREIGN KEY (`id_habitacion`) REFERENCES `habitacion` (`id_habitacion`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `familiar`
 --
 ALTER TABLE `familiar`
-  ADD CONSTRAINT `familiar_ibfk_57` FOREIGN KEY (`id_paciente`) REFERENCES `paciente` (`id_paciente`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `familiar_ibfk_58` FOREIGN KEY (`id_parentesco`) REFERENCES `parentesco` (`id_parentesco`) ON DELETE NO ACTION ON UPDATE CASCADE;
+  ADD CONSTRAINT `familiar_ibfk_93` FOREIGN KEY (`id_paciente`) REFERENCES `paciente` (`id_paciente`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `familiar_ibfk_94` FOREIGN KEY (`id_parentesco`) REFERENCES `parentesco` (`id_parentesco`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `habitacion`
 --
 ALTER TABLE `habitacion`
-  ADD CONSTRAINT `habitacion_ibfk_57` FOREIGN KEY (`id_sector`) REFERENCES `sector` (`id_sector`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `habitacion_ibfk_58` FOREIGN KEY (`id_cama`) REFERENCES `cama` (`id_cama`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `habitacion_ibfk_93` FOREIGN KEY (`id_sector`) REFERENCES `sector` (`id_sector`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `movimiento_habitacion`
 --
 ALTER TABLE `movimiento_habitacion`
-  ADD CONSTRAINT `movimiento_habitacion_ibfk_85` FOREIGN KEY (`id_admision`) REFERENCES `admision` (`id_admision`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `movimiento_habitacion_ibfk_86` FOREIGN KEY (`id_habitacion`) REFERENCES `habitacion` (`id_habitacion`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  ADD CONSTRAINT `movimiento_habitacion_ibfk_87` FOREIGN KEY (`id_mov`) REFERENCES `movimiento` (`id_mov`) ON DELETE NO ACTION ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_movimiento_cama` FOREIGN KEY (`id_cama`) REFERENCES `cama` (`id_cama`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `movimiento_habitacion_ibfk_139` FOREIGN KEY (`id_admision`) REFERENCES `admision` (`id_admision`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `movimiento_habitacion_ibfk_140` FOREIGN KEY (`id_habitacion`) REFERENCES `habitacion` (`id_habitacion`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `movimiento_habitacion_ibfk_141` FOREIGN KEY (`id_mov`) REFERENCES `movimiento` (`id_mov`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `paciente`
 --
 ALTER TABLE `paciente`
-  ADD CONSTRAINT `paciente_ibfk_57` FOREIGN KEY (`id_genero`) REFERENCES `genero` (`id_genero`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  ADD CONSTRAINT `paciente_ibfk_58` FOREIGN KEY (`id_localidad`) REFERENCES `localidad` (`id_localidad`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `paciente_ibfk_93` FOREIGN KEY (`id_genero`) REFERENCES `genero` (`id_genero`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `paciente_ibfk_94` FOREIGN KEY (`id_localidad`) REFERENCES `localidad` (`id_localidad`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `personal_administrativo`
 --
 ALTER TABLE `personal_administrativo`
-  ADD CONSTRAINT `personal_administrativo_ibfk_57` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  ADD CONSTRAINT `personal_administrativo_ibfk_58` FOREIGN KEY (`id_rol_usuario`) REFERENCES `rol_usuario` (`id_rol_usuario`) ON DELETE NO ACTION ON UPDATE CASCADE;
+  ADD CONSTRAINT `personal_administrativo_ibfk_93` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `personal_administrativo_ibfk_94` FOREIGN KEY (`id_rol_usuario`) REFERENCES `rol_usuario` (`id_rol_usuario`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `personal_salud`
@@ -995,9 +1098,9 @@ ALTER TABLE `personal_salud`
 -- Filtros para la tabla `registro_historia_clinica`
 --
 ALTER TABLE `registro_historia_clinica`
-  ADD CONSTRAINT `registro_historia_clinica_ibfk_57` FOREIGN KEY (`id_admision`) REFERENCES `admision` (`id_admision`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `registro_historia_clinica_ibfk_58` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `registro_historia_clinica_ibfk_59` FOREIGN KEY (`id_tipo`) REFERENCES `tipo_registro` (`id_tipo`);
+  ADD CONSTRAINT `registro_historia_clinica_ibfk_111` FOREIGN KEY (`id_admision`) REFERENCES `admision` (`id_admision`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `registro_historia_clinica_ibfk_112` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `registro_historia_clinica_ibfk_113` FOREIGN KEY (`id_tipo`) REFERENCES `tipo_registro` (`id_tipo`) ON DELETE NO ACTION ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

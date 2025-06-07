@@ -94,10 +94,41 @@ export const getPacientes = async (req, res) => {
 // Obtener paciente por ID
 export const getPacienteById = async (req, res) => {
 	try {
-		const paciente = await Paciente.findByPk(req.params.id);
+		const paciente = await Paciente.findByPk(req.params.id, {
+			include: [
+				{ model: Genero, as: 'genero', attributes: ['id_genero', 'nombre'] },
+				{
+					model: Localidad,
+					as: 'localidad',
+					attributes: ['id_localidad', 'nombre'],
+				},
+			],
+		});
 		if (!paciente)
 			return res.status(404).json({ message: 'Paciente no encontrado' });
 		res.json(paciente);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+export const getLocalidades = async (req, res) => {
+	try {
+		const localidades = await Localidad.findAll({
+			attributes: ['id_localidad', 'nombre'],
+		});
+		res.json(localidades);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+export const getGeneros = async (req, res) => {
+	try {
+		const generos = await Genero.findAll({
+			attributes: ['id_genero', 'nombre'],
+		});
+		res.json(generos);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
 	}

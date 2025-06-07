@@ -62,7 +62,7 @@ PersonalAdministrativo.associate?.({ Usuario, RolUsuario });
 PersonalSalud.associate?.({ Usuario, RolUsuario, Especialidad });
 Cama.associate?.({ Habitacion });
 Habitacion.associate?.({ Sector, Cama, MovimientoHabitacion });
-MovimientoHabitacion.associate?.({ Admision, Habitacion, Movimiento });
+MovimientoHabitacion.associate?.({ Admision, Habitacion, Movimiento, Cama });
 Admision.associate?.({
 	Paciente,
 	ObraSocial,
@@ -94,13 +94,6 @@ MovimientoHabitacion.belongsTo(Habitacion, {
 	foreignKey: 'id_habitacion',
 	as: 'habitacion_relacionada',
 });
-// MovimientoHabitacion.belongsTo(Movimiento, { foreignKey: 'id_mov', as: 'tipo_movimiento' }); // Solo si no está en associate
-
-// Habitacion.belongsTo(Sector, { foreignKey: 'id_sector', as: 'sector' }); // Solo si no está en associate
-// Habitacion.hasMany(Cama, { foreignKey: 'id_habitacion', as: 'camas' }); // Solo si no está en associate
-// Habitacion.hasMany(MovimientoHabitacion, { foreignKey: 'id_habitacion', as: 'movimientos' }); // Solo si no está en associate
-
-// Cama.belongsTo(Habitacion, { foreignKey: 'id_habitacion', as: 'habitacion' }); // Solo si no está en associate
 
 RegistroHistoriaClinica.belongsTo(TipoRegistro, {
 	foreignKey: 'id_tipo',
