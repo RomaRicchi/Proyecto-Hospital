@@ -1,219 +1,305 @@
 $(document).ready(function () {
-	console.log('Inicializando DataTable para camas...');
+	const tabla = $('#tablaPacientes');
 
-	const tabla = $('#tablaCamas');
 	if (tabla.length) {
-		fetch('/api/camas')
-			.then((response) => response.json())
-			.then((camas) => {
-				const dataSet = (Array.isArray(camas) ? camas : []).map((cama) => [
-					cama.id_cama,
-					cama.nombre,
-					cama.id_habitacion,
-					cama.desinfeccion
-						? '<span class="badge bg-success">Sí</span>'
-						: '<span class="badge bg-secondary">No</span>',
-					cama.estado
-						? '<span class="badge bg-success">Ocupada</span>'
-						: '<span class="badge bg-secondary">Disponible</span>',
-					`
-                    <button class="btn btn-sm btn-primary edit-btn" data-id="${cama.id_cama}">
-                        <i class="fas fa-pen"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger delete-btn" data-id="${cama.id_cama}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    `,
-				]);
-
-				const dataTable = tabla.DataTable({
-					language: {
-						url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
-					},
-					paging: true,
-					pageLength: 5,
-					searching: true,
-					ordering: true,
-					data: dataSet,
-					columns: [
-						{ title: 'ID Cama' },
-						{ title: 'Nombre' },
-						{ title: 'Habitación' },
-						{ title: 'Desinfección' },
-						{ title: 'Estado' },
-						{ title: 'Acciones', orderable: false, searchable: false },
-					],
-				});
-
-				// Detectar si la búsqueda no tiene resultados y mostrar botón para agregar cama
-				dataTable.on('draw', function () {
-					const noResults =
-						dataTable.rows({ filter: 'applied' }).data().length === 0;
-					$('#btnAgregarCama').remove();
-					if (noResults) {
-						$('<button>')
-							.attr('id', 'btnAgregarCama')
-							.addClass('btn btn-success mt-3')
-							.text('Agregar Nueva Cama')
-							.appendTo('#tablaCamas_wrapper')
-							.on('click', abrirSwalNuevaCama);
-					}
-				});
-			})
-			.catch((error) => {
-				console.error('Error al cargar camas:', error);
-				Swal.fire('Error', 'No se pudo cargar las camas.', 'error');
-			});
-	} else {
-		console.warn('Tabla #tablaCamas no encontrada.');
-	}
-
-	// Función para abrir Swal de nueva cama
-	function abrirSwalNuevaCama() {
-		Swal.fire({
-			title: 'Agregar Cama',
-			html:
-				'<input id="nombre" class="swal2-input" placeholder="Nombre">' +
-				'<input id="id_habitacion" class="swal2-input" placeholder="ID Habitación" type="number">' +
-				'<select id="desinfeccion" class="swal2-input"><option value="1">Sí</option><option value="0">No</option></select>' +
-				'<select id="estado" class="swal2-input"><option value="1">Ocupada</option><option value="0">Disponible</option></select>',
-			preConfirm: () => {
-				const nombre = $('#nombre').val();
-				const id_habitacion = $('#id_habitacion').val();
-				const desinfeccion = $('#desinfeccion').val();
-				const estado = $('#estado').val();
-				if (!nombre || !id_habitacion) {
-					Swal.showValidationMessage('Todos los campos son obligatorios');
-				}
-				return {
-					nombre,
-					id_habitacion,
-					desinfeccion,
-					estado,
-				};
+		const dt = tabla.DataTable({
+			language: {
+				url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
 			},
-			showCancelButton: true,
-			confirmButtonText: 'Guardar',
-		}).then((result) => {
-			if (result.isConfirmed) {
-				fetch('/api/camas', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(result.value),
-				})
-					.then((res) => {
-						if (!res.ok) throw new Error('Error');
-						return res.json();
-					})
-					.then(() =>
-						Swal.fire('Guardado', 'Cama creada', 'success').then(() =>
-							location.reload()
-						)
-					)
-					.catch(() => Swal.fire('Error', 'No se pudo crear Cama', 'error'));
+			paging: true,
+			pageLength: 5,
+			searching: true,
+			ordering: true,
+		});
+
+		dt.on('draw', function () {
+			const noResults = dt.rows({ filter: 'applied' }).data().length === 0;
+			$('#btnAgregarPaciente').remove();
+			if (noResults) {
+				$('<button>')
+					.attr('id', 'btnAgregarPaciente')
+					.addClass('btn btn-success mt-3')
+					.html('<i class="fas fa-plus me-1"></i>Agregar Paciente')
+					.appendTo('#tablaPacientes_wrapper')
+					.on('click', abrirSwalAgregarPaciente);
 			}
 		});
 	}
 
-	// Delegar el click para el botón de agregar cama (por si hay camas)
-	$(document).on('click', '#btnAgregarCama', abrirSwalNuevaCama);
+	$(document).on('click', '#btnAgregarPaciente', abrirSwalAgregarPaciente);
 
-	// Editar cama
+	function abrirSwalAgregarPaciente() {
+		Promise.all([
+			fetch('/api/pacientes/localidad').then((r) => r.json()),
+			fetch('/api/pacientes/genero').then((r) => r.json()),
+		]).then(([localidades, generos]) => {
+			const selectGenero = `
+                <select id="id_genero" class="swal2-input">
+                    <option value="">Seleccione género</option>
+                    ${generos
+											.map(
+												(g) =>
+													`<option value="${g.id_genero}">${g.nombre}</option>`
+											)
+											.join('')}
+                </select>`;
+			const selectLocalidad = `
+                <select id="id_localidad" class="swal2-input">
+                    <option value="">Seleccione localidad</option>
+                    ${localidades
+											.map(
+												(l) =>
+													`<option value="${l.id_localidad}">${l.nombre}</option>`
+											)
+											.join('')}
+                </select>`;
+			Swal.fire({
+				title: 'Agregar Paciente',
+				html: `
+                    <input id="dni_paciente" class="swal2-input" placeholder="DNI">
+                    <input id="apellido_p" class="swal2-input" placeholder="Apellido">
+                    <input id="nombre_p" class="swal2-input" placeholder="Nombre">
+                    <input id="fecha_nac" type="date" class="swal2-input">
+                    ${selectGenero}
+                    <input id="telefono" class="swal2-input" placeholder="Teléfono">
+                    <input id="direccion" class="swal2-input" placeholder="Dirección">
+                    ${selectLocalidad}
+                    <input id="email" class="swal2-input" placeholder="Email">
+                `,
+				showCancelButton: true,
+				confirmButtonText: 'Guardar',
+				preConfirm: () => {
+					const dni_paciente = $('#dni_paciente').val();
+					const apellido_p = $('#apellido_p').val();
+					const nombre_p = $('#nombre_p').val();
+					const fecha_nac = $('#fecha_nac').val();
+					const id_genero = $('#id_genero').val();
+					const telefono = $('#telefono').val();
+					const direccion = $('#direccion').val();
+					const id_localidad = $('#id_localidad').val();
+					const email = $('#email').val();
+
+					if (!dni_paciente || !apellido_p || !nombre_p || !id_genero) {
+						Swal.showValidationMessage(
+							'DNI, Apellido, Nombre y Género son obligatorios'
+						);
+						return false;
+					}
+
+					return {
+						dni_paciente,
+						apellido_p,
+						nombre_p,
+						fecha_nac,
+						id_genero,
+						telefono,
+						direccion,
+						id_localidad,
+						email,
+					};
+				},
+			}).then((result) => {
+				if (result.isConfirmed) {
+					fetch('/api/pacientes', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(result.value),
+					})
+						.then((res) => {
+							if (!res.ok) throw new Error();
+							return res.json();
+						})
+						.then(() =>
+							Swal.fire('Éxito', 'Paciente creado', 'success').then(() =>
+								location.reload()
+							)
+						)
+						.catch(() =>
+							Swal.fire('Error', 'No se pudo crear el paciente', 'error')
+						);
+				}
+			});
+		});
+	}
+
+	// Editar paciente
 	$(document).on('click', '.edit-btn', function () {
 		const id = $(this).data('id');
-		fetch(`/api/camas/${id}`)
-			.then((res) => res.json())
-			.then((cama) => {
-				Swal.fire({
-					title: 'Editar Cama',
-					html:
-						`<input id="nombre" class="swal2-input" value="${cama.nombre}" placeholder="Nombre">` +
-						`<input id="id_habitacion" class="swal2-input" value="${cama.id_habitacion}" placeholder="ID Habitación" type="number">` +
-						`<select id="desinfeccion" class="swal2-input">
-                            <option value="1" ${
-															cama.desinfeccion ? 'selected' : ''
-														}>Sí</option>
-                            <option value="0" ${
-															!cama.desinfeccion ? 'selected' : ''
-														}>No</option>
-                        </select>` +
-						`<select id="estado" class="swal2-input">
-                            <option value="1" ${
-															cama.estado ? 'selected' : ''
-														}>Ocupada</option>
-                            <option value="0" ${
-															!cama.estado ? 'selected' : ''
-														}>Disponible</option>
-                        </select>`,
-					preConfirm: () => {
-						const nombre = $('#nombre').val();
-						const id_habitacion = $('#id_habitacion').val();
-						const desinfeccion = $('#desinfeccion').val();
-						const estado = $('#estado').val();
-						if (!nombre || !id_habitacion) {
-							Swal.showValidationMessage('Todos los campos son obligatorios');
-						}
-						return {
-							nombre,
-							id_habitacion,
-							desinfeccion,
-							estado,
-						};
-					},
-					showCancelButton: true,
-					confirmButtonText: 'Guardar',
-				}).then((result) => {
-					if (result.isConfirmed) {
-						fetch(`/api/camas/${id}`, {
-							method: 'PUT',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify(result.value),
-						})
-							.then((res) => {
-								if (!res.ok) throw new Error('Error');
-								return res.text();
-							})
-							.then(() =>
-								Swal.fire(
-									'Actualizado',
-									'Cama modificada con éxito',
-									'success'
-								).then(() => location.reload())
-							)
-							.catch(() =>
-								Swal.fire('Error', 'No se pudo actualizar la cama', 'error')
-							);
+		Promise.all([
+			fetch(`/api/pacientes/${id}`).then((res) => res.json()),
+			fetch('/api/pacientes/localidad').then((r) => r.json()),
+			fetch('/api/pacientes/genero').then((r) => r.json()),
+		]).then(([paciente, localidades, generos]) => {
+			if (paciente.message) {
+				Swal.fire('Error', 'Paciente no encontrado', 'error');
+				return;
+			}
+			const selectGenero = `
+                <select id="id_genero" class="swal2-input">
+                    <option value="">Seleccione género</option>
+                    ${generos
+											.map(
+												(g) =>
+													`<option value="${g.id_genero}" ${
+														paciente.id_genero == g.id_genero ? 'selected' : ''
+													}>${g.nombre}</option>`
+											)
+											.join('')}
+                </select>`;
+			const selectLocalidad = `
+                <select id="id_localidad" class="swal2-input">
+                    <option value="">Seleccione localidad</option>
+                    ${localidades
+											.map(
+												(l) =>
+													`<option value="${l.id_localidad}" ${
+														paciente.id_localidad == l.id_localidad
+															? 'selected'
+															: ''
+													}>${l.nombre}</option>`
+											)
+											.join('')}
+                </select>`;
+			Swal.fire({
+				title: 'Editar Paciente',
+				html: `
+                    <input id="dni_paciente" class="swal2-input" value="${
+											paciente.dni_paciente || ''
+										}" placeholder="DNI">
+                    <input id="apellido_p" class="swal2-input" value="${
+											paciente.apellido_p || ''
+										}" placeholder="Apellido">
+                    <input id="nombre_p" class="swal2-input" value="${
+											paciente.nombre_p || ''
+										}" placeholder="Nombre">
+                    <input id="fecha_nac" type="date" class="swal2-input" value="${
+											paciente.fecha_nac
+												? paciente.fecha_nac.substring(0, 10)
+												: ''
+										}">
+                    ${selectGenero}
+                    <input id="telefono" class="swal2-input" value="${
+											paciente.telefono || ''
+										}" placeholder="Teléfono">
+                    <input id="direccion" class="swal2-input" value="${
+											paciente.direccion || ''
+										}" placeholder="Dirección">
+                    ${selectLocalidad}
+                    <input id="email" class="swal2-input" value="${
+											paciente.email || ''
+										}" placeholder="Email">
+                `,
+				showCancelButton: true,
+				confirmButtonText: 'Guardar',
+				preConfirm: () => {
+					const dni_paciente = $('#dni_paciente').val();
+					const apellido_p = $('#apellido_p').val();
+					const nombre_p = $('#nombre_p').val();
+					const fecha_nac = $('#fecha_nac').val();
+					const id_genero = $('#id_genero').val();
+					const telefono = $('#telefono').val();
+					const direccion = $('#direccion').val();
+					const id_localidad = $('#id_localidad').val();
+					const email = $('#email').val();
+
+					if (!dni_paciente || !apellido_p || !nombre_p || !id_genero) {
+						Swal.showValidationMessage(
+							'DNI, Apellido, Nombre y Género son obligatorios'
+						);
+						return false;
 					}
-				});
+
+					return {
+						dni_paciente,
+						apellido_p,
+						nombre_p,
+						fecha_nac,
+						id_genero,
+						telefono,
+						direccion,
+						id_localidad,
+						email,
+					};
+				},
+			}).then((result) => {
+				if (result.isConfirmed) {
+					fetch(`/api/pacientes/${id}`, {
+						method: 'PUT',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(result.value),
+					})
+						.then((res) => {
+							if (!res.ok) throw new Error();
+							return res.json();
+						})
+						.then(() =>
+							Swal.fire('Actualizado', 'Paciente modificado', 'success').then(
+								() => location.reload()
+							)
+						)
+						.catch(() =>
+							Swal.fire('Error', 'No se pudo actualizar el paciente', 'error')
+						);
+				}
 			});
+		});
 	});
 
-	// Eliminar cama
+	// Eliminar paciente
 	$(document).on('click', '.delete-btn', function () {
 		const id = $(this).data('id');
 		Swal.fire({
-			title: '¿Eliminar cama?',
-			text: 'Esta acción eliminará la cama permanentemente.',
+			title: '¿Eliminar paciente?',
+			text: 'Esta acción eliminará el registro de forma permanente.',
 			icon: 'warning',
 			showCancelButton: true,
 			confirmButtonText: 'Sí, eliminar',
 			cancelButtonText: 'Cancelar',
 		}).then((result) => {
 			if (result.isConfirmed) {
-				fetch(`/api/camas/${id}`, { method: 'DELETE' })
+				fetch(`/api/pacientes/${id}`, {
+					method: 'DELETE',
+				})
 					.then((res) => {
-						if (!res.ok) throw new Error('Error');
+						if (!res.ok) throw new Error();
 						return res.text();
 					})
 					.then(() =>
-						Swal.fire('Eliminado', 'Cama eliminada', 'success').then(() =>
-							location.reload()
-						)
+						Swal.fire(
+							'Eliminado',
+							'Paciente eliminado correctamente',
+							'success'
+						).then(() => location.reload())
 					)
 					.catch(() =>
-						Swal.fire('Error', 'No se pudo eliminar la cama', 'error')
+						Swal.fire('Error', 'No se pudo eliminar el paciente', 'error')
 					);
 			}
 		});
+	});
+
+	// Detalles
+	$(document).on('click', '.details-btn', function () {
+		const id = $(this).data('id');
+		fetch(`/api/pacientes/${id}`)
+			.then((res) => res.json())
+			.then((p) => {
+				Swal.fire({
+					title: `Detalles del Paciente`,
+					html: `
+                        <p><strong>DNI:</strong> ${p.dni_paciente}</p>
+                        <p><strong>Nombre:</strong> ${p.nombre_p} ${
+						p.apellido_p
+					}</p>
+                        <p><strong>Fecha de nacimiento:</strong> ${
+													p.fecha_nac?.substring(0, 10) || ''
+												}</p>
+                        <p><strong>Email:</strong> ${p.email || '-'}</p>
+                        <p><strong>Teléfono:</strong> ${p.telefono || '-'}</p>
+                        <p><strong>Dirección:</strong> ${p.direccion || '-'}</p>
+                    `,
+					confirmButtonText: 'Cerrar',
+				});
+			});
 	});
 });

@@ -26,7 +26,7 @@ $(document).ready(function () {
 		});
 	}
 
-	// 🔸 Agregar admisión (aquí solo es ejemplo, adaptalo según tus campos)
+	// 🔸Agregar admisión (aquí solo es ejemplo, adaptalo según tus campos)
 	$(document).on('click', '#btnAgregarAdmision', function () {
 		Swal.fire({
 			title: 'Agregar Nueva Admisión',

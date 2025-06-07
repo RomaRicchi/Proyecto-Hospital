@@ -11,6 +11,7 @@ block content
           th Paciente
           th Habitación
           th Sector
+          th Cama
           th Tipo Movimiento
           th Fecha Ingreso
           th Fecha Egreso
@@ -24,6 +25,7 @@ block content
               td= m.admision && m.admision.paciente ? m.admision.paciente.apellido_p + ', ' + m.admision.paciente.nombre_p : ''
               td= m.habitacion ? m.habitacion.num : ''
               td= m.habitacion && m.habitacion.sector ? m.habitacion.sector.nombre : ''
+              td= m.cama && m.cama.nombre ? m.cama.nombre : ''
               td= m.tipo_movimiento ? m.tipo_movimiento.nombre : ''
               td= m.fecha_hora_ingreso
               td= m.fecha_hora_egreso ? m.fecha_hora_egreso : ''
@@ -35,7 +37,7 @@ block content
                   i.fas.fa-trash
         else
           tr
-            td(colspan="9") No hay movimientos registrados.
+            td(colspan="10") No hay movimientos registrados.
 
   // Librerías DataTables y jQuery
   link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")

@@ -15,6 +15,11 @@ export default (sequelize, DataTypes) => {
 				type: DataTypes.INTEGER.UNSIGNED,
 				allowNull: false,
 			},
+			id_cama: {
+				// 👈 NUEVO CAMPO
+				type: DataTypes.TINYINT.UNSIGNED,
+				allowNull: false,
+			},
 			fecha_hora_ingreso: {
 				type: DataTypes.DATE,
 				allowNull: false,
@@ -44,12 +49,15 @@ export default (sequelize, DataTypes) => {
 			foreignKey: 'id_habitacion',
 			as: 'habitacion',
 		});
-
+		MovimientoHabitacion.belongsTo(models.Cama, {
+			// 👈 NUEVA ASOCIACIÓN
+			foreignKey: 'id_cama',
+			as: 'cama',
+		});
 		MovimientoHabitacion.belongsTo(models.Admision, {
 			foreignKey: 'id_admision',
 			as: 'admision',
 		});
-
 		MovimientoHabitacion.belongsTo(models.Movimiento, {
 			foreignKey: 'id_mov',
 			as: 'tipo_movimiento',

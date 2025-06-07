@@ -19,7 +19,7 @@ block content
             tr
               td #{cama.id_cama}
               td #{cama.nombre}
-              td #{cama.id_habitacion}
+              td #{cama.descripcionHabitacion}
               td
                 if cama.desinfeccion
                   span.badge.bg-success Sí
@@ -36,12 +36,13 @@ block content
                 button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=cama.id_cama)
                   i.fas.fa-trash
         else
-          tr
-            td(colspan="6").text-center.text-muted No hay camas registradas.
+          h1 No hay camas registradas.
 
-  // Librerías DataTables y jQuery
-  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+  // Librerías necesarias
   script(src="https://code.jquery.com/jquery-3.7.1.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+  script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
   script(src="/js/cama.js")
+
+  

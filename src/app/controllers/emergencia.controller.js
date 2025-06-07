@@ -40,17 +40,17 @@ export const ingresoEmergencia = async (req, res) => {
 		}
 
 		// Validar si ya existe una admisión activa para este paciente
-		const admisionActiva = await Admision.findOne({
-			where: {
-				id_paciente: paciente.id_paciente,
-				fecha_hora_egreso: null,
-			},
-		});
-		if (admisionActiva) {
-			return res.status(409).json({
-				error: 'El paciente ya tiene una admisión activa.',
-			});
-		}
+		// const admisionActiva = await Admision.findOne({
+		// 	where: {
+		// 		id_paciente: paciente.id_paciente,
+		// 		fecha_hora_egreso: null,
+		// 	},
+		// });
+		// if (admisionActiva) {
+		// 	return res.status(409).json({
+		// 		error: 'El paciente ya tiene una admisión activa.',
+		// 	});
+		// }
 
 		const obraSocial = await ObraSocial.findOne({
 			where: { nombre: { [Op.like]: '%Sin obra social%' } },

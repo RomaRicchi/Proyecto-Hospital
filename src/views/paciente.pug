@@ -3,7 +3,11 @@ extends layout_modular
 block content
   h1.text-center.mb-4 Lista de Pacientes
 
-  
+  .mb-3
+    button#btnAgregarPaciente.btn.btn-success
+      i.fas.fa-plus.me-1
+      | Agregar Paciente
+
   .table-responsive
     table#tablaPacientes.table.table-striped.table-bordered
       thead
@@ -39,11 +43,13 @@ block content
                 button.btn.btn-sm.btn-secondary.details-btn(data-id=paciente.id_paciente)
                   i.fas.fa-eye
         else
-          p.text-center.text-muted No hay pacientes registrados.
+          tr
+            td(colspan="10").text-center.text-muted No hay pacientes registrados.
 
-  // 📚 Librerías y scripts (asegurarse de orden)
-  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")
+  // Librerías
+  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
   script(src="https://code.jquery.com/jquery-3.7.1.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+  script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
   script(src="/js/pacientes.js")

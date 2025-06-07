@@ -1,0 +1,21 @@
+extends layout_modular
+
+block content
+  h1.text-center.mb-4 Alta de Paciente
+
+    // 🔍 Formulario para buscar paciente por DNI
+  form#buscarPacienteForm(method='GET')
+    .mb-3
+      label(for='dni') DNI del Paciente
+      input#dni.form-control(type='number', name='dni', required)
+    button.btn.btn-primary.mb-4(type='submit')
+      i.fas.fa-search.me-1
+      | Buscar
+
+    // 📋 Resultado dinámico (paciente + admisión + formulario alta)
+    #resultadoBusqueda
+
+  // 📦 Librerías necesarias (fuera del `block content`)
+  script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+  script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
+  script(src="/js/altaPaciente.js")
