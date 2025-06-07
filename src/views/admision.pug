@@ -1,7 +1,7 @@
 extends layout_modular
 
 block content
-  h1.text-center.mb-4 Gestión de Admisiones
+  h1.text-center.px-4.pt-5 Gestión de Admisiones
 
   .table-responsive
     table#tablaAdmisiones.table.table-striped.table-bordered
@@ -9,12 +9,15 @@ block content
         tr
           th ID
           th Paciente
+          th DNI
           th Obra Social
-          th Personal Administrativo
-          th Personal de Salud
+          th N° Asociado
           th Motivo Ingreso
+          th Descripción
           th Fecha Ingreso
-          th Estado
+          th Fecha Egreso
+          th Motivo Egreso
+          th Personal de Salud
           th Acciones
       tbody
         if admisiones && admisiones.length
@@ -22,12 +25,15 @@ block content
             tr
               td #{admision.id_admision}
               td #{admision.paciente}
+              td #{admision.dni_paciente}
               td #{admision.obra_social}
-              td #{admision.personal_admin}
-              td #{admision.personal_salud}
+              td #{admision.num_asociado}
               td #{admision.motivo_ingreso}
-              td #{admision.fecha_hora_ingreso}
-              td #{admision.estado}
+              td #{admision.descripcion}
+              td #{admision.fecha_ingreso}
+              td #{admision.fecha_egreso}
+              td #{admision.motivo_egr}
+              td #{admision.personal_salud}
               td
                 button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=admision.id_admision)
                   i.fas.fa-pen
@@ -35,7 +41,7 @@ block content
                   i.fas.fa-trash
         else
           tr
-            td(colspan="9") No hay admisiones registradas.
+            td(colspan="12") No hay admisiones registradas.
 
   // Librerías DataTables y jQuery
   link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")

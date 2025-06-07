@@ -1,110 +1,150 @@
 # Sistema de Información Hospitalaria (HIS)
 
-Un **Sistema de Información Hospitalaria** desarrollado como proyecto de fin de cursada de Desarrollo Web II. Permite gestionar pacientes, admisiones, habitaciones, historias clínicas y movimientos de internación en un entorno realista.
+**Sistema de Información Hospitalaria** es una aplicación web desarrollada en **Node.js con Express y Sequelize**, diseñada para **gestionar pacientes, admisiones hospitalarias, asignación de camas, habitaciones y registros clínicos**. El sistema ofrece una experiencia fluida para la administración de internaciones, adaptándose a entornos hospitalarios reales.
 
 ---
 
-## 🏥 Objetivos
+## 📑 Tabla de Contenidos
 
-- Digitalizar el flujo de atención hospitalaria: ingreso, asignación de cama, egreso.  
-- Facilitar la consulta y edición de datos de pacientes y movimientos.  
-- Practicar arquitectura MVC con Node.js, Express y Pug.
-
----
-
-## 🚀 Tecnologías
-
-- **Backend**: Node.js, Express  
-- **Base de datos**: MySQL (con conexión desde `src/app/database/`)  
-- **ORM / Conexión**: Sequelize (o mysql2)  
-- **Vistas**: Pug  
-- **Frontend**: Bootstrap 5, CSS personalizado (`public/css/style.css`), JS propio (`public/js/`)  
-- **Ambiente**: Variables en `.env`  
-- **Control de versiones**: Git  
+1. [Introducción](#-introducción)  
+2. [Características](#-características)  
+3. [Arquitectura](#-arquitectura)  
+4. [Requisitos](#-requisitos)  
+5. [Instalación](#-instalación)  
+6. [Estructura del Proyecto](#-estructura-del-proyecto)  
+7. [Uso](#-uso)  
+8. [Credenciales de Acceso](#-credenciales-de-acceso)  
+9. [Licencia](#-licencia)  
 
 ---
 
-## 📁 Estructura del proyecto
+## 📌 Introducción
 
-/
-├─ BD/ ← Base de datos
-├─ data/ ← Archivos de apoyo 
-├─ node_modules/
-├─ public/
-│ ├─ css/
-│ │ └─ style.css ← Estilos globales
-│ ├─ img/
-│ │ ├─ docG.png
-│ │ ├─ logo5.png
-│ │ └─ verdepastel.png
-│ └─ js/ ← Scripts front-end
-│ └─ startbootstrap/ ← Plantillas de Bootstrap
-├─ src/
-│ └─ app/
-│ ├─ config/ ← Configuración de Sequelize, MySQL, keys
-│ ├─ database/ ← Inicialización de la conexión
-│ ├─ middlewares/ ← Autenticación, validaciones, CORS, etc.
-│ ├─ models/ ← Definición de modelos (Paciente, Admision…)
-│ ├─ controllers/ ← Lógica de negocio y llamadas a modelos
-│ └─ routes/ ← Rutas Express organizadas por recurso
-│   ├─ paciente.js
-│   ├─ admision.js
-│   └─ habitacion.js
-├─ views/ ← Plantillas Pug
-│ ├─ partials/ ← Layouts parciales 
-│ ├─ layout_modular.pug
-│ ├─ paciente.pug
-│ ├─ admision.pug
-│ ├─ habitacion.pug
-│ └─ historiaClinica.pug
-├─ .env ← Variables sensibles (DB_USER, DB_PASS, etc.)
-├─ .gitignore
-├─ server.js ← Punto de entrada: carga HTTP y Middlewares
-└─ README.md
+**Sistema de Información Hospitalaria**  permite:
+
+- **Registrar y gestionar pacientes** y su historial clínico.  
+- **Administrar admisiones hospitalarias**, incluyendo el flujo de ingreso y egreso.  
+- **Asignar habitaciones y camas** disponibles de manera dinámica.  
+- **Controlar usuarios y roles del sistema**, con autenticación segura.  
+
+Construido con arquitectura **MVC**, incorpora **Pug** para las vistas, **MySQL** como base de datos y manejo de sesiones para usuarios autenticados.
 
 ---
 
-## ⚙️ Instalación y uso
+## 🚀 Características
 
-1. **Clonar el repositorio**  
-  
-   git clone https://github.com/tuusuario/his-hospitalario.git
-   cd his-hospitalario
+✅ **Gestión de Pacientes y Familiares**  
+✅ **Admisiones y Egresos** con lógica de validación  
+✅ **Manejo de Camas y Habitaciones**  
+✅ **Historial Clínico Registrado** por tipo y motivo  
+✅ **Sistema de Usuarios con Roles (admin, salud, etc.)**  
+✅ **Interfaz web con Bootstrap + Pug**  
+✅ **Autenticación y Sesiones**  
+✅ **Conexión a base de datos MySQL usando Sequelize**  
 
-2. **Instalar dependencias** 
-  npm install
+---
 
-3. **Configurar variables** 
-  
-  Crea un archivo .env (copiando .env.example si existe) y define:
+## 🏗️ Arquitectura
 
-      DB_HOST=localhost
-      DB_USER=tu_usuario
-      DB_PASS=tu_contraseña
-      DB_NAME=hospital_db
-      PORT=3000
+El proyecto está organizado en una estructura **MVC**:
 
-4. **Inicializar base de datos**
+- **Modelos (Sequelize):** `Paciente`, `Admision`, `Cama`, `Habitacion`, `Usuario`, etc.  
+- **Controladores:** lógica de negocio desacoplada, conexión con modelos.  
+- **Vistas (Pug):** componentes renderizados desde el servidor.  
+- **Rutas (Express):** API REST modularizada por entidad.  
+- **Middleware:** autenticación, sesión, logs.
 
-Ejecuta los scripts SQL en BD/ para crear tablas y cargar datos iniciales.
+---
 
-Asegúrate de que el schema hospital_db exista.
+## ⚙️ Requisitos
 
-4. **Levantar la aplicación**
+- Node.js v18+  
+- MySQL Server  
+- npm (gestor de paquetes)  
+- Git  
+- Editor de texto (recomendado: VS Code)  
 
+---
+
+## 📥 Instalación
+
+### 1️⃣ Clonar este repositorio
+
+
+git clone https://github.com/RomaRicchi/Proyecto-Hospital
+cd proyecto-hospital
+
+
+### 2️⃣ Instalar dependencias
+
+
+npm install
+
+
+### 3️⃣ Configurar entorno 
+
+Crear un archivo `.env` con las variables necesarias:
+
+```env
+DB_HOST=localhost
+DB_USER=tu_usuario
+DB_PASSWORD=tu_contraseña
+DB_NAME=hospital_db
+PORT=3000
+SESSION_SECRET=supersecreto
+```
+
+### 4️⃣ Inicializar base de datos
+
+Ejecutar el archivo SQL:
+
+```sql
+BD/hospital_db.sql
+```
+
+Asegúrate de tener creado el schema `hospital_db`.
+
+---
+
+## 📂 Estructura del Proyecto
+
+```
+Proyecto-Hospital/
+│
+├── BD/                            # Script de base de datos
+├── .env                          # Variables de entorno
+├── package.json                  # Dependencias y scripts
+├── src/
+│   ├── app/
+│   │   ├── config/               # Configuración de Sequelize
+│   │   ├── controllers/          # Lógica de negocio
+│   │   ├── models/               # Modelos Sequelize
+│   │   ├── routes/               # Endpoints REST
+│   │   ├── middlewares/          # Autenticación, sesión
+│   ├── public/                   # JS, CSS, imágenes
+│   ├── views/                    # Vistas Pug
+│   └── server.js                 # Punto de entrada
+```
+
+---
+
+## ▶️ Uso
+
+```bash
 npm run dev
-Correrá en http://localhost:3000/home.
+```
 
-## 🧪 Funcionalidades
+Luego accede a: [http://localhost:3000/home](http://localhost:3000/home)
 
-Pacientes: crear, editar, listar, buscar por DNI.
+---
 
-Admisiones: alta, baja, validación de admisiones activas.
+## 🔐 Credenciales de Acceso
 
-Habitaciones: asignar, liberar, registrar movimientos.
+| Usuario | Contraseña |
+| ------- | ---------- |
+| admin   | admin      |
 
-Interfaz: responsive con Bootstrap y plantillas Pug.
-
+---
 ## 👨‍💻 Autor
 
 Romanela Ricchiardi
@@ -113,6 +153,6 @@ Carrera: Desarrollo de Software – Universidad de La Punta
 
 Materia: Desarrollo Web II (2025)
 
-## 📄 Licencia
+## 📜 Licencia
 
-Este proyecto está bajo la Licencia MIT.
+Este proyecto está licenciado bajo la **Licencia MIT**. Puedes usarlo, modificarlo y distribuirlo libremente bajo los términos de esta licencia.

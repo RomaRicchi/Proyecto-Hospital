@@ -84,7 +84,12 @@ export const vistaPacienteNuevo = async (req, res) => {
 // Obtener todos los pacientes (API REST)
 export const getPacientes = async (req, res) => {
 	try {
-		const pacientes = await Paciente.findAll({ where: { estado: true } });
+		const pacientes = await Paciente.findAll({
+			where: { estado: true },
+			include: [
+				{ model: Genero, as: 'genero', attributes: ['id_genero', 'nombre'] },
+			],
+		});
 		res.json(pacientes);
 	} catch (error) {
 		res.status(500).json({ message: error.message });

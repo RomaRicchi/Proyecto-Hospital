@@ -1,25 +1,32 @@
 extends layout_modular
 
 block content
-    
+
+  //– Hero con solo el mensaje principal
   .hero(style="background-color: #a8e6cf; padding: 4rem 1rem;")
     .container.hero-content.text-center
       h1.mt-4 Bienvenido a nuestra Clínica
       h1.display-4 Cuidamos tu salud, acompañamos tu vida
       p.lead Más de 25 años de experiencia brindando atención médica integral.
 
-  h2.mt-4.text-center Obras sociales que recibimos:
-  .text-center
-    ul.list-unstyled
-      each obra in listaObras
-        li= obra
+  //– Listas en paralelo
+  .container.bg-white.py-5
+    .row.text-center
+      //– Columna de Obras Sociales
+      .col-12.col-md-6
+        h2 Obras sociales que recibimos:
+        ul.list-unstyled
+          each obra in listaObras
+            li= obra
 
-  h2.mt-4.text-center Especialidades disponibles:
-  .text-center
-    ul.list-unstyled
-      each esp in listaEsp
-        li= esp
+      //– Columna de Especialidades
+      .col-12.col-md-6
+        h2 Especialidades disponibles:
+        ul.list-unstyled
+          each esp in listaEsp
+            li= esp
 
+  //– Nuestros profesionales
   h2.mt-5.text-center Nuestros Profesionales
   .row.row-cols-2.row-cols-sm-3.row-cols-md-4.row-cols-lg-5.g-4.mt-3.justify-content-center
     each medico in medicos

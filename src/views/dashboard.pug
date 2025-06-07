@@ -1,10 +1,11 @@
 extends layout_modular
 
 block content
-  h1 Panel de Administración
-  p Bienvenido/a al sistema de gestión.
+  .container-fluid.px-4.pt-4
+    h1.text-black Panel de Administración
+    p.text-black Bienvenido/a al sistema de gestión.
   
-  .container-fluid.px-4
+  .admin-hero
     h1.mt-4 Panel
     ol.breadcrumb.mb-4
 
@@ -30,6 +31,38 @@ block content
       .col-12
         #tablaCamasContainer
 
+    .row
+      .col-xl-3.col-md-6
+        .card.bg-primary.text-white.mb-4
+          .card-body Total de pacientes
+          .card-footer.d-flex.align-items-center.justify-content-between
+            a.small.text-white.stretched-link(href="#") Ver detalles
+            div.small.text-white
+              i.fas.fa-angle-right
+
+      .col-xl-3.col-md-6
+        .card.bg-warning.text-white.mb-4
+          .card-body Altas médicas hoy
+          .card-footer.d-flex.align-items-center.justify-content-between
+            a.small.text-white.stretched-link(href="#") Ver registros
+            div.small.text-white
+              i.fas.fa-angle-right
+
+      .col-xl-3.col-md-6
+        .card.bg-success.text-white.mb-4
+          .card-body Camas disponibles
+          .card-footer.d-flex.align-items-center.justify-content-between
+            a.small.text-white.stretched-link(href="#") Ver habitaciones
+            div.small.text-white
+              i.fas.fa-angle-right
+
+      .col-xl-3.col-md-6
+        .card.bg-danger.text-white.mb-4
+          .card-body Internaciones activas
+          .card-footer.d-flex.align-items-center.justify-content-between
+            a.small.text-white.stretched-link(href="#") Ver internaciones
+            div.small.text-white
+              i.fas.fa-angle-right
 
     // En la sección head o justo antes de cerrar body
     script(src="https://code.jquery.com/jquery-3.6.0.min.js")

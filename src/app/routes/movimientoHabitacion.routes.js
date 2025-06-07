@@ -5,11 +5,14 @@ import {
 	getMovimientoHabitacionById,
 	createMovimientoHabitacion,
 	updateMovimientoHabitacion,
+	verificarGenero,
 	deleteMovimientoHabitacion,
-	reservarCama
+	reservarCama,
 } from '../controllers/movimientoHabitacion.controller.js';
 
 const router = Router();
+
+router.post('/verificar-genero', verificarGenero);
 
 router.get('/', getMovimientosHabitacion);
 router.get('/:id', getMovimientoHabitacionById);
