@@ -1,22 +1,28 @@
 $(document).ready(function () {
-  $('#buscarPacienteForm').submit(function (e) {
-    e.preventDefault();
-    const dni = $('#dni').val();
+	$('#buscarPacienteForm').submit(function (e) {
+		e.preventDefault();
+		const dni = $('#dni').val();
 
-    fetch(`/api/admisiones/paciente/${dni}/admisiones-vigentes`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data || !data.admision) {
-          Swal.fire('No encontrado', 'No hay una admisión activa para este paciente', 'info');
-          $('#resultadoBusqueda').html('');
-          return;
-        }
+		fetch(`/api/admisiones/paciente/${dni}/admisiones-vigentes`)
+			.then((res) => res.json())
+			.then((data) => {
+				if (!data || !data.admision) {
+					Swal.fire(
+						'No encontrado',
+						'No hay una admisión activa para este paciente',
+						'info'
+					);
+					$('#resultadoBusqueda').html('');
+					return;
+				}
 
-        const paciente = data.paciente;
-        const admision = data.admision;
-        const fechaIngreso = new Date(admision.fecha_hora_ingreso).toLocaleString();
+				const paciente = data.paciente;
+				const admision = data.admision;
+				const fechaIngreso = new Date(
+					admision.fecha_hora_ingreso
+				).toLocaleString();
 
-        $('#resultadoBusqueda').html(`
+				$('#resultadoBusqueda').html(`
           <h5>Datos del Paciente</h5>
           <table class="table table-bordered">
             <thead>
@@ -40,7 +46,7 @@ $(document).ready(function () {
           </table>
 
           <h5 class="mt-4">Completar Alta Médica</h5>
-          <form id="formEgreso">
+          <form id="formEgreso" action="javascript:void(0);">
             <div class="mb-3">
               <label for="fechaEgreso" class="form-label">Fecha y hora de egreso</label>
               <input type="datetime-local" id="fechaEgreso" class="form-control" required>
@@ -59,42 +65,50 @@ $(document).ready(function () {
             <button type="submit" class="btn btn-success">Dar de Alta</button>
           </form>
         `);
-      });
-  });
+			});
+	});
 
-  // Evento submit dinámico (delegado) para el formulario de alta
-  $(document).on('submit', '#formEgreso', function (e) {
-    e.preventDefault();
-    const dni = $('#dni').val();
-    const payload = {
-      fecha_hora_egreso: $('#fechaEgreso').val(),
-      motivo_egr: $('#motivoEgreso').val(),
-      id_personal_salud: $('#idUsuario').val()
-    };
+	// Evento submit para el formulario dinámico
+	$(document).on('submit', '#formEgreso', function (e) {
+		e.preventDefault();
+		const dni = $('#dni').val();
+		const payload = {
+			fecha_hora_egreso: $('#fechaEgreso').val(),
+			motivo_egr: $('#motivoEgreso').val(),
+			id_personal_salud: $('#idUsuario').val(),
+		};
 
-    fetch(`/api/admisiones/paciente/${dni}/alta`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(async res => {
-        let data;
-        try {
-          data = await res.json();
-        } catch (err) {
-          Swal.fire('Error', 'Respuesta inesperada del servidor', 'error');
-          return;
-        }
-        console.log('Respuesta del backend:', data);
-        if (data.success) {
-          Swal.fire('Alta realizada', 'El paciente fue dado de alta correctamente', 'success')
-            .then(() => location.reload());
-        } else {
-          Swal.fire('Error', data.message || 'Error al dar de alta', 'error');
-        }
-      })
-      .catch(err => {
-        Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
-      });
-  });
+		console.log('🟢 Enviando POST al backend con:', payload);
+
+		fetch(`/api/admisiones/paciente/${dni}/alta`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload),
+		})
+			.then(async (res) => {
+				if (!res.ok) {
+					const errorText = await res.text();
+					console.error('❌ Error no-OK:', errorText);
+					Swal.fire('Error', 'Error inesperado del servidor', 'error');
+					return;
+				}
+
+				const data = await res.json();
+				console.log('✅ Respuesta del backend:', data);
+
+				if (data.success) {
+					Swal.fire(
+						'Alta realizada',
+						'El paciente fue dado de alta correctamente',
+						'success'
+					).then(() => location.reload());
+				} else {
+					Swal.fire('Error', data.message || 'Error al dar de alta', 'error');
+				}
+			})
+			.catch((err) => {
+				console.error('❌ Error de red o ejecución:', err);
+				Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+			});
+	});
 });

@@ -35,29 +35,20 @@ const Parentesco = defineParentesco(sequelize, Sequelize.DataTypes);
 const ObraSocial = defineObraSocial(sequelize, Sequelize.DataTypes);
 const Usuario = defineUsuario(sequelize, Sequelize.DataTypes);
 const RolUsuario = defineRolUsuario(sequelize, Sequelize.DataTypes);
-const PersonalAdministrativo = definePersonalAdministrativo(
-	sequelize,
-	Sequelize.DataTypes
-);
+const PersonalAdministrativo = definePersonalAdministrativo(sequelize, Sequelize.DataTypes);
 const PersonalSalud = definePersonalSalud(sequelize, Sequelize.DataTypes);
 const Especialidad = defineEspecialidad(sequelize, Sequelize.DataTypes);
 const Sector = defineSector(sequelize, Sequelize.DataTypes);
 const Habitacion = defineHabitacion(sequelize, Sequelize.DataTypes);
 const Cama = defineCama(sequelize, Sequelize.DataTypes);
 const Movimiento = defineMovimiento(sequelize, Sequelize.DataTypes);
-const MovimientoHabitacion = defineMovimientoHabitacion(
-	sequelize,
-	Sequelize.DataTypes
-);
+const MovimientoHabitacion = defineMovimientoHabitacion(sequelize, Sequelize.DataTypes);
 const Admision = defineAdmision(sequelize, Sequelize.DataTypes);
-const RegistroHistoriaClinica = defineRegistroHistoriaClinica(
-	sequelize,
-	Sequelize.DataTypes
-);
+const RegistroHistoriaClinica = defineRegistroHistoriaClinica(sequelize, Sequelize.DataTypes);
 const MotivoIngreso = defineMotivoIngreso(sequelize, Sequelize.DataTypes);
 const TipoRegistro = defineTipoRegistro(sequelize, Sequelize.DataTypes);
 
-// Asociaciones internas (solo llama a associate si existe)
+// Asociaciones internas
 PersonalAdministrativo.associate?.({ Usuario, RolUsuario });
 PersonalSalud.associate?.({ Usuario, RolUsuario, Especialidad });
 Cama.associate?.({ Habitacion });
@@ -72,36 +63,29 @@ Admision.associate?.({
 	RegistroHistoriaClinica,
 });
 
-// Relaciones adicionales (solo las que no estén en associate)
+// Relaciones adicionales
 Paciente.belongsTo(Genero, { foreignKey: 'id_genero', as: 'genero' });
 Paciente.belongsTo(Localidad, { foreignKey: 'id_localidad', as: 'localidad' });
 Paciente.hasMany(Familiar, { foreignKey: 'id_paciente', as: 'familiares' });
 Paciente.hasMany(Admision, { foreignKey: 'id_paciente', as: 'admisiones' });
 
 Familiar.belongsTo(Paciente, { foreignKey: 'id_paciente', as: 'paciente' });
-Familiar.belongsTo(Parentesco, {
-	foreignKey: 'id_parentesco',
-	as: 'parentesco',
-});
+Familiar.belongsTo(Parentesco, { foreignKey: 'id_parentesco', as: 'parentesco' });
 
-// El resto de asociaciones de Admision ya están en su método associate
-
-MovimientoHabitacion.belongsTo(Admision, {
-	foreignKey: 'id_admision',
-	as: 'admision_relacionada',
-});
+// MovimientoHabitacion relaciones adicionales
 MovimientoHabitacion.belongsTo(Habitacion, {
 	foreignKey: 'id_habitacion',
 	as: 'habitacion_relacionada',
 });
 
+// ⚠️ RegistroHistoriaClinica usa alias distinto para evitar duplicado con 'admision'
 RegistroHistoriaClinica.belongsTo(TipoRegistro, {
 	foreignKey: 'id_tipo',
 	as: 'tipo_registro',
 });
 RegistroHistoriaClinica.belongsTo(Admision, {
 	foreignKey: 'id_admision',
-	as: 'admision',
+	as: 'admision_historia',
 });
 RegistroHistoriaClinica.belongsTo(Usuario, {
 	foreignKey: 'id_usuario',
@@ -117,7 +101,7 @@ Usuario.hasOne(PersonalSalud, {
 	as: 'personal_salud',
 });
 
-// Exportar cada modelo explícitamente para evitar conflictos
+// Exportar todos los modelos
 export {
 	sequelize,
 	Sequelize,

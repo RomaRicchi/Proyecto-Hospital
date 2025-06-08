@@ -136,6 +136,7 @@ export const ingresoEmergencia = async (req, res) => {
 			await MovimientoHabitacion.create({
 				id_admision: admision.id_admision,
 				id_habitacion: camaAsignada.id_habitacion,
+				id_cama: camaAsignada.id_cama, // <-- AGREGA ESTA LÍNEA
 				fecha_hora_ingreso,
 				fecha_hora_egreso: null,
 				id_mov: movIngreso ? movIngreso.id_mov : 1,

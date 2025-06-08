@@ -4,6 +4,7 @@ import {
 	ObraSocial,
 	Usuario,
 	Cama,
+	Habitacion,
 	MotivoIngreso,
 	MovimientoHabitacion,
 } from '../models/index.js';
@@ -184,80 +185,80 @@ export const buscarAdmisionVigente = async (req, res) => {
 
 export const darAltaPaciente = async (req, res) => {
 	try {
-		console.log('🔍 darAltaPaciente llamado:', req.params, req.body);
-
 		const { dni } = req.params;
 		const { fecha_hora_egreso, motivo_egr, id_personal_salud } = req.body;
 
-		// Validación básica
-		if (!fecha_hora_egreso || !motivo_egr || !id_personal_salud) {
-			return res.json({
-				success: false,
-				message: 'Todos los campos son obligatorios',
-			});
+		const paciente = await Paciente.findOne({ where: { dni_paciente: dni } });
+		if (!paciente) {
+			return res
+				.status(404)
+				.json({ success: false, message: 'Paciente no encontrado' });
 		}
 
-		// Buscar paciente
-		const paciente = await Paciente.findOne({ where: { dni_paciente: dni } });
-		if (!paciente)
-			return res.json({ success: false, message: 'Paciente no encontrado' });
-
-		// Buscar admisión activa
 		const admision = await Admision.findOne({
 			where: {
 				id_paciente: paciente.id_paciente,
 				fecha_hora_egreso: null,
 			},
 		});
-		if (!admision)
-			return res.json({ success: false, message: 'No hay admisión activa' });
+		if (!admision) {
+			return res
+				.status(404)
+				.json({ success: false, message: 'No hay admisión vigente' });
+		}
 
-		// Actualizar admisión con datos de alta
+		// 🔄 Actualizar admisión con egreso
 		admision.fecha_hora_egreso = fecha_hora_egreso;
 		admision.motivo_egr = motivo_egr;
 		admision.id_personal_salud = id_personal_salud;
 		await admision.save();
-		console.log('✅ Admisión actualizada');
 
-		// Buscar último movimiento de internación
-		const ultimoMovimiento = await MovimientoHabitacion.findOne({
-			where: { id_admision: admision.id_admision },
+		// 🔍 Buscar último movimiento activo
+		const ultimoMov = await MovimientoHabitacion.findOne({
+			where: {
+				id_admision: admision.id_admision,
+				id_mov: 1, // Ingresa/Ocupa
+				estado: 1,
+				fecha_hora_egreso: null,
+			},
 			order: [['fecha_hora_ingreso', 'DESC']],
 		});
 
-		if (ultimoMovimiento) {
-			// Crear nuevo movimiento de egreso
-			await MovimientoHabitacion.create({
-				id_admision: admision.id_admision,
-				id_habitacion: ultimoMovimiento.id_habitacion,
-				fecha_hora_ingreso: fecha_hora_egreso,
-				id_mov: 2, // ID del tipo "Egresa/Libera"
-				estado: 1,
-			});
-			console.log('✅ Movimiento registrado');
-
-			// Liberar cama ocupada
-			const cama = await Cama.findOne({
-				where: {
-					id_habitacion: ultimoMovimiento.id_habitacion,
-					estado: 1,
-				},
-			});
-
-			if (cama) {
-				cama.estado = 0;
-				await cama.save();
-				console.log('✅ Cama liberada');
-			} else {
-				console.warn('⚠️ No se encontró cama ocupada para liberar');
-			}
-		} else {
-			console.warn('⚠️ No se encontró movimiento previo de habitación');
+		if (!ultimoMov) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'No se encontró movimiento activo' });
 		}
 
-		res.json({ success: true });
+		// ✅ Marcar fecha egreso del movimiento anterior
+		ultimoMov.fecha_hora_egreso = fecha_hora_egreso;
+		await ultimoMov.save();
+
+		// 🆕 Registrar nuevo movimiento tipo egreso
+		await MovimientoHabitacion.create({
+			id_admision: admision.id_admision,
+			id_habitacion: ultimoMov.id_habitacion,
+			id_cama: ultimoMov.id_cama,
+			fecha_hora_ingreso: fecha_hora_egreso,
+			id_mov: 2, // Egresa/Libera
+			estado: 1,
+		});
+
+		// 🛏️ Liberar cama
+		const cama = await Cama.findByPk(ultimoMov.id_cama);
+		if (cama) {
+			cama.estado = 1; // libre
+			await cama.save();
+		}
+
+		return res.json({
+			success: true,
+			message: 'Alta registrada correctamente',
+		});
 	} catch (error) {
 		console.error('❌ Error en darAltaPaciente:', error);
-		res.json({ success: false, message: 'Error al dar de alta' });
+		res
+			.status(500)
+			.json({ success: false, message: 'Error inesperado del servidor' });
 	}
 };
