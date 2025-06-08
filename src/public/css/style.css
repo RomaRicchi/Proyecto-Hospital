@@ -146,12 +146,12 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: url('/img/doctor1.jpg') center/cover no-repeat;
+  background: url('/img/doctor1.png') center/cover no-repeat;
   z-index: -1;      
 }
 
 .login-hero {
-  background-image: url('/img/manos.jpg');
+  background-image: url('/img/manos.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
