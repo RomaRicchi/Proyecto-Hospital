@@ -89,7 +89,7 @@
 
 .hero {
   position: relative;
-  background-image: url('/img/medicina.jpg'); 
+  background-image: url('/img/medicina.webp'); 
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -146,12 +146,12 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: url('/img/doctor1.png') center/cover no-repeat;
+  background: url('/img/doctor1.webp') center/cover no-repeat;
   z-index: -1;      
 }
 
 .login-hero {
-  background-image: url('/img/manos.png');
+  background-image: url('/img/manos.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
