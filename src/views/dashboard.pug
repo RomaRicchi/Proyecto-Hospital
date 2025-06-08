@@ -6,10 +6,11 @@ block content
     p.text-black Bienvenido/a al sistema de gestión.
   
   .admin-hero
-    h1.mt-4 Panel
+    
     ol.breadcrumb.mb-4
-
-    // NUEVA SECCIÓN: Buscar camas disponibles por fecha
+    
+  
+    h1.mt-4 Nueva Admision
     .row.mb-4
       .col-12
         .card
@@ -26,45 +27,28 @@ block content
                     i.fas.fa-search.me-1
                     | Buscar camas libres
 
-    // Aquí se mostrará la tabla de resultados (datatable)
+  
     .row
       .col-12
         #tablaCamasContainer
 
-    .row
+    .row.mt-5.justify-content-center
+      // Botón Emergencias en formato card
       .col-xl-3.col-md-6
-        .card.bg-primary.text-white.mb-4
-          .card-body Total de pacientes
-          .card-footer.d-flex.align-items-center.justify-content-between
-            a.small.text-white.stretched-link(href="#") Ver detalles
-            div.small.text-white
-              i.fas.fa-angle-right
-
+        a.card.h-100.bg-danger.text-white.text-center.mb-4(href="/emergencias", style="text-decoration:none;")
+          .card-body.d-flex.flex-column.justify-content-center
+            i.fas.fa-exclamation-triangle.fa-2x.mb-2
+            h5 Emergencias
+         
+      // Botón Alta de Pacientes en formato card
       .col-xl-3.col-md-6
-        .card.bg-warning.text-white.mb-4
-          .card-body Altas médicas hoy
-          .card-footer.d-flex.align-items-center.justify-content-between
-            a.small.text-white.stretched-link(href="#") Ver registros
-            div.small.text-white
-              i.fas.fa-angle-right
+        a.card.h-100.bg-success.text-white.text-center.mb-4(href="/pacientes/alta", style="text-decoration:none;")
+          .card-body.d-flex.flex-column.justify-content-center
+            i.fas.fa-user-plus.fa-2x.mb-2
+            h5 Alta de Pacientes
+          
 
-      .col-xl-3.col-md-6
-        .card.bg-success.text-white.mb-4
-          .card-body Camas disponibles
-          .card-footer.d-flex.align-items-center.justify-content-between
-            a.small.text-white.stretched-link(href="#") Ver habitaciones
-            div.small.text-white
-              i.fas.fa-angle-right
-
-      .col-xl-3.col-md-6
-        .card.bg-danger.text-white.mb-4
-          .card-body Internaciones activas
-          .card-footer.d-flex.align-items-center.justify-content-between
-            a.small.text-white.stretched-link(href="#") Ver internaciones
-            div.small.text-white
-              i.fas.fa-angle-right
-
-    // En la sección head o justo antes de cerrar body
+    
     script(src="https://code.jquery.com/jquery-3.6.0.min.js")
     script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
     link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")        
