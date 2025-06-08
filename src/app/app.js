@@ -101,9 +101,5 @@ app.use('/api/tipos_registro', tipoRegistroRoutes);
 app.use('/api/emergencias', emergenciaRoutes);
 app.use('/', viewsRoutes);
 app.use('/', camaViewRoutes);
-app.get('/', (req, res) => {
-	res.redirect('/home'); // o a la vista que quieras mostrar primero
-});
-
 /* 🌐 Exportar app */
 export default app;
