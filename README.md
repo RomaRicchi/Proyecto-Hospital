@@ -156,3 +156,12 @@ Materia: Desarrollo Web II (2025)
 ## 📜 Licencia
 
 Este proyecto está licenciado bajo la **Licencia MIT**. Puedes usarlo, modificarlo y distribuirlo libremente bajo los términos de esta licencia.
+
+![image](https://github.com/user-attachments/assets/e9224155-3641-48e0-8c7c-8d7dcdf6db96)
+
+
+
+
+
+
+
