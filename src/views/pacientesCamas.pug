@@ -1,33 +1,32 @@
 extends layout_modular
 
 block content
-  h1.text-center.px-4.pt-5 Pacientes y Camas Asignadas
+  
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Pacientes y Camas Asignadas
 
-  table#tablaPacientesCamas.table.table-striped.table-bordered
-    thead
-      tr
-        th Nombre Completo
-        th Apellido
-        th DNI
-        th Género
-        th Cama Asignada
-    tbody
-      each item in pacientes_camas
-        tr
-          td #{item.nombre} #{item.apellido}
-          td= item.apellido
-          td= item.dni
-          td= item.genero
-          td #{item.cama_letra}#{item.cama_numero} - #{item.cama_sector}
+      table#tablaPacientesCamas.table.table-striped.table-bordered
+        thead
+          tr
+            th Nombre Completo
+            th Apellido
+            th DNI
+            th Género
+            th Cama Asignada
+            th Fecha Ingreso
+        tbody
+          each item in pacientes_camas
+            tr
+              td #{item.nombre} #{item.apellido}
+              td= item.apellido
+              td= item.dni
+              td= item.genero
+              td #{item.cama_letra}#{item.cama_numero} - #{item.cama_sector}
+              td= item.fecha_ingreso
 
-  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
-  link(rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
-  script.
-    $(document).ready(function() {
-      $('#tablaPacientesCamas').DataTable({
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
-        }
-      });
-    });
+      link(rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+      script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+      script(src="/js/pacientesCamas.js")

@@ -1,47 +1,49 @@
 extends layout_modular
 
 block content
-  h1.text-center.px-4.pt-5 Gestión de Usuarios
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Gestión de Usuarios
 
-  .table-responsive
-    table#tablaUsuarios.table.table-striped.table-bordered
-      thead
-        tr
-          th ID
-          th Username
-          th Tipo
-          th Rol
-          th Especialidad
-          th Estado
-          th Acciones
-      tbody
-        if usuarios && usuarios.length
-          each usuario in usuarios
+      .table-responsive
+        table#tablaUsuarios.table.table-striped.table-bordered
+          thead
             tr
-              td #{usuario.id_usuario}
-              td #{usuario.username}
-              td #{usuario.tipo} 
-              td #{usuario.rol}
-              td #{usuario.especialidad}
-              td #{usuario.estado}
-              td
-                button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=usuario.id_usuario)
-                  i.fas.fa-pen
-                button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=usuario.id_usuario)
-                  i.fas.fa-trash
-        else
-          //- Agregar fila vacía con las 7 celdas para evitar error de DataTable
-          tr
-            td(colspan="1") &nbsp;
-            td(colspan="1") &nbsp;
-            td(colspan="1") &nbsp;
-            td(colspan="1") &nbsp;
-            td(colspan="1") &nbsp;
-            td(colspan="1") &nbsp;
-            td(colspan="1") &nbsp;
+              th ID
+              th Username
+              th Tipo
+              th Rol
+              th Especialidad
+              th Estado
+              th Acciones
+          tbody
+            if usuarios && usuarios.length
+              each usuario in usuarios
+                tr
+                  td #{usuario.id_usuario}
+                  td #{usuario.username}
+                  td #{usuario.tipo} 
+                  td #{usuario.rol}
+                  td #{usuario.especialidad}
+                  td #{usuario.estado}
+                  td
+                    button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=usuario.id_usuario)
+                      i.fas.fa-pen
+                    button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=usuario.id_usuario)
+                      i.fas.fa-trash
+            else
+              //- Agregar fila vacía con las 7 celdas para evitar error de DataTable
+              tr
+                td(colspan="1") &nbsp;
+                td(colspan="1") &nbsp;
+                td(colspan="1") &nbsp;
+                td(colspan="1") &nbsp;
+                td(colspan="1") &nbsp;
+                td(colspan="1") &nbsp;
+                td(colspan="1") &nbsp;
 
-  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
-  script(src="https://code.jquery.com/jquery-3.7.1.min.js")
-  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
-  script(src="/js/usuario.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+      script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+      script(src="/js/usuario.js")

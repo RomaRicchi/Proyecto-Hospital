@@ -62,6 +62,11 @@ export default (sequelize, DataTypes) => {
 			foreignKey: 'id_mov',
 			as: 'tipo_movimiento',
 		});
+		MovimientoHabitacion.belongsTo(models.Admision, {
+			foreignKey: 'id_admision',
+			as: 'admision_relacionada', // este alias es clave
+		});
+
 	};
 
 	return MovimientoHabitacion;

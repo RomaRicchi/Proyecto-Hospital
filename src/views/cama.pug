@@ -1,48 +1,50 @@
 extends layout_modular
 
 block content
-  h1.text-center.px-4.pt-5 Gestión de Camas
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Gestión de Camas
 
-  .table-responsive
-    table#tablaCamas.table.table-striped.table-bordered
-      thead
-        tr
-          th ID Cama
-          th Nombre
-          th Habitación
-          th Desinfección
-          th Estado
-          th Acciones
-      tbody
-        if camas && camas.length
-          each cama in camas
+      .table-responsive
+        table#tablaCamas.table.table-striped.table-bordered
+          thead
             tr
-              td #{cama.id_cama}
-              td #{cama.nombre}
-              td #{cama.descripcionHabitacion}
-              td
-                if cama.desinfeccion
-                  span.badge.bg-success Sí
-                else
-                  span.badge.bg-secondary No
-              td
-                if cama.estado
-                  span.badge.bg-success Ocupada
-                else
-                  span.badge.bg-secondary Disponible
-              td
-                button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=cama.id_cama)
-                  i.fas.fa-pen
-                button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=cama.id_cama)
-                  i.fas.fa-trash
-        else
-          h1 No hay camas registradas.
+              th ID Cama
+              th Nombre
+              th Habitación
+              th Desinfección
+              th Estado
+              th Acciones
+          tbody
+            if camas && camas.length
+              each cama in camas
+                tr
+                  td #{cama.id_cama}
+                  td #{cama.nombre}
+                  td #{cama.descripcionHabitacion}
+                  td
+                    if cama.desinfeccion
+                      span.badge.bg-success Sí
+                    else
+                      span.badge.bg-secondary No
+                  td
+                    if cama.estado
+                      span.badge.bg-success Ocupada
+                    else
+                      span.badge.bg-secondary Disponible
+                  td
+                    button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=cama.id_cama)
+                      i.fas.fa-pen
+                    button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=cama.id_cama)
+                      i.fas.fa-trash
+            else
+              h1 No hay camas registradas.
 
-  // Librerías necesarias
-  script(src="https://code.jquery.com/jquery-3.7.1.min.js")
-  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-  script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
-  script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
-  script(src="/js/cama.js")
+      // Librerías necesarias
+      script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+      script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
+      script(src="/js/cama.js")
 
-  
+      

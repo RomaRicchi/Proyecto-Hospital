@@ -12,14 +12,14 @@ export const vistaPacientesCamas = async (req, res) => {
   try {
     const movimientos = await MovimientoHabitacion.findAll({
       where: {
-        id_mov: 1,
+        id_mov: 1, // Ingresa/Ocupa
         fecha_hora_egreso: null,
         estado: 1,
       },
       include: [
         {
           model: Admision,
-          as: 'admision', // ✅ alias corregido
+          as: 'admision_relacionada',
           include: [
             {
               model: Paciente,
@@ -43,7 +43,7 @@ export const vistaPacientesCamas = async (req, res) => {
     });
 
     const pacientes_camas = movimientos.map((mov) => {
-      const paciente = mov.admision?.paciente;
+      const paciente = mov.admision_relacionada?.paciente;
       const cama = mov.cama;
       const habitacion = cama?.habitacion;
       const sector = habitacion?.sector;
@@ -56,6 +56,7 @@ export const vistaPacientesCamas = async (req, res) => {
         cama_letra: cama?.nombre,
         cama_numero: habitacion?.num,
         cama_sector: sector?.nombre,
+        fecha_ingreso: mov.fecha_hora_ingreso?.toISOString().slice(0, 10), // ISO YYYY-MM-DD
       };
     });
 
