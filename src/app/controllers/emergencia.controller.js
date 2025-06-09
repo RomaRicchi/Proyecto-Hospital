@@ -11,8 +11,9 @@ import {
 } from '../models/index.js';
 import { Op } from 'sequelize';
 
-// Controlador principal para ingreso de emergencia
 export const ingresoEmergencia = async (req, res) => {
+	const sequelize = Admision.sequelize;
+	const t = await sequelize.transaction();
 	try {
 		const { fecha_hora_ingreso, sexo, identificador } = req.body;
 
@@ -22,40 +23,33 @@ export const ingresoEmergencia = async (req, res) => {
 
 		let paciente = await Paciente.findOne({
 			where: { dni_paciente: identificador },
+			transaction: t,
 		});
 
 		if (!paciente) {
-			paciente = await Paciente.create({
-				dni_paciente: identificador,
-				apellido_p: 'NN',
-				nombre_p: 'No identificado',
-				fecha_nac: null,
-				id_genero: sexo,
-				telefono: null,
-				direccion: null,
-				id_localidad: null,
-				email: null,
-				estado: 1,
-			});
+			paciente = await Paciente.create(
+				{
+					dni_paciente: identificador,
+					apellido_p: 'NN',
+					nombre_p: 'No identificado',
+					fecha_nac: null,
+					id_genero: sexo,
+					telefono: null,
+					direccion: null,
+					id_localidad: null,
+					email: null,
+					estado: 1,
+				},
+				{ transaction: t }
+			);
 		}
-
-		// Validar si ya existe una admisión activa para este paciente
-		// const admisionActiva = await Admision.findOne({
-		// 	where: {
-		// 		id_paciente: paciente.id_paciente,
-		// 		fecha_hora_egreso: null,
-		// 	},
-		// });
-		// if (admisionActiva) {
-		// 	return res.status(409).json({
-		// 		error: 'El paciente ya tiene una admisión activa.',
-		// 	});
-		// }
 
 		const obraSocial = await ObraSocial.findOne({
 			where: { nombre: { [Op.like]: '%Sin obra social%' } },
+			transaction: t,
 		});
 		if (!obraSocial) {
+			await t.rollback();
 			return res
 				.status(400)
 				.json({ error: 'No se encontró la obra social "Sin obra social".' });
@@ -63,28 +57,19 @@ export const ingresoEmergencia = async (req, res) => {
 
 		const motivo = await MotivoIngreso.findOne({
 			where: { tipo: { [Op.like]: '%emergencia%' } },
+			transaction: t,
 		});
 		if (!motivo) {
+			await t.rollback();
 			return res
 				.status(400)
 				.json({ error: 'No se encontró el motivo "Ingreso por emergencia".' });
 		}
 
-		const admision = await Admision.create({
-			id_paciente: paciente.id_paciente,
-			id_obra_social: obraSocial.id_obra_social,
-			num_asociado: identificador,
-			fecha_hora_ingreso,
-			id_motivo: motivo.id_motivo,
-			descripcion: 'Ingreso por emergencia',
-			fecha_hora_egreso: null,
-			motivo_egr: null,
-			id_personal_salud: null,
-		});
-
 		const camasLibres = await Cama.findAll({
 			where: { estado: 0 },
 			include: [{ model: Habitacion, as: 'habitacion' }],
+			transaction: t,
 		});
 
 		let camaAsignada = null;
@@ -108,6 +93,7 @@ export const ingresoEmergencia = async (req, res) => {
 						],
 					},
 				],
+				transaction: t,
 			});
 
 			if (movimientosActivos.length === 0) {
@@ -129,21 +115,42 @@ export const ingresoEmergencia = async (req, res) => {
 		}
 
 		if (camaAsignada) {
+			const admision = await Admision.create(
+				{
+					id_paciente: paciente.id_paciente,
+					id_obra_social: obraSocial.id_obra_social,
+					num_asociado: identificador,
+					fecha_hora_ingreso,
+					id_motivo: motivo.id_motivo,
+					descripcion: 'Ingreso por emergencia',
+					fecha_hora_egreso: null,
+					motivo_egr: null,
+					id_personal_salud: null,
+				},
+				{ transaction: t }
+			);
+
 			const movIngreso = await Movimiento.findOne({
 				where: { nombre: { [Op.like]: '%Ingresa%' } },
+				transaction: t,
 			});
 
-			await MovimientoHabitacion.create({
-				id_admision: admision.id_admision,
-				id_habitacion: camaAsignada.id_habitacion,
-				id_cama: camaAsignada.id_cama, // <-- AGREGA ESTA LÍNEA
-				fecha_hora_ingreso,
-				fecha_hora_egreso: null,
-				id_mov: movIngreso ? movIngreso.id_mov : 1,
-				estado: 1,
-			});
+			await MovimientoHabitacion.create(
+				{
+					id_admision: admision.id_admision,
+					id_habitacion: camaAsignada.id_habitacion,
+					id_cama: camaAsignada.id_cama,
+					fecha_hora_ingreso,
+					fecha_hora_egreso: null,
+					id_mov: movIngreso ? movIngreso.id_mov : 1,
+					estado: 1,
+				},
+				{ transaction: t }
+			);
 
-			await camaAsignada.update({ estado: 1 });
+			await camaAsignada.update({ estado: 1 }, { transaction: t });
+
+			await t.commit();
 
 			return res.status(200).json({
 				mensaje: 'Paciente ingresado y cama asignada correctamente.',
@@ -157,11 +164,13 @@ export const ingresoEmergencia = async (req, res) => {
 				cama: camaAsignada.nombre,
 			});
 		} else {
+			await t.rollback();
 			return res.status(409).json({
 				error: 'No hay camas disponibles compatibles con el sexo del paciente.',
 			});
 		}
 	} catch (error) {
+		if (t) await t.rollback();
 		console.error(error);
 		return res
 			.status(500)
