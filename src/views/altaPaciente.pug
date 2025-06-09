@@ -4,8 +4,9 @@ block content
   .gral-hero.d-flex.align-items-center.justify-content-center.text-center
     .gral-hero-content
       h1.text-center.px-4.pt-5 Alta de Paciente
-        // 🔍 Formulario para buscar paciente por DNI
-      form#buscarPacienteForm(method='GET')
+
+      // 🔍 Formulario para buscar paciente por DNI (sin method GET para evitar recarga)
+      form#buscarPacienteForm
         .mb-3
           label(for='dni') DNI del Paciente
           input#dni.form-control(type='number', name='dni', required)
@@ -13,14 +14,13 @@ block content
           i.fas.fa-search.me-1
           | Buscar
 
-        // 📋 Resultado dinámico (paciente + admisión + formulario alta)
-        #resultadoBusqueda
+      // 📋 Resultado dinámico (paciente + admisión + formulario alta)
+      #resultadoBusqueda
 
-
+block scripts
   link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
   script(src="https://code.jquery.com/jquery-3.7.1.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
   script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
   script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
   script(src="/js/altaPaciente.js")
-
