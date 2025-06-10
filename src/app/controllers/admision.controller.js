@@ -91,7 +91,6 @@ export const vistaAdmisiones = async (req, res) => {
 
 		res.render('admision', { admisiones: adaptados });
 	} catch (error) {
-		console.error('Error al cargar vista de admisiones:', error);
 		res.status(500).send('Error al mostrar admisiones');
 	}
 };
@@ -191,7 +190,6 @@ export const buscarAdmisionVigente = async (req, res) => {
 
 		res.json({ success: true, paciente, admision });
 	} catch (error) {
-		console.error('Error al buscar admisión vigente:', error);
 		res.json({ success: false, message: 'Error interno del servidor' });
 	}
 };
@@ -269,7 +267,6 @@ export const darAltaPaciente = async (req, res) => {
 			message: 'Alta registrada correctamente',
 		});
 	} catch (error) {
-		console.error('❌ Error en darAltaPaciente:', error);
 		res
 			.status(500)
 			.json({ success: false, message: 'Error inesperado del servidor' });

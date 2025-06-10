@@ -60,7 +60,6 @@ export const vistaPacientes = async (req, res) => {
 
 		res.render('paciente', { pacientes: pacientesAdaptados || [] });
 	} catch (error) {
-		console.error('Error al listar pacientes:', error);
 		res.status(500).send('Error en el servidor');
 	}
 };
@@ -76,7 +75,6 @@ export const vistaPacienteNuevo = async (req, res) => {
 
 		res.render('pacienteNuevo', { generos, localidades });
 	} catch (error) {
-		console.error('Error cargando nuevo paciente:', error);
 		res.status(500).send('Error al cargar formulario de paciente');
 	}
 };

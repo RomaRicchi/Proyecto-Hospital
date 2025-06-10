@@ -1,6 +1,4 @@
 $(document).ready(function () {
-	console.log('Inicializando DataTable para sectores...');
-
 	const tabla = $('#tablaSector');
 	if (tabla.length) {
 		fetch('/api/sectores')
@@ -52,11 +50,9 @@ $(document).ready(function () {
 				});
 			})
 			.catch((error) => {
-				console.error('Error al cargar sectores:', error);
 				Swal.fire('Error', 'No se pudo cargar los sectores.', 'error');
 			});
 	} else {
-		console.warn('Tabla #tablaSector no encontrada.');
 	}
 
 	// Agregar nuevo sector
@@ -120,8 +116,8 @@ $(document).ready(function () {
 							body: JSON.stringify(result.value),
 						})
 							.then(() =>
-								Swal.fire('Actualizado', 'Sector modificado', 'success').then(() =>
-									location.reload()
+								Swal.fire('Actualizado', 'Sector modificado', 'success').then(
+									() => location.reload()
 								)
 							)
 							.catch(() =>

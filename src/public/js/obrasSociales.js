@@ -1,6 +1,4 @@
 $(document).ready(function () {
-	console.log('Inicializando DataTable para obras sociales...');
-
 	const tabla = $('#tablaObraSocial');
 	if (tabla.length) {
 		fetch('/api/obras-sociales') // 🟢 Corrección ruta
@@ -51,7 +49,6 @@ $(document).ready(function () {
 				});
 			})
 			.catch((error) => {
-				console.error('Error al cargar obras sociales:', error);
 				Swal.fire('Error', 'No se pudo cargar las obras sociales.', 'error');
 			});
 	}
@@ -155,6 +152,4 @@ $(document).ready(function () {
 			}
 		});
 	});
-
-
 });

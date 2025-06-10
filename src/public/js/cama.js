@@ -35,8 +35,14 @@ $(document).ready(function () {
 				<input id="swal-nombre" class="swal2-input" placeholder="Nombre">
 				<select id="swal-id_habitacion" class="swal2-input">
 					<option disabled selected value="">Seleccionar habitación</option>
-					${habitaciones.map(h =>
-						`<option value="${h.id_habitacion}">Habitación ${h.num} - ${h.sector?.nombre || 'Sin sector'}</option>`).join('')}
+					${habitaciones
+						.map(
+							(h) =>
+								`<option value="${h.id_habitacion}">Habitación ${h.num} - ${
+									h.sector?.nombre || 'Sin sector'
+								}</option>`
+						)
+						.join('')}
 				</select>
 				<div id="detalle-habitacion" class="text-start p-2 border rounded" style="background-color: #f8f9fa;">
 					Selecciona una habitación para ver detalles.
@@ -60,16 +66,20 @@ $(document).ready(function () {
 
 				select.addEventListener('change', function () {
 					const selectedId = this.value;
-					const habitacion = habitaciones.find(h => h.id_habitacion == selectedId);
+					const habitacion = habitaciones.find(
+						(h) => h.id_habitacion == selectedId
+					);
 					if (habitacion) {
 						const camasNombres = habitacion.camas?.length
-							? habitacion.camas.map(c => c.nombre).join(', ')
+							? habitacion.camas.map((c) => c.nombre).join(', ')
 							: 'No hay camas registradas';
 
 						detalleDiv.innerHTML = `
 							<strong>Sector:</strong> ${habitacion.sector?.nombre || 'Sin sector'}<br>
 							<strong>Número Habitación:</strong> ${habitacion.num}<br>
-							<strong>Camas en Habitación:</strong> ${habitacion.camas?.length || 0} (${camasNombres})
+							<strong>Camas en Habitación:</strong> ${
+								habitacion.camas?.length || 0
+							} (${camasNombres})
 						`;
 					}
 				});
@@ -86,7 +96,7 @@ $(document).ready(function () {
 				}
 
 				return { nombre, id_habitacion, desinfeccion, estado };
-			}
+			},
 		}).then((result) => {
 			if (result.isConfirmed) {
 				fetch('/api/camas', {
@@ -118,15 +128,18 @@ $(document).on('click', '.edit-btn', async function () {
 		const habitaciones = await cargarHabitaciones();
 
 		let opcionesHabitacion = '';
-		habitaciones.forEach(hab => {
-			const selected = hab.id_habitacion == cama.id_habitacion ? 'selected' : '';
+		habitaciones.forEach((hab) => {
+			const selected =
+				hab.id_habitacion == cama.id_habitacion ? 'selected' : '';
 			opcionesHabitacion += `<option value="${hab.id_habitacion}" ${selected}>${hab.num} - ${hab.sector.nombre}</option>`;
 		});
 
 		Swal.fire({
 			title: 'Editar Cama',
 			html: `
-				<input id="swal-nombre" class="swal2-input" value="${cama.nombre}" placeholder="Nombre">
+				<input id="swal-nombre" class="swal2-input" value="${
+					cama.nombre
+				}" placeholder="Nombre">
 				<select id="swal-id_habitacion" class="swal2-input">${opcionesHabitacion}</select>
 				<div id="detalle-habitacion" class="text-start p-2 border rounded" style="background-color: #f8f9fa; margin-top: 10px;">
 					Selecciona una habitación para ver detalles
@@ -148,10 +161,12 @@ $(document).on('click', '.edit-btn', async function () {
 				const select = document.getElementById('swal-id_habitacion');
 				const detalleDiv = document.getElementById('detalle-habitacion');
 
-				const habInicial = habitaciones.find(h => h.id_habitacion == cama.id_habitacion);
+				const habInicial = habitaciones.find(
+					(h) => h.id_habitacion == cama.id_habitacion
+				);
 				if (habInicial) {
 					const camasNombres = habInicial.camas?.length
-						? habInicial.camas.map(c => c.nombre).join(', ')
+						? habInicial.camas.map((c) => c.nombre).join(', ')
 						: 'No hay camas registradas';
 					detalleDiv.innerHTML = `
 						<strong>Sector:</strong> ${habInicial.sector.nombre}<br>
@@ -161,18 +176,22 @@ $(document).on('click', '.edit-btn', async function () {
 				}
 
 				select.addEventListener('change', function () {
-					const habitacion = habitaciones.find(h => h.id_habitacion == this.value);
+					const habitacion = habitaciones.find(
+						(h) => h.id_habitacion == this.value
+					);
 					if (habitacion) {
-						const camasNombres = habitacion.camas.length > 0
-							? habitacion.camas.map(c => c.nombre).join(', ')
-							: 'No hay camas registradas';
+						const camasNombres =
+							habitacion.camas.length > 0
+								? habitacion.camas.map((c) => c.nombre).join(', ')
+								: 'No hay camas registradas';
 						detalleDiv.innerHTML = `
 							<strong>Sector:</strong> ${habitacion.sector.nombre}<br>
 							<strong>Número Habitación:</strong> ${habitacion.num}<br>
 							<strong>Camas en Habitación:</strong> ${habitacion.camas.length} (${camasNombres})
 						`;
 					} else {
-						detalleDiv.innerHTML = 'No se encontró información para la habitación seleccionada';
+						detalleDiv.innerHTML =
+							'No se encontró información para la habitación seleccionada';
 					}
 				});
 			},
@@ -194,15 +213,18 @@ $(document).on('click', '.edit-btn', async function () {
 						return response.json().catch(() => ({}));
 					})
 					.then(() =>
-						Swal.fire('Actualizado', 'Cama modificada con éxito', 'success').then(() =>
-							location.reload()
-						)
+						Swal.fire(
+							'Actualizado',
+							'Cama modificada con éxito',
+							'success'
+						).then(() => location.reload())
 					)
-					.catch(() => Swal.fire('Error', 'No se pudo actualizar la cama', 'error'));
+					.catch(() =>
+						Swal.fire('Error', 'No se pudo actualizar la cama', 'error')
+					);
 			}
 		});
 	} catch (error) {
-		console.error('Error al obtener datos para editar cama:', error);
 		Swal.fire('Error', 'No se pudo cargar los datos para editar', 'error');
 	}
 });
@@ -238,7 +260,6 @@ async function cargarHabitaciones() {
 		if (!response.ok) throw new Error('No se pudieron cargar habitaciones');
 		return await response.json();
 	} catch (error) {
-		console.error(error);
 		return [];
 	}
 }

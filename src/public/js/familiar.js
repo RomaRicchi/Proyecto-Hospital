@@ -1,6 +1,4 @@
 $(document).ready(function () {
-	console.log('Inicializando DataTable para familiares...');
-
 	const tabla = $('#tablaFamiliar');
 	if (tabla.length) {
 		const dataTable = tabla.DataTable({

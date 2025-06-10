@@ -39,7 +39,6 @@ router.get('/home', async (req, res) => {
 				foto: user.picture.medium,
 			}));
 		} catch (apiError) {
-			console.error('❌ Error en randomuser.me. Se usarán médicos de prueba.');
 			medicos = Array.from({ length: 12 }, (_, i) => ({
 				nombre: `Dr/a. Emergencia ${i + 1}`,
 				especialidad: listaEsp[i % listaEsp.length] || 'General',
@@ -49,7 +48,6 @@ router.get('/home', async (req, res) => {
 
 		res.render('inicio', { listaObras, listaEsp, medicos });
 	} catch (err) {
-		console.error('❌ Error cargando datos públicos:', err);
 		res.status(500).send('Error al cargar la página principal');
 	}
 });

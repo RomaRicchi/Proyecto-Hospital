@@ -214,12 +214,6 @@ $(document).on('click', '.btn-asignar-paciente', function () {
 
 // Paso 4: Formulario de admisión y creación de movimiento
 async function formularioAdmision(paciente, id_cama, id_habitacion) {
-	console.log(
-		'Entrando a formularioAdmision',
-		paciente,
-		id_cama,
-		id_habitacion
-	);
 	// Cargar selects desde la base de datos
 	const motivos = await fetch('/api/motivos_ingreso').then((r) => r.json());
 	const obras = await fetch('/api/obras-sociales').then((r) => r.json());
@@ -256,7 +250,6 @@ async function formularioAdmision(paciente, id_cama, id_habitacion) {
         </select>
     `,
 		preConfirm: () => {
-			console.log('Entrando a preConfirm de admisión');
 			const id_obra_social =
 				Swal.getPopup().querySelector('#id_obra_social').value;
 			const num_asociado = Swal.getPopup().querySelector('#num_asociado').value;
@@ -292,7 +285,6 @@ async function formularioAdmision(paciente, id_cama, id_habitacion) {
 		},
 	}).then(async (result) => {
 		if (result.isConfirmed) {
-			console.log('Swal de admisión confirmado');
 			const admision = await fetch('/api/admisiones', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -308,9 +300,7 @@ async function formularioAdmision(paciente, id_cama, id_habitacion) {
 					id_personal_salud: result.value.id_personal_salud,
 				}),
 			}).then((r) => r.json());
-			console.log('Respuesta de admisión:', admision);
 			// Crear movimiento habitación y manejar error de género
-			console.log('Enviando movimiento habitación');
 			const resp = await fetch('/api/movimientos_habitacion', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -327,10 +317,6 @@ async function formularioAdmision(paciente, id_cama, id_habitacion) {
 
 			if (!resp.ok) {
 				const data = await resp.json();
-				console.log(
-					'Mostrando Swal de error por conflicto de género:',
-					data.message
-				);
 				Swal.fire(
 					'Error',
 					data.message || 'No se pudo asignar la cama',
@@ -339,7 +325,6 @@ async function formularioAdmision(paciente, id_cama, id_habitacion) {
 				return;
 			}
 
-			console.log('Mostrando Swal de admisión exitosa');
 			Swal.fire(
 				'Listo',
 				'Paciente asignado y admitido correctamente',

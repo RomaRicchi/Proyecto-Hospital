@@ -34,9 +34,6 @@ const mostrarInicio = async (req, res) => {
 				foto: user.picture.medium,
 			}));
 		} catch (apiError) {
-			console.error(
-				'❌ Error consultando RandomUser, usando médicos de emergencia.'
-			);
 			medicos = Array.from({ length: 12 }, (_, i) => ({
 				nombre: `Dr/a. Emergencia ${i + 1}`,
 				especialidad:
@@ -48,7 +45,6 @@ const mostrarInicio = async (req, res) => {
 
 		res.render('inicio', { listaObras, listaEsp, medicos });
 	} catch (error) {
-		console.error('Error al cargar datos públicos:', error);
 		res.status(500).send('Error cargando datos públicos');
 	}
 };

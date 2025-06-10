@@ -1,6 +1,4 @@
 $(document).ready(function () {
-	console.log('Inicializando DataTable para motivos de ingreso...');
-
 	const tabla = $('#tablaMotivoIngreso');
 	if (tabla.length) {
 		fetch('/api/motivos_ingreso')
@@ -20,8 +18,13 @@ $(document).ready(function () {
 				]);
 
 				const dataTable = tabla.DataTable({
-					language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
-					paging: true, pageLength: 5, searching: true, ordering: true,
+					language: {
+						url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+					},
+					paging: true,
+					pageLength: 5,
+					searching: true,
+					ordering: true,
 					data: dataSet,
 					columns: [
 						{ title: 'ID' },
@@ -48,7 +51,6 @@ $(document).ready(function () {
 				});
 			})
 			.catch((error) => {
-				console.error('Error al cargar motivos:', error);
 				Swal.fire('Error', 'No se pudo cargar los motivos.', 'error');
 			});
 	}
@@ -75,12 +77,17 @@ $(document).ready(function () {
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(result.value),
 				})
-					.then(() => Swal.fire('Guardado', 'Motivo creado', 'success').then(() => location.reload()))
-					.catch(() => Swal.fire('Error', 'No se pudo crear el motivo', 'error'));
+					.then(() =>
+						Swal.fire('Guardado', 'Motivo creado', 'success').then(() =>
+							location.reload()
+						)
+					)
+					.catch(() =>
+						Swal.fire('Error', 'No se pudo crear el motivo', 'error')
+					);
 			}
 		});
 	});
-
 
 	// 🔸 Editar motivo
 	$(document).on('click', '.edit-btn', function () {
@@ -107,8 +114,14 @@ $(document).ready(function () {
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify(result.value),
 						})
-							.then(() => Swal.fire('Actualizado', 'Motivo modificado', 'success').then(() => location.reload()))
-							.catch(() => Swal.fire('Error', 'No se pudo actualizar el motivo', 'error'));
+							.then(() =>
+								Swal.fire('Actualizado', 'Motivo modificado', 'success').then(
+									() => location.reload()
+								)
+							)
+							.catch(() =>
+								Swal.fire('Error', 'No se pudo actualizar el motivo', 'error')
+							);
 					}
 				});
 			});
@@ -127,8 +140,14 @@ $(document).ready(function () {
 		}).then((result) => {
 			if (result.isConfirmed) {
 				fetch(`/api/motivos_ingreso/${id}`, { method: 'DELETE' })
-					.then(() => Swal.fire('Eliminado', 'Motivo eliminado', 'success').then(() => location.reload()))
-					.catch(() => Swal.fire('Error', 'No se pudo eliminar el motivo', 'error'));
+					.then(() =>
+						Swal.fire('Eliminado', 'Motivo eliminado', 'success').then(() =>
+							location.reload()
+						)
+					)
+					.catch(() =>
+						Swal.fire('Error', 'No se pudo eliminar el motivo', 'error')
+					);
 			}
 		});
 	});

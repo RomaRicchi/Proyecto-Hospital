@@ -43,7 +43,6 @@ export const getUsuarios = async (req, res) => {
 
 		res.json(adaptados);
 	} catch (error) {
-		console.error('Error al obtener usuarios:', error);
 		res.status(500).json({ message: 'Error al obtener usuarios' });
 	}
 };
@@ -84,7 +83,6 @@ export const vistaUsuarios = async (req, res) => {
 
 		res.render('usuario', { usuarios: usuariosAdaptados });
 	} catch (error) {
-		console.error('Error al renderizar vista de usuarios:', error);
 		res.status(500).send('Error al mostrar usuarios');
 	}
 };
@@ -144,7 +142,6 @@ export const createUsuario = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('❌ Error al crear usuario:', error);
 		res.status(500).json({ message: 'Error al registrar el usuario' });
 	}
 };

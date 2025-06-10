@@ -1,6 +1,4 @@
 $(document).ready(function () {
-	console.log('Inicializando DataTable para movimientos habitación...');
-
 	const tabla = $('#tablaMovimientosHabitacion');
 
 	if (tabla.length) {
@@ -77,7 +75,6 @@ $(document).ready(function () {
 				});
 			})
 			.catch((error) => {
-				console.error('Error al cargar movimientos habitación:', error);
 				$('#tablaMovimientosHabitacion').html(
 					'<tr><td colspan="10" class="text-center">No se pudo cargar los movimientos habitación.</td></tr>'
 				);

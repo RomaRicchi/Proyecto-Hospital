@@ -53,15 +53,12 @@ export const deleteMovimiento = async (req, res) => {
 	}
 };
 
-
-
 // 🔸 Vista Pug para movimientos
 export const vistaMovimientos = async (req, res) => {
-  try {
-    const movimientos = await Movimiento.findAll();
-    res.render('movimiento', { movimientos });
-  } catch (error) {
-    console.error('Error al cargar vista de movimientos:', error);
-    res.status(500).send('Error al cargar movimientos');
-  }
+	try {
+		const movimientos = await Movimiento.findAll();
+		res.render('movimiento', { movimientos });
+	} catch (error) {
+		res.status(500).send('Error al cargar movimientos');
+	}
 };

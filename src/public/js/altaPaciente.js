@@ -89,8 +89,6 @@ $(document).ready(function () {
 			id_personal_salud: $('#idUsuario').val(),
 		};
 
-		console.log('🟢 Enviando POST al backend con:', payload);
-
 		fetch(`/api/admisiones/paciente/${dni}/alta`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -99,13 +97,11 @@ $(document).ready(function () {
 			.then(async (res) => {
 				if (!res.ok) {
 					const errorText = await res.text();
-					console.error('❌ Error no-OK:', errorText);
 					Swal.fire('Error', 'Error inesperado del servidor', 'error');
 					return;
 				}
 
 				const data = await res.json();
-				console.log('✅ Respuesta del backend:', data);
 
 				if (data.success) {
 					Swal.fire(
@@ -118,7 +114,6 @@ $(document).ready(function () {
 				}
 			})
 			.catch((err) => {
-				console.error('❌ Error de red o ejecución:', err);
 				Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
 			});
 	});

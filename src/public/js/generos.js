@@ -1,6 +1,4 @@
 $(document).ready(function () {
-	console.log('Inicializando DataTable para géneros...');
-
 	const tabla = $('#tablaGenero');
 	if (tabla.length) {
 		fetch('/api/genero')
@@ -53,11 +51,9 @@ $(document).ready(function () {
 				});
 			})
 			.catch((error) => {
-				console.error('Error al cargar géneros:', error);
 				Swal.fire('Error', 'No se pudo cargar los géneros.', 'error');
 			});
 	} else {
-		console.warn('Tabla #tablaGenero no encontrada.');
 	}
 
 	// Botón para agregar nuevo género

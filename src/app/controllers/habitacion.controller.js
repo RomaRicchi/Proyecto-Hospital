@@ -11,7 +11,6 @@ export const getHabitaciones = async (req, res) => {
 		});
 		res.json(habitaciones);
 	} catch (error) {
-		console.error('Error al obtener habitaciones:', error);
 		res.status(500).json({ message: 'Error al obtener habitaciones' });
 	}
 };
@@ -30,7 +29,6 @@ export const getHabitacionById = async (req, res) => {
 		}
 		res.json(habitacion);
 	} catch (error) {
-		console.error('Error al obtener habitación:', error);
 		res.status(500).json({ message: 'Error al obtener habitación' });
 	}
 };
@@ -54,7 +52,6 @@ export const vistaHabitaciones = async (req, res) => {
 
 		res.render('habitacion', { habitaciones: habitacionesAdaptadas });
 	} catch (error) {
-		console.error('Error al mostrar habitaciones:', error);
 		res.status(500).send('Error interno al mostrar habitaciones');
 	}
 };
@@ -73,7 +70,6 @@ export const createHabitacion = async (req, res) => {
 		});
 		res.status(201).json(habitacion);
 	} catch (error) {
-		console.error('Error al crear habitación:', error);
 		res.status(500).json({ message: 'Error al crear habitación' });
 	}
 };
@@ -98,7 +94,6 @@ export const updateHabitacion = async (req, res) => {
 		});
 		res.json(habitacion);
 	} catch (error) {
-		console.error('Error al actualizar habitación:', error);
 		res.status(500).json({ message: 'Error al actualizar habitación' });
 	}
 };
@@ -115,7 +110,6 @@ export const deleteHabitacion = async (req, res) => {
 		await habitacion.destroy();
 		res.status(204).send();
 	} catch (error) {
-		console.error('Error al eliminar habitación:', error);
 		res.status(500).json({ message: 'Error al eliminar habitación' });
 	}
 };

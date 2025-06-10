@@ -180,7 +180,6 @@ export const ingresoEmergencia = async (req, res) => {
 		}
 	} catch (error) {
 		if (t) await t.rollback();
-		console.error(error);
 		return res
 			.status(500)
 			.json({ error: 'Error en el ingreso de emergencia.' });

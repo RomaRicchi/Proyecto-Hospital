@@ -1,6 +1,4 @@
 $(document).ready(function () {
-	console.log('Inicializando DataTable para habitaciones...');
-
 	const tabla = $('#tablaHabitacion');
 	if (tabla.length) {
 		fetch('/api/habitaciones')
@@ -55,7 +53,6 @@ $(document).ready(function () {
 				});
 			})
 			.catch((error) => {
-				console.error('Error al cargar habitaciones:', error);
 				Swal.fire('Error', 'No se pudieron cargar las habitaciones.', 'error');
 			});
 	}
@@ -104,7 +101,6 @@ $(document).ready(function () {
 				}
 			});
 		} catch (error) {
-			console.error('Error cargando opciones:', error);
 			Swal.fire('Error', 'No se pudieron cargar sectores.', 'error');
 		}
 	});
@@ -162,7 +158,6 @@ $(document).ready(function () {
 				}
 			});
 		} catch (error) {
-			console.error('Error al cargar habitación:', error);
 			Swal.fire('Error', 'No se pudo cargar la habitación.', 'error');
 		}
 	});

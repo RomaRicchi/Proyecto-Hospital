@@ -42,7 +42,6 @@ export const verificarGenero = async (req, res) => {
 		}
 		return res.json({ ok: true });
 	} catch (error) {
-		console.error('Error en verificarGenero:', error);
 		res.status(500).json({ message: 'Error al verificar género' });
 	}
 };
@@ -85,7 +84,6 @@ export const getMovimientosHabitacion = async (req, res) => {
 		});
 		res.json(movimientos);
 	} catch (error) {
-		console.error('Error al obtener movimientos habitación:', error);
 		res
 			.status(500)
 			.json({ message: 'Error al obtener movimientos habitación' });
@@ -114,7 +112,6 @@ export const getMovimientoHabitacionById = async (req, res) => {
 			return res.status(404).json({ message: 'Movimiento no encontrado' });
 		res.json(movimiento);
 	} catch (error) {
-		console.error('Error al obtener movimiento:', error);
 		res.status(500).json({ message: 'Error al obtener movimiento habitación' });
 	}
 };
@@ -204,7 +201,6 @@ export const createMovimientoHabitacion = async (req, res) => {
 
 		res.status(201).json(nuevo);
 	} catch (error) {
-		console.error('Error al crear movimiento:', error);
 		res.status(500).json({ message: 'Error al crear movimiento habitación' });
 	}
 };
@@ -237,7 +233,6 @@ export const updateMovimientoHabitacion = async (req, res) => {
 		});
 		res.json(movimiento);
 	} catch (error) {
-		console.error('Error al actualizar movimiento:', error);
 		res
 			.status(500)
 			.json({ message: 'Error al actualizar movimiento habitación' });
@@ -254,7 +249,6 @@ export const deleteMovimientoHabitacion = async (req, res) => {
 		await movimiento.destroy();
 		res.sendStatus(204);
 	} catch (error) {
-		console.error('Error al eliminar movimiento:', error);
 		res
 			.status(500)
 			.json({ message: 'Error al eliminar movimiento habitación' });
@@ -281,7 +275,6 @@ export const vistaMovimientosHabitacion = async (req, res) => {
 		});
 		res.render('movHabitacion', { movimientos }); // ← nombre de tu archivo pug y variable
 	} catch (error) {
-		console.error('Error al cargar vista:', error);
 		res.status(500).send('Error al cargar movimientos habitación');
 	}
 };
@@ -304,7 +297,6 @@ export const reservarCama = async (req, res) => {
 
 		res.send('Cama reservada');
 	} catch (error) {
-		console.error('Error al reservar cama:', error);
 		res.status(500).send('Error al reservar cama');
 	}
 };

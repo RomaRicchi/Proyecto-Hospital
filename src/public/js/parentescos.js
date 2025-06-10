@@ -1,6 +1,4 @@
 $(document).ready(function () {
-	console.log('Inicializando DataTable para parentescos...');
-
 	const tabla = $('#tablaParentesco');
 	if (tabla.length) {
 		fetch('/api/parentescos')
@@ -20,8 +18,13 @@ $(document).ready(function () {
 				]);
 
 				const dataTable = tabla.DataTable({
-					language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
-					paging: true, pageLength: 5, searching: true, ordering: true,
+					language: {
+						url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+					},
+					paging: true,
+					pageLength: 5,
+					searching: true,
+					ordering: true,
 					data: dataSet,
 					columns: [
 						{ title: 'ID' },
@@ -48,7 +51,6 @@ $(document).ready(function () {
 				});
 			})
 			.catch((error) => {
-				console.error('Error al cargar parentescos:', error);
 				Swal.fire('Error', 'No se pudo cargar los parentescos.', 'error');
 			});
 	}
@@ -75,15 +77,21 @@ $(document).ready(function () {
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(result.value),
 				})
-					.then(() => Swal.fire('Guardado', 'Parentesco creado', 'success').then(() => location.reload()))
-					.catch(() => Swal.fire('Error', 'No se pudo crear el parentesco', 'error'));
+					.then(() =>
+						Swal.fire('Guardado', 'Parentesco creado', 'success').then(() =>
+							location.reload()
+						)
+					)
+					.catch(() =>
+						Swal.fire('Error', 'No se pudo crear el parentesco', 'error')
+					);
 			}
 		});
 	});
 
 	// 🔸 Formulario superior de agregar parentesco
 	$('form').on('submit', function (e) {
-		e.preventDefault();  // Evitar recarga
+		e.preventDefault(); // Evitar recarga
 		const nombre = $('#nombre').val().trim();
 
 		if (!nombre) {
@@ -101,11 +109,13 @@ $(document).ready(function () {
 				return response.json();
 			})
 			.then(() =>
-				Swal.fire('Guardado', 'Parentesco creado con éxito', 'success').then(() =>
-					location.reload()
+				Swal.fire('Guardado', 'Parentesco creado con éxito', 'success').then(
+					() => location.reload()
 				)
 			)
-			.catch(() => Swal.fire('Error', 'No se pudo crear el parentesco', 'error'));
+			.catch(() =>
+				Swal.fire('Error', 'No se pudo crear el parentesco', 'error')
+			);
 	});
 
 	// 🔸 Editar parentesco
@@ -133,8 +143,20 @@ $(document).ready(function () {
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify(result.value),
 						})
-							.then(() => Swal.fire('Actualizado', 'Parentesco modificado', 'success').then(() => location.reload()))
-							.catch(() => Swal.fire('Error', 'No se pudo actualizar el parentesco', 'error'));
+							.then(() =>
+								Swal.fire(
+									'Actualizado',
+									'Parentesco modificado',
+									'success'
+								).then(() => location.reload())
+							)
+							.catch(() =>
+								Swal.fire(
+									'Error',
+									'No se pudo actualizar el parentesco',
+									'error'
+								)
+							);
 					}
 				});
 			});
@@ -153,8 +175,14 @@ $(document).ready(function () {
 		}).then((result) => {
 			if (result.isConfirmed) {
 				fetch(`/api/parentescos/${id}`, { method: 'DELETE' })
-					.then(() => Swal.fire('Eliminado', 'Parentesco eliminado', 'success').then(() => location.reload()))
-					.catch(() => Swal.fire('Error', 'No se pudo eliminar el parentesco', 'error'));
+					.then(() =>
+						Swal.fire('Eliminado', 'Parentesco eliminado', 'success').then(() =>
+							location.reload()
+						)
+					)
+					.catch(() =>
+						Swal.fire('Error', 'No se pudo eliminar el parentesco', 'error')
+					);
 			}
 		});
 	});

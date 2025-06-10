@@ -15,7 +15,6 @@ export const getCamasApi = async (req, res) => {
 		const camas = await Cama.findAll();
 		res.json(camas);
 	} catch (error) {
-		console.error('Error al obtener camas:', error);
 		res.status(500).json({ message: 'Error al obtener camas' });
 	}
 };
@@ -47,7 +46,6 @@ export const getCamas = async (req, res) => {
 
 		res.render('cama', { camas });
 	} catch (error) {
-		console.error('Error al obtener camas:', error);
 		res.status(500).send('Error interno del servidor');
 	}
 };
@@ -64,7 +62,6 @@ export const getCamaById = async (req, res) => {
 			res.status(404).send('Cama no encontrada');
 		}
 	} catch (error) {
-		console.error('Error al obtener cama:', error);
 		res.status(500).send('Error interno del servidor');
 	}
 };
@@ -106,17 +103,6 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 					order: [['fecha_hora_ingreso', 'DESC']],
 					logging: console.log,
 				});
-
-				// Log para depuración
-				console.log('Fecha recibida:', fecha);
-				console.log(
-					'Movimientos encontrados:',
-					movimientos.map((m) => ({
-						fecha_hora_ingreso: m.fecha_hora_ingreso,
-						fecha_hora_egreso: m.fecha_hora_egreso,
-						tipo: m.tipo_movimiento?.nombre,
-					}))
-				);
 
 				let estado = 'Disponible';
 				let paciente = null;
@@ -163,7 +149,6 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 
 		res.json(camasConEstado);
 	} catch (error) {
-		console.error(error);
 		res.status(500).json({ message: 'Error al buscar camas' });
 	}
 };
@@ -174,7 +159,6 @@ export const createCama = async (req, res) => {
 		const nuevaCama = await Cama.create(req.body);
 		res.status(201).json(nuevaCama);
 	} catch (error) {
-		console.error('Error al crear cama:', error);
 		res.status(500).send('Error interno del servidor');
 	}
 };
@@ -205,7 +189,6 @@ export const deleteCama = async (req, res) => {
 			res.status(404).send('Cama no encontrada');
 		}
 	} catch (error) {
-		console.error('Error al eliminar cama:', error);
 		res.status(500).send('Error interno del servidor');
 	}
 };
@@ -221,7 +204,6 @@ export const vistaReservarCama = async (req, res) => {
 		});
 		res.render('reservaCama', { camas });
 	} catch (error) {
-		console.error('Error al cargar camas:', error);
 		res.status(500).send('Error al cargar camas');
 	}
 };

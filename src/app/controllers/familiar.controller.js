@@ -58,7 +58,6 @@ export const vistaFamiliares = async (req, res) => {
 
 		res.render('familiar', { familiares: familiaresAdaptados || [] });
 	} catch (error) {
-		console.error('Error al mostrar familiares:', error);
 		res.status(500).send('Error interno al mostrar familiares');
 	}
 };
@@ -101,7 +100,6 @@ export const getFamiliarByPaciente = async (req, res) => {
 
 		res.json(familiar);
 	} catch (error) {
-		console.error('Error al obtener el familiar:', error);
 		res.status(500).json({ message: 'Error interno al buscar el familiar.' });
 	}
 };

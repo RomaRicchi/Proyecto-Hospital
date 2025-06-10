@@ -3,7 +3,7 @@ import {
 	PersonalAdministrativo,
 	RolUsuario,
 } from '../models/index.js';
-import bcrypt from 'bcrypt';  
+import bcrypt from 'bcrypt';
 
 // 🧾 Vista para mostrar el login
 export const vistaLogin = (req, res) => {
@@ -15,30 +15,20 @@ export const login = async (req, res) => {
 	const { usuario, password } = req.body;
 
 	try {
-		console.log('🟡 Intentando login con:', usuario);
-
 		const user = await Usuario.findOne({ where: { username: usuario } });
 
 		if (!user) {
-			console.log('🔴 Usuario no encontrado');
 			return res
 				.status(401)
 				.render('users', { error: 'Usuario no encontrado' });
 		}
 
-		console.log('🟢 Usuario encontrado:', user.username);
-		console.log('📌 Hashed en BD:', user.password);
-		console.log('📌 Contraseña ingresada:', password);
-
 		const valido = await bcrypt.compare(password, user.password);
 		if (!valido) {
-			console.log('🔴 Contraseña incorrecta');
 			return res
 				.status(401)
 				.render('users', { error: 'Contraseña incorrecta' });
 		}
-
-		console.log('✅ Contraseña válida. Login exitoso');
 
 		// 🧑‍💼 Buscar datos del personal administrativo y su rol
 		const personal = await PersonalAdministrativo.findOne({
@@ -56,7 +46,6 @@ export const login = async (req, res) => {
 
 		res.redirect('/dashboard');
 	} catch (error) {
-		console.error('❌ Error en login:', error);
 		res.status(500).render('users', { error: 'Error interno del servidor' });
 	}
 };

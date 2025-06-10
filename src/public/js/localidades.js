@@ -1,6 +1,4 @@
 $(document).ready(function () {
-	console.log('Inicializando DataTable para localidades...');
-
 	const tabla = $('#tablaLocalidades');
 	if (tabla.length) {
 		fetch('/api/localidades')
@@ -52,11 +50,9 @@ $(document).ready(function () {
 				});
 			})
 			.catch((error) => {
-				console.error('Error al cargar localidades:', error);
 				Swal.fire('Error', 'No se pudo cargar las localidades.', 'error');
 			});
 	} else {
-		console.warn('Tabla #tablaLocalidades no encontrada.');
 	}
 
 	// Agregar nueva localidad
