@@ -128,23 +128,19 @@
 .admin-hero {
   position: relative;
   padding: 3rem 1rem;
-  min-height: 500px; 
+  height: auto;
+  min-height: 100vh;
   color: rgb(31, 94, 165);
-  overflow: hidden;
+  overflow: hidden; 
 }
 
 .admin-hero::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: url('/img/doctor1.webp') no-repeat center top;
-  background-size: contain; 
-  background-repeat: no-repeat;
-  background-position: top center;
-  background-attachment: scroll;
-  z-index: -1;
+  background: url('/img/doctor1.webp') center/cover no-repeat;
+  z-index: -1;      
 }
-
 
 .login-hero {
   background-image: url('/img/manos.webp');
@@ -165,9 +161,9 @@
   background-image: url('/img/estetoscopio.webp');
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
+  background-repeat: repeat;
   min-height: 100vh;
-  height: 100vh;
+  height: auto;
   margin-top: 0;             
   padding: 0;                  
   display: flex;
