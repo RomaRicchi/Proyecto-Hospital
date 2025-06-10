@@ -122,9 +122,19 @@ $(document).on('click', '.btn-asignar-paciente', function () {
 					return paciente;
 				})
 				.catch(() => {
-					Swal.showValidationMessage(
-						'Paciente no encontrado. ¿Desea registrarlo?'
-					);
+					// Mostrar un nuevo Swal con botón para registrar
+					Swal.fire({
+						title: 'Paciente no encontrado',
+						html: '¿Desea registrar un nuevo paciente?',
+						icon: 'question',
+						showCancelButton: true,
+						confirmButtonText: 'Registrar',
+						cancelButtonText: 'Cancelar',
+					}).then((r) => {
+						if (r.isConfirmed) {
+							window.location.href = '/paciente';
+						}
+					});
 					return false;
 				});
 		},
