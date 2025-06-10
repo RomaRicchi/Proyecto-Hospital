@@ -87,7 +87,7 @@ app.use('/api/genero', generoRoutes);
 app.use('/api/localidades', localidadRoutes);
 app.use('/api/obras-sociales', obraSocialRoutes);
 app.use('/api/parentescos', parentescoRoutes);
-app.use('/api/personal_salud', personalSaludRoutes);
+app.use('/api/personal-salud', personalSaludRoutes);
 app.use('/api/especialidades', especialidadRoutes);
 app.use('/api/sectores', sectorRoutes);
 app.use('/api/habitaciones', habitacionRoutes);

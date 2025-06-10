@@ -1,28 +1,37 @@
 $(document).ready(function () {
-	$('#buscarPacienteForm').submit(function (e) {
+	$('#buscarPacienteForm').submit(async function (e) {
 		e.preventDefault();
 		const dni = $('#dni').val();
 
-		fetch(`/api/admisiones/paciente/${dni}/admisiones-vigentes`)
-			.then((res) => res.json())
-			.then((data) => {
-				if (!data || !data.admision) {
-					Swal.fire(
-						'No encontrado',
-						'No hay una admisión activa para este paciente',
-						'info'
-					);
-					$('#resultadoBusqueda').html('');
-					return;
-				}
+		const res = await fetch(
+			`/api/admisiones/paciente/${dni}/admisiones-vigentes`
+		);
+		const data = await res.json();
 
-				const paciente = data.paciente;
-				const admision = data.admision;
-				const fechaIngreso = new Date(
-					admision.fecha_hora_ingreso
-				).toLocaleString();
+		if (!data || !data.admision) {
+			Swal.fire(
+				'No encontrado',
+				'No hay una admisión activa para este paciente',
+				'info'
+			);
+			$('#resultadoBusqueda').html('');
+			return;
+		}
 
-				$('#resultadoBusqueda').html(`
+		const paciente = data.paciente;
+		const admision = data.admision;
+		const fechaIngreso = new Date(admision.fecha_hora_ingreso).toLocaleString();
+
+		// Obtener médicos
+		const medicos = await fetch('/api/personal-salud').then((r) => r.json());
+		const medicosOptions = medicos
+			.map(
+				(m) =>
+					`<option value="${m.id_personal_salud}">${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula}</option>`
+			)
+			.join('');
+
+		$('#resultadoBusqueda').html(`
           <h5>Datos del Paciente</h5>
           <table class="table table-bordered">
             <thead>
@@ -58,14 +67,16 @@ $(document).ready(function () {
             </div>
 
             <div class="mb-3">
-              <label for="idUsuario" class="form-label">ID Médico Responsable</label>
-              <input type="number" id="idUsuario" class="form-control" required>
+              <label for="idUsuario" class="form-label">Médico Responsable</label>
+              <select id="idUsuario" class="form-control" required>
+                <option value="">Seleccione médico</option>
+                ${medicosOptions}
+              </select>
             </div>
 
             <button type="submit" class="btn btn-success">Dar de Alta</button>
           </form>
         `);
-			});
 	});
 
 	// Evento submit para el formulario dinámico

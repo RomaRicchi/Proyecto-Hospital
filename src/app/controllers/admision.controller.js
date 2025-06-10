@@ -115,6 +115,19 @@ export const createAdmision = async (req, res) => {
 			);
 		}
 
+		// Cambiar estado de la cama a ocupada solo si la fecha de ingreso es actual o pasada
+		if (
+			req.body.id_cama &&
+			req.body.fecha_hora_ingreso &&
+			new Date(req.body.fecha_hora_ingreso) <= new Date()
+		) {
+			const cama = await Cama.findByPk(req.body.id_cama);
+			if (cama) {
+				cama.estado = 1; // Ocupada
+				await cama.save();
+			}
+		}
+
 		res.status(201).json(nueva);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
@@ -247,7 +260,7 @@ export const darAltaPaciente = async (req, res) => {
 		// 🛏️ Liberar cama
 		const cama = await Cama.findByPk(ultimoMov.id_cama);
 		if (cama) {
-			cama.estado = 1; // libre
+			cama.estado = 0; // libre
 			await cama.save();
 		}
 

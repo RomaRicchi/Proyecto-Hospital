@@ -187,6 +187,21 @@ export const createMovimientoHabitacion = async (req, res) => {
 			id_mov,
 			estado: estado || 1,
 		});
+
+		// Cambiar estado de la cama a ocupada solo si es un ingreso y la fecha es actual o pasada
+		if (
+			id_mov == 1 && // 1 = Ingresa/Ocupa
+			id_cama &&
+			fecha_hora_ingreso &&
+			new Date(fecha_hora_ingreso) <= new Date()
+		) {
+			const cama = await Cama.findByPk(id_cama);
+			if (cama) {
+				cama.estado = 1; // Ocupada
+				await cama.save();
+			}
+		}
+
 		res.status(201).json(nuevo);
 	} catch (error) {
 		console.error('Error al crear movimiento:', error);

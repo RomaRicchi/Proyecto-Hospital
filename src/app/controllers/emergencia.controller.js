@@ -26,6 +26,13 @@ export const ingresoEmergencia = async (req, res) => {
 			transaction: t,
 		});
 
+		if (paciente) {
+			await t.rollback();
+			return res
+				.status(409)
+				.json({ error: 'El paciente ya existe en el sistema.' });
+		}
+
 		if (!paciente) {
 			paciente = await Paciente.create(
 				{
@@ -150,6 +157,7 @@ export const ingresoEmergencia = async (req, res) => {
 
 			await camaAsignada.update({ estado: 1 }, { transaction: t });
 
+			// ...dentro del if (camaAsignada) { ... }
 			await t.commit();
 
 			return res.status(200).json({
@@ -161,6 +169,7 @@ export const ingresoEmergencia = async (req, res) => {
 					dni: paciente.dni_paciente,
 				},
 				habitacion: camaAsignada.id_habitacion,
+				num_habitacion: camaAsignada.habitacion.num, // <--- Agrega esto
 				cama: camaAsignada.nombre,
 			});
 		} else {

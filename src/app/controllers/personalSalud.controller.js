@@ -8,7 +8,8 @@ import {
 export const getPersonalSalud = async (req, res) => {
 	try {
 		const lista = await PersonalSalud.findAll({
-			include: ['usuario', 'rol', 'especialidad'],
+			attributes: ['id_personal_salud', 'apellido', 'nombre', 'matricula'],
+			where: { activo: true },
 		});
 		res.json(lista);
 	} catch (error) {

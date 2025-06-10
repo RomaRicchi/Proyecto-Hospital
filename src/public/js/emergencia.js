@@ -19,13 +19,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			const data = await res.json();
 
+			if (res.status === 409 && data.error && data.error.includes('existe')) {
+				Swal.fire({
+					icon: 'warning',
+					title: 'Paciente ya existe',
+					text: data.error,
+				});
+				return; // No seguir con la lógica de admisión
+			}
+
 			if (res.ok) {
 				Swal.fire({
 					icon: 'success',
 					title: 'Ingreso exitoso',
 					html: `
                         <p><b>Paciente:</b> ${data.paciente.apellido}, ${data.paciente.nombre} (DNI: ${data.paciente.dni})</p>
-                        <p><b>Habitación:</b> ${data.habitacion} - <b>Cama:</b> ${data.cama}</p>
+                        <p><b>Habitación:</b> ${data.num_habitacion} - <b>Cama:</b> ${data.cama}</p>
                     `,
 				}).then(() => {
 					form.reset();

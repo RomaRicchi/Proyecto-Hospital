@@ -223,12 +223,19 @@ async function formularioAdmision(paciente, id_cama, id_habitacion) {
 	// Cargar selects desde la base de datos
 	const motivos = await fetch('/api/motivos_ingreso').then((r) => r.json());
 	const obras = await fetch('/api/obras-sociales').then((r) => r.json());
+	const medicos = await fetch('/api/personal-salud').then((r) => r.json());
 
 	let motivosOptions = motivos
 		.map((m) => `<option value="${m.id_motivo}">${m.tipo}</option>`)
 		.join('');
 	let obrasOptions = obras
 		.map((o) => `<option value="${o.id_obra_social}">${o.nombre}</option>`)
+		.join('');
+	let medicosOptions = medicos
+		.map(
+			(m) =>
+				`<option value="${m.id_personal_salud}">${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula}</option>`
+		)
 		.join('');
 
 	Swal.fire({
@@ -243,7 +250,10 @@ async function formularioAdmision(paciente, id_cama, id_habitacion) {
         <input type="datetime-local" id="fecha_hora_egreso" class="swal2-input" placeholder="Fecha y hora egreso (opcional)">
         <input type="text" id="descripcion" class="swal2-input" placeholder="Descripción">
         <input type="text" id="motivo_egr" class="swal2-input" placeholder="Motivo egreso (opcional)">
-        <input type="number" id="id_personal_salud" class="swal2-input" placeholder="ID personal salud (opcional)">
+        <select id="id_personal_salud" class="swal2-input">
+          <option value="">Seleccione médico</option>
+          ${medicosOptions}
+        </select>
     `,
 		preConfirm: () => {
 			console.log('Entrando a preConfirm de admisión');
@@ -309,7 +319,7 @@ async function formularioAdmision(paciente, id_cama, id_habitacion) {
 					id_habitacion: id_habitacion,
 					id_cama: id_cama,
 					fecha_hora_ingreso: admision.fecha_hora_ingreso,
-					fecha_hora_egreso: admision.fecha_hora_egreso || null, // <-- AGREGADO
+					fecha_hora_egreso: admision.fecha_hora_egreso || null,
 					id_mov: 1, // Ocupa
 					estado: 1,
 				}),
