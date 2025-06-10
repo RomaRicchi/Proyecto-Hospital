@@ -65,7 +65,8 @@ El proyecto está organizado en una estructura **MVC**:
 - Editor de texto (recomendado: VS Code)  
 
 ---
-
+En servidor hasta el 1 de Julio del 2025 [https://proyecto-hospital-production.up.railway.app/home] (https://proyecto-hospital-production.up.railway.app/home)
+o...
 ## 📥 Instalación
 
 ### 1️⃣ Clonar este repositorio
