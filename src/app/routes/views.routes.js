@@ -18,12 +18,15 @@ import { vistaMotivosIngreso } from '../controllers/motivoIngreso.controller.js'
 import { vistaMovimientos } from '../controllers/movimiento.controller.js';
 import { vistaMovimientosHabitacion } from '../controllers/movimientoHabitacion.controller.js';
 import { vistaPacientesCamas } from '../controllers/pacientesCamas.controller.js';
+import { verificarPacienteConMovimientoActivo } from '../controllers/dashboard.controller.js';
+
 const router = Router();
 
 // 🔸 Panel Principal
 router.get('/dashboard', isAuthenticated, (req, res) =>
 	res.render('dashboard')
 );
+router.post('/verificar-movimiento-activo', verificarPacienteConMovimientoActivo);
 router.get('/inicio', (req, res) => res.render('inicio'));
 
 // 🔸 Pacientes
@@ -75,5 +78,6 @@ router.get('/habitacion', isAuthenticated, vistaHabitaciones);
 
 // Rutas protegidas y vistas
 router.get('/usuario', isAuthenticated, vistaUsuarios);
+
 
 export default router;

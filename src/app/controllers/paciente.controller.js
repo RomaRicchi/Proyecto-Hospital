@@ -105,6 +105,17 @@ export const getPacienteById = async (req, res) => {
 					as: 'localidad',
 					attributes: ['id_localidad', 'nombre'],
 				},
+				{
+					model: Familiar,
+					as: 'familiares',
+					include: [
+						{
+							model: Parentesco,
+							as: 'parentesco',
+							attributes: ['nombre'],
+						},
+					],
+				},
 			],
 		});
 		if (!paciente)

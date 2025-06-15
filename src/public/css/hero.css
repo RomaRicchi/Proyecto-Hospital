@@ -1,0 +1,150 @@
+.hero {
+  position: relative;
+  background-image: url('/img/medicina.webp'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 800px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-overlay {
+  content: "";
+  position: absolute;
+  inset: 0;
+  
+}
+
+.hero .container {
+  z-index: 1;
+}
+
+.hero h1,
+.hero p {
+  color: #080707;
+}
+
+.hero .display-4 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 3rem;      
+}
+
+.hero .lead {
+  font-family: 'Merriweather', serif;
+  font-weight: 300;
+  font-size: 1.25rem;
+  margin-top: 0.5rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .hero .display-4 { font-size: 2rem; }
+  .hero .lead { font-size: 1rem; }
+}
+
+.admin-hero {
+  position: relative;
+  padding: 3rem 1rem;
+  height: auto;
+  min-height: 100vh;
+  color: rgb(31, 94, 165);
+  overflow: hidden; 
+}
+
+.admin-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('/img/doctor1.webp') center/cover no-repeat;
+  z-index: -1;      
+}
+
+.login-hero {
+  background-image: url('/img/manos.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: calc(100vh - 56px); 
+  margin-top: 0;             
+  padding: 0;                  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 0;                  
+}
+
+.gral-hero {
+  background-image: url('/img/estetoscopio.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: repeat;
+  min-height: 100vh;
+  height: auto;
+  margin-top: 0;             
+  padding: 0;                  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 0; 
+  text-align: center;
+  
+}
+
+.gral-hero-content {
+  color: rgb(31, 94, 165);
+  max-width: 600px;
+  width: 100%;
+}
+
+.gral-hero-cont {
+  color: rgb(31, 94, 165);
+  width: 100%; 
+  max-width: none; 
+  padding: 2rem; 
+}
+
+.gral-hero .card {
+  border-radius: 1rem;
+  overflow: hidden;
+  background-color: rgb(31, 94, 165);
+  box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.gral-hero .card:hover {
+  transform: translateY(-4px);
+}
+
+.gral-hero .card-body {
+  padding: 2rem;
+}
+
+.gral-hero h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.gral-hero p.lead {
+  font-size: 1.2rem;
+  font-weight: 300;
+}
+
+@media (max-width: 576px) {
+  .gral-hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .gral-hero p.lead {
+    font-size: 1rem;
+  }
+
+  .gral-hero .card-body {
+    padding: 1.5rem;
+  }
+}
+
