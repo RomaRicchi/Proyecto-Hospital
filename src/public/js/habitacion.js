@@ -1,197 +1,187 @@
 $(document).ready(function () {
-  const $tabla = $('#tablaHabitacion');
-  if (!$tabla.length) return;
+	const tabla = $('#tablaHabitacion');
+	if (tabla.length) {
+		fetch('/api/habitaciones')
+			.then((response) => response.json())
+			.then((habitaciones) => {
+				const dataSet = habitaciones.map((h) => [
+					h.num,
+					h.camas?.map((c) => c.nombre).join(', ') || 'Sin camas',
+					h.sector?.nombre || 'Sin sector',
+					`
+                    <button class="btn btn-sm btn-primary edit-btn" data-id="${h.id_habitacion}">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-btn" data-id="${h.id_habitacion}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    `,
+				]);
 
-  // Validación para el campo "Número": entero positivo, hasta 4 dígitos
-  function validarNumero(num) {
-    if (!num) return 'El número es obligatorio.';
-    if (!/^[1-9]\d{0,3}$/.test(num)) {
-      return 'El número debe ser un entero positivo (1–9999).';
-    }
-    return null;
-  }
+				const dataTable = tabla.DataTable({
+					language: {
+						url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+					},
+					paging: true,
+					pageLength: 5,
+					searching: true,
+					ordering: true,
+					data: dataSet,
+					columns: [
+						{ title: 'Número' },
+						{ title: 'Camas' },
+						{ title: 'Sector' },
+						{ title: 'Acciones', orderable: false, searchable: false },
+					],
+				});
 
-  // 1) Inicializar DataTable
-  const dt = $tabla.DataTable({
-    language: {
-      url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
-    },
-    paging: true,
-    pageLength: 5,
-    searching: true,
-    ordering: true,
-    destroy: true,
-    responsive: true,
-    scrollX: false,
-    columnDefs: [{ targets: 3, orderable: false, searchable: false }],
-  });
+				dataTable.on('draw', function () {
+					const info = dataTable.page.info();
+					if (info.recordsDisplay === 0) {
+						if ($('#btnAgregarHabitacion').length === 0) {
+							$('#tablaHabitacion_wrapper').append(`
+                                <div class="text-center mt-3">
+                                    <button id="btnAgregarHabitacion" class="btn btn-success">
+                                        Agregar Nueva Habitación
+                                    </button>
+                                </div>
+                            `);
+						}
+					} else {
+						$('#btnAgregarHabitacion').remove();
+					}
+				});
+			})
+			.catch((error) => {
+				Swal.fire('Error', 'No se pudieron cargar las habitaciones.', 'error');
+			});
+	}
 
-  // 2) Función para mostrar el botón "Agregar" cuando la tabla esté vacía
-  function toggleAddButton() {
-    // Borra instancias previas
-    $('#btnAgregarHabitacion').remove();
+	// 🔸 Botón Agregar
+	$(document).on('click', '#btnAgregarHabitacion', async function () {
+		try {
+			const sectores = await fetch('/api/sectores').then((r) => r.json());
 
-    // Si no hay filas, lo mostramos
-    if (dt.rows({ filter: 'applied' }).data().length === 0) {
-      const $btn = $(`
-        <div id="btnAgregarHabitacion" class="text-center mt-3">
-          <button class="btn btn-success">
-            <i class="fas fa-plus-circle me-1"></i> Agregar Habitación
-          </button>
-        </div>
-      `);
-      // Insertar debajo de la tabla, dentro del wrapper de DataTables
-      $('#tablaHabitacion_wrapper').append($btn);
-    }
-  }
+			const sectorOptions = sectores
+				.map((s) => `<option value="${s.id_sector}">${s.nombre}</option>`)
+				.join('');
 
-  // 3) Ejecutar al dibujar y al iniciar
-  dt.on('draw', toggleAddButton);
-  toggleAddButton();
+			Swal.fire({
+				title: 'Agregar Habitación',
+				html: `
+                    <input id="swal-num" class="swal2-input" placeholder="Número">
+                    <select id="swal-sector" class="swal2-input"><option value="">(Opcional) Sector</option>${sectorOptions}</select>
+                `,
+				showCancelButton: true,
+				confirmButtonText: 'Guardar',
+				preConfirm: () => {
+					const num = $('#swal-num').val().trim();
+					if (!num) {
+						Swal.showValidationMessage('El número es obligatorio');
+						return false;
+					}
+					return {
+						num,
+						id_sector: $('#swal-sector').val() || null,
+					};
+				},
+			}).then((result) => {
+				if (result.isConfirmed) {
+					fetch('/api/habitaciones', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(result.value),
+					})
+						.then(() =>
+							Swal.fire('Agregado', 'Habitación creada', 'success').then(() =>
+								location.reload()
+							)
+						)
+						.catch(() => Swal.fire('Error', 'No se pudo crear', 'error'));
+				}
+			});
+		} catch (error) {
+			Swal.fire('Error', 'No se pudieron cargar sectores.', 'error');
+		}
+	});
 
-  // 4) Click en el botón dinámico "Agregar Habitación"
-  $(document).on('click', '#btnAgregarHabitacion button', async function () {
-    try {
-      const sectores = await fetch('/api/sectores').then((r) => r.json());
-      const sectorOptions = sectores
-        .map((s) => `<option value="${s.id_sector}">${s.nombre}</option>`)
-        .join('');
+	// 🔸 Botón Editar
+	$(document).on('click', '.edit-btn', async function () {
+		const id = $(this).data('id');
+		try {
+			const [habitacion, sectores] = await Promise.all([
+				fetch(`/api/habitaciones/${id}`).then((r) => r.json()),
+				fetch('/api/sectores').then((r) => r.json()),
+			]);
 
-      Swal.fire({
-        title: 'Agregar Habitación',
-        html: `
-          <input id="swal-num" class="swal2-input" placeholder="Número">
-          <select id="swal-sector" class="swal2-input">
-            <option value="">Sector</option>
-            ${sectorOptions}
-          </select>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Guardar',
-        preConfirm: () => {
-          const num = $('#swal-num').val().trim();
-          const id_sector = $('#swal-sector').val();
-          const error = validarNumero(num);
-          if (error) {
-            Swal.showValidationMessage(error);
-            return false;
-          }
-          return { num, id_sector: id_sector || null };
-        },
-      }).then((result) => {
-        if (!result.isConfirmed) return;
-        fetch('/api/habitaciones', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(result.value),
-        })
-          .then((res) => {
-            if (res.status === 409) throw new Error('Ya existe una habitación con este número.');
-            if (!res.ok) throw new Error();
-            return res.json();
-          })
-          .then(() =>
-            Swal.fire('Agregado', 'Habitación creada', 'success').then(() =>
-              location.reload()
-            )
-          )
-          .catch((err) =>
-            Swal.fire('Error', err.message || 'No se pudo crear', 'error')
-          );
-      });
-    } catch {
-      Swal.fire('Error', 'No se pudieron cargar los sectores.', 'error');
-    }
-  });
+			const sectorOptions = sectores
+				.map(
+					(s) =>
+						`<option value="${s.id_sector}" ${
+							habitacion.id_sector == s.id_sector ? 'selected' : ''
+						}>${s.nombre}</option>`
+				)
+				.join('');
 
-  // 5) Botón Editar
-  $(document).on('click', '.edit-btn', async function () {
-    const id = $(this).data('id');
-    try {
-      const [habitacion, sectores] = await Promise.all([
-        fetch(`/api/habitaciones/${id}`).then((r) => r.json()),
-        fetch('/api/sectores').then((r) => r.json()),
-      ]);
-      const sectorOptions = sectores
-        .map(
-          (s) =>
-            `<option value="${s.id_sector}" ${
-              habitacion.id_sector == s.id_sector ? 'selected' : ''
-            }>${s.nombre}</option>`
-        )
-        .join('');
-      Swal.fire({
-        title: 'Editar Habitación',
-        html: `
-          <input id="swal-num" class="swal2-input" placeholder="Número" value="${habitacion.num}">
-          <select id="swal-sector" class="swal2-input">
-            <option value="">Sector</option>
-            ${sectorOptions}
-          </select>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Guardar',
-        preConfirm: () => {
-          const num = $('#swal-num').val().trim();
-          const id_sector = $('#swal-sector').val();
-          const error = validarNumero(num);
-          if (error) {
-            Swal.showValidationMessage(error);
-            return false;
-          }
-          return { num, id_sector: id_sector || null };
-        },
-      }).then((result) => {
-        if (!result.isConfirmed) return;
-        fetch(`/api/habitaciones/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(result.value),
-        })
-          .then((res) => {
-            if (res.status === 409) throw new Error('Ya existe una habitación con este número.');
-            if (!res.ok) throw new Error();
-            return res.json();
-          })
-          .then(() =>
-            Swal.fire('Actualizado', 'Habitación modificada', 'success').then(() =>
-              location.reload()
-            )
-          )
-          .catch((err) =>
-            Swal.fire('Error', err.message || 'No se pudo actualizar', 'error')
-          );
-      });
-    } catch {
-      Swal.fire('Error', 'No se pudo cargar la habitación.', 'error');
-    }
-  });
+			Swal.fire({
+				title: 'Editar Habitación',
+				html: `
+                    <input id="swal-num" class="swal2-input" placeholder="Número" value="${habitacion.num}">
+                    <select id="swal-sector" class="swal2-input"><option value="">(Opcional) Sector</option>${sectorOptions}</select>
+                `,
+				showCancelButton: true,
+				confirmButtonText: 'Guardar',
+				preConfirm: () => {
+					const num = $('#swal-num').val().trim();
+					if (!num) {
+						Swal.showValidationMessage('El número es obligatorio');
+						return false;
+					}
+					return {
+						num,
+						id_sector: $('#swal-sector').val() || null,
+					};
+				},
+			}).then((result) => {
+				if (result.isConfirmed) {
+					fetch(`/api/habitaciones/${id}`, {
+						method: 'PUT',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(result.value),
+					})
+						.then(() =>
+							Swal.fire('Actualizado', 'Habitación modificada', 'success').then(
+								() => location.reload()
+							)
+						)
+						.catch(() => Swal.fire('Error', 'No se pudo actualizar', 'error'));
+				}
+			});
+		} catch (error) {
+			Swal.fire('Error', 'No se pudo cargar la habitación.', 'error');
+		}
+	});
 
-  // 6) Botón Eliminar
-  $(document).on('click', '.delete-btn', function () {
-    const id = $(this).data('id');
-    Swal.fire({
-      title: '¿Eliminar habitación?',
-      text: 'Esta acción es irreversible.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
-    }).then((result) => {
-      if (!result.isConfirmed) return;
-      fetch(`/api/habitaciones/${id}`, { method: 'DELETE' })
-        .then((res) => {
-          if (res.status === 409) throw new Error('No se puede eliminar: en uso.');
-          if (!res.ok) throw new Error();
-          return res.json();
-        })
-        .then(() =>
-          Swal.fire('Eliminado', 'Habitación borrada', 'success').then(() =>
-            location.reload()
-          )
-        )
-        .catch((err) =>
-          Swal.fire('Error', err.message || 'No se pudo eliminar', 'error')
-        );
-    });
-  });
+	// 🔸 Botón Eliminar
+	$(document).on('click', '.delete-btn', function () {
+		const id = $(this).data('id');
+		Swal.fire({
+			title: '¿Eliminar habitación?',
+			text: 'Esta acción eliminará la habitación.',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Sí, eliminar',
+			cancelButtonText: 'Cancelar',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				fetch(`/api/habitaciones/${id}`, { method: 'DELETE' })
+					.then(() =>
+						Swal.fire('Eliminado', 'Habitación eliminada', 'success').then(() =>
+							location.reload()
+						)
+					)
+					.catch(() => Swal.fire('Error', 'No se pudo eliminar', 'error'));
+			}
+		});
+	});
 });

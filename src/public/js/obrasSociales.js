@@ -17,14 +17,14 @@ $(document).ready(function () {
 				]);
 
 				const dataTable = tabla.DataTable({
-					language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'},
+					language: {
+						url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+					},
 					paging: true,
-					pageLength: 10,
+					pageLength: 5,
 					searching: true,
-					ordering: true,  
-					destroy: true,
-					responsive: true,
-					scrollX: false,
+					ordering: true,
+					data: dataSet,
 					columns: [
 						{ title: 'Nombre' },
 						{ title: 'Acciones', orderable: false, searchable: false },

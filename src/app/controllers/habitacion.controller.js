@@ -46,10 +46,9 @@ export const vistaHabitaciones = async (req, res) => {
 		const habitacionesAdaptadas = habitaciones.map((h) => ({
 			id_habitacion: h.id_habitacion,
 			num: h.num,
-			sector:   h.sector?.nombre  || 'Sin sector',
-			camas:    h.camas?.map((c) => c.nombre).join(', ') || 'Sin camas',
+			sector: h.sector?.nombre || 'Sin sector',
+			camas: h.camas?.map((c) => c.nombre).join(', ') || 'Sin camas',
 		}));
-
 
 		res.render('habitacion', { habitaciones: habitacionesAdaptadas });
 	} catch (error) {

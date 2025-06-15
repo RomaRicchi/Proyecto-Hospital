@@ -9,6 +9,7 @@ block content
         table#tablaMovimientosHabitacion.table.table-striped.table-bordered
           thead
             tr
+              th ID
               th Paciente
               th Habitación
               th Sector
@@ -22,6 +23,7 @@ block content
             if movimientos && movimientos.length
               each m in movimientos
                 tr
+                  td= m.id_movimiento
                   td= m.admision && m.admision.paciente ? m.admision.paciente.apellido_p + ', ' + m.admision.paciente.nombre_p : ''
                   td= m.habitacion ? m.habitacion.num : ''
                   td= m.habitacion && m.habitacion.sector ? m.habitacion.sector.nombre : ''
@@ -36,10 +38,12 @@ block content
                     button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=m.id_movimiento)
                       i.fas.fa-trash
             else
-              h1 No hay movimientos registrados.
+              tr
+                td(colspan="10") No hay movimientos registrados.
 
       // Librerías DataTables y jQuery
-      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+      script(src="https://code.jquery.com/jquery-3.7.1.min.js")
       script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+      script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
       script(src="/js/movimiento_habitacion.js")

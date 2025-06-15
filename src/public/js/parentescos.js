@@ -1,73 +1,62 @@
 $(document).ready(function () {
 	const tabla = $('#tablaParentesco');
-	if (!tabla.length) return;
-
-	// 🔍 Validación estricta del campo "nombre"
-	function validarNombre(nombre) {
-		if (!nombre || !nombre.trim()) {
-			return 'El nombre del parentesco es obligatorio.';
-		}
-		const limpio = nombre.trim();
-		if (limpio.length < 3 || limpio.length > 50) {
-			return 'Debe tener entre 3 y 50 caracteres.';
-		}
-		if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(limpio)) {
-			return 'Solo se permiten letras y espacios.';
-		}
-		return null;
-	}
-
-	// 🔄 Cargar tabla
-	fetch('/api/parentescos')
-		.then(res => res.json())
-		.then(parentescos => {
-			const dataSet = parentescos.map(p => [
-				p.nombre,
-				`
+	if (tabla.length) {
+		fetch('/api/parentescos')
+			.then((response) => response.json())
+			.then((parentescos) => {
+				const dataSet = parentescos.map((p) => [
+					p.id_parentesco,
+					p.nombre,
+					`
 					<button class="btn btn-sm btn-primary edit-btn" data-id="${p.id_parentesco}">
 						<i class="fas fa-pen"></i>
 					</button>
 					<button class="btn btn-sm btn-danger delete-btn" data-id="${p.id_parentesco}">
 						<i class="fas fa-trash"></i>
 					</button>
-				`
-			]);
+					`,
+				]);
 
-			const dataTable = tabla.DataTable({
-				language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
-				paging: true,
-				pageLength: 10,
-				searching: true,
-				ordering: true,  
-				destroy: true,
-				responsive: true,
-				scrollX: false,
-				columns: [
-					{ title: 'Nombre' },
-					{ title: 'Acciones', orderable: false, searchable: false }
-				]
+				const dataTable = tabla.DataTable({
+					language: {
+						url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+					},
+					paging: true,
+					pageLength: 5,
+					searching: true,
+					ordering: true,
+					data: dataSet,
+					columns: [
+						{ title: 'ID' },
+						{ title: 'Nombre' },
+						{ title: 'Acciones', orderable: false, searchable: false },
+					],
+				});
+
+				dataTable.on('draw', function () {
+					const info = dataTable.page.info();
+					if (info.recordsDisplay === 0) {
+						if ($('#btnAgregarParentesco').length === 0) {
+							$('#tablaParentesco_wrapper').append(`
+								<div class="text-center mt-3">
+									<button id="btnAgregarParentesco" class="btn btn-success">
+										Agregar Nuevo Parentesco
+									</button>
+								</div>
+							`);
+						}
+					} else {
+						$('#btnAgregarParentesco').remove();
+					}
+				});
+			})
+			.catch((error) => {
+				Swal.fire('Error', 'No se pudo cargar los parentescos.', 'error');
 			});
+	}
 
-			dataTable.on('draw', function () {
-				$('#btnAgregarParentesco').remove();
-				if (dataTable.rows({ filter: 'applied' }).data().length === 0) {
-					$('#tablaParentesco_wrapper').append(`
-						<div class="text-center mt-3" id="btnAgregarParentesco">
-							<button class="btn btn-success">
-								<i class="fas fa-plus-circle me-1"></i> Agregar Nuevo Parentesco
-							</button>
-						</div>
-					`);
-				}
-			});
-			dataTable.draw();
-		})
-		.catch(() => {
-			Swal.fire('Error', 'No se pudo cargar los parentescos.', 'error');
-		});
-
-	// 🟢 Agregar parentesco
-	$(document).on('click', '#btnAgregarParentesco button', function () {
+	// 🔸 Botón emergente "Agregar Parentesco"
+	$(document).on('click', '#btnAgregarParentesco', function () {
 		Swal.fire({
 			title: 'Agregar Parentesco',
 			input: 'text',
@@ -76,61 +65,104 @@ $(document).ready(function () {
 			showCancelButton: true,
 			confirmButtonText: 'Guardar',
 			preConfirm: (nombre) => {
-				const err = validarNombre(nombre);
-				if (err) {
-					Swal.showValidationMessage(err);
-					return false;
+				if (!nombre) {
+					Swal.showValidationMessage('El nombre es obligatorio');
 				}
-				return { nombre: nombre.trim() };
-			}
+				return { nombre };
+			},
 		}).then((result) => {
-			if (!result.isConfirmed) return;
-			fetch('/api/parentescos', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(result.value)
-			})
-				.then(() => Swal.fire('Guardado', 'Parentesco creado', 'success').then(() => location.reload()))
-				.catch(() => Swal.fire('Error', 'No se pudo crear el parentesco', 'error'));
+			if (result.isConfirmed) {
+				fetch('/api/parentescos', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(result.value),
+				})
+					.then(() =>
+						Swal.fire('Guardado', 'Parentesco creado', 'success').then(() =>
+							location.reload()
+						)
+					)
+					.catch(() =>
+						Swal.fire('Error', 'No se pudo crear el parentesco', 'error')
+					);
+			}
 		});
 	});
 
-	// ✏️ Editar
+	// 🔸 Formulario superior de agregar parentesco
+	$('form').on('submit', function (e) {
+		e.preventDefault(); // Evitar recarga
+		const nombre = $('#nombre').val().trim();
+
+		if (!nombre) {
+			Swal.fire('Error', 'El nombre del parentesco es obligatorio', 'error');
+			return;
+		}
+
+		fetch('/api/parentescos', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ nombre }),
+		})
+			.then((response) => {
+				if (!response.ok) throw new Error('No se pudo crear el parentesco');
+				return response.json();
+			})
+			.then(() =>
+				Swal.fire('Guardado', 'Parentesco creado con éxito', 'success').then(
+					() => location.reload()
+				)
+			)
+			.catch(() =>
+				Swal.fire('Error', 'No se pudo crear el parentesco', 'error')
+			);
+	});
+
+	// 🔸 Editar parentesco
 	$(document).on('click', '.edit-btn', function () {
 		const id = $(this).data('id');
 		fetch(`/api/parentescos/${id}`)
-			.then(res => res.json())
-			.then(p => {
+			.then((res) => res.json())
+			.then((p) => {
 				Swal.fire({
 					title: 'Editar Parentesco',
 					input: 'text',
 					inputValue: p.nombre,
-					inputLabel: 'Nombre del parentesco',
 					showCancelButton: true,
 					confirmButtonText: 'Guardar',
 					preConfirm: (nombre) => {
-						const err = validarNombre(nombre);
-						if (err) {
-							Swal.showValidationMessage(err);
-							return false;
+						if (!nombre) {
+							Swal.showValidationMessage('El nombre es obligatorio');
 						}
-						return { nombre: nombre.trim() };
+						return { nombre };
+					},
+				}).then((result) => {
+					if (result.isConfirmed) {
+						fetch(`/api/parentescos/${id}`, {
+							method: 'PUT',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify(result.value),
+						})
+							.then(() =>
+								Swal.fire(
+									'Actualizado',
+									'Parentesco modificado',
+									'success'
+								).then(() => location.reload())
+							)
+							.catch(() =>
+								Swal.fire(
+									'Error',
+									'No se pudo actualizar el parentesco',
+									'error'
+								)
+							);
 					}
-				}).then(result => {
-					if (!result.isConfirmed) return;
-					fetch(`/api/parentescos/${id}`, {
-						method: 'PUT',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(result.value)
-					})
-						.then(() => Swal.fire('Actualizado', 'Parentesco modificado', 'success').then(() => location.reload()))
-						.catch(() => Swal.fire('Error', 'No se pudo actualizar el parentesco', 'error'));
 				});
-			})
-			.catch(() => Swal.fire('Error', 'No se pudo cargar el parentesco', 'error'));
+			});
 	});
 
-	// 🗑️ Eliminar
+	// 🔸 Eliminar parentesco
 	$(document).on('click', '.delete-btn', function () {
 		const id = $(this).data('id');
 		Swal.fire({
@@ -139,12 +171,19 @@ $(document).ready(function () {
 			icon: 'warning',
 			showCancelButton: true,
 			confirmButtonText: 'Sí, eliminar',
-			cancelButtonText: 'Cancelar'
-		}).then(result => {
-			if (!result.isConfirmed) return;
-			fetch(`/api/parentescos/${id}`, { method: 'DELETE' })
-				.then(() => Swal.fire('Eliminado', 'Parentesco eliminado', 'success').then(() => location.reload()))
-				.catch(() => Swal.fire('Error', 'No se pudo eliminar el parentesco', 'error'));
+			cancelButtonText: 'Cancelar',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				fetch(`/api/parentescos/${id}`, { method: 'DELETE' })
+					.then(() =>
+						Swal.fire('Eliminado', 'Parentesco eliminado', 'success').then(() =>
+							location.reload()
+						)
+					)
+					.catch(() =>
+						Swal.fire('Error', 'No se pudo eliminar el parentesco', 'error')
+					);
+			}
 		});
 	});
 });

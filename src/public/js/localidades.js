@@ -1,180 +1,161 @@
 $(document).ready(function () {
-  const $tabla = $('#tablaLocalidades');
-  if (!$tabla.length) return;
+	const tabla = $('#tablaLocalidades');
+	if (tabla.length) {
+		fetch('/api/localidades')
+			.then((response) => response.json())
+			.then((localidades) => {
+				const dataSet = localidades.map((loc) => [
+					loc.nombre,
+					`
+					<button class="btn btn-sm btn-primary edit-btn" data-id="${loc.id_localidad}">
+						<i class="fas fa-pen"></i>
+					</button>
+					<button class="btn btn-sm btn-danger delete-btn" data-id="${loc.id_localidad}">
+						<i class="fas fa-trash"></i>
+					</button>
+					`,
+				]);
 
-  // Validación para el nombre de localidad: 3–50 caracteres, solo letras y espacios
-  function validarLocalidad(nombre) {
-    if (!nombre || !nombre.trim()) {
-      return 'El nombre de la localidad es obligatorio.';
-    }
-    const trimmed = nombre.trim();
-    if (trimmed.length < 3 || trimmed.length > 50) {
-      return 'El nombre debe tener entre 3 y 50 caracteres.';
-    }
-    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(trimmed)) {
-      return 'El nombre solo puede contener letras y espacios.';
-    }
-    return null;
-  }
+				const dataTable = tabla.DataTable({
+					language: {
+						url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+					},
+					paging: true,
+					pageLength: 5,
+					searching: true,
+					ordering: true,
+					data: dataSet,
+					columns: [
+						{ title: 'Nombre' },
+						{ title: 'Acciones', orderable: false, searchable: false },
+					],
+				});
 
-  // 1) Cargar y renderizar DataTable
-  fetch('/api/localidades')
-    .then(r => r.json())
-    .then(localidades => {
-      const dataSet = localidades.map(loc => [
-        loc.nombre,
-        `
-          <button class="btn btn-sm btn-primary edit-btn" data-id="${loc.id_localidad}">
-            <i class="fas fa-pen"></i>
-          </button>
-          <button class="btn btn-sm btn-danger delete-btn" data-id="${loc.id_localidad}">
-            <i class="fas fa-trash"></i>
-          </button>
-        `
-      ]);
+				// Botón para agregar nueva localidad si no hay resultados
+				dataTable.on('draw', function () {
+					const info = dataTable.page.info();
+					if (info.recordsDisplay === 0) {
+						if ($('#btnAgregarLocalidad').length === 0) {
+							$('#tablaLocalidades_wrapper').append(`
+								<div class="text-center mt-3">
+									<button id="btnAgregarLocalidad" class="btn btn-success">
+										Agregar Nueva Localidad
+									</button>
+								</div>
+							`);
+						}
+					} else {
+						$('#btnAgregarLocalidad').remove();
+					}
+				});
+			})
+			.catch((error) => {
+				Swal.fire('Error', 'No se pudo cargar las localidades.', 'error');
+			});
+	} else {
+	}
 
-      const dt = $tabla.DataTable({
-        language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
-        paging: true,
-        pageLength: 10,
-        searching: true,
-        ordering: true,
-        data: dataSet,
-	      destroy: true,
-        responsive: true,
-		    scrollX: false,
-        columns: [
-          { title: 'Nombre' },
-          { title: 'Acciones', orderable: false, searchable: false }
-        ]
-      });
+	// Agregar nueva localidad
+	$(document).on('click', '#btnAgregarLocalidad', function () {
+		Swal.fire({
+			title: 'Agregar Localidad',
+			input: 'text',
+			inputLabel: 'Nombre de la localidad',
+			inputPlaceholder: 'Ingrese el nombre de la localidad',
+			showCancelButton: true,
+			confirmButtonText: 'Guardar',
+			preConfirm: (nombre) => {
+				if (!nombre) {
+					Swal.showValidationMessage('El nombre es obligatorio');
+				}
+				return { nombre };
+			},
+		}).then((result) => {
+			if (result.isConfirmed) {
+				fetch('/api/localidades', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(result.value),
+				})
+					.then(() =>
+						Swal.fire('Guardado', 'Localidad creada', 'success').then(() =>
+							location.reload()
+						)
+					)
+					.catch(() =>
+						Swal.fire('Error', 'No se pudo crear la localidad', 'error')
+					);
+			}
+		});
+	});
 
-      // Mostrar botón Agregar si no hay filas
-      dt.on('draw', () => {
-        $('#btnAgregarLocalidad').remove();
-        if (dt.rows({ filter: 'applied' }).data().length === 0) {
-          $('#tablaLocalidades_wrapper').append(`
-            <div id="btnAgregarLocalidad" class="text-center mt-3">
-              <button class="btn btn-success">
-                <i class="fas fa-plus-circle me-1"></i> Agregar Nueva Localidad
-              </button>
-            </div>
-          `);
-        }
-      });
-      dt.draw(); // disparar draw inicial
-    })
-    .catch(() => {
-      Swal.fire('Error', 'No se pudo cargar las localidades.', 'error');
-    });
+	// Editar localidad
+	$(document).on('click', '.edit-btn', function () {
+		const id = $(this).data('id');
+		fetch(`/api/localidades/${id}`)
+			.then((res) => res.json())
+			.then((localidad) => {
+				Swal.fire({
+					title: 'Editar Localidad',
+					input: 'text',
+					inputLabel: 'Nombre de la localidad',
+					inputValue: localidad.nombre,
+					showCancelButton: true,
+					confirmButtonText: 'Guardar',
+					preConfirm: (nombre) => {
+						if (!nombre) {
+							Swal.showValidationMessage('El nombre es obligatorio');
+						}
+						return { nombre };
+					},
+				}).then((result) => {
+					if (result.isConfirmed) {
+						fetch(`/api/localidades/${id}`, {
+							method: 'PUT',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify(result.value),
+						})
+							.then(() =>
+								Swal.fire(
+									'Actualizado',
+									'Localidad modificada',
+									'success'
+								).then(() => location.reload())
+							)
+							.catch(() =>
+								Swal.fire(
+									'Error',
+									'No se pudo actualizar la localidad',
+									'error'
+								)
+							);
+					}
+				});
+			});
+	});
 
-  // 2) Agregar nueva localidad
-  $(document).on('click', '#btnAgregarLocalidad button', () => {
-    Swal.fire({
-      title: 'Agregar Localidad',
-      input: 'text',
-      inputLabel: 'Nombre de la localidad',
-      inputPlaceholder: 'Ingrese el nombre de la localidad',
-      showCancelButton: true,
-      confirmButtonText: 'Guardar',
-      preConfirm: (nombre) => {
-        const error = validarLocalidad(nombre);
-        if (error) {
-          Swal.showValidationMessage(error);
-          return false;
-        }
-        return { nombre: nombre.trim() };
-      }
-    }).then(result => {
-      if (!result.isConfirmed) return;
-      fetch('/api/localidades', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(result.value)
-      })
-      .then(res => {
-        if (res.status === 409) throw new Error('Ya existe esa localidad.');
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then(() =>
-        Swal.fire('Guardado', 'Localidad creada', 'success').then(() => location.reload())
-      )
-      .catch(err =>
-        Swal.fire('Error', err.message || 'No se pudo crear la localidad', 'error')
-      );
-    });
-  });
-
-  // 3) Editar localidad
-  $(document).on('click', '.edit-btn', function () {
-    const id = $(this).data('id');
-    fetch(`/api/localidades/${id}`)
-      .then(r => r.json())
-      .then(localidad => {
-        Swal.fire({
-          title: 'Editar Localidad',
-          input: 'text',
-          inputLabel: 'Nombre de la localidad',
-          inputValue: localidad.nombre,
-          showCancelButton: true,
-          confirmButtonText: 'Guardar',
-          preConfirm: (nombre) => {
-            const error = validarLocalidad(nombre);
-            if (error) {
-              Swal.showValidationMessage(error);
-              return false;
-            }
-            return { nombre: nombre.trim() };
-          }
-        }).then(result => {
-          if (!result.isConfirmed) return;
-          fetch(`/api/localidades/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(result.value)
-          })
-          .then(res => {
-            if (!res.ok) throw new Error();
-            return res.json();
-          })
-          .then(() =>
-            Swal.fire('Actualizado', 'Localidad modificada', 'success').then(() => location.reload())
-          )
-          .catch(() =>
-            Swal.fire('Error', 'No se pudo actualizar la localidad', 'error')
-          );
-        });
-      })
-      .catch(() => {
-        Swal.fire('Error', 'No se pudo cargar la localidad.', 'error');
-      });
-  });
-
-  // 4) Eliminar localidad
-  $(document).on('click', '.delete-btn', function () {
-    const id = $(this).data('id');
-    Swal.fire({
-      title: '¿Eliminar localidad?',
-      text: 'Esta acción eliminará la localidad permanentemente.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    }).then(result => {
-      if (!result.isConfirmed) return;
-      fetch(`/api/localidades/${id}`, { method: 'DELETE' })
-        .then(res => {
-          if (res.status === 409) throw new Error('No se puede eliminar: en uso.');
-          if (!res.ok) throw new Error();
-          return res.json();
-        })
-        .then(() =>
-          Swal.fire('Eliminado', 'Localidad eliminada', 'success').then(() => location.reload())
-        )
-        .catch(err =>
-          Swal.fire('Error', err.message || 'No se pudo eliminar la localidad', 'error')
-        );
-    });
-  });
+	// 🔴 Eliminar localidad
+	$(document).on('click', '.delete-btn', function () {
+		const id = $(this).data('id');
+		Swal.fire({
+			title: '¿Eliminar localidad?',
+			text: 'Esta acción eliminará la localidad permanentemente.',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Sí, eliminar',
+			cancelButtonText: 'Cancelar',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				fetch(`/api/localidades/${id}`, { method: 'DELETE' })
+					.then(() =>
+						Swal.fire('Eliminado', 'Localidad eliminada', 'success').then(() =>
+							location.reload()
+						)
+					)
+					.catch(() =>
+						Swal.fire('Error', 'No se pudo eliminar la localidad', 'error')
+					);
+			}
+		});
+	});
 });
