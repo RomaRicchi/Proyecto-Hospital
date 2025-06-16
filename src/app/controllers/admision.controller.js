@@ -4,7 +4,6 @@ import {
 	ObraSocial,
 	Usuario,
 	Cama,
-	Habitacion,
 	MotivoIngreso,
 	MovimientoHabitacion,
 } from '../models/index.js';
