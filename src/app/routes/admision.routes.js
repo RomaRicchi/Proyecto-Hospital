@@ -6,16 +6,20 @@ import {
 	updateAdmision,
 	deleteAdmision,
 	getOpcionesAdmision,
+	validarAdmisionPorDNI,
 	buscarAdmisionVigente,
 	darAltaPaciente,
 } from '../controllers/admision.controller.js';
 
 const router = Router();
 
+
 // Rutas específicas primero
-router.get('/paciente/:dni/admisiones-vigentes', buscarAdmisionVigente); // Buscar admisión activa
-router.post('/paciente/:dni/alta', darAltaPaciente); // Dar de alta al paciente
+router.get('/validar-dni/:dni', validarAdmisionPorDNI); // ✅ nueva validación
+router.get('/paciente/:dni/admisiones-vigentes', buscarAdmisionVigente);
+router.post('/paciente/:dni/alta', darAltaPaciente);
 router.get('/opciones', getOpcionesAdmision);
+
 // Rutas CRUD generales
 router.get('/', getAdmisiones);
 router.get('/:id', getAdmisionById);

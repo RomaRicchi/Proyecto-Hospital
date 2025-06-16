@@ -188,8 +188,22 @@ $(document).on('click', '.btn-asignar-paciente', function () {
 						);
 						return;
 					}
-					// Si no hay conflicto, mostrar formulario de admisión
+										// Validar si el paciente ya tiene admisión vigente o futura
+					const validar = await fetch(`/api/admisiones/validar-dni/${pacienteSeleccionado.dni_paciente}`);
+					const resultado = await validar.json();
+
+					if (resultado.vigente) {
+					Swal.fire(
+						'Atención',
+						'El paciente ya tiene una admisión vigente o en curso. No puede registrar otra.',
+						'warning'
+					);
+					return;
+					}
+
+					// Si no tiene admisión activa, mostrar el formulario
 					formularioAdmision(pacienteSeleccionado, id_cama, habitacionId);
+
 				}
 			});
 		} else if (result.dismiss === Swal.DismissReason.cancel) {

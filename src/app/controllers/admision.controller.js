@@ -7,6 +7,7 @@ import {
 	MotivoIngreso,
 	MovimientoHabitacion,
 } from '../models/index.js';
+import { Op } from 'sequelize';
 
 export const getOpcionesAdmision = async (req, res) => {
 	try {
@@ -93,9 +94,26 @@ export const vistaAdmisiones = async (req, res) => {
 		res.status(500).send('Error al mostrar admisiones');
 	}
 };
-
 export const createAdmision = async (req, res) => {
 	try {
+		// ✅ Validación para evitar duplicados vigentes o futuros
+		const admisionActiva = await Admision.findOne({
+			where: {
+				id_paciente: req.body.id_paciente,
+				fecha_hora_ingreso: { [Op.lte]: new Date(req.body.fecha_hora_ingreso) },
+				[Op.or]: [
+					{ fecha_hora_egreso: null },
+					{ fecha_hora_egreso: { [Op.gt]: new Date(req.body.fecha_hora_ingreso) } },
+				],
+			},
+		});
+
+		if (admisionActiva) {
+			return res.status(400).json({
+				message: 'El paciente ya tiene una admisión vigente en ese período',
+			});
+		}
+
 		const nueva = await Admision.create(req.body);
 
 		// Si se crea con fecha de egreso, actualizar movimiento_habitacion activo
@@ -131,6 +149,7 @@ export const createAdmision = async (req, res) => {
 		res.status(500).json({ message: error.message });
 	}
 };
+
 
 export const updateAdmision = async (req, res) => {
 	try {
@@ -171,6 +190,31 @@ export const deleteAdmision = async (req, res) => {
 		res.status(500).json({ message: error.message });
 	}
 };
+
+export const validarAdmisionPorDNI = async (req, res) => {
+	try {
+		const { dni } = req.params;
+		const paciente = await Paciente.findOne({ where: { dni_paciente: dni } });
+
+		if (!paciente) return res.json({ vigente: false });
+
+		const admision = await Admision.findOne({
+			where: {
+				id_paciente: paciente.id_paciente,
+				fecha_hora_ingreso: { [Op.lte]: new Date() },
+				[Op.or]: [
+					{ fecha_hora_egreso: null },
+					{ fecha_hora_egreso: { [Op.gt]: new Date() } },
+				],
+			},
+		});
+
+		res.json({ vigente: !!admision });
+	} catch (error) {
+		res.status(500).json({ message: 'Error en validación' });
+	}
+};
+
 
 export const buscarAdmisionVigente = async (req, res) => {
 	try {
