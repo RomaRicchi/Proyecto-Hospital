@@ -18,19 +18,21 @@ import { vistaMotivosIngreso } from '../controllers/motivoIngreso.controller.js'
 import { vistaMovimientos } from '../controllers/movimiento.controller.js';
 import { vistaMovimientosHabitacion } from '../controllers/movimientoHabitacion.controller.js';
 import { vistaPacientesCamas } from '../controllers/pacientesCamas.controller.js';
+import { vistaDashboard } from '../controllers/dashboard.controller.js';
+import { vistaEmergencias } from '../controllers/emergencia.controller.js';
+import { vistaAltaPaciente } from '../controllers/alta.controller.js';
+
 const router = Router();
 
-// 🔸 Panel Principal
-router.get('/dashboard', isAuthenticated, (req, res) =>
-	res.render('dashboard')
-);
 router.get('/inicio', (req, res) => res.render('inicio'));
+router.get('/usuarios', isAuthenticated, (req, res) => res.render('users')); //loguin
+// 🔸 Panel Principal
+router.get('/dashboard', isAuthenticated, vistaDashboard);
 
 // 🔸 Pacientes
-router.get('/paciente', isAuthenticated, vistaPacientes); // paciente.pug
+router.get('/paciente', isAuthenticated, vistaPacientes);
 router.get('/paciente/nuevo', isAuthenticated, vistaPacienteNuevo);
 router.get('/pacientes/camas', isAuthenticated, vistaPacientesCamas);
- // pacientesCamas.pug
 
 // 🔸 Localidad y Género
 router.get('/paciente/localidad', isAuthenticated, vistaLocalidades);
@@ -45,35 +47,19 @@ router.get('/sector', isAuthenticated, vistaSectores);
 router.get('/habitacion', isAuthenticated, vistaHabitaciones);
 router.get('/camas', isAuthenticated, getCamas);
 
-// 🔸 Admisiones e Internaciones
+// 🔸 Admisiones
 router.get('/admisiones', isAuthenticated, vistaAdmisiones);
-router.get('/internaciones', isAuthenticated, (req, res) =>
-	res.render('internaciones')
-);
 router.get('/motivoIngreso', isAuthenticated, vistaMotivosIngreso);
-router.get(
-	'/movimientoHabitacion',
-	isAuthenticated,
-	vistaMovimientosHabitacion
-);
-
+router.get('/movimientoHabitacion', isAuthenticated, vistaMovimientosHabitacion);
 router.get('/movimiento', isAuthenticated, vistaMovimientos);
-router.get('/paciente/alta', isAuthenticated, (req, res) =>
-  res.render('altaPaciente')
-);
-// 🔸 Administración
+router.get('/paciente/alta', isAuthenticated, vistaAltaPaciente);
 router.get('/obraSocial', isAuthenticated, vistaObrasSociales);
-router.get('/usuarios', isAuthenticated, (req, res) => res.render('users'));
 
 // 🔸 Emergencias
-router.get('/emergencias', isAuthenticated, (req, res) =>
-	res.render('emergencia')
-);
+router.get('/emergencias', isAuthenticated, vistaEmergencias);
 
-// 🔸 Habitaciones
-router.get('/habitacion', isAuthenticated, vistaHabitaciones);
-
-// Rutas protegidas y vistas
+// 🔸 Usuarios
 router.get('/usuario', isAuthenticated, vistaUsuarios);
+
 
 export default router;

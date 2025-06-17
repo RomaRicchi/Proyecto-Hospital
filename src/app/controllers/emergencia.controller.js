@@ -1,6 +1,5 @@
 import {
 	Paciente,
-	Genero,
 	Admision,
 	ObraSocial,
 	MotivoIngreso,
@@ -184,4 +183,12 @@ export const ingresoEmergencia = async (req, res) => {
 			.status(500)
 			.json({ error: 'Error en el ingreso de emergencia.' });
 	}
+};
+
+export const vistaEmergencias = (req, res) => {
+  try {
+    res.render('emergencia');
+  } catch (error) {
+    res.status(500).send('Error al cargar la vista de emergencias');
+  }
 };

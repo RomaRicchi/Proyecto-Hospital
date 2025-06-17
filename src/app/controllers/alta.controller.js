@@ -123,3 +123,10 @@ export const darAltaPaciente = async (req, res) => {
 	}
 };
 
+export const vistaAltaPaciente = (req, res) => {
+  try {
+    res.render('altaPaciente');
+  } catch (error) {
+    res.status(500).send('Error al cargar el formulario de alta de paciente');
+  }
+};
