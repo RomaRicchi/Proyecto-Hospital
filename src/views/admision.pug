@@ -9,7 +9,7 @@ block content
         table#tablaAdmisiones.table.table-striped.table-bordered
           thead
             tr
-              th ID
+              
               th Paciente
               th DNI
               th Obra Social
@@ -25,7 +25,7 @@ block content
             if admisiones && admisiones.length
               each admision in admisiones
                 tr
-                  td #{admision.id_admision}
+                  
                   td #{admision.paciente}
                   td #{admision.dni_paciente}
                   td #{admision.obra_social}
@@ -42,8 +42,7 @@ block content
                     button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=admision.id_admision)
                       i.fas.fa-trash
             else
-              tr
-                td(colspan="12") No hay admisiones registradas.
+              h1 No hay admisiones registradas.
 
       // Librerías DataTables y jQuery
       link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
