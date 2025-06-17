@@ -43,7 +43,7 @@ export const updateLocalidad = async (req, res) => {
 
 		const nombre = req.body.nombre?.trim();
 
-		if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ \-]+$/.test(nombre)) {
+		if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ -]+$/.test(nombre)) {
 			return res.status(400).json({ message: 'El nombre solo puede contener letras, espacios y guiones.' });
 		}
 
