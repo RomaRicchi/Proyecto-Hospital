@@ -15,31 +15,30 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
         i.fas.fa-list.me-1
         | Lista de Pacientes
     li
-      a.nav-link.text-white(href="/paciente/localidad")
-        i.fas.fa-map-marker-alt.me-1
-        | Localidad
-    li
-      a.nav-link.text-white(href="/paciente/genero")
-        i.fas.fa-venus-mars.me-1
-        | Género
-    li
       a.nav-link.text-white(href="/pacientes/camas")
         i.fas.fa-procedures.me-1
         | Camas Asignadas
-
-  // 🔹 Familiar
-  a.nav-link.text-white.collapsed(href="#familiarSubmenu", data-bs-toggle="collapse", aria-expanded="false")
-    i.fas.fa-users.me-2
-    | Familiar
-  ul.collapse#familiarSubmenu(style="list-style-type: none; padding-left: 1rem;")
     li
       a.nav-link.text-white(href="/familiar")
         i.fas.fa-list.me-1
         | Lista de Familiares
     li
-      a.nav-link.text-white(href="/familiar/parentesco")
-        i.fas.fa-sitemap.me-1
-        | Parentesco
+      a.nav-link.text-white.collapsed(href="#auxiliaresPacientesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
+        i.fas.fa-tools.me-1
+        | Auxiliares
+      ul.collapse#auxiliaresPacientesSubmenu(style="list-style-type: none; padding-left: 1rem;")
+        li
+          a.nav-link.text-white(href="/paciente/localidad")
+            i.fas.fa-map-marker-alt.me-1
+            | Localidad
+        li
+          a.nav-link.text-white(href="/paciente/genero")
+            i.fas.fa-venus-mars.me-1
+            | Género
+        li
+          a.nav-link.text-white(href="/familiar/parentesco")
+            i.fas.fa-sitemap.me-1
+            | Parentesco
 
   // 🔹 Ubicación
   a.nav-link.text-white.collapsed(href="#ubicacionSubmenu", data-bs-toggle="collapse", aria-expanded="false")
@@ -58,10 +57,7 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
       a.nav-link.text-white(href="/camas")
         i.fas.fa-procedures.me-1
         | Lista de Camas
-    li
-      a.nav-link.text-white(href="/camas/reservar")
-        i.fas.fa-procedures.me-1
-        | Reservar Cama
+    
 
   // 🔹 Admisiones
   a.nav-link.text-white.collapsed(href="#admisionesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
@@ -81,21 +77,30 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
         i.fas.fa-ambulance.me-1
         | Emergencias
     li
-      a.nav-link.text-white(href="/obraSocial")
-        i.fas.fa-briefcase-medical.me-1
-        | Obras Sociales
+      a.nav-link.text-white(href="/camas/reservar")
+        i.fas.fa-procedures.me-1
+        | Reservar Cama
     li
-      a.nav-link.text-white(href="/motivoIngreso")
-        i.fas.fa-clipboard-list.me-1
-        | Motivos de Ingreso
-    li
-      a.nav-link.text-white(href="/movimientoHabitacion")
-        i.fas.fa-exchange-alt.me-1
-        | Movimientos de Habitación
-    li
-      a.nav-link.text-white(href="/movimiento")
-        i.fas.fa-exchange-alt.me-1
-        | Tipos de Movimientos
+      a.nav-link.text-white.collapsed(href="#auxiliaresSubmenu", data-bs-toggle="collapse", aria-expanded="false")
+        i.fas.fa-tools.me-1
+        | Auxiliares
+      ul.collapse#auxiliaresSubmenu(style="list-style-type: none; padding-left: 1rem;")
+        li
+          a.nav-link.text-white(href="/obraSocial")
+            i.fas.fa-briefcase-medical.me-1
+            | Obras Sociales
+        li
+          a.nav-link.text-white(href="/motivoIngreso")
+            i.fas.fa-clipboard-list.me-1
+            | Motivos de Ingreso
+        li
+          a.nav-link.text-white(href="/movimientoHabitacion")
+            i.fas.fa-exchange-alt.me-1
+            | Movimientos de Habitación
+        li
+          a.nav-link.text-white(href="/movimiento")
+            i.fas.fa-exchange-alt.me-1
+            | Tipos de Movimientos
 
   // 🔹 Usuarios
   a.nav-link.text-white.collapsed(href="#usuariosSubmenu", data-bs-toggle="collapse", aria-expanded="false")

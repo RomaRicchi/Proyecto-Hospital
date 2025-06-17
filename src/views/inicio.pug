@@ -1,32 +1,26 @@
 extends layout_modular
 
 block content
+  .hero.position-relative
+    img.hero-img(src="/img/medicina.webp" alt="Imagen de medicina")
+    .hero-overlay
+    .container.text-center.position-relative
+      h1.hero-title.mt-4 Bienvenido a nuestra Clínica
+      h1.display-4.hero-title Cuidamos tu salud, acompañamos tu vida
+      p.lead.hero-subtitle Más de 25 años de experiencia brindando atención médica integral.
 
-  //– Hero con solo el mensaje principal
-  .hero(style="background-color: #a8e6cf; padding: 4rem 1rem;")
-    .container.hero-content.text-center
-      h1.mt-4 Bienvenido a nuestra Clínica
-      h1.display-4 Cuidamos tu salud, acompañamos tu vida
-      p.lead Más de 25 años de experiencia brindando atención médica integral.
+      .row.text-center.mt-4
+        .col-12.col-md-6
+          h2.hero-subtitle1 Obras sociales:
+          ul.list-unstyled
+            each obra in listaObras
+              li= obra
+        .col-12.col-md-6
+          h2.hero-subtitle1 Especialidades:
+          ul.list-unstyled
+            each esp in listaEsp
+              li= esp
 
-  //– Listas en paralelo
-  .container.bg-white.py-5
-    .row.text-center
-      //– Columna de Obras Sociales
-      .col-12.col-md-6
-        h2 Obras sociales que recibimos:
-        ul.list-unstyled
-          each obra in listaObras
-            li= obra
-
-      //– Columna de Especialidades
-      .col-12.col-md-6
-        h2 Especialidades disponibles:
-        ul.list-unstyled
-          each esp in listaEsp
-            li= esp
-
-  //– Nuestros profesionales
   h2.mt-5.text-center Nuestros Profesionales
   .row.row-cols-2.row-cols-sm-3.row-cols-md-4.row-cols-lg-5.g-4.mt-3.justify-content-center
     each medico in medicos
