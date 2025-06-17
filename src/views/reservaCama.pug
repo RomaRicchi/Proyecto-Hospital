@@ -9,38 +9,30 @@ block content
         table#tablaCamas.table.table-striped.table-bordered
           thead
             tr
-              th Sector
+              th ID Cama
+              th Nombre
               th Habitación
-              th Cama
               th Estado
               th Acciones
           tbody
             if camas && camas.length
               each cama in camas
-                tr
-                  td #{cama.habitacion?.sector?.nombre || '-'}
-                  td #{cama.habitacion?.num || '-'}
-                  td #{cama.nombre}
-                  td
-                    if cama.estado == 0 && cama.desinfeccion
+                if !cama.estado && cama.desinfeccion 
+                  tr
+                    td #{cama.id_cama}
+                    td #{cama.nombre}
+                    td #{cama.id_habitacion}
+                    td
                       span.badge.bg-secondary Libre
-                    else if cama.estado == 1
-                      span.badge.bg-danger Ocupada
-                    else if cama.estado == 2
-                      span.badge.bg-warning.text-dark Reservada
-                    else
-                      span.badge.bg-dark Desconocido
-                  td
-                    if cama.estado == 0 && cama.desinfeccion
+                    td
                       button.btn.btn-sm.btn-success.reserve-btn(data-id=cama.id_cama) Reservar
-                    else
-                      button.btn.btn-sm.btn-secondary(disabled) No disponible
             else
-            h1 No hay camas disponibles.
+              tr
+                td(colspan="5").text-center.text-muted No hay camas disponibles.
 
 
-    script(src="https://code.jquery.com/jquery-3.6.0.min.js")
-    script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-    script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
-    link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
-    script(src="/js/reservar.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+      script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+      script(src="/js/reservar.js")

@@ -27,7 +27,7 @@ block content
           tbody
             if pacientes && pacientes.length
               each paciente in pacientes
-                tr(style="white-space: nowrap;")
+                tr
                   td= paciente.dni_paciente
                   td= paciente.apellido_p
                   td= paciente.nombre_p
@@ -44,13 +44,14 @@ block content
                       i.fas.fa-trash
                     button.btn.btn-sm.btn-secondary.details-btn(data-id=paciente.id_paciente)
                       i.fas.fa-eye
-                    a.btn.btn-sm.btn-success.ms-1(href=`/familiar?idPaciente=${paciente.id_paciente}` title="Agregar familiar")
-                      i.fas.fa-user-plus
             else
-              h1 No hay pacientes registrados.
+              tr
+                td(colspan="10").text-center.text-muted No hay pacientes registrados.
 
       // Librerías
-      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+      script(src="https://code.jquery.com/jquery-3.7.1.min.js")
       script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+      script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+      script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
       script(src="/js/pacientes.js")

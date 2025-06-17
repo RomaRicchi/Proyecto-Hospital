@@ -9,6 +9,7 @@ block content
         table#tablaFamiliar.table.table-striped.table-bordered
           thead
             tr
+              th ID
               th Nombre
               th Apellido
               th Teléfono
@@ -20,6 +21,7 @@ block content
             if familiares && familiares.length
               each familiar in familiares
                 tr
+                  td #{familiar.id_familiar}
                   td #{familiar.nombre}
                   td #{familiar.apellido}
                   td #{familiar.telefono}
@@ -32,10 +34,11 @@ block content
                     button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=familiar.id_familiar)
                       i.fas.fa-trash
             else
-              h1 No hay familiares registrados.
+              p.text-center.text-muted No hay familiares registrados.
 
       // Librerías DataTables y jQuery
-      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")
+      script(src="https://code.jquery.com/jquery-3.7.1.min.js")
       script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+      script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
       script(src="/js/familiar.js")

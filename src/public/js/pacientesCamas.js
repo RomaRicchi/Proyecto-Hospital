@@ -2,48 +2,46 @@ $(document).ready(function () {
   const $tabla = $('#tablaPacientesCamas');
   if (!$tabla.length) return;
 
-  // 1) Crear controles de fecha UNA sola vez
-  const $container = $('<div class="row mb-3"></div>');
-  $container.append(`
+  // 🔍 Filtros personalizados por fecha
+  const contenedor = $('<div class="row mb-3"></div>');
+  const filtroDesde = $(`
     <div class="col-md-4">
-      <label class="form-label">Desde ingreso:</label>
+      <label class="form-label">Desde:</label>
       <input type="date" id="fechaDesde" class="form-control">
     </div>
+  `);
+  const filtroHasta = $(`
     <div class="col-md-4">
-      <label class="form-label">Hasta ingreso:</label>
+      <label class="form-label">Hasta:</label>
       <input type="date" id="fechaHasta" class="form-control">
     </div>
   `);
-  $tabla.before($container);
 
-  // 2) Extensión de búsqueda para filtrar por Fecha Ingreso (columna índice 5)
-  $.fn.dataTable.ext.search.push((settings, data) => {
+  $tabla.before(contenedor.append(filtroDesde, filtroHasta));
+
+  // 🔍 Extensión de búsqueda personalizada para filtrar por fecha
+  $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
     const desde = $('#fechaDesde').val();
     const hasta = $('#fechaHasta').val();
-    const ingresoTxt = data[5];
-    if (!ingresoTxt) return true;
-    const ingreso = new Date(ingresoTxt);
-    if (desde && ingreso < new Date(desde)) return false;
-    if (hasta && ingreso > new Date(hasta)) return false;
+    const fechaTexto = data[5]; // 📅 columna de fecha ingreso (6ta columna, índice 5)
+    if (!fechaTexto) return true;
+
+    const fecha = new Date(fechaTexto);
+    if (desde && fecha < new Date(desde)) return false;
+    if (hasta && fecha > new Date(hasta)) return false;
     return true;
   });
 
-  // 3) Inicializar DataTable sin scrollX y con responsive
+  // 🧾 Inicializar DataTable
   const dt = $tabla.DataTable({
     language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
-    paging: true,
     pageLength: 10,
-    searching: true,
     ordering: true,
-    destroy: true,
-    responsive: true,
-    scrollX: false,
-    
+    searching: true,
   });
 
-  // 4) Refrescar el filtro al cambiar las fechas
-  $('#fechaDesde, #fechaHasta').on('change', () => dt.draw());
-
-  // 5) Ocultar cualquier overflow-x sobrante
-  $('.dataTables_wrapper .table-responsive').css('overflow-x', 'hidden');
+  // 🔄 Refiltrar al cambiar fechas
+  $('#fechaDesde, #fechaHasta').on('change', function () {
+    dt.draw();
+  });
 });

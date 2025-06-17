@@ -1,8 +1,4 @@
 $(document).ready(function () {
-
-  const hoy = new Date().toISOString().split('T')[0];
-    $('#fecha_busqueda').val(hoy).attr('min', hoy); // también lo usamos como min (ver paso 2)
-    buscarCamasDisponibles(hoy);
 	// Manejar el submit del formulario de búsqueda
 	$('#formBuscarCamas').on('submit', function (e) {
 		e.preventDefault();
