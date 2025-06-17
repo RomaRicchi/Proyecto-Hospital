@@ -79,8 +79,10 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 					include: [{ model: Sector, as: 'sector' }],
 				},
 			],
-			logging: console.log,
 		});
+
+		const fechaConsulta = new Date(fecha);
+		const formatoFecha = (d) => (d ? d.toISOString().slice(0, 10) : null);
 
 		const camasConEstado = await Promise.all(
 			camas.map(async (cama) => {
@@ -101,47 +103,44 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 						},
 					],
 					order: [['fecha_hora_ingreso', 'DESC']],
-					logging: console.log,
+					limit: 1, // solo el más reciente
 				});
 
 				let estado = 'Disponible';
 				let paciente = null;
 				let genero = null;
 
-				// Convertir fecha a solo YYYY-MM-DD para comparar solo la fecha
-				const fechaConsulta = new Date(fecha);
-				const soloFecha = (d) => (d ? d.toISOString().slice(0, 10) : null);
+				const ultimoMov = movimientos[0];
 
-				for (const mov of movimientos) {
-					const fechaIngreso = mov.fecha_hora_ingreso;
-					const fechaEgreso = mov.fecha_hora_egreso;
+				if (ultimoMov) {
+					const fi = ultimoMov.fecha_hora_ingreso;
+					const fe = ultimoMov.fecha_hora_egreso;
 
-					if (
-						soloFecha(fechaIngreso) <= soloFecha(fechaConsulta) &&
-						(!fechaEgreso || soloFecha(fechaEgreso) >= soloFecha(fechaConsulta))
-					) {
-						if (mov.tipo_movimiento.nombre === 'Ingresa/Ocupa') {
+					const dentroDelRango =
+						formatoFecha(fi) <= formatoFecha(fechaConsulta) &&
+						(!fe || formatoFecha(fe) >= formatoFecha(fechaConsulta));
+
+					if (dentroDelRango) {
+						if (ultimoMov.tipo_movimiento.nombre === 'Ingresa/Ocupa') {
 							estado = 'Ocupada';
-							paciente = mov.admision?.paciente;
-							genero = paciente?.genero?.nombre;
-						} else if (mov.tipo_movimiento.nombre === 'Reserva') {
+						} else if (ultimoMov.tipo_movimiento.nombre === 'Reserva') {
 							estado = 'Reservada';
-							paciente = mov.admision?.paciente;
-							genero = paciente?.genero?.nombre;
 						}
-						break;
+						const p = ultimoMov.admision?.paciente;
+						if (p) {
+							paciente = `${p.apellido_p} ${p.nombre_p}`;
+							genero = p.genero?.nombre || null;
+						}
 					}
 				}
 
 				return {
 					id_cama: cama.id_cama,
-					nombre_cama: cama.nombre,
-					habitacion: cama.habitacion?.num,
-					sector: cama.habitacion?.sector?.nombre,
+					nombre_cama: cama.numero || cama.nombre || `Cama ${cama.id_cama}`,
+					habitacion: cama.habitacion?.num || '-',
+					sector: cama.habitacion?.sector?.nombre || '-',
 					estado,
-					paciente: paciente
-						? `${paciente.apellido_p} ${paciente.nombre_p}`
-						: null,
+					paciente,
 					genero,
 				};
 			})
