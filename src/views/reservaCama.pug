@@ -3,44 +3,48 @@ extends layout_modular
 block content
   .gral-hero.d-flex.align-items-center.justify-content-center.text-center
     .gral-hero-cont
-      h1.text-center.px-4.pt-5 Reserva de Cama
+      h1.text-center.px-4.pt-5 Reserva de Camas
 
       .table-responsive
-        table#tablaCamas.table.table-striped.table-bordered
+        table#tablaReservas.table.table-striped.table-bordered
           thead
             tr
               th Sector
               th Habitación
               th Cama
-              th Estado
-              th Acciones
+              th Fecha de Reserva
+              th Paciente
+              th Motivo de Ingreso
+              th Acción
           tbody
             if camas && camas.length
               each cama in camas
-                tr
-                  td #{cama.habitacion?.sector?.nombre || '-'}
-                  td #{cama.habitacion?.num || '-'}
-                  td #{cama.nombre}
-                  td
-                    if cama.estado == 0 && cama.desinfeccion
-                      span.badge.bg-secondary Libre
-                    else if cama.estado == 1
-                      span.badge.bg-danger Ocupada
-                    else if cama.estado == 2
-                      span.badge.bg-warning.text-dark Reservada
-                    else
-                      span.badge.bg-dark Desconocido
-                  td
-                    if cama.estado == 0 && cama.desinfeccion
-                      button.btn.btn-sm.btn-success.reserve-btn(data-id=cama.id_cama) Reservar
-                    else
-                      button.btn.btn-sm.btn-secondary(disabled) No disponible
-            else
-            h1 No hay camas disponibles.
+                if cama.movimientos && cama.movimientos.length > 0
+                  - const mov = cama.movimientos[0]
+                  - const paciente = mov?.admision?.paciente
+                  - const fechaIngreso = mov?.fecha_hora_ingreso ? new Date(mov.fecha_hora_ingreso).toLocaleString('es-AR') : '-'
+                  - const motivo = mov?.admision?.motivo_ing || '-'
+                  - const idPaciente = paciente && paciente.id_paciente ? paciente.id_paciente : ''
+
+                  tr
+                    td= cama.habitacion && cama.habitacion.sector ? cama.habitacion.sector.nombre : '-'
+                    td= cama.habitacion ? cama.habitacion.num : '-'
+                    td= cama.nombre
+                    td= fechaIngreso
+                    td= paciente ? `${paciente.apellido_p}, ${paciente.nombre_p}` : '-'
+                    td= motivo
+                    td
+                      form(action='/confirmar-reserva', method='POST')
+                        input(type='hidden', name='id_paciente', value=idPaciente)
+                        input(type='hidden', name='fecha_actual', value=fechaIngreso)
+                        button.btn.btn-sm.btn-success(type='submit')
+                          i.fas.fa-check-circle.me-1
+                          | Confirmar ingreso
 
 
-    script(src="https://code.jquery.com/jquery-3.6.0.min.js")
-    script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-    script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
-    link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
-    script(src="/js/reservar.js")
+        // Librerías para tabla y scripts
+        script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+        script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+        link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")
+        script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
+        script(src="/js/reservar.js")

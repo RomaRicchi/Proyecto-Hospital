@@ -11,10 +11,11 @@ $(document).ready(function () {
     if (trimmed.length < 3 || trimmed.length > 50) {
       return 'El nombre debe tener entre 3 y 50 caracteres.';
     }
-    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(trimmed)) {
-      return 'El nombre solo puede contener letras y espacios.';
+    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ -]+$/.test(trimmed)) {
+      return 'El nombre solo puede contener letras, espacios y guiones.';
     }
     return null;
+
   }
 
   // 1) Cargar y renderizar DataTable

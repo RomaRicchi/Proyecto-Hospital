@@ -22,7 +22,13 @@ export const getLocalidadById = async (req, res) => {
 
 export const createLocalidad = async (req, res) => {
 	try {
-		const localidad = await Localidad.create(req.body);
+		const nombre = req.body.nombre?.trim();
+
+		if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ -]+$/.test(nombre)) {
+			return res.status(400).json({ message: 'El nombre solo puede contener letras, espacios y guiones.' });
+		}
+
+		const localidad = await Localidad.create({ nombre });
 		res.status(201).json(localidad);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
@@ -34,12 +40,20 @@ export const updateLocalidad = async (req, res) => {
 		const localidad = await Localidad.findByPk(req.params.id);
 		if (!localidad)
 			return res.status(404).json({ message: 'Localidad no encontrada' });
-		await localidad.update(req.body);
+
+		const nombre = req.body.nombre?.trim();
+
+		if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ -]+$/.test(nombre)) {
+			return res.status(400).json({ message: 'El nombre solo puede contener letras, espacios y guiones.' });
+		}
+
+		await localidad.update({ nombre });
 		res.json(localidad);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
 	}
 };
+
 
 export const deleteLocalidad = async (req, res) => {
 	try {
