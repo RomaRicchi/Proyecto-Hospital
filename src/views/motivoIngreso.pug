@@ -10,14 +10,12 @@ block content
         table#tablaMotivoIngreso.table.table-striped.table-bordered
           thead
             tr
-              th ID
               th Tipo
               th Acciones
           tbody
             if motivos && motivos.length
               each motivo in motivos
                 tr
-                  td= motivo.id_motivo
                   td= motivo.tipo
                   td
                     button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=motivo.id_motivo)
@@ -28,8 +26,7 @@ block content
               p.text-center.text-muted No hay motivos registrados.
 
       // 🔸 Librerías DataTables y jQuery
-      script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
       script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-      script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
-      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
       script(src="/js/motivos_ingreso.js")  // JS específico para motivos ingreso

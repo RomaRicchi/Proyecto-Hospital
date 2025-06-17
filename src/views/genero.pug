@@ -10,14 +10,12 @@ block content
         table#tablaGenero.table.table-striped.table-bordered
           thead
             tr
-              th ID
               th Nombre
               th Acciones
           tbody
             if generos && generos.length  
               each genero in generos
                 tr
-                  td #{genero.id_genero}
                   td #{genero.nombre}
                   td
                     button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=genero.id_genero)
@@ -25,10 +23,9 @@ block content
                     button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=genero.id_genero)
                       i.fas.fa-trash
             else
-              p.text-center.text-muted No hay géneros registrados.
+              h1 No hay géneros registrados.
       
-      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")
-      script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
       script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-      script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
       script(src="/js/generos.js")

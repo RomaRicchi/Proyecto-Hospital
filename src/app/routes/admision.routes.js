@@ -15,7 +15,7 @@ const router = Router();
 
 
 // Rutas específicas primero
-router.get('/validar-dni/:dni', validarAdmisionPorDNI); // ✅ nueva validación
+router.get('/validar-dni/:dni', validarAdmisionPorDNI); 
 router.get('/paciente/:dni/admisiones-vigentes', buscarAdmisionVigente);
 router.post('/paciente/:dni/alta', darAltaPaciente);
 router.get('/opciones', getOpcionesAdmision);

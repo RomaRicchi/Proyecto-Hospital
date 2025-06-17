@@ -22,15 +22,12 @@ block content
                     button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=localidad.id_localidad)
                       i.fas.fa-trash
             else
-              p.text-center.text-muted No hay localidades registradas.
+              h1 No hay localidades registradas.
 
-      // Botón para agregar nueva localidad
-      .mt-3.text-center
-        button.btn.btn-success#btnAgregarLocalidad Agregar Nueva Localidad
+      
 
       // Librerías DataTables y jQuery
-      script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
       script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-      script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
-      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
       script(src="/js/localidades.js")
