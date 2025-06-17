@@ -8,12 +8,12 @@ $(document).ready(function () {
       pageLength: 10,
       searching: true,
       ordering: true,
-	  destroy: true,
-      responsive: true,    // NUEVO: hace la tabla “responsive” y elimina la barra X
+	    destroy: true,
+      responsive: true,    
       scrollX: false,
-	  columnDefs: [             // deshabilita orden/búsqueda en la columna de acciones
-		{ targets: [4], orderable: false, searchable: false }
-	  ]
+      columnDefs: [     
+      { targets: [4], orderable: false, searchable: false }
+      ]
     });
 
     dt.on('draw', function () {

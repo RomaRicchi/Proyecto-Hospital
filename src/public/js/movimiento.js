@@ -39,9 +39,9 @@ $(document).ready(function () {
         pageLength: 10,
         searching: true,
         ordering: true,  
-		destroy: true,
+		    destroy: true,
         responsive: true,
-		scrollX: false,
+		    scrollX: false,
         columns: [
           { title: 'Nombre' },
           { title: 'Acciones', orderable: false, searchable: false }

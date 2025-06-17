@@ -10,6 +10,8 @@ import {
 	reservarCama,
 } from '../controllers/movimientoHabitacion.controller.js';
 
+import { confirmarReserva } from '../controllers/confirmarReserva.controller.js';
+
 const router = Router();
 
 router.post('/verificar-genero', verificarGenero);
@@ -22,5 +24,6 @@ router.delete('/:id', deleteMovimientoHabitacion);
 
 // 🔸 Agregar la ruta para reservar cama, protegida con isAuthenticated
 router.post('/reservar/:id_cama', isAuthenticated, reservarCama);
+router.post('/confirmar-reserva', isAuthenticated, confirmarReserva);
 
 export default router;

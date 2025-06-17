@@ -21,6 +21,7 @@ import { vistaPacientesCamas } from '../controllers/pacientesCamas.controller.js
 import { vistaDashboard } from '../controllers/dashboard.controller.js';
 import { vistaEmergencias } from '../controllers/emergencia.controller.js';
 import { vistaAltaPaciente } from '../controllers/alta.controller.js';
+import { vistaReservarCama } from '../controllers/confirmarReserva.controller.js';
 
 const router = Router();
 
@@ -54,6 +55,7 @@ router.get('/movimientoHabitacion', isAuthenticated, vistaMovimientosHabitacion)
 router.get('/movimiento', isAuthenticated, vistaMovimientos);
 router.get('/paciente/alta', isAuthenticated, vistaAltaPaciente);
 router.get('/obraSocial', isAuthenticated, vistaObrasSociales);
+router.get('/reservar-cama', isAuthenticated, vistaReservarCama);
 
 // 🔸 Emergencias
 router.get('/emergencias', isAuthenticated, vistaEmergencias);

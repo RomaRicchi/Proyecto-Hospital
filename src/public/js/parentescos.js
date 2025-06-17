@@ -2,7 +2,7 @@ $(document).ready(function () {
 	const tabla = $('#tablaParentesco');
 	if (!tabla.length) return;
 
-	// 🔍 Validación estricta del campo "nombre"
+	
 	function validarNombre(nombre) {
 		if (!nombre || !nombre.trim()) {
 			return 'El nombre del parentesco es obligatorio.';
