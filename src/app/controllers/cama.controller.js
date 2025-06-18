@@ -70,6 +70,8 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 	const { fecha } = req.query;
 	if (!fecha) return res.status(400).json({ message: 'Fecha requerida' });
 
+	console.log('📅 Buscando camas para:', fecha);
+
 	try {
 		const camas = await Cama.findAll({
 			include: [
@@ -86,52 +88,55 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 
 		const camasConEstado = await Promise.all(
 			camas.map(async (cama) => {
-				const movimientos = await MovimientoHabitacion.findAll({
-					where: { id_cama: cama.id_cama },
-					include: [
-						{ model: Movimiento, as: 'tipo_movimiento' },
-						{
-							model: Admision,
-							as: 'admision',
-							include: [
-								{
-									model: Paciente,
-									as: 'paciente',
-									include: [{ model: Genero, as: 'genero' }],
-								},
-							],
-						},
-					],
-					order: [['fecha_hora_ingreso', 'DESC']],
-					limit: 1, // solo el más reciente
-				});
-
 				let estado = 'Disponible';
 				let paciente = null;
 				let genero = null;
 
-				const ultimoMov = movimientos[0];
+				try {
+					const movimientos = await MovimientoHabitacion.findAll({
+						where: { id_cama: cama.id_cama },
+						include: [
+							{ model: Movimiento, as: 'tipo_movimiento' },
+							{
+								model: Admision,
+								as: 'admision',
+								include: [
+									{
+										model: Paciente,
+										as: 'paciente',
+										include: [{ model: Genero, as: 'genero' }],
+									},
+								],
+							},
+						],
+						order: [['fecha_hora_ingreso', 'DESC']],
+						limit: 1,
+					});
 
-				if (ultimoMov) {
-					const fi = ultimoMov.fecha_hora_ingreso;
-					const fe = ultimoMov.fecha_hora_egreso;
+					const ultimoMov = movimientos?.[0];
 
-					const dentroDelRango =
-						formatoFecha(fi) <= formatoFecha(fechaConsulta) &&
-						(!fe || formatoFecha(fe) >= formatoFecha(fechaConsulta));
+					if (ultimoMov) {
+						const fi = ultimoMov.fecha_hora_ingreso;
+						const fe = ultimoMov.fecha_hora_egreso;
 
-					if (dentroDelRango) {
-						if (ultimoMov.tipo_movimiento.nombre === 'Ingresa/Ocupa') {
-							estado = 'Ocupada';
-						} else if (ultimoMov.tipo_movimiento.nombre === 'Reserva') {
-							estado = 'Reservada';
-						}
-						const p = ultimoMov.admision?.paciente;
-						if (p) {
-							paciente = `${p.apellido_p} ${p.nombre_p}`;
-							genero = p.genero?.nombre || null;
+						const dentroDelRango =
+							formatoFecha(fi) <= formatoFecha(fechaConsulta) &&
+							(!fe || formatoFecha(fe) >= formatoFecha(fechaConsulta));
+
+						if (dentroDelRango) {
+							const tipo = ultimoMov?.tipo_movimiento?.nombre;
+							if (tipo === 'Ingresa/Ocupa') estado = 'Ocupada';
+							else if (tipo === 'Reserva') estado = 'Reservada';
+
+							const p = ultimoMov?.admision?.paciente;
+							if (p) {
+								paciente = `${p.apellido_p || ''} ${p.nombre_p || ''}`;
+								genero = p.genero?.nombre || null;
+							}
 						}
 					}
+				} catch (movError) {
+					console.error(`❗ Error al procesar movimientos de cama ${cama.id_cama}:`, movError.message);
 				}
 
 				return {
@@ -146,8 +151,10 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 			})
 		);
 
+		console.log(`✅ Camas encontradas: ${camasConEstado.length}`);
 		res.json(camasConEstado);
 	} catch (error) {
+		console.error('❌ Error general al buscar camas disponibles:', error.message);
 		res.status(500).json({ message: 'Error al buscar camas' });
 	}
 };
