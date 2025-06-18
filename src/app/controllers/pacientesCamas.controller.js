@@ -13,7 +13,6 @@ export const vistaPacientesCamas = async (req, res) => {
 		const movimientos = await MovimientoHabitacion.findAll({
 			where: {
 				id_mov: 1, // Ingresa/Ocupa
-				fecha_hora_egreso: null,
 				estado: 1,
 			},
 			include: [

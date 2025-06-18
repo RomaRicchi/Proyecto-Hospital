@@ -1,23 +1,27 @@
-import { Router } from 'express';
-import { isAuthenticated } from '../middlewares/auth.middleware.js';
-import { vistaReservarCama } from '../controllers/cama.controller.js';
+import express from 'express';
 import {
+	getCamasApi,
 	getCamas,
 	getCamaById,
+	getCamasDisponiblesPorFecha,
 	createCama,
 	updateCama,
 	deleteCama,
-	getCamasDisponiblesPorFecha,
-	getCamasApi,
+	vistaReservarCama,
 } from '../controllers/cama.controller.js';
 
-const router = Router();
+const router = express.Router();
+
 
 router.get('/disponibles', getCamasDisponiblesPorFecha);
-
-router.get('/api/camas', getCamasApi);
-router.get('/', getCamas);
+router.get('/', getCamasApi);
 router.get('/:id', getCamaById);
+
+// Vistas
+router.get('/vista', getCamas); // Evitá conflicto con /:id
+router.get('/reservar', vistaReservarCama);
+
+// CRUD
 router.post('/', createCama);
 router.put('/:id', updateCama);
 router.delete('/:id', deleteCama);

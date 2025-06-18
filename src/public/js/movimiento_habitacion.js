@@ -11,7 +11,7 @@ $(document).ready(function () {
 			})
 			.then((movimientos) => {
 				const dataSet = (movimientos || []).map((m) => [
-					m.id_movimiento,
+					
 					m.admision && m.admision.paciente
 						? `${m.admision.paciente.apellido_p}, ${m.admision.paciente.nombre_p}`
 						: '-',
@@ -86,7 +86,7 @@ $(document).ready(function () {
 		Swal.fire({
 			title: 'Agregar Movimiento Habitación',
 			html: `
-                <input type="number" id="id_admision" class="swal2-input" placeholder="ID Admisión">
+                
                 <input type="number" id="id_habitacion" class="swal2-input" placeholder="ID Habitación">
                 <input type="number" id="id_cama" class="swal2-input" placeholder="ID Cama">
                 <input type="text" id="fecha_hora_ingreso" class="swal2-input" placeholder="Fecha Ingreso">
@@ -133,7 +133,7 @@ $(document).ready(function () {
 					);
 				}
 				return {
-					id_admision,
+					
 					id_habitacion,
 					id_cama,
 					fecha_hora_ingreso,
@@ -170,9 +170,7 @@ $(document).ready(function () {
 				Swal.fire({
 					title: 'Editar Movimiento',
 					html: `
-            <input type="number" id="id_admision" class="swal2-input" value="${
-							m.id_admision
-						}">
+            
             <input type="number" id="id_habitacion" class="swal2-input" value="${
 							m.id_habitacion
 						}">
@@ -234,7 +232,7 @@ $(document).ready(function () {
 							);
 						}
 						return {
-							id_admision,
+							
 							id_habitacion,
 							id_cama,
 							fecha_hora_ingreso,

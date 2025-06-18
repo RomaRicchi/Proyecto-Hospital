@@ -233,6 +233,7 @@ $(document).ready(function () {
 			}),
 		}).then((result) => {
 			if (result.isConfirmed) {
+				
 				fetch(`/api/admisiones/${id}`, {
 					method: 'PUT',
 					headers: { 'Content-Type': 'application/json' },
