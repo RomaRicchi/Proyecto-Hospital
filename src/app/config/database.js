@@ -6,13 +6,10 @@ export default {
 	port: 3306,
 	dialect: 'mysql',
 	logging: false,
-	timezone: '-03:00', // Hora de Argentina
 	dialectOptions: {
 		ssl: {
 			require: true,
 			rejectUnauthorized: false,
 		},
-		dateStrings: true,
-		typeCast: true,
 	},
 };
