@@ -8,6 +8,7 @@ import {
 	Paciente,
 	Genero,
 } from '../models/index.js';
+import { Op } from 'sequelize';
 
 // 🔸 API: Obtener todas las camas en formato JSON (para DataTable)
 export const getCamasApi = async (req, res) => {
@@ -19,36 +20,7 @@ export const getCamasApi = async (req, res) => {
 	}
 };
 
-// 🔸 Vista tradicional: Renderizar la vista PUG con camas
-export const getCamas = async (req, res) => {
-	try {
-		const camas = await Cama.findAll({
-			include: [
-				{
-					model: Habitacion,
-					as: 'habitacion',
-					include: [{ model: Sector, as: 'sector' }],
-				},
-			],
-		});
 
-		// Campo virtual para vista PUG
-		camas.forEach((cama) => {
-			const numero = cama.habitacion?.num;
-			const sector = cama.habitacion?.sector?.nombre;
-			cama.descripcionHabitacion =
-				numero && sector
-					? `Habitación ${numero} - ${sector}`
-					: numero
-					? `Habitación ${numero}`
-					: '—';
-		});
-
-		res.render('cama', { camas });
-	} catch (error) {
-		res.status(500).send('Error interno del servidor');
-	}
-};
 
 // 🔸 Obtener cama por ID (JSON)
 export const getCamaById = async (req, res) => {
@@ -67,97 +39,94 @@ export const getCamaById = async (req, res) => {
 };
 
 export const getCamasDisponiblesPorFecha = async (req, res) => {
-	const { fecha } = req.query;
-	if (!fecha) return res.status(400).json({ message: 'Fecha requerida' });
-
-	console.log('📅 Buscando camas para:', fecha);
-
 	try {
+		const { fecha } = req.query;
+		if (!fecha) return res.status(400).json({ message: 'Fecha requerida' });
+
+		const desde = new Date(`${fecha}T00:00:00`);
+		const hasta = new Date(`${fecha}T23:59:59`);
+
 		const camas = await Cama.findAll({
 			include: [
+				{
+					model: MovimientoHabitacion,
+					as: 'movimientos',
+					required: false,
+					where: {
+						fecha_hora_ingreso: {
+							[Op.lte]: hasta,
+						},
+					},
+					include: [
+						{
+							model: Movimiento,
+							as: 'tipo_movimiento',
+						},
+						{
+							model: Admision,
+							as: 'admision',
+							include: [
+								{
+									model: Paciente,
+									as: 'paciente',
+									include: [{ model: Genero, as: 'genero' }],
+								},
+							],
+						},
+					],
+				},
 				{
 					model: Habitacion,
 					as: 'habitacion',
 					include: [{ model: Sector, as: 'sector' }],
 				},
 			],
+			order: [['id_cama', 'ASC']],
 		});
 
-		const fechaConsulta = new Date(fecha);
-		const formatoFecha = (d) => (d ? d.toISOString().slice(0, 10) : null);
+		const resultado = camas.map((cama) => {
+			let estado = 'Disponible';
+			let paciente = null;
+			let genero = null;
 
-		const camasConEstado = await Promise.all(
-			camas.map(async (cama) => {
-				let estado = 'Disponible';
-				let paciente = null;
-				let genero = null;
+			if (Array.isArray(cama.movimientos) && cama.movimientos.length > 0) {
+				const movimientosValidos = cama.movimientos.filter((mov) => {
+				const fechaMov = new Date(mov.fecha_hora_ingreso);
+				return fechaMov >= desde && fechaMov <= hasta;
+				});
 
-				try {
-					const movimientos = await MovimientoHabitacion.findAll({
-						where: { id_cama: cama.id_cama },
-						include: [
-							{ model: Movimiento, as: 'tipo_movimiento' },
-							{
-								model: Admision,
-								as: 'admision',
-								include: [
-									{
-										model: Paciente,
-										as: 'paciente',
-										include: [{ model: Genero, as: 'genero' }],
-									},
-								],
-							},
-						],
-						order: [['fecha_hora_ingreso', 'DESC']],
-						limit: 1,
-					});
+				const ultimoMovimiento = movimientosValidos[0]; // Podés ordenar antes si hace falta
 
-					const ultimoMov = movimientos?.[0];
+				if (ultimoMovimiento) {
+				const tipo = ultimoMovimiento.tipo_movimiento?.nombre;
+				if (tipo === 'Reserva') estado = 'Reservada';
+				else estado = 'Ocupada';
 
-					if (ultimoMov) {
-						const fi = ultimoMov.fecha_hora_ingreso;
-						const fe = ultimoMov.fecha_hora_egreso;
-
-						const dentroDelRango =
-							formatoFecha(fi) <= formatoFecha(fechaConsulta) &&
-							(!fe || formatoFecha(fe) >= formatoFecha(fechaConsulta));
-
-						if (dentroDelRango) {
-							const tipo = ultimoMov?.tipo_movimiento?.nombre;
-							if (tipo === 'Ingresa/Ocupa') estado = 'Ocupada';
-							else if (tipo === 'Reserva') estado = 'Reservada';
-
-							const p = ultimoMov?.admision?.paciente;
-							if (p) {
-								paciente = `${p.apellido_p || ''} ${p.nombre_p || ''}`;
-								genero = p.genero?.nombre || null;
-							}
-						}
-					}
-				} catch (movError) {
-					console.error(`❗ Error al procesar movimientos de cama ${cama.id_cama}:`, movError.message);
+				const pac = ultimoMovimiento.admision?.paciente;
+				paciente = pac ? `${pac.apellido} ${pac.nombre}` : null;
+				genero = pac?.genero?.nombre || null;
 				}
+			}
 
-				return {
-					id_cama: cama.id_cama,
-					nombre_cama: cama.numero || cama.nombre || `Cama ${cama.id_cama}`,
-					habitacion: cama.habitacion?.num || '-',
-					sector: cama.habitacion?.sector?.nombre || '-',
-					estado,
-					paciente,
-					genero,
-				};
-			})
-		);
+			return {
+				id_cama: cama.id_cama,
+				nombre_cama: cama.nombre,
+				sector: cama.habitacion?.sector?.nombre || '-',
+				habitacion: cama.habitacion?.num || '-',
+				estado,
+				paciente,
+				genero
+			};
+		});
 
-		console.log(`✅ Camas encontradas: ${camasConEstado.length}`);
-		res.json(camasConEstado);
+		res.json(resultado);
 	} catch (error) {
-		console.error('❌ Error general al buscar camas disponibles:', error.message);
-		res.status(500).json({ message: 'Error al buscar camas' });
+		console.error('❌ getCamasDisponiblesPorFecha error:', error);
+		res.status(500).json({ message: 'Error al cargar las camas' });
 	}
 };
+
+
 
 // 🔸 Crear nueva cama
 export const createCama = async (req, res) => {
@@ -199,17 +168,34 @@ export const deleteCama = async (req, res) => {
 	}
 };
 
-// 🔸 Vista de reserva de cama
-export const vistaReservarCama = async (req, res) => {
+export const vistaCama = async (req, res) => {
 	try {
 		const camas = await Cama.findAll({
-			where: {
-				estado: false, // libres
-				desinfeccion: true, // desinfectadas
-			},
+			include: [
+				{
+					model: Habitacion,
+					as: 'habitacion',
+					include: [{ model: Sector, as: 'sector' }],
+				},
+			],
+			order: [['id_cama', 'ASC']],
 		});
-		res.render('reservaCama', { camas });
+
+		// Enriquecer datos para la vista
+		camas.forEach((cama) => {
+			const numero = cama.habitacion?.num;
+			const sector = cama.habitacion?.sector?.nombre;
+			cama.descripcionHabitacion =
+				numero && sector
+					? `Habitación ${numero} - ${sector}`
+					: numero
+					? `Habitación ${numero}`
+					: '—';
+		});
+
+		res.render('cama', { camas });
 	} catch (error) {
+		console.error('Error al cargar camas:', error);
 		res.status(500).send('Error al cargar camas');
 	}
 };

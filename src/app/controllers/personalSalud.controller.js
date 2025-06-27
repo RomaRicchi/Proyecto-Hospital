@@ -1,20 +1,22 @@
 import {
 	PersonalSalud,
-	Usuario,
 	RolUsuario,
 	Especialidad,
 } from '../models/index.js';
 
 export const getPersonalSalud = async (req, res) => {
-	try {
-		const lista = await PersonalSalud.findAll({
-			attributes: ['id_personal_salud', 'apellido', 'nombre', 'matricula'],
-			where: { activo: true },
-		});
-		res.json(lista);
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+  try {
+    const personal = await PersonalSalud.findAll({
+      include: [
+        { model: RolUsuario, as: 'rol' },
+        { model: Especialidad, as: 'especialidad' }
+      ]
+    });
+    res.json(personal);
+  } catch (error) {
+    console.error('Error al obtener personal de salud:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
 };
 
 export const getPersonalSaludById = async (req, res) => {
@@ -58,5 +60,21 @@ export const deletePersonalSalud = async (req, res) => {
 		res.sendStatus(204);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
+	}
+};
+
+export const vistaPersonalSalud = async (req, res) => {
+	try {
+		const personal = await PersonalSalud.findAll({
+			include: [
+				{ model: RolUsuario, as: 'rol' },
+				{ model: Especialidad, as: 'especialidad' }
+			],
+			where: { activo: true }
+		});
+		res.render('salud', { personal });
+	} catch (error) {
+		console.error(error);
+		res.status(500).send('Error al cargar personal de salud');
 	}
 };

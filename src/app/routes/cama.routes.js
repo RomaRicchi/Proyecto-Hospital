@@ -1,27 +1,19 @@
-import express from 'express';
+import { Router } from 'express';
 import {
-	getCamasApi,
-	getCamas,
+	vistaCama, 
 	getCamaById,
-	getCamasDisponiblesPorFecha,
 	createCama,
 	updateCama,
 	deleteCama,
-	vistaReservarCama,
+	getCamasDisponiblesPorFecha,
+	getCamasApi,
 } from '../controllers/cama.controller.js';
 
-const router = express.Router();
-
-
+const router = Router();
+router.get('/vista', vistaCama); 
 router.get('/disponibles', getCamasDisponiblesPorFecha);
-router.get('/', getCamasApi);
+router.get('/api/camas', getCamasApi);
 router.get('/:id', getCamaById);
-
-// Vistas
-router.get('/vista', getCamas); // Evitá conflicto con /:id
-router.get('/reservar', vistaReservarCama);
-
-// CRUD
 router.post('/', createCama);
 router.put('/:id', updateCama);
 router.delete('/:id', deleteCama);

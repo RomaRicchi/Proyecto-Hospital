@@ -1,18 +1,16 @@
-import { Router } from 'express';
+import express from 'express';
 import {
-	getEspecialidades,
-	getEspecialidadById,
-	createEspecialidad,
-	updateEspecialidad,
-	deleteEspecialidad,
+  listarEspecialidades,
+  crearEspecialidad,
+  actualizarEspecialidad,
+  eliminarEspecialidad
 } from '../controllers/especialidad.controller.js';
 
-const router = Router();
+const router = express.Router();
 
-router.get('/', getEspecialidades);
-router.get('/:id', getEspecialidadById);
-router.post('/', createEspecialidad);
-router.put('/:id', updateEspecialidad);
-router.delete('/:id', deleteEspecialidad);
+router.get('/', listarEspecialidades);
+router.post('/', crearEspecialidad);
+router.put('/:id', actualizarEspecialidad);
+router.delete('/:id', eliminarEspecialidad);
 
 export default router;

@@ -1,18 +1,16 @@
-import { Router } from 'express';
+import express from 'express';
 import {
-	getTiposRegistro,
-	getTipoRegistroById,
-	createTipoRegistro,
-	updateTipoRegistro,
-	deleteTipoRegistro,
+  listarTipos,
+  crearTipo,
+  actualizarTipo,
+  eliminarTipo
 } from '../controllers/tipoRegistro.controller.js';
 
-const router = Router();
+const router = express.Router();
 
-router.get('/', getTiposRegistro);
-router.get('/:id', getTipoRegistroById);
-router.post('/', createTipoRegistro);
-router.put('/:id', updateTipoRegistro);
-router.delete('/:id', deleteTipoRegistro);
+router.get('/', listarTipos);
+router.post('/', crearTipo);
+router.put('/:id', actualizarTipo);
+router.delete('/:id', eliminarTipo);
 
 export default router;

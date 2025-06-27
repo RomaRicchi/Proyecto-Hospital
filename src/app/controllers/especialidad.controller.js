@@ -1,54 +1,55 @@
 import { Especialidad } from '../models/index.js';
 
-export const getEspecialidades = async (req, res) => {
-	try {
-		const lista = await Especialidad.findAll();
-		res.json(lista);
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+export const listarEspecialidades = async (req, res) => {
+  try {
+    const especialidades = await Especialidad.findAll();
+    res.json(especialidades);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al listar especialidades' });
+  }
 };
 
-export const getEspecialidadById = async (req, res) => {
-	try {
-		const especialidad = await Especialidad.findByPk(req.params.id);
-		if (!especialidad)
-			return res.status(404).json({ message: 'Especialidad no encontrada' });
-		res.json(especialidad);
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+export const crearEspecialidad = async (req, res) => {
+  const { nombre } = req.body;
+  try {
+    const existente = await Especialidad.findOne({ where: { nombre } });
+    if (existente) return res.status(409).json({ message: 'Ya existe' });
+    const nueva = await Especialidad.create({ nombre });
+    res.json(nueva);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al crear especialidad' });
+  }
 };
 
-export const createEspecialidad = async (req, res) => {
-	try {
-		const nueva = await Especialidad.create(req.body);
-		res.status(201).json(nueva);
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+export const actualizarEspecialidad = async (req, res) => {
+  const { id } = req.params;
+  const { nombre } = req.body;
+  try {
+    const esp = await Especialidad.findByPk(id);
+    if (!esp) return res.status(404).json({ message: 'No encontrada' });
+    await esp.update({ nombre });
+    res.json({ message: 'Actualizada' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al actualizar' });
+  }
 };
 
-export const updateEspecialidad = async (req, res) => {
-	try {
-		const especialidad = await Especialidad.findByPk(req.params.id);
-		if (!especialidad)
-			return res.status(404).json({ message: 'Especialidad no encontrada' });
-		await especialidad.update(req.body);
-		res.json(especialidad);
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+export const eliminarEspecialidad = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const esp = await Especialidad.findByPk(id);
+    if (!esp) return res.status(404).json({ message: 'No encontrada' });
+    await esp.destroy();
+    res.json({ message: 'Eliminada' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al eliminar' });
+  }
 };
-
-export const deleteEspecialidad = async (req, res) => {
-	try {
-		const especialidad = await Especialidad.findByPk(req.params.id);
-		if (!especialidad)
-			return res.status(404).json({ message: 'Especialidad no encontrada' });
-		await especialidad.destroy();
-		res.sendStatus(204);
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+export const vistaEspecialidades = async (req, res) => {
+  try {
+    const especialidades = await Especialidad.findAll();
+    res.render('especialidad', { especialidades });
+  } catch (error) {
+    res.status(500).send('Error al mostrar especialidades');
+  }
 };

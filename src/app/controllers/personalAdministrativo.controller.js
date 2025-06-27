@@ -1,6 +1,5 @@
 import {
 	PersonalAdministrativo,
-	Usuario,
 	RolUsuario,
 } from '../models/index.js';
 
@@ -58,3 +57,17 @@ export const deletePersonalAdministrativo = async (req, res) => {
 		res.status(500).json({ message: error.message });
 	}
 };
+
+export const vistaPersonalAdministrativo = async (req, res) => {
+	try {
+		const personal = await PersonalAdministrativo.findAll({
+			include: [{ model: RolUsuario, as: 'rol' }],
+			where: { activo: true }
+		});
+		res.render('administrativo', { personal });
+	} catch (error) {
+		console.error(error);
+		res.status(500).send('Error al cargar personal administrativo');
+	}
+};
+

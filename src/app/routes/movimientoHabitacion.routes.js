@@ -7,10 +7,13 @@ import {
 	updateMovimientoHabitacion,
 	verificarGenero,
 	deleteMovimientoHabitacion,
-	reservarCama,
+	
 } from '../controllers/movimientoHabitacion.controller.js';
 
-import { confirmarReserva } from '../controllers/confirmarReserva.controller.js';
+import {
+	confirmarReserva,
+	cancelarReserva
+} from '../controllers/confirmarReserva.controller.js';
 
 const router = Router();
 
@@ -22,8 +25,10 @@ router.post('/', createMovimientoHabitacion);
 router.put('/:id', updateMovimientoHabitacion);
 router.delete('/:id', deleteMovimientoHabitacion);
 
-// 🔸 Agregar la ruta para reservar cama, protegida con isAuthenticated
-router.post('/reservar/:id_cama', isAuthenticated, reservarCama);
+// 🔸 Rutas especiales con autenticación
+
 router.post('/confirmar-reserva', isAuthenticated, confirmarReserva);
+router.put('/cancelar-reserva/:id_movimiento', isAuthenticated, cancelarReserva); 
 
 export default router;
+
