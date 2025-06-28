@@ -1,4 +1,20 @@
 $(document).ready(function () {
+	
+	const hoyLocal = new Date();
+	const offset = hoyLocal.getTimezoneOffset();
+	hoyLocal.setMinutes(hoyLocal.getMinutes() - offset);
+	const hoy = hoyLocal.toISOString().split('T')[0];
+
+	// Establecer fecha mínima
+	$('#fecha_ingreso').attr('min', hoy);
+
+	// Validación antes de enviar
+	if (fechaSeleccionada < hoy) {
+	Swal.fire('Error', 'No se puede usar una fecha anterior a hoy', 'error');
+	return;
+	}
+
+	
 	const tabla = $('#tablaMovimientosHabitacion');
 
 	if (tabla.length) {
@@ -11,7 +27,7 @@ $(document).ready(function () {
 			})
 			.then((movimientos) => {
 				const dataSet = (movimientos || []).map((m) => [
-					
+					m.id_movimiento,
 					m.admision && m.admision.paciente
 						? `${m.admision.paciente.apellido_p}, ${m.admision.paciente.nombre_p}`
 						: '-',
@@ -37,26 +53,14 @@ $(document).ready(function () {
 				]);
 
 				const dataTable = tabla.DataTable({
-					language: {
-						url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
-					},
+					language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
 					paging: true,
-					pageLength: 5,
-					searching: true,
-					ordering: true,
-					data: dataSet,
-					columns: [
-						{ title: 'ID' },
-						{ title: 'Paciente' },
-						{ title: 'Habitación' },
-						{ title: 'Sector' },
-						{ title: 'Cama' }, // 👈 Nueva columna
-						{ title: 'Tipo Movimiento' },
-						{ title: 'Ingreso' },
-						{ title: 'Egreso' },
-						{ title: 'Estado' },
-						{ title: 'Acciones', orderable: false, searchable: false },
-					],
+      				pageLength: 10,
+      				searching: true,
+      				ordering: true,  
+      				responsive: true,
+		  			scrollX: false,
+					columnDefs: [{ targets: [6], orderable: false, searchable: false }], 
 				});
 
 				dataTable.on('draw', function () {
@@ -86,7 +90,7 @@ $(document).ready(function () {
 		Swal.fire({
 			title: 'Agregar Movimiento Habitación',
 			html: `
-                
+                <input type="number" id="id_admision" class="swal2-input" placeholder="ID Admisión">
                 <input type="number" id="id_habitacion" class="swal2-input" placeholder="ID Habitación">
                 <input type="number" id="id_cama" class="swal2-input" placeholder="ID Cama">
                 <input type="text" id="fecha_hora_ingreso" class="swal2-input" placeholder="Fecha Ingreso">
@@ -133,7 +137,7 @@ $(document).ready(function () {
 					);
 				}
 				return {
-					
+					id_admision,
 					id_habitacion,
 					id_cama,
 					fecha_hora_ingreso,
@@ -170,7 +174,9 @@ $(document).ready(function () {
 				Swal.fire({
 					title: 'Editar Movimiento',
 					html: `
-            
+            <input type="number" id="id_admision" class="swal2-input" value="${
+							m.id_admision
+						}">
             <input type="number" id="id_habitacion" class="swal2-input" value="${
 							m.id_habitacion
 						}">
@@ -232,7 +238,7 @@ $(document).ready(function () {
 							);
 						}
 						return {
-							
+							id_admision,
 							id_habitacion,
 							id_cama,
 							fecha_hora_ingreso,

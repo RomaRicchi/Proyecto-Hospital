@@ -1,4 +1,20 @@
 document.addEventListener('DOMContentLoaded', function () {
+  
+  const hoyLocal = new Date();
+  const offset = hoyLocal.getTimezoneOffset();
+  hoyLocal.setMinutes(hoyLocal.getMinutes() - offset);
+  const hoy = hoyLocal.toISOString().split('T')[0];
+
+  // Establecer fecha mínima
+  $('#fecha_ingreso').attr('min', hoy);
+
+  // Validación antes de enviar
+  if (fechaSeleccionada < hoy) {
+    Swal.fire('Error', 'No se puede usar una fecha anterior a hoy', 'error');
+    return;
+  }
+
+  
   const form = document.getElementById('formEmergencia');
   if (!form) return;
 

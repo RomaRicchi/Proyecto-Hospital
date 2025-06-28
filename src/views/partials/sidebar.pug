@@ -77,7 +77,7 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
         i.fas.fa-ambulance.me-1
         | Emergencias
     li
-      a.nav-link.text-white(href="/camas/reservar")
+      a.nav-link.text-white(href="/reserva-cama")
         i.fas.fa-procedures.me-1
         | Reservar Cama
     li
@@ -111,3 +111,39 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
       a.nav-link.text-white(href="/usuario")
         i.fas.fa-users.me-1
         | Lista de Usuarios
+    li
+      a.nav-link.text-white(href="/rolUsuario")
+        i.fas.fa-user-tag.me-1
+        | Roles de Usuario
+
+  // 🔹 Personal
+  a.nav-link.text-white.collapsed(href="#personalSubmenu", data-bs-toggle="collapse", aria-expanded="false")
+    i.fas.fa-user-md.me-2
+    | Personal
+  ul.collapse#personalSubmenu(style="list-style-type: none; padding-left: 1rem;")
+    li
+      a.nav-link.text-white(href="/personal/salud")
+        i.fas.fa-stethoscope.me-1
+        | Salud
+    li
+      a.nav-link.text-white(href="/personal/administrativo")
+        i.fas.fa-user-tie.me-1
+        | Administrativo
+    li
+      a.nav-link.text-white(href="/especialidad")
+        i.fas.fa-notes-medical.me-1
+        | Especialidades
+
+  // 🔹 Registros Clínicos
+  a.nav-link.text-white.collapsed(href="#clinicosSubmenu", data-bs-toggle="collapse", aria-expanded="false")
+    i.fas.fa-file-medical.me-2
+    | Registros Clínicos
+  ul.collapse#clinicosSubmenu(style="list-style-type: none; padding-left: 1rem;")
+    li
+      a.nav-link.text-white(href="/registroClinico")
+        i.fas.fa-file-alt.me-1
+        | Lista de Registros
+    li
+      a.nav-link.text-white(href="/tipoRegistro")
+        i.fas.fa-file-signature.me-1
+        | Tipos de Registro

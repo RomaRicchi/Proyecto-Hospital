@@ -37,5 +37,19 @@ export default (sequelize, DataTypes) => {
 		});
 	};
 
+	Cama.associate = (models) => {
+	
+		Cama.belongsTo(models.Habitacion, {
+			foreignKey: 'id_habitacion',
+			as: 'habitacion',
+		});
+
+		Cama.hasMany(models.MovimientoHabitacion, {
+			foreignKey: 'id_cama',
+			as: 'movimientos'
+		});
+	};
+
+
 	return Cama;
 };

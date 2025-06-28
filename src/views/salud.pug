@@ -1,0 +1,38 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Personal de Salud
+
+      .table-responsive
+        table#tablaSalud.table.table-striped.table-bordered
+          thead
+            tr
+              th Apellido
+              th Nombre
+              th Rol
+              th Especialidad
+              th Matrícula
+              th Acciones
+          tbody
+            if personal.length > 0
+              each p in personal
+                tr
+                  td= p.apellido
+                  td= p.nombre
+                  td= p.rol ? p.rol.nombre : ''
+                  td= p.especialidad ? p.especialidad.nombre : ''
+                  td= p.matricula
+                  td
+                    button.btn.btn-sm.btn-warning.edit-btn(data-id=p.id_personal_salud) Editar
+                    button.btn.btn-sm.btn-danger.delete-btn(data-id=p.id_personal_salud) Baja
+            else
+              h1 No hay camas registradas.
+
+        // Librerías necesarias
+        script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+        script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+        link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+        script(src="/js/salud.js")
+

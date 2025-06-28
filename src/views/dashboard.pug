@@ -33,23 +33,29 @@ block content
         #tablaCamasContainer
 
     .row.mt-5.justify-content-center
-      // Botón Emergencias en formato card
+      // Botón Emergencias
       .col-xl-3.col-md-6
         a.card.h-100.bg-danger.text-white.text-center.mb-4(href="/emergencias", style="text-decoration:none;")
           .card-body.d-flex.flex-column.justify-content-center
             i.fas.fa-exclamation-triangle.fa-2x.mb-2
             h5 Emergencias
-         
-      // Botón Alta de Pacientes en formato card
+
+      // Botón Reservar Cama (corregido)
+      .col-xl-3.col-md-6
+        a.card.h-100.bg-warning.text-dark.text-center.mb-4(href="/reserva-cama", style="text-decoration:none;")
+          .card-body.d-flex.flex-column.justify-content-center
+            i.fas.fa-bed.fa-2x.mb-2
+            h5 Reservar
+
+      // Botón Alta de Pacientes
       .col-xl-3.col-md-6
         a.card.h-100.bg-success.text-white.text-center.mb-4(href="/paciente/alta", style="text-decoration:none;")
           .card-body.d-flex.flex-column.justify-content-center
             i.fas.fa-user-plus.fa-2x.mb-2
             h5 Alta de Pacientes
-          
 
     
     script(src="https://code.jquery.com/jquery-3.6.0.min.js")
     script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
     link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")        
-    script(src="/js/dashboard.js")        
+    script(type="module", src="/js/dashboard.js")        

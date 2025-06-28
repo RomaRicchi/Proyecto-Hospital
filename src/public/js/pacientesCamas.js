@@ -1,4 +1,10 @@
 $(document).ready(function () {
+  
+  const hoyLocal = new Date();
+  const offset = hoyLocal.getTimezoneOffset();
+  hoyLocal.setMinutes(hoyLocal.getMinutes() - offset);
+  const hoy = hoyLocal.toISOString().split('T')[0];
+
   const $tabla = $('#tablaPacientesCamas');
   if (!$tabla.length) return;
 
@@ -30,7 +36,7 @@ $(document).ready(function () {
 
   // 3) Inicializar DataTable sin scrollX y con responsive
   const dt = $tabla.DataTable({
-    language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
+    language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
     paging: true,
     pageLength: 10,
     searching: true,

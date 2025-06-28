@@ -9,7 +9,6 @@ block content
         table#tablaUsuarios.table.table-striped.table-bordered
           thead
             tr
-              th ID
               th Username
               th Tipo
               th Rol
@@ -20,7 +19,6 @@ block content
             if usuarios && usuarios.length
               each usuario in usuarios
                 tr
-                  td #{usuario.id_usuario}
                   td #{usuario.username}
                   td #{usuario.tipo} 
                   td #{usuario.rol}

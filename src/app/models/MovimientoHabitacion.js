@@ -50,7 +50,6 @@ export default (sequelize, DataTypes) => {
 			as: 'habitacion',
 		});
 		MovimientoHabitacion.belongsTo(models.Cama, {
-			// 👈 NUEVA ASOCIACIÓN
 			foreignKey: 'id_cama',
 			as: 'cama',
 		});
@@ -64,7 +63,7 @@ export default (sequelize, DataTypes) => {
 		});
 		MovimientoHabitacion.belongsTo(models.Admision, {
 			foreignKey: 'id_admision',
-			as: 'admision_relacionada', // este alias es clave
+			as: 'admision_relacionada', 
 		});
 
 	};

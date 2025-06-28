@@ -2,7 +2,7 @@ $(document).ready(function () {
 	const tabla = $('#tablaUsuarios');
 	if (tabla.length) {
 		const dt = tabla.DataTable({
-			language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
+			language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
 			paging: true,
       		pageLength: 10,
       		searching: true,
@@ -10,7 +10,7 @@ $(document).ready(function () {
 		  	destroy: true,
       		responsive: true,
 		    scrollX: false,
-			columnDefs: [{ targets: [6], orderable: false, searchable: false }], 
+			columnDefs: [{ targets: [5], orderable: false, searchable: false }], 
 		});
 
 		dt.on('draw', function () {
@@ -88,7 +88,7 @@ $(document).ready(function () {
 
 	// Editar usuario
 	$(document).on('click', '.edit-btn', async function () {
-		const id = $(this).data('id');
+		
 		const usuario = await fetch(`/api/usuarios/${id}`).then((r) => r.json());
 		const roles = await fetch('/api/roles')
 			.then((r) => r.json())

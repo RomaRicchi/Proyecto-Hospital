@@ -13,16 +13,14 @@ $(document).ready(function () {
 
   // 1) Inicializar DataTable
   const dt = $tabla.DataTable({
-    language: {
-      url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
-    },
-    	paging: true,
-      pageLength: 10,
-      searching: true,
-      ordering: true,  
-		  destroy: true,
-      responsive: true,
-		  scrollX: false,
+    language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
+    paging: true,
+    pageLength: 10,
+    searching: true,
+    ordering: true,  
+		destroy: true,
+    responsive: true,
+		scrollX: false,
     columnDefs: [{ targets: 3, orderable: false, searchable: false }],
   });
 

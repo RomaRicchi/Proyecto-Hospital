@@ -1,18 +1,6 @@
-$(document).ready(function () {
+import { mostrarFormularioYRegistrarAdmision } from './utils/admisionCompleta.js';
+import { configurarBusquedaDeCamas } from './utils/validacionFechas.js';
 
-  const hoy = new Date().toISOString().split('T')[0];
-    $('#fecha_busqueda').val(hoy).attr('min', hoy); // también lo usamos como min (ver paso 2)
-    buscarCamasDisponibles(hoy);
-	// Manejar el submit del formulario de búsqueda
-	$('#formBuscarCamas').on('submit', function (e) {
-		e.preventDefault();
-		const fecha = $('#fecha_busqueda').val();
-		if (!fecha) {
-			Swal.fire('Atención', 'Debe seleccionar una fecha.', 'warning');
-			return;
-		}
-		buscarCamasDisponibles(fecha);
-	});
 
 	function buscarCamasDisponibles(fecha) {
 		$('#tablaCamasContainer').html(
@@ -47,7 +35,7 @@ $(document).ready(function () {
         <tbody>
     `;
 		if (camas.length === 0) {
-			html += `<tr><td colspan="7" class="text-center">No hay camas para la fecha seleccionada.</td></tr>`;
+			html += `<tr><td colspan="6" class="text-center">No hay camas para la fecha seleccionada.</td></tr>`;
 		} else {
 			camas.forEach((cama) => {
 				let estadoBadge = '';
@@ -82,9 +70,7 @@ $(document).ready(function () {
 		$('#tablaCamasContainer').html(html);
 
 		$('#tablaCamas').DataTable({
-			language: {
-				url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
-			},
+			language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
 			paging: true,
 			pageLength: 10,
 			searching: true,
@@ -92,8 +78,10 @@ $(document).ready(function () {
 			destroy: true,
 		});
 	}
-});
 
+$(document).ready(function () {
+	configurarBusquedaDeCamas(buscarCamasDisponibles);
+});
 // Evento para el botón de asignar paciente
 $(document).on('click', '.btn-asignar-paciente', function () {
 	const id_cama = $(this).data('id');
@@ -192,22 +180,23 @@ $(document).on('click', '.btn-asignar-paciente', function () {
 						);
 						return;
 					}
-										// Validar si el paciente ya tiene admisión vigente o futura
-					const validar = await fetch(`/api/admisiones/validar-dni/${pacienteSeleccionado.dni_paciente}`);
+					// Validar si el paciente ya tiene admisión vigente o futura
+					const validar = await fetch(
+						`/api/admisiones/validar-dni/${pacienteSeleccionado.dni_paciente}`
+					);
 					const resultado = await validar.json();
 
 					if (resultado.vigente) {
-					Swal.fire(
-						'Atención',
-						'El paciente ya tiene una admisión vigente o en curso. No puede registrar otra.',
-						'warning'
-					);
-					return;
+						Swal.fire(
+							'Atención',
+							'El paciente ya tiene una admisión vigente o en curso. No puede registrar otra.',
+							'warning'
+						);
+						return;
 					}
 
 					// Si no tiene admisión activa, mostrar el formulario
-					formularioAdmision(pacienteSeleccionado, id_cama, habitacionId);
-
+					mostrarFormularioYRegistrarAdmision(pacienteSeleccionado, id_cama, habitacionId);
 				}
 			});
 		} else if (result.dismiss === Swal.DismissReason.cancel) {
@@ -230,124 +219,3 @@ $(document).on('click', '.btn-asignar-paciente', function () {
 	});
 });
 
-// Paso 4: Formulario de admisión y creación de movimiento
-async function formularioAdmision(paciente, id_cama, id_habitacion) {
-	// Cargar selects desde la base de datos
-	const motivos = await fetch('/api/motivos_ingreso').then((r) => r.json());
-	const obras = await fetch('/api/obras-sociales').then((r) => r.json());
-	const medicos = await fetch('/api/personal-salud').then((r) => r.json());
-
-	let motivosOptions = motivos
-		.map((m) => `<option value="${m.id_motivo}">${m.tipo}</option>`)
-		.join('');
-	let obrasOptions = obras
-		.map((o) => `<option value="${o.id_obra_social}">${o.nombre}</option>`)
-		.join('');
-	let medicosOptions = medicos
-		.map(
-			(m) =>
-				`<option value="${m.id_personal_salud}">${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula}</option>`
-		)
-		.join('');
-
-	Swal.fire({
-		title: 'Registrar Admisión',
-		html: `
-        <select id="id_obra_social" class="swal2-input">${obrasOptions}</select>
-        <input type="text" id="num_asociado" class="swal2-input" placeholder="N° Asociado">
-        <select id="id_motivo" class="swal2-input">${motivosOptions}</select>
-        <label for="fecha_hora_ingreso" style="display:block;text-align:left;margin-top:8px;">Fecha y hora de ingreso</label>
-        <input type="datetime-local" id="fecha_hora_ingreso" class="swal2-input" placeholder="Fecha y hora ingreso">
-        <label for="fecha_hora_egreso" style="display:block;text-align:left;margin-top:8px;">Fecha y hora de egreso (opcional)</label>
-        <input type="datetime-local" id="fecha_hora_egreso" class="swal2-input" placeholder="Fecha y hora egreso (opcional)">
-        <input type="text" id="descripcion" class="swal2-input" placeholder="Descripción">
-        <input type="text" id="motivo_egr" class="swal2-input" placeholder="Motivo egreso (opcional)">
-        <select id="id_personal_salud" class="swal2-input">
-          <option value="">Seleccione médico</option>
-          ${medicosOptions}
-        </select>
-    `,
-		preConfirm: () => {
-			const id_obra_social =
-				Swal.getPopup().querySelector('#id_obra_social').value;
-			const num_asociado = Swal.getPopup().querySelector('#num_asociado').value;
-			const id_motivo = Swal.getPopup().querySelector('#id_motivo').value;
-			const fecha_hora_ingreso = Swal.getPopup().querySelector(
-				'#fecha_hora_ingreso'
-			).value;
-			const fecha_hora_egreso =
-				Swal.getPopup().querySelector('#fecha_hora_egreso').value;
-			const descripcion = Swal.getPopup().querySelector('#descripcion').value;
-			const motivo_egr = Swal.getPopup().querySelector('#motivo_egr').value;
-			const id_personal_salud =
-				Swal.getPopup().querySelector('#id_personal_salud').value;
-
-			if (
-				!id_obra_social ||
-				!num_asociado ||
-				!id_motivo ||
-				!fecha_hora_ingreso
-			) {
-				Swal.showValidationMessage('Completa todos los campos obligatorios');
-			}
-			return {
-				id_obra_social,
-				num_asociado,
-				id_motivo,
-				fecha_hora_ingreso,
-				fecha_hora_egreso: fecha_hora_egreso || null,
-				descripcion,
-				motivo_egr,
-				id_personal_salud: id_personal_salud || null,
-			};
-		},
-	}).then(async (result) => {
-		if (result.isConfirmed) {
-			const admision = await fetch('/api/admisiones', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					id_paciente: paciente.id_paciente,
-					id_obra_social: result.value.id_obra_social,
-					num_asociado: result.value.num_asociado,
-					id_motivo: result.value.id_motivo,
-					fecha_hora_ingreso: result.value.fecha_hora_ingreso,
-					fecha_hora_egreso: result.value.fecha_hora_egreso,
-					descripcion: result.value.descripcion,
-					motivo_egr: result.value.motivo_egr,
-					id_personal_salud: result.value.id_personal_salud,
-				}),
-			}).then((r) => r.json());
-			// Crear movimiento habitación y manejar error de género
-			const resp = await fetch('/api/movimientos_habitacion', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					id_admision: admision.id_admision,
-					id_habitacion: id_habitacion,
-					id_cama: id_cama,
-					fecha_hora_ingreso: admision.fecha_hora_ingreso,
-					fecha_hora_egreso: admision.fecha_hora_egreso || null,
-					id_mov: 1, // Ocupa
-					estado: 1,
-				}),
-			});
-
-			if (!resp.ok) {
-				const data = await resp.json();
-				Swal.fire(
-					'Error',
-					data.message || 'No se pudo asignar la cama',
-					'error'
-				);
-				return;
-			}
-
-			Swal.fire(
-				'Listo',
-				'Paciente asignado y admitido correctamente',
-				'success'
-			).then(() => location.reload());
-		}
-	});
-}

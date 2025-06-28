@@ -11,9 +11,10 @@ $(document).ready(function () {
     if (trimmed.length < 3 || trimmed.length > 50) {
       return 'El nombre debe tener entre 3 y 50 caracteres.';
     }
-    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ -]+$/.test(trimmed)) {
+    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ \-]+$/.test(trimmed)) {
       return 'El nombre solo puede contener letras, espacios y guiones.';
     }
+
     return null;
 
   }
@@ -35,7 +36,7 @@ $(document).ready(function () {
       ]);
 
       const dt = $tabla.DataTable({
-        language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
+        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' }, 
         paging: true,
         pageLength: 10,
         searching: true,

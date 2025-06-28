@@ -51,7 +51,7 @@ const TipoRegistro = defineTipoRegistro(sequelize, Sequelize.DataTypes);
 // Asociaciones internas
 PersonalAdministrativo.associate?.({ Usuario, RolUsuario });
 PersonalSalud.associate?.({ Usuario, RolUsuario, Especialidad });
-Cama.associate?.({ Habitacion });
+Cama.associate?.({ Habitacion, MovimientoHabitacion });
 Habitacion.associate?.({ Sector, Cama, MovimientoHabitacion });
 MovimientoHabitacion.associate?.({ Admision, Habitacion, Movimiento, Cama });
 Admision.associate?.({
@@ -90,6 +90,10 @@ RegistroHistoriaClinica.belongsTo(Admision, {
 RegistroHistoriaClinica.belongsTo(Usuario, {
 	foreignKey: 'id_usuario',
 	as: 'usuario',
+});
+Admision.belongsTo(Paciente, {
+  as: 'paciente_admision',
+  foreignKey: 'id_paciente'
 });
 
 Usuario.hasOne(PersonalAdministrativo, {
