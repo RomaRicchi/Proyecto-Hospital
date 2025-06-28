@@ -383,7 +383,7 @@ button,
 [type=button],
 [type=reset],
 [type=submit] {
-  -webkit-appearance: button;
+  -webkit-overflow-appearance: button;
 }
 button:not(:disabled),
 [type=button]:not(:disabled),
@@ -441,7 +441,7 @@ legend + * {
 
 [type=search] {
   outline-offset: -2px;
-  -webkit-appearance: textfield;
+  -webkit-overflow-appearance: textfield;
 }
 
 /* rtl:raw:
@@ -462,7 +462,7 @@ legend + * {
 
 ::file-selector-button {
   font: inherit;
-  -webkit-appearance: button;
+  -webkit-overflow-appearance: button;
 }
 
 output {
@@ -1926,40 +1926,46 @@ progress {
 }
 
 .table-responsive, .datatable-wrapper .datatable-container {
-  overflow-x: auto;
+  overflow-x:  hidden !important;
   -webkit-overflow-scrolling: touch;
 }
 
 @media (max-width: 575.98px) {
   .table-responsive-sm {
-    overflow-x: auto;
+    overflow-x:  hidden !important;
     -webkit-overflow-scrolling: touch;
   }
 }
 @media (max-width: 767.98px) {
   .table-responsive-md {
-    overflow-x: auto;
+    overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
   }
 }
 @media (max-width: 991.98px) {
   .table-responsive-lg {
-    overflow-x: auto;
+    overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
   }
 }
 @media (max-width: 1199.98px) {
   .table-responsive-xl {
-    overflow-x: auto;
+    overflow-x:  hidden !important;
     -webkit-overflow-scrolling: touch;
   }
 }
 @media (max-width: 1399.98px) {
   .table-responsive-xxl {
-    overflow-x: auto;
+    overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
   }
 }
+
+.table-responsive {
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+}
+
 .form-label {
   margin-bottom: 0.5rem;
 }

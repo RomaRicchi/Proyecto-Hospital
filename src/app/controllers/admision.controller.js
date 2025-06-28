@@ -65,7 +65,7 @@ export const vistaAdmisiones = async (req, res) => {
 				},
 				{ model: ObraSocial, as: 'obra_social', attributes: ['nombre'] },
 				{ model: Usuario, as: 'personal_salud', attributes: ['username'] },
-				{ model: MotivoIngreso, as: 'motivo_ingreso', attributes: ['tipo'] }, // <-- Agregado
+				{ model: MotivoIngreso, as: 'motivo_ingreso', attributes: ['tipo'] },
 			],
 		});
 
@@ -77,11 +77,11 @@ export const vistaAdmisiones = async (req, res) => {
 			dni_paciente: a.paciente ? a.paciente.dni_paciente : '-',
 			obra_social: a.obra_social ? a.obra_social.nombre : 'Sin cobertura',
 			num_asociado: a.num_asociado,
-			motivo_ingreso: a.motivo_ingreso ? a.motivo_ingreso.tipo : '-', // <-- Mostrar nombre
-			descripcion: a.descripcion || '-',
 			fecha_ingreso: a.fecha_hora_ingreso
 				? new Date(a.fecha_hora_ingreso).toLocaleString()
 				: '-',
+			motivo_ingreso: a.motivo_ingreso ? a.motivo_ingreso.tipo : '-',
+			descripcion: a.descripcion || '-',
 			fecha_egreso: a.fecha_hora_egreso
 				? new Date(a.fecha_hora_egreso).toLocaleString()
 				: 'En internación',
@@ -97,6 +97,38 @@ export const vistaAdmisiones = async (req, res) => {
 
 export const createAdmision = async (req, res) => {
 	try {
+		const { id_cama } = req.body;
+		const fechaIngreso = new Date(req.body.fecha_hora_ingreso);
+		const fechaEgreso = req.body.fecha_hora_egreso
+			? new Date(req.body.fecha_hora_egreso)
+			: null;
+
+		// ❌ No se permite fecha de ingreso en el pasado
+		if (fechaIngreso < new Date().setHours(0, 0, 0, 0)) {
+			return res
+				.status(400)
+				.json({ message: 'No se permite una fecha de ingreso en el pasado' });
+		}
+
+		// ❌ Si hay fecha de egreso, debe ser posterior o igual a la de ingreso
+		if (fechaEgreso && fechaEgreso < fechaIngreso) {
+			return res
+				.status(400)
+				.json({
+					message: 'La fecha de egreso no puede ser anterior a la de ingreso',
+				});
+		}
+		if (req.body.id_cama && req.body.id_mov === 3) {
+			await validarConflictoReserva({
+				id_cama: req.body.id_cama,
+				fecha_hora_ingreso: req.body.fecha_hora_ingreso,
+			});
+		}
+
+		if (req.body.id_cama) {
+			await validarEstadoCama(req.body.id_cama);
+		}
+
 		// ✅ Validación para evitar duplicados vigentes o futuros
 		const admisionActiva = await Admision.findOne({
 			where: {
@@ -104,7 +136,11 @@ export const createAdmision = async (req, res) => {
 				fecha_hora_ingreso: { [Op.lte]: new Date(req.body.fecha_hora_ingreso) },
 				[Op.or]: [
 					{ fecha_hora_egreso: null },
-					{ fecha_hora_egreso: { [Op.gt]: new Date(req.body.fecha_hora_ingreso) } },
+					{
+						fecha_hora_egreso: {
+							[Op.gt]: new Date(req.body.fecha_hora_ingreso),
+						},
+					},
 				],
 			},
 		});
@@ -113,6 +149,16 @@ export const createAdmision = async (req, res) => {
 			return res.status(400).json({
 				message: 'El paciente ya tiene una admisión vigente en ese período',
 			});
+		}
+		// ✅ Validar que la cama esté libre al momento de admisión
+		if (id_cama) {
+			const cama = await Cama.findByPk(id_cama);
+			if (!cama) {
+				return res.status(400).json({ message: 'Cama no encontrada' });
+			}
+			if (cama.estado === 1) {
+				return res.status(400).json({ message: 'La cama ya está ocupada' });
+			}
 		}
 
 		const nueva = await Admision.create(req.body);
@@ -151,15 +197,14 @@ export const createAdmision = async (req, res) => {
 	}
 };
 
-
 export const updateAdmision = async (req, res) => {
 	try {
 		const admision = await Admision.findByPk(req.params.id);
 		if (!admision)
 			return res.status(404).json({ message: 'Admisión no encontrada' });
+
 		await admision.update(req.body);
 
-		// Si se actualiza la fecha de egreso, sincronizar en movimiento_habitacion
 		if (req.body.fecha_hora_egreso) {
 			await MovimientoHabitacion.update(
 				{ fecha_hora_egreso: req.body.fecha_hora_egreso },
@@ -215,6 +260,3 @@ export const validarAdmisionPorDNI = async (req, res) => {
 		res.status(500).json({ message: 'Error en validación' });
 	}
 };
-
-
-

@@ -17,17 +17,15 @@ $(document).ready(function () {
     });
 
     dt.on('draw', function () {
-      const noResults = dt.rows({ filter: 'applied' }).data().length === 0;
       $('#btnAgregarCama').remove();
-      if (noResults) {
-        $('#tablaCamas_wrapper').append(`
-          <div class="text-center mt-3">
-            <button id="btnAgregarCama" class="btn btn-success">
-              Agregar Nueva Cama
-            </button>
-          </div>
-        `);
-      }
+
+      $('#tablaCamas_wrapper').prepend(`
+        <div id="btnAgregarCama" class="text-end mb-3">
+          <button class="btn btn-success">
+            <i class="fas fa-plus-circle me-1"></i> Agregar Nueva Cama
+          </button>
+        </div>
+      `);
     });
   }
 
@@ -86,7 +84,7 @@ $(document).ready(function () {
         });
       },
       preConfirm: () => {
-        const nombre       = document.getElementById('swal-nombre').value.trim();
+        const nombre       = document.getElementById('swal-nombre').value.trim().toUpperCase();
         const id_habitacion = document.getElementById('swal-id_habitacion').value;
         const desinfeccion  = document.getElementById('swal-desinfeccion').value;
         const estado        = document.getElementById('swal-estado').value;
@@ -110,7 +108,11 @@ $(document).ready(function () {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(result.value),
         })
-          .then((response) => {
+          .then(async (response) => {
+            if (response.status === 409) {
+              const error = await response.json();
+              throw new Error(error.message || 'Ya existe una cama con ese nombre');
+            }
             if (!response.ok) throw new Error('Error al crear la cama');
             return response.json();
           })
@@ -213,10 +215,15 @@ $(document).ready(function () {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(result.value)
           })
-            .then((response) => {
-              if (!response.ok) throw new Error();
+            .then(async (response) => {
+              if (response.status === 409) {
+                const error = await response.json();
+                throw new Error(error.message || 'Ya existe otra cama con ese nombre');
+              }
+              if (!response.ok) throw new Error('Error al actualizar la cama');
               return response.json();
             })
+
             .then(() =>
               Swal.fire('Actualizado', 'Cama modificada con éxito', 'success').then(() =>
                 location.reload()

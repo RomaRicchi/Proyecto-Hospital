@@ -43,6 +43,7 @@ $(document).ready(function () {
           </td>
         </tr>`;
     });
+    
     html += `</tbody></table>`;
     $container.html(html);
     $('#tablaRoles').DataTable({ 

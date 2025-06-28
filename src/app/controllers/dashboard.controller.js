@@ -1,4 +1,4 @@
-import { Admision, MovimientoHabitacion, Cama, Habitacion } from '../models/index.js';
+import { Admision, MovimientoHabitacion, Cama, Habitacion, Sector } from '../models/index.js';
 import { Op } from 'sequelize';
 
 // Verifica si un paciente ya tiene una cama asignada actualmente
@@ -41,10 +41,29 @@ export const verificarPacienteConMovimientoActivo = async (req, res) => {
   }
 };
 
-export const vistaDashboard = (req, res) => {
+export const vistaDashboard = async (req, res) => {
   try {
-    res.render('dashboard');
+    const camas = await Cama.findAll({
+      include: [
+        {
+          model: Habitacion,
+          as: 'habitacion',
+          include: [{ model: Sector, as: 'sector' }]
+        }
+      ],
+      order: [['id_cama', 'ASC']]
+    });
+
+    camas.forEach((cama) => {
+      cama.descripcionHabitacion =
+        cama.habitacion && cama.habitacion.sector
+          ? `Habitación ${cama.habitacion.num} - ${cama.habitacion.sector.nombre}`
+          : '-';
+    });
+
+    res.render('dashboard', { camas });
   } catch (error) {
+    console.error('Error al cargar el panel principal:', error);
     res.status(500).send('Error al cargar el panel principal');
   }
 };

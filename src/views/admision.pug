@@ -9,7 +9,6 @@ block content
         table#tablaAdmisiones.table.table-striped.table-bordered
           thead
             tr
-            
               th Paciente
               th DNI
               th Obra Social
@@ -25,7 +24,6 @@ block content
             if admisiones && admisiones.length
               each admision in admisiones
                 tr
-                  
                   td #{admision.paciente}
                   td #{admision.dni_paciente}
                   td #{admision.obra_social}
@@ -44,8 +42,7 @@ block content
             else
               h1 No hay admisiones registradas.
 
-      // Librerías DataTables y jQuery
-      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+        
       script(src="https://code.jquery.com/jquery-3.7.1.min.js")
       script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
       script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")

@@ -18,85 +18,107 @@ $(document).ready(function () {
           <i class="fas fa-plus-circle me-1"></i> Nuevo Tipo
         </button>
       </div>
-      <table id="tablaTipos" class="table table-bordered">
-        <thead><tr><th>Descripción</th><th style="width:150px;">Acciones</th></tr></thead>
+      <table id="tablaTipos" class="table table-bordered table-striped table-hover">
+        <thead><tr><th>Nombre</th><th style="width:150px;">Acciones</th></tr></thead>
         <tbody>
     `;
     arr.forEach(t => {
       html += `
         <tr>
-          <td>${t.descripcion}</td>
+          <td>${t.nombre}</td>
           <td>
-            <button class="btn btn-warning btn-sm edit" data-id="${t.id_tipo_registro}" data-desc="${t.descripcion}"><i class="fas fa-edit"></i></button>
-            <button class="btn btn-danger btn-sm del" data-id="${t.id_tipo_registro}"><i class="fas fa-trash-alt"></i></button>
+            <button class="btn btn-warning btn-sm edit" data-id="${t.id_tipo}" data-desc="${t.nombre}"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-danger btn-sm del" data-id="${t.id_tipo}"><i class="fas fa-trash-alt"></i></button>
           </td>
         </tr>`;
     });
+
     html += '</tbody></table>';
     $c.html(html);
-    $('#tablaTipos').DataTable({ language:{url:'//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'} });
+    $('#tablaTipos').DataTable({
+      language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
+      paging: true,
+      pageLength: 10,
+      searching: true,
+      ordering: true,
+      destroy: true,
+      responsive: true,
+      scrollX: false,
+      columns: [
+        { title: 'Nombre' },
+        { title: 'Acciones', orderable: false, searchable: false }
+      ],
+    });
   }
 
-  /* Alta */
-  $(document).on('click','#btnAdd',()=>{
+  // Alta
+  $(document).on('click', '#btnAdd', () => {
     Swal.fire({
-      title:'Nuevo Tipo',
-      input:'text',
-      inputLabel:'Descripción',
-      showCancelButton:true,
-      preConfirm:v=>{
-        const e=validar(v); if(e){Swal.showValidationMessage(e);return false;}
+      title: 'Nuevo Tipo',
+      input: 'text',
+      inputLabel: 'Nombre',
+      showCancelButton: true,
+      preConfirm: v => {
+        const e = validar(v); if (e) { Swal.showValidationMessage(e); return false; }
         return v.trim();
       }
-    }).then(r=>{
-      if(!r.isConfirmed) return;
-      fetch('/api/tipos-registro',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({descripcion:r.value})})
-      .then(res=>{
-        if(res.status===409) throw new Error('Ya existe');
-        if(!res.ok) throw new Error();
-        return res.json();
+    }).then(r => {
+      if (!r.isConfirmed) return;
+      fetch('/api/tipos-registro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: r.value })
       })
-      .then(()=> Swal.fire('Guardado','','success').then(cargar))
-      .catch(e=>Swal.fire('Error',e.message||'No se pudo crear','error'));
+        .then(res => {
+          if (res.status === 409) throw new Error('Ya existe');
+          if (!res.ok) throw new Error();
+          return res.json();
+        })
+        .then(() => Swal.fire('Guardado', '', 'success').then(cargar))
+        .catch(e => Swal.fire('Error', e.message || 'No se pudo crear', 'error'));
     });
   });
 
-  /* Editar */
-  $(document).on('click','.edit',function(){
-    const id=$(this).data('id'); const desc=$(this).data('desc');
+  // Editar
+  $(document).on('click', '.edit', function () {
+    const id = $(this).data('id'); const desc = $(this).data('desc');
     Swal.fire({
-      title:'Editar Tipo',
-      input:'text',
-      inputValue:desc,
-      showCancelButton:true,
-      preConfirm:v=>{
-        const e=validar(v); if(e){Swal.showValidationMessage(e);return false;}
+      title: 'Editar Tipo',
+      input: 'text',
+      inputValue: desc,
+      showCancelButton: true,
+      preConfirm: v => {
+        const e = validar(v); if (e) { Swal.showValidationMessage(e); return false; }
         return v.trim();
       }
-    }).then(r=>{
-      if(!r.isConfirmed) return;
-      fetch(`/api/tipos-registro/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({descripcion:r.value})})
-      .then(res=>{if(!res.ok) throw new Error(); return res.json();})
-      .then(()=> Swal.fire('Actualizado','','success').then(cargar))
-      .catch(()=>Swal.fire('Error','No se pudo actualizar','error'));
+    }).then(r => {
+      if (!r.isConfirmed) return;
+      fetch(`/api/tipos-registro/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: r.value })
+      })
+        .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+        .then(() => Swal.fire('Actualizado', '', 'success').then(cargar))
+        .catch(() => Swal.fire('Error', 'No se pudo actualizar', 'error'));
     });
   });
 
-  /* Eliminar */
-  $(document).on('click','.del',function(){
-    const id=$(this).data('id');
-    Swal.fire({title:'¿Eliminar?',icon:'warning',showCancelButton:true,confirmButtonText:'Sí, eliminar'})
-    .then(r=>{
-      if(!r.isConfirmed) return;
-      fetch(`/api/tipos-registro/${id}`,{method:'DELETE'})
-      .then(res=>{
-        if(res.status===409) throw new Error('En uso por registros clínicos');
-        if(!res.ok) throw new Error();
-        return res.json();
-      })
-      .then(()=>Swal.fire('Eliminado','','success').then(cargar))
-      .catch(e=>Swal.fire('Error',e.message||'No se pudo eliminar','error'));
-    });
+  // Eliminar
+  $(document).on('click', '.del', function () {
+    const id = $(this).data('id');
+    Swal.fire({ title: '¿Eliminar?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar' })
+      .then(r => {
+        if (!r.isConfirmed) return;
+        fetch(`/api/tipos-registro/${id}`, { method: 'DELETE' })
+          .then(res => {
+            if (res.status === 409) throw new Error('En uso por registros clínicos');
+            if (!res.ok) throw new Error();
+            return res.json();
+          })
+          .then(() => Swal.fire('Eliminado', '', 'success').then(cargar))
+          .catch(e => Swal.fire('Error', e.message || 'No se pudo eliminar', 'error'));
+      });
   });
 
   cargar();

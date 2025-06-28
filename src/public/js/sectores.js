@@ -1,155 +1,147 @@
 $(document).ready(function () {
-	const tabla = $('#tablaSector');
-	if (tabla.length) {
-		fetch('/api/sectores')
-			.then((response) => response.json())
-			.then((sectores) => {
-				const dataSet = sectores.map((sec) => [
-					sec.nombre,
-					`
-					<button class="btn btn-sm btn-primary edit-btn" data-id="${sec.id_sector}">
-						<i class="fas fa-pen"></i>
-					</button>
-					<button class="btn btn-sm btn-danger delete-btn" data-id="${sec.id_sector}">
-						<i class="fas fa-trash"></i>
-					</button>
-					`,
-				]);
+  const $container = $('#tablaSectorContainer');
 
-				const dataTable = tabla.DataTable({
-					language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
-					paging: true,
-                    pageLength: 10,
-     			    searching: true,
-      				ordering: true,  
-		  			destroy: true,
-      				responsive: true,
-		  			scrollX: false,
-					columns: [
-						{ title: 'Nombre' },
-						{ title: 'Acciones', orderable: false, searchable: false },
-					],
-				});
+  function cargarSectores() {
+    fetch('/api/sectores')
+      .then(r => r.json())
+      .then(data => renderTabla(data))
+      .catch(() => {
+        $container.html('<div class="alert alert-danger">No se pudieron cargar los sectores</div>');
+      });
+  }
 
-				// Botón para agregar nuevo sector si no hay resultados
-				dataTable.on('draw', function () {
-					const info = dataTable.page.info();
-					if (info.recordsDisplay === 0) {
-						if ($('#btnAgregarSector').length === 0) {
-							$('#tablaSector_wrapper').append(`
-								<div class="text-center mt-3">
-									<button id="btnAgregarSector" class="btn btn-success">
-										Agregar Nuevo Sector
-									</button>
-								</div>
-							`);
-						}
-					} else {
-						$('#btnAgregarSector').remove();
-					}
-				});
-			})
-			.catch((error) => {
-				Swal.fire('Error', 'No se pudo cargar los sectores.', 'error');
-			});
-	} else {
-	}
+  function renderTabla(data) {
+    let html = `
+      <div class="mb-3 text-end">
+        <button class="btn btn-success" id="btnAgregarSector">
+          <i class="fas fa-plus-circle me-1"></i> Agregar Nuevo Sector
+        </button>
+      </div>
+      <div class="table-responsive">
+        <table id="tablaSector" class="table table-bordered table-striped table-hover">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th style="width:150px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
 
-	// Agregar nuevo sector
-	$(document).on('click', '#btnAgregarSector', function () {
-		Swal.fire({
-			title: 'Agregar Sector',
-			input: 'text',
-			inputLabel: 'Nombre del sector',
-			inputPlaceholder: 'Ingrese el nombre del sector',
-			showCancelButton: true,
-			confirmButtonText: 'Guardar',
-			preConfirm: (nombre) => {
-				if (!nombre) {
-					Swal.showValidationMessage('El nombre es obligatorio');
-				}
-				return { nombre };
-			},
-		}).then((result) => {
-			if (result.isConfirmed) {
-				fetch('/api/sectores', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(result.value),
-				})
-					.then(() =>
-						Swal.fire('Guardado', 'Sector creado', 'success').then(() =>
-							location.reload()
-						)
-					)
-					.catch(() =>
-						Swal.fire('Error', 'No se pudo crear el sector', 'error')
-					);
-			}
-		});
-	});
+    data.forEach(sec => {
+      html += `
+        <tr>
+          <td>${sec.nombre}</td>
+          <td>
+            <button class="btn btn-warning btn-sm edit-btn" data-id="${sec.id_sector}">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-danger btn-sm delete-btn" data-id="${sec.id_sector}">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>`;
+    });
 
-	// Editar sector
-	$(document).on('click', '.edit-btn', function () {
-		const id = $(this).data('id');
-		fetch(`/api/sectores/${id}`)
-			.then((res) => res.json())
-			.then((sector) => {
-				Swal.fire({
-					title: 'Editar Sector',
-					input: 'text',
-					inputLabel: 'Nombre del sector',
-					inputValue: sector.nombre,
-					showCancelButton: true,
-					confirmButtonText: 'Guardar',
-					preConfirm: (nombre) => {
-						if (!nombre) {
-							Swal.showValidationMessage('El nombre es obligatorio');
-						}
-						return { nombre };
-					},
-				}).then((result) => {
-					if (result.isConfirmed) {
-						fetch(`/api/sectores/${id}`, {
-							method: 'PUT',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify(result.value),
-						})
-							.then(() =>
-								Swal.fire('Actualizado', 'Sector modificado', 'success').then(
-									() => location.reload()
-								)
-							)
-							.catch(() =>
-								Swal.fire('Error', 'No se pudo actualizar el sector', 'error')
-							);
-					}
-				});
-			});
-	});
+    html += `</tbody></table></div>`;
+    $container.html(html);
 
-	// Eliminar sector
-	$(document).on('click', '.delete-btn', function () {
-		const id = $(this).data('id');
-		Swal.fire({
-			title: '¿Eliminar sector?',
-			text: 'Esta acción eliminará el sector permanentemente.',
-			icon: 'warning',
-			showCancelButton: true,
-			confirmButtonText: 'Sí, eliminar',
-			cancelButtonText: 'Cancelar',
-		}).then((result) => {
-			if (result.isConfirmed) {
-				fetch(`/api/sectores/${id}`, { method: 'DELETE' })
-					.then(() =>
-						Swal.fire('Eliminado', 'Sector eliminado', 'success').then(() =>
-							location.reload()
-						)
-					)
-					.catch(() =>
-						Swal.fire('Error', 'No se pudo eliminar el sector', 'error')
-					);
-			}
-		});
-	});
+    $('#tablaSector').DataTable({
+      language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
+      destroy: true,
+      columns: [
+        { title: 'Nombre' },
+        { title: 'Acciones', orderable: false, searchable: false }
+      ]
+    });
+  }
+
+  // Agregar sector
+  $(document).on('click', '#btnAgregarSector', () => {
+    Swal.fire({
+      title: 'Nuevo Sector',
+      input: 'text',
+      inputLabel: 'Nombre',
+      showCancelButton: true,
+      confirmButtonText: 'Guardar',
+      preConfirm: (v) => {
+        if (!v || v.trim().length < 3) {
+          Swal.showValidationMessage('Debe ingresar al menos 3 letras');
+          return false;
+        }
+        return v.trim();
+      }
+    }).then(result => {
+      if (!result.isConfirmed) return;
+      fetch('/api/sectores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: result.value })
+      })
+        .then(res => {
+          if (!res.ok) throw new Error();
+          return res.json();
+        })
+        .then(() => Swal.fire('Guardado', 'Sector creado correctamente', 'success').then(cargarSectores))
+        .catch(err => Swal.fire('Error', err.message || 'No se pudo crear', 'error'));
+    });
+  });
+
+  // Editar sector
+  $(document).on('click', '.edit-btn', function () {
+    const id = $(this).data('id');
+    fetch(`/api/sectores/${id}`)
+      .then(res => res.json())
+      .then(sector => {
+        Swal.fire({
+          title: 'Editar Sector',
+          input: 'text',
+          inputValue: sector.nombre,
+          showCancelButton: true,
+          confirmButtonText: 'Actualizar',
+          preConfirm: (v) => {
+            if (!v || v.trim().length < 3) {
+              Swal.showValidationMessage('Debe ingresar al menos 3 letras');
+              return false;
+            }
+            return v.trim();
+          }
+        }).then(result => {
+          if (!result.isConfirmed) return;
+          fetch(`/api/sectores/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nombre: result.value })
+          })
+            .then(res => {
+              if (!res.ok) throw new Error();
+              return res.json();
+            })
+            .then(() => Swal.fire('Actualizado', 'Sector actualizado', 'success').then(cargarSectores))
+            .catch(() => Swal.fire('Error', 'No se pudo actualizar', 'error'));
+        });
+      });
+  });
+
+  // Eliminar sector
+  $(document).on('click', '.delete-btn', function () {
+    const id = $(this).data('id');
+    Swal.fire({
+      title: '¿Eliminar sector?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar'
+    }).then(result => {
+      if (!result.isConfirmed) return;
+      fetch(`/api/sectores/${id}`, { method: 'DELETE' })
+        .then(res => {
+          if (!res.ok) throw new Error();
+          return res.json();
+        })
+        .then(() => Swal.fire('Eliminado', 'Sector eliminado', 'success').then(cargarSectores))
+        .catch(() => Swal.fire('Error', 'No se pudo eliminar', 'error'));
+    });
+  });
+
+  cargarSectores();
 });

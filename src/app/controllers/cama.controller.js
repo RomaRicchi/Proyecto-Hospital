@@ -131,26 +131,65 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 // 🔸 Crear nueva cama
 export const createCama = async (req, res) => {
 	try {
+		const { nombre, id_habitacion } = req.body;
+
+		// Verificar si ya existe una cama con ese nombre en la misma habitación
+		const existente = await Cama.findOne({
+			where: {
+				nombre,
+				id_habitacion
+			}
+		});
+
+		if (existente) {
+			return res.status(409).json({
+				message: 'Ya existe una cama con ese nombre en esta habitación'
+			});
+		}
+
 		const nuevaCama = await Cama.create(req.body);
 		res.status(201).json(nuevaCama);
 	} catch (error) {
+		console.error(error);
 		res.status(500).send('Error interno del servidor');
 	}
 };
 
+
 // 🔸 Actualizar cama
 export const updateCama = async (req, res) => {
 	try {
-		const cama = await Cama.findByPk(req.params.id);
+		const { id } = req.params;
+		const { nombre, id_habitacion } = req.body;
+
+		const cama = await Cama.findByPk(id);
 		if (!cama) {
 			return res.status(404).json({ message: 'Cama no encontrada' });
 		}
+
+		// Verificar si ya existe otra cama con el mismo nombre en esa habitación
+		const duplicada = await Cama.findOne({
+			where: {
+				nombre,
+				id_habitacion,
+				id_cama: { [Op.ne]: id }
+			}
+		});
+
+		if (duplicada) {
+			return res.status(409).json({
+				message: 'Ya existe otra cama con ese nombre en esta habitación'
+			});
+		}
+
 		await cama.update(req.body);
 		res.json(cama);
 	} catch (error) {
-		res.status(500).json({ message: error.message });
+		console.error(error);
+		res.status(500).json({ message: 'Error al actualizar la cama' });
 	}
 };
+
 
 // 🔸 Eliminar cama
 export const deleteCama = async (req, res) => {

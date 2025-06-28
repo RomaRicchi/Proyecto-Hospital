@@ -1,5 +1,5 @@
 import { Habitacion, Sector, Cama } from '../models/index.js';
-
+import { Op } from 'sequelize';
 // 🔸 Obtener todas las habitaciones con JOIN
 export const getHabitaciones = async (req, res) => {
 	try {
@@ -57,46 +57,69 @@ export const vistaHabitaciones = async (req, res) => {
 	}
 };
 
-// 🔸 Crear habitación
 export const createHabitacion = async (req, res) => {
-	try {
-		const { num, id_sector } = req.body;
-		if (!num) {
-			return res.status(400).json({ message: 'El número es obligatorio' });
-		}
+  const { num, id_sector } = req.body;
 
-		const habitacion = await Habitacion.create({
-			num,
-			id_sector: id_sector || null,
-		});
-		res.status(201).json(habitacion);
-	} catch (error) {
-		res.status(500).json({ message: 'Error al crear habitación' });
-	}
+  try {
+    const existente = await Habitacion.findOne({
+      where: { num, id_sector }
+    });
+
+    if (existente) {
+      return res.status(409).json({ message: 'Ya existe una habitación con ese número en este sector' });
+    }
+
+    // ✅ Crear la nueva habitación
+    const nueva = await Habitacion.create({ num, id_sector });
+    res.status(201).json(nueva);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al crear habitación' });
+  }
 };
+
 
 // 🔸 Actualizar habitación
 export const updateHabitacion = async (req, res) => {
-	try {
-		const { id } = req.params;
-		const { num, id_sector } = req.body;
+  try {
+    const { id } = req.params;
+    const { num, id_sector } = req.body;
 
-		const habitacion = await Habitacion.findByPk(id);
-		if (!habitacion) {
-			return res.status(404).json({ message: 'Habitación no encontrada' });
-		}
-		if (!num) {
-			return res.status(400).json({ message: 'El número es obligatorio' });
-		}
+    const habitacion = await Habitacion.findByPk(id);
+    if (!habitacion) {
+      return res.status(404).json({ message: 'Habitación no encontrada' });
+    }
 
-		await habitacion.update({
-			num,
-			id_sector: id_sector || null,
-		});
-		res.json(habitacion);
-	} catch (error) {
-		res.status(500).json({ message: 'Error al actualizar habitación' });
-	}
+    if (!num) {
+      return res.status(400).json({ message: 'El número es obligatorio' });
+    }
+
+    // 🔍 Validar que no exista otra habitación con el mismo número y sector
+    const existente = await Habitacion.findOne({
+      where: {
+        num,
+        id_sector,
+        id_habitacion: { [Op.ne]: id } // Importante: excluir la actual
+      }
+    });
+
+    if (existente) {
+      return res.status(409).json({
+        message: 'Ya existe otra habitación con ese número en este sector'
+      });
+    }
+
+    await habitacion.update({
+      num,
+      id_sector: id_sector || null
+    });
+
+    res.json(habitacion);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al actualizar habitación' });
+  }
 };
 
 // 🔸 Eliminar habitación

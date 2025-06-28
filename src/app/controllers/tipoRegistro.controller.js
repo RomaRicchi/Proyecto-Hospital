@@ -1,5 +1,4 @@
 import { TipoRegistro, RegistroHistoriaClinica } from '../models/index.js';
-import { Op } from 'sequelize';
 
 export const listarTipos = async (req, res) => {
   try {
@@ -11,11 +10,11 @@ export const listarTipos = async (req, res) => {
 };
 
 export const crearTipo = async (req, res) => {
-  const { descripcion } = req.body;
+  const { nombre } = req.body;
   try {
-    const existe = await TipoRegistro.findOne({ where: { descripcion } });
+    const existe = await TipoRegistro.findOne({ where: { nombre } });
     if (existe) return res.status(409).json({ message: 'Ya existe' });
-    const nuevo = await TipoRegistro.create({ descripcion });
+    const nuevo = await TipoRegistro.create({ nombre });
     res.json(nuevo);
   } catch (e) {
     res.status(500).json({ message: 'Error al crear' });
@@ -24,11 +23,11 @@ export const crearTipo = async (req, res) => {
 
 export const actualizarTipo = async (req, res) => {
   const { id } = req.params;
-  const { descripcion } = req.body;
+  const { nombre } = req.body;
   try {
     const tipo = await TipoRegistro.findByPk(id);
     if (!tipo) return res.status(404).json({ message: 'No encontrado' });
-    await tipo.update({ descripcion });
+    await tipo.update({ nombre });
     res.json({ message: 'Actualizado' });
   } catch (e) {
     res.status(500).json({ message: 'Error al actualizar' });
@@ -38,9 +37,8 @@ export const actualizarTipo = async (req, res) => {
 export const eliminarTipo = async (req, res) => {
   const { id } = req.params;
   try {
-    /* Evitar eliminar si está en uso */
     const enUso = await RegistroHistoriaClinica.findOne({
-      where: { id_tipo_registro: id }
+      where: { id_tipo: id }
     });
     if (enUso) return res.status(409).json({ message: 'En uso por registros clínicos' });
 
@@ -56,16 +54,15 @@ export const eliminarTipo = async (req, res) => {
 export const vistaTipoRegistro = async (req, res) => {
   try {
     const tipos = await TipoRegistro.findAll({
-      where: { /* si tenés un campo estado, por ej. estado:true */ },
-      order: [['descripcion', 'ASC']]
+      order: [['nombre', 'ASC']]
     });
 
     const tiposAdaptados = tipos.map(t => ({
-      id_tipo_registro: t.id_tipo_registro,
-      descripcion: t.descripcion
+      id_tipo: t.id_tipo,
+      nombre: t.nombre
     }));
 
-    res.render('tipoRegistro', { tipos: tiposAdaptados });
+    res.render('tiposRegistro', { tipos: tiposAdaptados }); // ⚠️ También corrige aquí el nombre de la vista si estaba mal
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al mostrar tipos de registro');

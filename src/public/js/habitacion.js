@@ -26,22 +26,21 @@ $(document).ready(function () {
 
   // 2) Función para mostrar el botón "Agregar" cuando la tabla esté vacía
   function toggleAddButton() {
-    // Borra instancias previas
+    // Eliminar instancia previa si existe
     $('#btnAgregarHabitacion').remove();
 
-    // Si no hay filas, lo mostramos
-    if (dt.rows({ filter: 'applied' }).data().length === 0) {
-      const $btn = $(`
-        <div id="btnAgregarHabitacion" class="text-center mt-3">
-          <button class="btn btn-success">
-            <i class="fas fa-plus-circle me-1"></i> Agregar Habitación
-          </button>
-        </div>
-      `);
-      // Insertar debajo de la tabla, dentro del wrapper de DataTables
-      $('#tablaHabitacion_wrapper').append($btn);
-    }
+    const $btn = $(`
+      <div id="btnAgregarHabitacion" class="text-end mb-3">
+        <button class="btn btn-success">
+          <i class="fas fa-plus-circle me-1"></i> Agregar Habitación
+        </button>
+      </div>
+    `);
+
+    // Insertar arriba del wrapper de DataTables
+    $('#tablaHabitacion_wrapper').prepend($btn);
   }
+
 
   // 3) Ejecutar al dibujar y al iniciar
   dt.on('draw', toggleAddButton);
@@ -83,9 +82,12 @@ $(document).ready(function () {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(result.value),
         })
-          .then((res) => {
-            if (res.status === 409) throw new Error('Ya existe una habitación con este número.');
-            if (!res.ok) throw new Error();
+          .then(async res => {
+            if (res.status === 409) {
+              const error = await res.json();
+              throw new Error(error.message || 'Conflicto: habitación duplicada');
+            }
+            if (!res.ok) throw new Error('Error al crear');
             return res.json();
           })
           .then(() =>
@@ -146,11 +148,15 @@ $(document).ready(function () {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(result.value),
         })
-          .then((res) => {
-            if (res.status === 409) throw new Error('Ya existe una habitación con este número.');
-            if (!res.ok) throw new Error();
+          .then(async res => {
+            if (res.status === 409) {
+              const error = await res.json();
+              throw new Error(error.message || 'Conflicto: habitación duplicada');
+            }
+            if (!res.ok) throw new Error('Error al actualizar');
             return res.json();
           })
+
           .then(() =>
             Swal.fire('Actualizado', 'Habitación modificada', 'success').then(() =>
               location.reload()

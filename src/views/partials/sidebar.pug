@@ -23,6 +23,10 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
         i.fas.fa-list.me-1
         | Lista de Familiares
     li
+      a.nav-link.text-white(href="/registroClinico")
+        i.fas.fa-file-alt.me-1
+        | Registros clinicos
+    li
       a.nav-link.text-white.collapsed(href="#auxiliaresPacientesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
         i.fas.fa-tools.me-1
         | Auxiliares
@@ -39,6 +43,10 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
           a.nav-link.text-white(href="/familiar/parentesco")
             i.fas.fa-sitemap.me-1
             | Parentesco
+        li
+          a.nav-link.text-white(href="/tipoRegistro")
+            i.fas.fa-file-signature.me-1
+            | Tipos de Registro
 
   // 🔹 Ubicación
   a.nav-link.text-white.collapsed(href="#ubicacionSubmenu", data-bs-toggle="collapse", aria-expanded="false")
@@ -134,16 +142,4 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
         i.fas.fa-notes-medical.me-1
         | Especialidades
 
-  // 🔹 Registros Clínicos
-  a.nav-link.text-white.collapsed(href="#clinicosSubmenu", data-bs-toggle="collapse", aria-expanded="false")
-    i.fas.fa-file-medical.me-2
-    | Registros Clínicos
-  ul.collapse#clinicosSubmenu(style="list-style-type: none; padding-left: 1rem;")
-    li
-      a.nav-link.text-white(href="/registroClinico")
-        i.fas.fa-file-alt.me-1
-        | Lista de Registros
-    li
-      a.nav-link.text-white(href="/tipoRegistro")
-        i.fas.fa-file-signature.me-1
-        | Tipos de Registro
+  

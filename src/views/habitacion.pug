@@ -9,16 +9,16 @@ block content
         table#tablaHabitacion.table.table-striped.table-bordered
           thead
             tr
-              th Número
               th Sector
+              th Número hab
               th Camas
               th Acciones
           tbody
             if habitaciones && habitaciones.length
               each habitacion in habitaciones
                 tr
-                  td #{habitacion.num}
                   td #{habitacion.sector}
+                  td #{habitacion.num}
                   td #{habitacion.camas}
                   td
                     button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=habitacion.id_habitacion)
