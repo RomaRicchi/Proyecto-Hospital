@@ -19,9 +19,6 @@ export const getCamasApi = async (req, res) => {
 		res.status(500).json({ message: 'Error al obtener camas' });
 	}
 };
-
-
-
 // 🔸 Obtener cama por ID (JSON)
 export const getCamaById = async (req, res) => {
 	try {
@@ -103,19 +100,20 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 				else estado = 'Ocupada';
 
 				const pac = ultimoMovimiento.admision?.paciente;
-				paciente = pac ? `${pac.apellido} ${pac.nombre}` : null;
+				paciente = pac ? `${pac.apellido_p} ${pac.nombre_p}` : null;
 				genero = pac?.genero?.nombre || null;
 				}
 			}
 
 			return {
-				id_cama: cama.id_cama,
-				nombre_cama: cama.nombre,
-				sector: cama.habitacion?.sector?.nombre || '-',
-				habitacion: cama.habitacion?.num || '-',
-				estado,
-				paciente,
-				genero
+					id_cama: cama.id_cama,
+					nombre_cama: cama.nombre,
+					sector: cama.habitacion?.sector?.nombre || '-',
+					habitacion: cama.habitacion?.num || '-',
+					estado,
+					desinfeccion: cama.desinfeccion, 
+					paciente,
+					genero
 			};
 		});
 
@@ -125,9 +123,6 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 		res.status(500).json({ message: 'Error al cargar las camas' });
 	}
 };
-
-
-
 // 🔸 Crear nueva cama
 export const createCama = async (req, res) => {
 	try {
@@ -154,8 +149,6 @@ export const createCama = async (req, res) => {
 		res.status(500).send('Error interno del servidor');
 	}
 };
-
-
 // 🔸 Actualizar cama
 export const updateCama = async (req, res) => {
 	try {
@@ -189,8 +182,6 @@ export const updateCama = async (req, res) => {
 		res.status(500).json({ message: 'Error al actualizar la cama' });
 	}
 };
-
-
 // 🔸 Eliminar cama
 export const deleteCama = async (req, res) => {
 	try {
@@ -220,7 +211,6 @@ export const vistaCama = async (req, res) => {
 			order: [['id_cama', 'ASC']],
 		});
 
-		// Enriquecer datos para la vista
 		camas.forEach((cama) => {
 			const numero = cama.habitacion?.num;
 			const sector = cama.habitacion?.sector?.nombre;

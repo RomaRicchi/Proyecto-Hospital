@@ -1,80 +1,105 @@
 export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_habitacion) {
 	try {
-		// Cargar datos para los selects
+		// 🔽 1. Cargar datos para los selects
 		const [motivos, obras, medicos] = await Promise.all([
 			fetch('/api/motivos_ingreso').then(r => r.json()),
 			fetch('/api/obras-sociales').then(r => r.json()),
-			fetch('/api/personal-salud').then(r => r.json()),
+			fetch('/api/usuarios/medicos').then(r => r.json()),
 		]);
-
+		
+		// 🔽 2. Armar <option> para selects
 		const motivosOptions = motivos.map(m =>
 			`<option value="${m.id_motivo}">${m.tipo}</option>`).join('');
 		const obrasOptions = obras.map(o =>
 			`<option value="${o.id_obra_social}">${o.nombre}</option>`).join('');
 		const medicosOptions = medicos.map(m =>
-			`<option value="${m.id_personal_salud}">${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula}</option>`).join('');
+			`<option value="${m.id_usuario}">${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula}</option>`
+		).join('');
 
 
-	    // Mostrar formulario SweetAlert
-	    const result = await Swal.fire({
+		// 🔽 3. Mostrar formulario
+		const result = await Swal.fire({
 			title: 'Registrar Admisión',
 			html: `
-                <select id="id_obra_social" class="swal2-input">${obrasOptions}</select>
-                <input type="text" id="num_asociado" class="swal2-input" placeholder="N° Asociado">
+                <select id="id_obra_social" class="swal2-input" required>
+                    <option value="">Seleccione obra social</option>
+                    ${obrasOptions}
+                </select>
+                <input type="text" id="num_asociado" class="swal2-input" placeholder="N° Asociado" required>
+                
                 <label for="fecha_hora_ingreso" style="display:block;text-align:left;margin-top:8px;">Fecha y hora de ingreso</label>
-                <input type="datetime-local" id="fecha_hora_ingreso" class="swal2-input" placeholder="Fecha y hora ingreso">
-                <select id="id_motivo" class="swal2-input">${motivosOptions}</select>
-                <input type="text" id="descripcion" class="swal2-input" placeholder="Descripción sintomatologica">
+                <input type="datetime-local" id="fecha_hora_ingreso" class="swal2-input" required>
+
+                <select id="id_motivo" class="swal2-input" required>
+                    <option value="">Seleccione motivo de ingreso</option>
+                    ${motivosOptions}
+                </select>
+
+                <input type="text" id="descripcion" class="swal2-input" placeholder="Descripción sintomatológica">
+                
                 <label for="fecha_hora_egreso" style="display:block;text-align:left;margin-top:8px;">Fecha y hora de egreso (opcional)</label>
-                <input type="datetime-local" id="fecha_hora_egreso" class="swal2-input" placeholder="Fecha y hora egreso (opcional)">
+                <input type="datetime-local" id="fecha_hora_egreso" class="swal2-input">
+
                 <input type="text" id="motivo_egr" class="swal2-input" placeholder="Motivo egreso (opcional)">
+
                 <select id="id_personal_salud" class="swal2-input">
-                <option value="">Seleccione médico</option>
-                ${medicosOptions}
+                    <option value="">Seleccione médico</option>
+                    ${medicosOptions}
                 </select>
             `,
-            showCancelButton: true,
-            confirmButtonText: 'Guardar',
-            preConfirm: () => {
-                const getVal = id => Swal.getPopup().querySelector(id)?.value;
-                const fecha_ingreso = getVal('#fecha_hora_ingreso');
-                if (!getVal('#id_obra_social') || !getVal('#id_motivo') || !fecha_ingreso) {
-                    Swal.showValidationMessage('Completa todos los campos obligatorios');
-                    return false;
-                }
-                return {
-                    id_obra_social: getVal('#id_obra_social'),
-                    num_asociado: getVal('#num_asociado'),
-                    fecha_hora_ingreso: fecha_ingreso,
-                    id_motivo: getVal('#id_motivo'),
-                    descripcion: getVal('#descripcion'),
-                    fecha_hora_egreso: getVal('#fecha_hora_egreso') || null,
-                    motivo_egr: getVal('#motivo_egr'),
-                    id_personal_salud: getVal('#id_personal_salud') || null,
-                };
-            }
-        });
+			showCancelButton: true,
+			confirmButtonText: 'Guardar',
+			preConfirm: () => {
+				const getVal = id => Swal.getPopup().querySelector(id)?.value;
 
-	    if (!result.isConfirmed) return;
+				const fecha_ingreso = getVal('#fecha_hora_ingreso');
+				const id_obra_social = getVal('#id_obra_social');
+				const id_motivo = getVal('#id_motivo');
+				const num_asociado = getVal('#num_asociado');
 
-        Swal.showLoading(); 
-        const { fecha_hora_ingreso } = result.value;
-        const seleccion = new Date(fecha_hora_ingreso);
-        const hoy = new Date();
-        const id_mov = seleccion > hoy ? 3 : 1;
+				if (!id_obra_social || !id_motivo || !fecha_ingreso || !num_asociado) {
+					Swal.showValidationMessage('Completa todos los campos obligatorios');
+					return false;
+				}
 
-        if (seleccion < hoy) {
-            await Swal.fire('Error', 'No se puede seleccionar una fecha pasada', 'error');
-            return;
-        }
+				return {
+					id_obra_social,
+					num_asociado,
+					fecha_hora_ingreso: fecha_ingreso,
+					id_motivo,
+					descripcion: getVal('#descripcion') || null,
+					fecha_hora_egreso: getVal('#fecha_hora_egreso') || null,
+					motivo_egr: getVal('#motivo_egr') || null,
+					id_personal_salud: getVal('#id_personal_salud') || null,
+				};
+			}
+		});
 
-		// Crear admisión
+		if (!result.isConfirmed) return;
+
+		// 🔽 4. Determinar tipo de movimiento
+		const { fecha_hora_ingreso } = result.value;
+		const seleccion = new Date(fecha_hora_ingreso);
+		const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+		const manana = new Date(hoy); manana.setDate(hoy.getDate() + 1);
+		const id_mov = seleccion >= manana ? 3 : 1;
+
+		if (seleccion < hoy) {
+			await Swal.fire('Error', 'No se puede seleccionar una fecha pasada', 'error');
+			return;
+		}
+
+		// 🔽 5. Enviar admisión
+		Swal.showLoading();
+
 		const admResp = await fetch('/api/admisiones', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				...result.value,
-				id_paciente: paciente.id_paciente
+				id_paciente: paciente.id_paciente,
+				id_cama,
+				id_mov,
 			})
 		});
 
@@ -85,13 +110,12 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 		}
 
 		const admision = await admResp.json();
-
 		if (!admision?.id_admision) {
 			await Swal.fire('Error', 'No se pudo obtener el ID de la admisión creada.', 'error');
 			return;
 		}
 
-		// Crear movimiento de habitación (ya sea ingreso o reserva)
+		// 🔽 6. Registrar movimiento
 		const movResp = await fetch('/api/movimientos_habitacion', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },

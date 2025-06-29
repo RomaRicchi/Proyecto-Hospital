@@ -27,6 +27,7 @@ import { configurarBusquedaDeCamas } from './utils/validacionFechas.js';
             <th>Habitación</th>
             <th>Cama</th>
             <th>Estado</th>
+			<th>Desinfección</th>
             <th>Paciente</th>
             <th>Género</th>
             <th>Acción</th>
@@ -38,32 +39,37 @@ import { configurarBusquedaDeCamas } from './utils/validacionFechas.js';
 			html += `<tr><td colspan="6" class="text-center">No hay camas para la fecha seleccionada.</td></tr>`;
 		} else {
 			camas.forEach((cama) => {
+				let desinfeccionBadge = Number(cama.desinfeccion) === 1
+					? '<span class="badge bg-success">Sí</span>'
+					: '<span class="badge bg-secondary">No</span>';
 				let estadoBadge = '';
-				if (cama.estado === 'Disponible')
+				if (cama.estado === 'Disponible') {
 					estadoBadge = '<span class="badge bg-success">Disponible</span>';
-				else if (cama.estado === 'Ocupada')
+				} else if (cama.estado === 'Ocupada') {
 					estadoBadge = '<span class="badge bg-danger">Ocupada</span>';
-				else if (cama.estado === 'Reservada')
-					estadoBadge =
-						'<span class="badge bg-warning text-dark">Reservada</span>';
-
+				} else if (cama.estado === 'Reservada') {
+					estadoBadge = '<span class="badge bg-warning text-dark">Reservada</span>';
+				} else {
+					estadoBadge = '<span class="badge bg-secondary">Desconocido</span>';
+				}
 				html += `
-          <tr>
-            <td>${cama.sector || '-'}</td>
-            <td>${cama.habitacion || '-'}</td>
-            <td>${cama.nombre_cama || '-'}</td>
-            <td>${estadoBadge}</td>
-            <td>${cama.paciente || '-'}</td>
-            <td>${cama.genero || '-'}</td>
-            <td>
-              <button class="btn btn-sm btn-primary btn-asignar-paciente" ${
-								cama.estado !== 'Disponible' ? 'disabled' : ''
-							} data-id="${cama.id_cama}">
-                Asignar paciente
-              </button>
-            </td>
-          </tr>
-        `;
+				<tr>
+					<td>${cama.sector || '-'}</td>
+					<td>${cama.habitacion || '-'}</td>
+					<td>${cama.nombre_cama || '-'}</td>
+					<td>${estadoBadge}</td>
+					<td>${desinfeccionBadge}</td>
+					<td>${cama.paciente || '-'}</td>
+					<td>${cama.genero || '-'}</td>
+					<td>
+					<button class="btn btn-sm btn-primary btn-asignar-paciente"
+						${cama.estado !== 'Disponible' || Number(cama.desinfeccion) !== 1 ? 'disabled' : ''}
+						data-id="${cama.id_cama}">
+						Asignar paciente
+					</button>
+					</td>
+				</tr>
+				`;
 			});
 		}
 		html += `</tbody></table>`;

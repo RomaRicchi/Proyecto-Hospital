@@ -19,7 +19,7 @@ export const getUsuarios = async (req, res) => {
 				},
 				{
 					model: PersonalSalud,
-					as: 'personal_salud',
+					as: 'datos_medico', // 👈 Este alias es el que definiste en index.js
 					include: [
 						{ model: RolUsuario, as: 'rol', attributes: ['nombre'] },
 						{ model: Especialidad, as: 'especialidad', attributes: ['nombre'] },
@@ -59,7 +59,7 @@ export const vistaUsuarios = async (req, res) => {
 				},
 				{
 					model: PersonalSalud,
-					as: 'personal_salud',
+					as: 'datos_medico', // 👈 Este alias es el que definiste en index.js
 					include: [
 						{ model: RolUsuario, as: 'rol', attributes: ['nombre'] },
 						{ model: Especialidad, as: 'especialidad', attributes: ['nombre'] },
@@ -70,7 +70,7 @@ export const vistaUsuarios = async (req, res) => {
 
 		const usuariosAdaptados = usuarios.map((u) => {
 			const admin = u.personal_administrativo;
-			const salud = u.personal_salud;
+			const salud = u.datos_medico;
 			return {
 				id_usuario: u.id_usuario,
 				username: u.username,
@@ -176,5 +176,35 @@ export const deleteUsuario = async (req, res) => {
 		res.sendStatus(204);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
+	}
+};
+
+export const listarUsuariosMedicos = async (req, res) => {
+	try {
+		const medicos = await Usuario.findAll({
+			include: {
+				model: PersonalSalud,
+				as: 'datos_medico',
+				attributes: ['nombre', 'apellido', 'matricula'],
+			},
+			where: {
+				id_rol_usuario: 4, // o el ID del rol de médico
+			},
+			attributes: ['id_usuario', 'username'],
+		});
+
+		const resultado = medicos
+			.filter(m => m.datos_medico)
+			.map(m => ({
+				id_usuario: m.id_usuario,
+				nombre: m.datos_medico.nombre,
+				apellido: m.datos_medico.apellido,
+				matricula: m.datos_medico.matricula,
+			}));
+
+		res.json(resultado);
+	} catch (error) {
+		console.error('❌ Error al listar médicos:', error);
+		res.status(500).json({ message: 'Error al obtener médicos' });
 	}
 };

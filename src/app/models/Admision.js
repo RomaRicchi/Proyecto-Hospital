@@ -39,10 +39,11 @@ export default (sequelize, DataTypes) => {
 				type: DataTypes.STRING(255),
 				allowNull: true,
 			},
-			id_personal_salud: {
-				type: DataTypes.INTEGER.UNSIGNED,
-				allowNull: true,
+			id_usuario: {
+			type: DataTypes.INTEGER.UNSIGNED,
+			allowNull: true,
 			},
+
 		},
 		{
 			tableName: 'admision',
@@ -60,8 +61,8 @@ export default (sequelize, DataTypes) => {
 			as: 'obra_social',
 		});
 		Admision.belongsTo(models.Usuario, {
-			foreignKey: 'id_personal_salud',
-			as: 'personal_salud',
+			foreignKey: 'id_usuario',
+			as: 'usuario_asignado',
 		});
 		Admision.belongsTo(models.MotivoIngreso, {
 			foreignKey: 'id_motivo',

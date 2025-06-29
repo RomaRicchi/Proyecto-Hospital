@@ -48,7 +48,7 @@ const RegistroHistoriaClinica = defineRegistroHistoriaClinica(sequelize, Sequeli
 const MotivoIngreso = defineMotivoIngreso(sequelize, Sequelize.DataTypes);
 const TipoRegistro = defineTipoRegistro(sequelize, Sequelize.DataTypes);
 
-// Asociaciones internas
+
 PersonalAdministrativo.associate?.({ Usuario, RolUsuario });
 PersonalSalud.associate?.({ Usuario, RolUsuario, Especialidad });
 Cama.associate?.({ Habitacion, MovimientoHabitacion });
@@ -63,7 +63,6 @@ Admision.associate?.({
 	RegistroHistoriaClinica,
 });
 
-// Relaciones adicionales
 Paciente.belongsTo(Genero, { foreignKey: 'id_genero', as: 'genero' });
 Paciente.belongsTo(Localidad, { foreignKey: 'id_localidad', as: 'localidad' });
 Paciente.hasMany(Familiar, { foreignKey: 'id_paciente', as: 'familiares' });
@@ -72,40 +71,20 @@ Paciente.hasMany(Admision, { foreignKey: 'id_paciente', as: 'admisiones' });
 Familiar.belongsTo(Paciente, { foreignKey: 'id_paciente', as: 'paciente' });
 Familiar.belongsTo(Parentesco, { foreignKey: 'id_parentesco', as: 'parentesco' });
 
-// MovimientoHabitacion relaciones adicionales
-MovimientoHabitacion.belongsTo(Habitacion, {
-	foreignKey: 'id_habitacion',
-	as: 'habitacion_relacionada',
-});
+MovimientoHabitacion.belongsTo(Habitacion, {	foreignKey: 'id_habitacion',	as: 'habitacion_relacionada'});
 
-// ⚠️ RegistroHistoriaClinica usa alias distinto para evitar duplicado con 'admision'
-RegistroHistoriaClinica.belongsTo(TipoRegistro, {
-	foreignKey: 'id_tipo',
-	as: 'tipo_registro',
-});
-RegistroHistoriaClinica.belongsTo(Admision, {
-	foreignKey: 'id_admision',
-	as: 'admision_historia',
-});
-RegistroHistoriaClinica.belongsTo(Usuario, {
-	foreignKey: 'id_usuario',
-	as: 'usuario',
-});
-Admision.belongsTo(Paciente, {
-  as: 'paciente_admision',
-  foreignKey: 'id_paciente'
-});
+RegistroHistoriaClinica.belongsTo(TipoRegistro, {	foreignKey: 'id_tipo',	as: 'tipo_registro'});
+RegistroHistoriaClinica.belongsTo(Admision, {	foreignKey: 'id_admision',	as: 'admision_historia'});
+RegistroHistoriaClinica.belongsTo(Usuario, { foreignKey: 'id_usuario',	as: 'usuario'});
 
-Usuario.hasOne(PersonalAdministrativo, {
-	foreignKey: 'id_usuario',
-	as: 'personal_administrativo',
-});
-Usuario.hasOne(PersonalSalud, {
-	foreignKey: 'id_usuario',
-	as: 'personal_salud',
-});
+Admision.belongsTo(Paciente, { as: 'paciente_admision', foreignKey: 'id_paciente' });
+Admision.belongsTo(Usuario, { as: 'usuario_medico', foreignKey: 'id_usuario' });
 
-// Exportar todos los modelos
+Usuario.hasOne(PersonalAdministrativo, { foreignKey: 'id_usuario',	as: 'personal_administrativo'});
+Usuario.hasOne(PersonalSalud, {  foreignKey: 'id_usuario',  as: 'datos_medico'});
+
+PersonalSalud.belongsTo(Usuario, {  foreignKey: 'id_usuario',  as: 'datos_usuario'});
+
 export {
 	sequelize,
 	Sequelize,

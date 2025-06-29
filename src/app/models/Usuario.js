@@ -27,5 +27,13 @@ export default (sequelize, DataTypes) => {
 		}
 	);
 
+	
+	Usuario.associate = (models) => {
+		Usuario.hasOne(models.PersonalSalud, {
+			foreignKey: 'id_usuario',
+			as: 'datos_medico',
+		});
+	};
+
 	return Usuario;
 };

@@ -59,6 +59,9 @@ export const vistaDashboard = async (req, res) => {
         cama.habitacion && cama.habitacion.sector
           ? `Habitación ${cama.habitacion.num} - ${cama.habitacion.sector.nombre}`
           : '-';
+
+      // Asegurarse de que desinfeccion esté presente
+      cama.dataValues.desinfeccion = cama.desinfeccion;
     });
 
     res.render('dashboard', { camas });
@@ -67,3 +70,4 @@ export const vistaDashboard = async (req, res) => {
     res.status(500).send('Error al cargar el panel principal');
   }
 };
+

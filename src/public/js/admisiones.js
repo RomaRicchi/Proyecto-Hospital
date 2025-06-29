@@ -1,7 +1,5 @@
-import { mostrarFormularioYRegistrarAdmision } from './utils/admisionUtils.js';
-import { configurarBusquedaDeCamas } from './utils/validacionFechas.js';
 $(document).ready(function () {
-  configurarBusquedaDeCamas(buscarCamasDisponibles);
+
   const tabla = $('#tablaAdmisiones');
 
 	if (tabla.length) {
@@ -14,24 +12,9 @@ $(document).ready(function () {
 		  	destroy: true,
       		responsive: true,
 		  	scrollX: false,
-			columnDefs: [{ targets: [8], orderable: false, searchable: false }],
-		});
-
-		dt.on('draw', function () {
-			const noResults = dt.rows({ filter: 'applied' }).data().length === 0;
-			$('#btnAgregarAdmision').remove();
-			if (noResults) {
-				$('#tablaAdmisiones_wrapper').append(`
-                    <div class="text-center mt-3">
-                        <button id="btnAgregarAdmision" class="btn btn-success">
-                            Agregar Nueva Admisión
-                        </button>
-                    </div>
-                `);
-			}
+			columnDefs: [{ targets: [10], orderable: false, searchable: false }],
 		});
 	}
-  mostrarFormularioYRegistrarAdmision(pacienteSeleccionado, id_cama, habitacionId);
 	// Función para obtener opciones asociadas
 	async function getOpcionesAdmision() {
 		const res = await fetch('/api/admisiones/opciones');
@@ -105,14 +88,18 @@ $(document).ready(function () {
 									.join('')}
             </select>
         `;
-    const minFecha = new Date().toISOString().slice(0, 16);
+    const minFecha = null; 
 		Swal.fire({
 			title: 'Editar Admisión',
 			html: `
         ${selectPacientes}
         ${selectObraSocial}
         <input id="swal-num_asociado" class="swal2-input" value="${admision.num_asociado || ''}" placeholder="N° Asociado">
-        <input id="swal-fecha_hora_ingreso" type="datetime-local" class="swal2-input" min="${minFecha}" value="${admision.fecha_hora_ingreso ? admision.fecha_hora_ingreso.slice(0, 16) : ''}" placeholder="Fecha Ingreso">
+        <input id="swal-fecha_hora_ingreso" type="datetime-local"
+			class="swal2-input"
+			${minFecha ? `min="${minFecha}"` : ''}
+			value="${admision.fecha_hora_ingreso ? admision.fecha_hora_ingreso.slice(0, 16) : ''}"
+			placeholder="Fecha Ingreso">
         ${selectMotivo}
         <input id="swal-descripcion" class="swal2-input" value="${admision.descripcion || ''}" placeholder="Descripción">
         <input id="swal-fecha_hora_egreso" type="datetime-local" class="swal2-input" value="${admision.fecha_hora_egreso ? admision.fecha_hora_egreso.slice(0, 16) : ''}" placeholder="Fecha Egreso">
@@ -130,11 +117,6 @@ $(document).ready(function () {
 
         const hoy = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
         const fechaSeleccionada = fechaIngreso.slice(0, 10);
-
-        if (fechaSeleccionada < hoy) {
-          Swal.showValidationMessage('No se puede seleccionar una fecha pasada');
-          return false;
-        }
 
         const esFuturo = fechaSeleccionada > hoy;
 

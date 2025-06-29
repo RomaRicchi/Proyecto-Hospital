@@ -9,6 +9,7 @@ block content
         table#tablaAdmisiones.table.table-striped.table-bordered
           thead
             tr
+            
               th Paciente
               th DNI
               th Obra Social
@@ -33,7 +34,7 @@ block content
                   td #{admision.fecha_ingreso}
                   td #{admision.fecha_egreso}
                   td #{admision.motivo_egr}
-                  td #{admision.personal_salud}
+                  td #{admision.usuario_asignado}
                   td
                     button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=admision.id_admision)
                       i.fas.fa-pen
@@ -42,8 +43,7 @@ block content
             else
               h1 No hay admisiones registradas.
 
-        
-      script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
       script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-      script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
       script(src="/js/admisiones.js")
