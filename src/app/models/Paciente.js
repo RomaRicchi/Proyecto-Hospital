@@ -55,5 +55,12 @@ export default (sequelize, DataTypes) => {
 		}
 	);
 
+	Paciente.associate = (models) => {
+		Paciente.hasMany(models.Admision, {
+			foreignKey: 'id_paciente',
+			as: 'admisiones',
+		});
+	};
+
 	return Paciente;
 };

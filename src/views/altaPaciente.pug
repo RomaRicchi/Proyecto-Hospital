@@ -8,8 +8,9 @@ block content
       // 🔍 Formulario para buscar paciente por DNI (sin method GET para evitar recarga)
       form#buscarPacienteForm
         .mb-3
-          label(for='dni') DNI del Paciente
-          input#dni.form-control(type='number', name='dni', required)
+          label(for='busqueda') Buscar Paciente (DNI, nombre o apellido)
+          input#busqueda.form-control(type='text', name='busqueda', required)
+
         button.btn.btn-primary.mb-4(type='submit')
           i.fas.fa-search.me-1
           | Buscar

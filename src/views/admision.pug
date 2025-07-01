@@ -21,27 +21,8 @@ block content
               th Motivo Egreso
               th Personal de Salud
               th Acciones
-          tbody
-            if admisiones && admisiones.length
-              each admision in admisiones
-                tr
-                  td #{admision.paciente}
-                  td #{admision.dni_paciente}
-                  td #{admision.obra_social}
-                  td #{admision.num_asociado}
-                  td #{admision.motivo_ingreso}
-                  td #{admision.descripcion}
-                  td #{admision.fecha_ingreso}
-                  td #{admision.fecha_egreso}
-                  td #{admision.motivo_egr}
-                  td #{admision.usuario_asignado}
-                  td
-                    button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=admision.id_admision)
-                      i.fas.fa-pen
-                    button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=admision.id_admision)
-                      i.fas.fa-trash
-            else
-              h1 No hay admisiones registradas.
+          tbody#tbodyAdmisiones
+            
 
       script(src="https://code.jquery.com/jquery-3.6.0.min.js")
       script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")

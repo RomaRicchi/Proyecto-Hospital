@@ -1,19 +1,18 @@
-$(document).ready(function () { 
+$(document).ready(function () {
   $('#buscarPacienteForm').submit(async function (e) {
     e.preventDefault();
-    const dni = $('#dni').val();
+    const dni = $('#busqueda').val().trim();
 
-    const res = await fetch(
-      `/api/admisiones/paciente/${dni}/admisiones-vigentes`
-    );
+    if (!dni || isNaN(dni)) {
+      Swal.fire('Error', 'Debe ingresar un DNI válido', 'warning');
+      return;
+    }
+
+    const res = await fetch(`/api/admisiones/paciente/${dni}/admisiones-vigentes`);
     const data = await res.json();
 
-    if (!data || !data.admision) {
-      Swal.fire(
-        'No encontrado',
-        'No hay una admisión activa para este paciente',
-        'info'
-      );
+    if (!data.success || !data.admision) {
+      Swal.fire('No encontrado', data.message || 'No hay una admisión activa para este paciente', 'info');
       $('#resultadoBusqueda').html('');
       return;
     }
@@ -23,16 +22,11 @@ $(document).ready(function () {
     const fechaIngreso = new Date(admision.fecha_hora_ingreso);
     const fechaIngresoStr = fechaIngreso.toLocaleString();
 
-    // Obtener médicos
     const medicos = await fetch('/api/personal-salud').then((r) => r.json());
     const medicosOptions = medicos
-      .map(
-        (m) =>
-          `<option value="${m.id_personal_salud}">${m.apellido}, ${m.nombre} — Matrícula: ${m.matricula}</option>`
-      )
+      .map(m => `<option value="${m.id_personal_salud}">${m.apellido}, ${m.nombre} — Matrícula: ${m.matricula}</option>`)
       .join('');
 
-    // Renderizamos tabla + form, y guardamos fechaIngreso como data-* en el form
     $('#resultadoBusqueda').html(`
       <h5>Datos del Paciente</h5>
       <table class="table table-bordered">
@@ -81,45 +75,35 @@ $(document).ready(function () {
     `);
   });
 
-  // Evento submit para el formulario dinámico
   $(document).on('submit', '#formEgreso', function (e) {
     e.preventDefault();
-
-    // 1️⃣ Capturamos valores
     const $form = $(this);
     const fechaIngreso = new Date($form.data('fecha-ingreso'));
-    const fechaEgreso   = $('#fechaEgreso').val();
-    const motivoEgreso  = $('#motivoEgreso').val().trim();
-    const idPersonal    = $('#idUsuario').val();
+    const fechaEgreso = $('#fechaEgreso').val();
+    const motivoEgreso = $('#motivoEgreso').val().trim();
+    const idPersonal = $('#idUsuario').val();
 
-    // 2️⃣ Validaciones
     if (!fechaEgreso) {
       return Swal.fire('Error', 'Debes indicar la fecha y hora de egreso.', 'warning');
     }
+
     const fechaE = new Date(fechaEgreso);
     if (fechaE <= fechaIngreso) {
-      return Swal.fire(
-        'Error',
-        'La fecha de egreso debe ser posterior a la fecha de ingreso.',
-        'warning'
-      );
+      return Swal.fire('Error', 'La fecha de egreso debe ser posterior a la fecha de ingreso.', 'warning');
     }
+
     if (motivoEgreso.length < 5) {
-      return Swal.fire(
-        'Error',
-        'El motivo de egreso es obligatorio (mínimo 5 caracteres).',
-        'warning'
-      );
+      return Swal.fire('Error', 'El motivo de egreso es obligatorio (mínimo 5 caracteres).', 'warning');
     }
+
     if (!idPersonal) {
       return Swal.fire('Error', 'Debes seleccionar un médico responsable.', 'warning');
     }
 
-    // 3️⃣ Armamos el payload y enviamos
-    const dni = $('#dni').val();
+    const dni = $('#busqueda').val();
     const payload = {
       fecha_hora_egreso: fechaEgreso,
-      motivo_egr:        motivoEgreso,
+      motivo_egr: motivoEgreso,
       id_personal_salud: idPersonal,
     };
 
@@ -135,17 +119,12 @@ $(document).ready(function () {
         }
         const data = await res.json();
         if (data.success) {
-          Swal.fire(
-            'Alta realizada',
-            'El paciente fue dado de alta correctamente',
-            'success'
-          ).then(() => location.reload());
+          Swal.fire('Alta realizada', 'El paciente fue dado de alta correctamente', 'success')
+            .then(() => location.reload());
         } else {
           Swal.fire('Error', data.message || 'No se pudo procesar el alta', 'error');
         }
       })
-      .catch(() =>
-        Swal.fire('Error', 'No se pudo conectar con el servidor', 'error')
-      );
+      .catch(() => Swal.fire('Error', 'No se pudo conectar con el servidor', 'error'));
   });
 });

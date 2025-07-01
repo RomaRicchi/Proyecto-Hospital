@@ -185,22 +185,22 @@ export const listarUsuariosMedicos = async (req, res) => {
 			include: {
 				model: PersonalSalud,
 				as: 'datos_medico',
-				attributes: ['nombre', 'apellido', 'matricula'],
-			},
-			where: {
-				id_rol_usuario: 4, // o el ID del rol de médico
+				where: {
+					id_rol_usuario: 4, 
+					activo: true       
+				},
+				attributes: ['id_personal_salud', 'nombre', 'apellido', 'matricula'],
 			},
 			attributes: ['id_usuario', 'username'],
 		});
 
-		const resultado = medicos
-			.filter(m => m.datos_medico)
-			.map(m => ({
-				id_usuario: m.id_usuario,
-				nombre: m.datos_medico.nombre,
-				apellido: m.datos_medico.apellido,
-				matricula: m.datos_medico.matricula,
-			}));
+		const resultado = medicos.map(m => ({
+			id_usuario: m.id_usuario,
+			id_personal_salud: m.datos_medico.id_personal_salud, // <-- agregar este campo
+			nombre: m.datos_medico.nombre,
+			apellido: m.datos_medico.apellido,
+			matricula: m.datos_medico.matricula,
+		}));
 
 		res.json(resultado);
 	} catch (error) {

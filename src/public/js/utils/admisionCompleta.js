@@ -1,13 +1,13 @@
+import { obtenerFechaBusquedaFormateada } from './validacionFechas.js';
+
 export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_habitacion) {
 	try {
-		// 🔽 1. Cargar datos para los selects
 		const [motivos, obras, medicos] = await Promise.all([
 			fetch('/api/motivos_ingreso').then(r => r.json()),
 			fetch('/api/obras-sociales').then(r => r.json()),
 			fetch('/api/usuarios/medicos').then(r => r.json()),
 		]);
-		
-		// 🔽 2. Armar <option> para selects
+
 		const motivosOptions = motivos.map(m =>
 			`<option value="${m.id_motivo}">${m.tipo}</option>`).join('');
 		const obrasOptions = obras.map(o =>
@@ -16,8 +16,8 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 			`<option value="${m.id_usuario}">${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula}</option>`
 		).join('');
 
+		const fechaFormateada = obtenerFechaBusquedaFormateada(); // 📌 yyyy-MM-ddTHH:mm o null
 
-		// 🔽 3. Mostrar formulario
 		const result = await Swal.fire({
 			title: 'Registrar Admisión',
 			html: `
@@ -40,15 +40,16 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
                 <label for="fecha_hora_egreso" style="display:block;text-align:left;margin-top:8px;">Fecha y hora de egreso (opcional)</label>
                 <input type="datetime-local" id="fecha_hora_egreso" class="swal2-input">
 
-                <input type="text" id="motivo_egr" class="swal2-input" placeholder="Motivo egreso (opcional)">
+				<input type="text" id="motivo_egr" class="swal2-input" placeholder="Motivo egreso (opcional)">
 
-                <select id="id_personal_salud" class="swal2-input">
+                <select id="id_usuario" class="swal2-input">
                     <option value="">Seleccione médico</option>
                     ${medicosOptions}
                 </select>
             `,
 			showCancelButton: true,
 			confirmButtonText: 'Guardar',
+			focusConfirm: false,
 			preConfirm: () => {
 				const getVal = id => Swal.getPopup().querySelector(id)?.value;
 
@@ -70,21 +71,35 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 					descripcion: getVal('#descripcion') || null,
 					fecha_hora_egreso: getVal('#fecha_hora_egreso') || null,
 					motivo_egr: getVal('#motivo_egr') || null,
-					id_personal_salud: getVal('#id_personal_salud') || null,
+					id_usuario: getVal('#id_usuario') || null,
 				};
 			}
 		});
 
+		// Asignar valor por defecto al input de fecha/hora de ingreso
+		const inputFechaIngreso = document.querySelector('#fecha_hora_ingreso');
+		if (inputFechaIngreso) {
+			inputFechaIngreso.value = fechaFormateada ?? new Date().toISOString().slice(0, 16);
+		}
+
 		if (!result.isConfirmed) return;
 
-		// 🔽 4. Determinar tipo de movimiento
+		// 🔽 4. Determinar tipo de movimiento y lógica de reserva SOLO después de confirmar
 		const { fecha_hora_ingreso } = result.value;
-		const seleccion = new Date(fecha_hora_ingreso);
 		const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+		const seleccionFinal = new Date(fecha_hora_ingreso);
 		const manana = new Date(hoy); manana.setDate(hoy.getDate() + 1);
-		const id_mov = seleccion >= manana ? 3 : 1;
+		let id_mov = 1;
+		let fecha_hora_egreso = result.value.fecha_hora_egreso;
 
-		if (seleccion < hoy) {
+		if (seleccionFinal >= manana) {
+			id_mov = 3;
+			const egreso = new Date(seleccionFinal);
+			egreso.setDate(egreso.getDate() + 7);
+			fecha_hora_egreso = egreso.toISOString().slice(0, 16);
+		}
+
+		if (seleccionFinal < hoy) {
 			await Swal.fire('Error', 'No se puede seleccionar una fecha pasada', 'error');
 			return;
 		}
@@ -97,6 +112,7 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				...result.value,
+				fecha_hora_egreso,
 				id_paciente: paciente.id_paciente,
 				id_cama,
 				id_mov,
@@ -124,7 +140,7 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 				id_habitacion,
 				id_cama,
 				fecha_hora_ingreso: admision.fecha_hora_ingreso,
-				fecha_hora_egreso: admision.fecha_hora_egreso || null,
+				fecha_hora_egreso: fecha_hora_egreso || admision.fecha_hora_egreso || null,
 				id_mov,
 				estado: 1
 			})

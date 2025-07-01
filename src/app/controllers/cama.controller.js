@@ -23,14 +23,24 @@ export const getCamasApi = async (req, res) => {
 export const getCamaById = async (req, res) => {
 	try {
 		const cama = await Cama.findByPk(req.params.id, {
-			include: [{ model: Habitacion, as: 'habitacion' }],
+			include: [
+				{
+					model: Habitacion,
+					as: 'habitacion',
+					include: [
+						{ model: Sector, as: 'sector' } 
+					],
+				},
+			],
 		});
+
 		if (cama) {
 			res.json(cama);
 		} else {
 			res.status(404).send('Cama no encontrada');
 		}
 	} catch (error) {
+		console.error('Error al obtener cama:', error);
 		res.status(500).send('Error interno del servidor');
 	}
 };
@@ -43,42 +53,36 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 		const desde = new Date(`${fecha}T00:00:00`);
 		const hasta = new Date(`${fecha}T23:59:59`);
 
+		const SECTORES_CON_INTERNACION = [ 1, 3, 7, 9, 10, 14, 26 ];
 		const camas = await Cama.findAll({
+		include: [
+			{ model: Habitacion, as: 'habitacion', required: true,
 			include: [
-				{
-					model: MovimientoHabitacion,
-					as: 'movimientos',
-					required: false,
-					where: {
-						fecha_hora_ingreso: {
-							[Op.lte]: hasta,
-						},
+				{ model: Sector, as: 'sector', required: true,
+				where: {
+					id_sector: {
+					[Op.in]: SECTORES_CON_INTERNACION,
 					},
-					include: [
-						{
-							model: Movimiento,
-							as: 'tipo_movimiento',
-						},
-						{
-							model: Admision,
-							as: 'admision',
-							include: [
-								{
-									model: Paciente,
-									as: 'paciente',
-									include: [{ model: Genero, as: 'genero' }],
-								},
-							],
-						},
-					],
 				},
-				{
-					model: Habitacion,
-					as: 'habitacion',
-					include: [{ model: Sector, as: 'sector' }],
 				},
 			],
-			order: [['id_cama', 'ASC']],
+			},
+			{
+			model: MovimientoHabitacion, as: 'movimientos',
+			required: false,
+			include: [
+				{ model: Movimiento, as: 'tipo_movimiento' },
+				{ model: Admision, as: 'admision',
+				include: [
+					{ model: Paciente, as: 'paciente',
+					include: [{ model: Genero, as: 'genero' }],
+					},
+				],
+				},
+			],
+			},
+		],
+		order: [['id_cama', 'ASC']],
 		});
 
 		const resultado = camas.map((cama) => {
@@ -86,43 +90,59 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 			let paciente = null;
 			let genero = null;
 
-			if (Array.isArray(cama.movimientos) && cama.movimientos.length > 0) {
-				const movimientosValidos = cama.movimientos.filter((mov) => {
-				const fechaMov = new Date(mov.fecha_hora_ingreso);
-				return fechaMov >= desde && fechaMov <= hasta;
+			const mov = cama.movimientos?.[0];
+			if (mov && mov.admision) {
+				const admision = mov.admision;
+				const pac = admision.paciente;
+
+				const fechaEgreso = admision.fecha_hora_egreso
+					? new Date(admision.fecha_hora_egreso)
+					: null;
+				const fechaConsulta = new Date(fecha + 'T23:59:59'); // considerar todo el día
+
+				const ocupadaEnFecha = cama.movimientos?.some((mov) => {
+					const adm = mov.admision;
+					if (!adm) return false;
+
+					const ingreso = new Date(adm.fecha_hora_ingreso);
+					const egreso = adm.fecha_hora_egreso ? new Date(adm.fecha_hora_egreso) : null;
+					const consulta = new Date(fecha + 'T23:59:59');
+
+					return ingreso <= consulta && (!egreso || consulta <= egreso);
 				});
 
-				const ultimoMovimiento = movimientosValidos[0]; // Podés ordenar antes si hace falta
-
-				if (ultimoMovimiento) {
-				const tipo = ultimoMovimiento.tipo_movimiento?.nombre;
-				if (tipo === 'Reserva') estado = 'Reservada';
-				else estado = 'Ocupada';
-
-				const pac = ultimoMovimiento.admision?.paciente;
-				paciente = pac ? `${pac.apellido_p} ${pac.nombre_p}` : null;
-				genero = pac?.genero?.nombre || null;
+				if (ocupadaEnFecha && mov && mov.admision && mov.admision.paciente) {
+					estado = 'Ocupada';
+					paciente = `${mov.admision.paciente.apellido_p} ${mov.admision.paciente.nombre_p}`;
+					genero = mov.admision.paciente.genero?.nombre || null;
 				}
 			}
 
-			return {
-					id_cama: cama.id_cama,
-					nombre_cama: cama.nombre,
-					sector: cama.habitacion?.sector?.nombre || '-',
-					habitacion: cama.habitacion?.num || '-',
-					estado,
-					desinfeccion: cama.desinfeccion, 
-					paciente,
-					genero
-			};
-		});
 
-		res.json(resultado);
+			return {
+				id_cama: cama.id_cama,
+				nombre_cama: cama.nombre,
+				sector: cama.habitacion?.sector?.nombre || '-',
+				habitacion: cama.habitacion?.num || '-',
+				estado,
+				desinfeccion: cama.desinfeccion,
+				paciente,
+				genero,
+				movimientos: cama.movimientos?.map((mov) => ({
+					id_mov: mov.id_mov,
+					fecha_hora_ingreso: mov.fecha_hora_ingreso,
+					fecha_hora_egreso: mov.fecha_hora_egreso
+				})) || []
+			};
+	});
+
+	res.json(resultado);
 	} catch (error) {
 		console.error('❌ getCamasDisponiblesPorFecha error:', error);
 		res.status(500).json({ message: 'Error al cargar las camas' });
 	}
 };
+
 // 🔸 Crear nueva cama
 export const createCama = async (req, res) => {
 	try {

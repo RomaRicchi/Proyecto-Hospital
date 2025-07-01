@@ -3,28 +3,16 @@ import {
 	Paciente,
 	Cama,
 	MovimientoHabitacion,
-} from '../models/index.js';
+	RegistroHistoriaClinica,
+	Usuario,
+	TipoRegistro,
+	PersonalSalud  
+} from '../models/index.js'; 
+import { Op } from 'sequelize';
 
-export const verificarAdmisionActiva = async (req, res) => {
-	try {
-		const { id_paciente } = req.params;
-
-		const admision = await Admision.findOne({
-			where: {
-				id_paciente,
-				fecha_hora_egreso: null,
-			},
-		});
-
-		res.json({ admisionActiva: !!admision });
-	} catch (error) {
-		console.error('Error al verificar admisión activa:', error);
-		res.status(500).json({ message: 'Error al verificar admisión activa' });
-	}
-};
 
 export const buscarAdmisionVigente = async (req, res) => {
-	try {
+	
 		const { dni } = req.params;
 
 		const paciente = await Paciente.findOne({ where: { dni_paciente: dni } });
@@ -38,10 +26,11 @@ export const buscarAdmisionVigente = async (req, res) => {
 			},
 		});
 
+		if (!admision)
+			return res.json({ success: false, message: 'No hay admisión activa para este paciente' });
+
 		res.json({ success: true, paciente, admision });
-	} catch (error) {
-		res.json({ success: false, message: 'Error interno del servidor' });
-	}
+	
 };
 
 export const darAltaPaciente = async (req, res) => {
@@ -112,14 +101,40 @@ export const darAltaPaciente = async (req, res) => {
 			await cama.save();
 		}
 
+		// 📝 Registrar en historia clínica
+		// Buscar id_usuario del médico responsable
+		let id_usuario = null;
+		if (id_personal_salud) {
+			const medico = await Usuario.findOne({
+				include: [{
+					model: PersonalSalud,
+					as: 'datos_medico',
+					where: { id_personal_salud }
+				}]
+			});
+
+			if (medico) id_usuario = medico.id_usuario;
+		}
+		// Buscar id_tipo para egreso
+		let id_tipo = null;
+		const tipoEgreso = await TipoRegistro.findOne({ where: { nombre: { [Op.like]: '%egreso%' } } });
+		if (tipoEgreso) id_tipo = tipoEgreso.id_tipo;
+		await RegistroHistoriaClinica.create({
+			id_admision: admision.id_admision,
+			id_usuario,
+			fecha_hora_reg: fecha_hora_egreso,
+			id_tipo,
+			detalle: `Alta médica: ${motivo_egr}`,
+			estado: 1
+		});
+
 		return res.json({
 			success: true,
 			message: 'Alta registrada correctamente',
 		});
 	} catch (error) {
-		res
-			.status(500)
-			.json({ success: false, message: 'Error inesperado del servidor' });
+	console.error('❌ Error en darAltaPaciente:', error); // <-- AÑADÍ ESTE LOG
+	res.status(500).json({ success: false, message: 'Error inesperado del servidor' });
 	}
 };
 

@@ -19,3 +19,30 @@ export function configurarBusquedaDeCamas(callbackBuscarCamas) {
 		callbackBuscarCamas(fechaSeleccionadaStr);
 	});
 }
+
+export function obtenerFechaBusquedaFormateada() {
+	const input = document.querySelector('#fecha_busqueda');
+	if (!input) return null;
+
+	const fecha = input.value;
+	if (!fecha) return null;
+
+	return fecha;
+	
+}
+
+
+
+export function aplicarReservaSemanal(inputFechaIngreso, inputFechaEgreso, inputMotivoEgr) {
+	if (!inputFechaIngreso || !inputFechaEgreso) return;
+
+	const fechaIngreso = new Date(inputFechaIngreso.value);
+	const fechaEgreso = new Date(fechaIngreso);
+	fechaEgreso.setDate(fechaIngreso.getDate() + 7);
+
+	const egresoStr = fechaEgreso.toISOString().slice(0, 16);
+	inputFechaEgreso.value = egresoStr;
+	inputFechaEgreso.disabled = true;
+
+	if (inputMotivoEgr) inputMotivoEgr.disabled = true;
+}

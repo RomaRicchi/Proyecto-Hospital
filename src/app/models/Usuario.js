@@ -27,11 +27,14 @@ export default (sequelize, DataTypes) => {
 		}
 	);
 
-	
 	Usuario.associate = (models) => {
 		Usuario.hasOne(models.PersonalSalud, {
 			foreignKey: 'id_usuario',
 			as: 'datos_medico',
+		});
+		Usuario.hasOne(models.PersonalAdministrativo, {
+			foreignKey: 'id_usuario',
+			as: 'personal_administrativo',
 		});
 	};
 

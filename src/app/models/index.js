@@ -54,6 +54,14 @@ PersonalSalud.associate?.({ Usuario, RolUsuario, Especialidad });
 Cama.associate?.({ Habitacion, MovimientoHabitacion });
 Habitacion.associate?.({ Sector, Cama, MovimientoHabitacion });
 MovimientoHabitacion.associate?.({ Admision, Habitacion, Movimiento, Cama });
+Usuario.associate?.({
+  PersonalSalud,
+  PersonalAdministrativo,
+  RolUsuario,
+  Especialidad,
+  Paciente,
+  Admision,
+});
 Admision.associate?.({
 	Paciente,
 	ObraSocial,
@@ -62,11 +70,10 @@ Admision.associate?.({
 	MovimientoHabitacion,
 	RegistroHistoriaClinica,
 });
-
+Paciente.associate?.({ Admision });
 Paciente.belongsTo(Genero, { foreignKey: 'id_genero', as: 'genero' });
 Paciente.belongsTo(Localidad, { foreignKey: 'id_localidad', as: 'localidad' });
 Paciente.hasMany(Familiar, { foreignKey: 'id_paciente', as: 'familiares' });
-Paciente.hasMany(Admision, { foreignKey: 'id_paciente', as: 'admisiones' });
 
 Familiar.belongsTo(Paciente, { foreignKey: 'id_paciente', as: 'paciente' });
 Familiar.belongsTo(Parentesco, { foreignKey: 'id_parentesco', as: 'parentesco' });
@@ -80,11 +87,8 @@ RegistroHistoriaClinica.belongsTo(Usuario, { foreignKey: 'id_usuario',	as: 'usua
 Admision.belongsTo(Paciente, { as: 'paciente_admision', foreignKey: 'id_paciente' });
 Admision.belongsTo(Usuario, { as: 'usuario_medico', foreignKey: 'id_usuario' });
 
-Usuario.hasOne(PersonalAdministrativo, { foreignKey: 'id_usuario',	as: 'personal_administrativo'});
-Usuario.hasOne(PersonalSalud, {  foreignKey: 'id_usuario',  as: 'datos_medico'});
-
 PersonalSalud.belongsTo(Usuario, {  foreignKey: 'id_usuario',  as: 'datos_usuario'});
-
+Usuario.hasOne(PersonalSalud, { foreignKey: 'id_usuario',  as: 'dato_doctor'});
 export {
 	sequelize,
 	Sequelize,
