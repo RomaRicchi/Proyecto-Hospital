@@ -54,7 +54,6 @@ export const updateLocalidad = async (req, res) => {
 	}
 };
 
-
 export const deleteLocalidad = async (req, res) => {
 	try {
 		const localidad = await Localidad.findByPk(req.params.id);

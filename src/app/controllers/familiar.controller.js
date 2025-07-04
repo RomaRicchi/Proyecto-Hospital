@@ -1,6 +1,5 @@
 import { Familiar, Paciente, Parentesco } from '../models/index.js';
 
-// ✅ Obtener todos los familiares activos
 export const getFamiliares = async (req, res) => {
 	try {
 		const familiares = await Familiar.findAll({
@@ -16,7 +15,6 @@ export const getFamiliares = async (req, res) => {
 	}
 };
 
-// Vista para mostrar todos los familiares
 export const vistaFamiliares = async (req, res) => {
 	try {
 		const familiares = await Familiar.findAll({
@@ -62,7 +60,6 @@ export const vistaFamiliares = async (req, res) => {
 	}
 };
 
-// ✅ Obtener familiar por su ID
 export const getFamiliarById = async (req, res) => {
 	try {
 		const familiar = await Familiar.findByPk(req.params.id, {
@@ -79,7 +76,6 @@ export const getFamiliarById = async (req, res) => {
 	}
 };
 
-// ✅ Obtener familiar por ID de paciente
 export const getFamiliarByPaciente = async (req, res) => {
 	try {
 		const familiar = await Familiar.findOne({
@@ -104,7 +100,6 @@ export const getFamiliarByPaciente = async (req, res) => {
 	}
 };
 
-// ✅ Crear nuevo familiar
 export const createFamiliar = async (req, res) => {
 	try {
 		const familiar = await Familiar.create(req.body);
@@ -114,7 +109,6 @@ export const createFamiliar = async (req, res) => {
 	}
 };
 
-// ✅ Actualizar datos de un familiar existente
 export const updateFamiliar = async (req, res) => {
 	try {
 		const familiar = await Familiar.findByPk(req.params.id);
@@ -127,7 +121,6 @@ export const updateFamiliar = async (req, res) => {
 	}
 };
 
-// ✅ Borrado lógico de un familiar
 export const deleteFamiliar = async (req, res) => {
 	try {
 		const familiar = await Familiar.findByPk(req.params.id);

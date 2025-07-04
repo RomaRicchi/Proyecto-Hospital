@@ -1,6 +1,5 @@
 import { Genero } from '../models/index.js';
 
-// 🔸 Obtener todos los géneros
 export const getGeneros = async (req, res) => {
 	try {
 		const generos = await Genero.findAll();
@@ -10,7 +9,6 @@ export const getGeneros = async (req, res) => {
 	}
 };
 
-// 🔸 Obtener género por ID
 export const getGeneroById = async (req, res) => {
 	try {
 		const genero = await Genero.findByPk(req.params.id);
@@ -23,7 +21,6 @@ export const getGeneroById = async (req, res) => {
 	}
 };
 
-// 🔸 Crear género
 export const createGenero = async (req, res) => {
 	try {
 		const { nombre } = req.body;
@@ -38,7 +35,6 @@ export const createGenero = async (req, res) => {
 	}
 };
 
-// 🔸 Actualizar género
 export const updateGenero = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -60,7 +56,6 @@ export const updateGenero = async (req, res) => {
 	}
 };
 
-// 🔸 Eliminar género
 export const deleteGenero = async (req, res) => {
 	try {
 		const { id } = req.params;

@@ -1,6 +1,5 @@
 import { Parentesco } from '../models/index.js';
 
-// 🔸 Obtener todos los parentescos
 export const getParentescos = async (req, res) => {
 	try {
 		const parentescos = await Parentesco.findAll();
@@ -10,7 +9,6 @@ export const getParentescos = async (req, res) => {
 	}
 };
 
-// 🔸 Obtener parentesco por ID
 export const getParentescoById = async (req, res) => {
 	try {
 		const parentesco = await Parentesco.findByPk(req.params.id);
@@ -23,7 +21,6 @@ export const getParentescoById = async (req, res) => {
 	}
 };
 
-// 🔸 Crear parentesco
 export const createParentesco = async (req, res) => {
 	try {
 		const { nombre } = req.body;
@@ -38,7 +35,6 @@ export const createParentesco = async (req, res) => {
 	}
 };
 
-// 🔸 Actualizar parentesco
 export const updateParentesco = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -60,7 +56,6 @@ export const updateParentesco = async (req, res) => {
 	}
 };
 
-// 🔸 Eliminar parentesco
 export const deleteParentesco = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -76,7 +71,6 @@ export const deleteParentesco = async (req, res) => {
 	}
 };
 
-// 🔸 Vista para mostrar parentescos en pug
 export const vistaParentescos = async (req, res) => {
 	try {
 		const parentescos = await Parentesco.findAll();

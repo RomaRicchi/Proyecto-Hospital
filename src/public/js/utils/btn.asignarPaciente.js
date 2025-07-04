@@ -76,49 +76,23 @@ $(document).on('click', '.btn-asignar-paciente', function () {
 				cancelButtonText: 'No, cancelar',
 			}).then(async (confirma) => {
 				if (confirma.isConfirmed) {
-					const resp = await fetch(
-						'/api/movimientos_habitacion/verificar-genero',
-						{
-							method: 'POST',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify({
-								id_habitacion: habitacionId,
-								id_cama: id_cama,
-								id_genero: pacienteSeleccionado.genero.id_genero,
-							}),
-						}
-					);
-					const data = await resp.json();
-					if (!resp.ok) {
-						Swal.fire(
-							'No permitido',
-							data.message || 'Conflicto de género',
-							'error'
-						);
-						return;
-					}
-					// Validar si el paciente ya tiene admisión vigente o futura
 					const fechaSeleccionada = $('#fecha_busqueda').val();
-					let fechaParaValidar = new Date();
+					const fechaHoraIngreso = new Date(fechaSeleccionada || Date.now());
+					fechaHoraIngreso.setHours(9, 0, 0, 0); // 09:00 AM
 
-					if (fechaSeleccionada) {
-					const hoy = new Date();
-					const fechaSeleccionadaDate = new Date(fechaSeleccionada);
-					fechaParaValidar = fechaSeleccionadaDate > hoy ? fechaSeleccionadaDate : hoy;
-					}
+					const verificarGenero = await fetch('/api/movimientos_habitacion/verificar-genero', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							id_habitacion: habitacionId,
+							id_cama: id_cama,
+							id_genero: pacienteSeleccionado.genero.id_genero
+						}),
+					});
 
-					const validar = await fetch(
-					`/api/admisiones/validar-dni/${pacienteSeleccionado.dni_paciente}?fecha=${encodeURIComponent(fechaParaValidar.toISOString())}`
-					);
-
-					const resultado = await validar.json();
-
-					if (resultado.vigente) {
-						Swal.fire(
-							'Atención',
-							'El paciente ya tiene una admisión vigente o en curso. No puede registrar otra.',
-							'warning'
-						);
+					if (!verificarGenero.ok) {
+						const data = await verificarGenero.json();
+						await Swal.fire('No permitido', data.message || 'Conflicto de género', 'error');
 						return;
 					}
 					// ⚠️ Validación de edad y género por sector

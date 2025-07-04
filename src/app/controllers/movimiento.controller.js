@@ -53,7 +53,6 @@ export const deleteMovimiento = async (req, res) => {
 	}
 };
 
-// 🔸 Vista Pug para movimientos
 export const vistaMovimientos = async (req, res) => {
 	try {
 		const movimientos = await Movimiento.findAll();

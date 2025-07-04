@@ -1,6 +1,6 @@
 import { Habitacion, Sector, Cama } from '../models/index.js';
 import { Op } from 'sequelize';
-// 🔸 Obtener todas las habitaciones con JOIN
+
 export const getHabitaciones = async (req, res) => {
 	try {
 		const habitaciones = await Habitacion.findAll({
@@ -15,7 +15,6 @@ export const getHabitaciones = async (req, res) => {
 	}
 };
 
-// 🔸 Obtener habitación por ID con JOIN
 export const getHabitacionById = async (req, res) => {
 	try {
 		const habitacion = await Habitacion.findByPk(req.params.id, {
@@ -33,7 +32,6 @@ export const getHabitacionById = async (req, res) => {
 	}
 };
 
-// 🔸 Vista para mostrar todas las habitaciones (PUG)
 export const vistaHabitaciones = async (req, res) => {
 	try {
 		const habitaciones = await Habitacion.findAll({
@@ -79,8 +77,6 @@ export const createHabitacion = async (req, res) => {
   }
 };
 
-
-// 🔸 Actualizar habitación
 export const updateHabitacion = async (req, res) => {
   try {
     const { id } = req.params;
@@ -122,7 +118,6 @@ export const updateHabitacion = async (req, res) => {
   }
 };
 
-// 🔸 Eliminar habitación
 export const deleteHabitacion = async (req, res) => {
 	try {
 		const { id } = req.params;

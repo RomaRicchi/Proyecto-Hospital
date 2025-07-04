@@ -9,7 +9,7 @@ import {
 	PersonalSalud  
 } from '../models/index.js'; 
 import { Op } from 'sequelize';
-
+import { toUTC } from '../helpers/timezone.helper.js';
 
 export const buscarAdmisionVigente = async (req, res) => {
 	
@@ -36,7 +36,10 @@ export const buscarAdmisionVigente = async (req, res) => {
 export const darAltaPaciente = async (req, res) => {
 	try {
 		const { dni } = req.params;
-		const { fecha_hora_egreso, motivo_egr, id_personal_salud } = req.body;
+		let { fecha_hora_egreso, motivo_egr, id_personal_salud } = req.body;
+
+		// ⏱️ Ajustar fecha a UTC
+		fecha_hora_egreso = toUTC(fecha_hora_egreso);
 
 		const paciente = await Paciente.findOne({ where: { dni_paciente: dni } });
 		if (!paciente) {
@@ -67,7 +70,7 @@ export const darAltaPaciente = async (req, res) => {
 		const ultimoMov = await MovimientoHabitacion.findOne({
 			where: {
 				id_admision: admision.id_admision,
-				id_mov: 1, // Ingresa/Ocupa
+				id_mov: 1,
 				estado: 1,
 				fecha_hora_egreso: null,
 			},
@@ -75,9 +78,7 @@ export const darAltaPaciente = async (req, res) => {
 		});
 
 		if (!ultimoMov) {
-			return res
-				.status(400)
-				.json({ success: false, message: 'No se encontró movimiento activo' });
+			return res.status(400).json({ success: false, message: 'No se encontró movimiento activo' });
 		}
 
 		// ✅ Marcar fecha egreso del movimiento anterior
@@ -90,19 +91,18 @@ export const darAltaPaciente = async (req, res) => {
 			id_habitacion: ultimoMov.id_habitacion,
 			id_cama: ultimoMov.id_cama,
 			fecha_hora_ingreso: fecha_hora_egreso,
-			id_mov: 2, // Egresa/Libera
+			id_mov: 2,
 			estado: 1,
 		});
 
 		// 🛏️ Liberar cama
 		const cama = await Cama.findByPk(ultimoMov.id_cama);
 		if (cama) {
-			cama.estado = 0; // libre
+			cama.estado = 0;
 			await cama.save();
 		}
 
-		// 📝 Registrar en historia clínica
-		// Buscar id_usuario del médico responsable
+		// 📝 Historia clínica
 		let id_usuario = null;
 		if (id_personal_salud) {
 			const medico = await Usuario.findOne({
@@ -112,13 +112,12 @@ export const darAltaPaciente = async (req, res) => {
 					where: { id_personal_salud }
 				}]
 			});
-
 			if (medico) id_usuario = medico.id_usuario;
 		}
-		// Buscar id_tipo para egreso
-		let id_tipo = null;
+
 		const tipoEgreso = await TipoRegistro.findOne({ where: { nombre: { [Op.like]: '%egreso%' } } });
-		if (tipoEgreso) id_tipo = tipoEgreso.id_tipo;
+		const id_tipo = tipoEgreso ? tipoEgreso.id_tipo : null;
+
 		await RegistroHistoriaClinica.create({
 			id_admision: admision.id_admision,
 			id_usuario,
@@ -133,8 +132,8 @@ export const darAltaPaciente = async (req, res) => {
 			message: 'Alta registrada correctamente',
 		});
 	} catch (error) {
-	console.error('❌ Error en darAltaPaciente:', error); // <-- AÑADÍ ESTE LOG
-	res.status(500).json({ success: false, message: 'Error inesperado del servidor' });
+		console.error('❌ Error en darAltaPaciente:', error);
+		res.status(500).json({ success: false, message: 'Error inesperado del servidor' });
 	}
 };
 

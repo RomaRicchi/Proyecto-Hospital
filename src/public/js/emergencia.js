@@ -1,100 +1,173 @@
-document.addEventListener('DOMContentLoaded', function () {
-  
-  const hoyLocal = new Date();
-  const offset = hoyLocal.getTimezoneOffset();
-  hoyLocal.setMinutes(hoyLocal.getMinutes() - offset);
-  const hoy = hoyLocal.toISOString().split('T')[0];
+import {
+  Paciente,
+  Admision,
+  ObraSocial,
+  MotivoIngreso,
+  Cama,
+  Habitacion,
+  Movimiento,
+  MovimientoHabitacion,
+  RegistroHistoriaClinica
+} from '../models/index.js';
+import { Op } from 'sequelize';
 
-  // Establecer fecha mínima
-  $('#fecha_ingreso').attr('min', hoy);
+import {
+  validarEstadoCama,
+  validarFechaNoPasada,
+  validarAdmisionActiva,
+  validarConflictoReserva,
+  verificarGeneroHabitacion
+} from '../validators/admision.validator.js';
 
-  // Validación antes de enviar
-  if (fechaSeleccionada < hoy) {
-    Swal.fire('Error', 'No se puede usar una fecha anterior a hoy', 'error');
-    return;
+export const ingresoEmergencia = async (req, res) => {
+  const sequelize = Admision.sequelize;
+  const t = await sequelize.transaction();
+  try {
+    const { fecha_hora_ingreso, sexo, identificador } = req.body;
+
+    if (!fecha_hora_ingreso || !sexo || !identificador) {
+      return res.status(400).json({ error: 'Faltan datos obligatorios.' });
+    }
+
+    await validarFechaNoPasada(fecha_hora_ingreso);
+
+    let paciente = await Paciente.findOne({
+      where: { dni_paciente: identificador },
+      transaction: t,
+    });
+
+    if (paciente) {
+      await t.rollback();
+      return res.status(409).json({ error: 'El paciente ya existe en el sistema.' });
+    }
+
+    paciente = await Paciente.create({
+      dni_paciente: identificador,
+      apellido_p: 'NN',
+      nombre_p: 'No identificado',
+      fecha_nac: null,
+      id_genero: sexo,
+      telefono: null,
+      direccion: null,
+      id_localidad: null,
+      email: null,
+      estado: 1,
+    }, { transaction: t });
+
+    await validarAdmisionActiva(paciente.id_paciente, fecha_hora_ingreso, t);
+
+    const obraSocial = await ObraSocial.findOne({
+      where: { nombre: { [Op.like]: '%Sin obra social%' } },
+      transaction: t,
+    });
+    if (!obraSocial) {
+      await t.rollback();
+      return res.status(400).json({ error: 'No se encontró "Sin obra social".' });
+    }
+
+    const motivo = await MotivoIngreso.findOne({
+      where: { tipo: { [Op.like]: '%emergencia%' } },
+      transaction: t,
+    });
+    if (!motivo) {
+      await t.rollback();
+      return res.status(400).json({ error: 'No se encontró el motivo "emergencia".' });
+    }
+
+    const camasLibres = await Cama.findAll({
+      where: { estado: 0 },
+      include: [{ model: Habitacion, as: 'habitacion' }],
+      transaction: t,
+    });
+
+    let camaAsignada = null;
+
+    for (const cama of camasLibres) {
+      try {
+        await verificarGeneroHabitacion(cama.id_habitacion, sexo, t);
+        camaAsignada = cama;
+        break;
+      } catch (e) {
+        continue;
+      }
+    }
+
+    if (!camaAsignada) {
+      await t.rollback();
+      return res.status(409).json({
+        error: 'No hay camas disponibles compatibles con el sexo del paciente.',
+      });
+    }
+
+    await validarEstadoCama(camaAsignada.id_cama, t);
+    await validarConflictoReserva({
+      id_cama: camaAsignada.id_cama,
+      fecha_hora_ingreso
+    }, t);
+
+    const admision = await Admision.create({
+      id_paciente: paciente.id_paciente,
+      id_obra_social: obraSocial.id_obra_social,
+      num_asociado: identificador,
+      fecha_hora_ingreso,
+      id_motivo: motivo.id_motivo,
+      descripcion: 'Ingreso por emergencia',
+      fecha_hora_egreso: null,
+      motivo_egr: null,
+      id_personal_salud: null,
+    }, { transaction: t });
+
+    const movIngreso = await Movimiento.findOne({
+      where: { nombre: { [Op.like]: '%Ingresa%' } },
+      transaction: t,
+    });
+
+    await MovimientoHabitacion.create({
+      id_admision: admision.id_admision,
+      id_habitacion: camaAsignada.id_habitacion,
+      id_cama: camaAsignada.id_cama,
+      fecha_hora_ingreso,
+      fecha_hora_egreso: null,
+      id_mov: movIngreso ? movIngreso.id_mov : 1,
+      estado: 1,
+    }, { transaction: t });
+
+    await camaAsignada.update({ estado: 1 }, { transaction: t });
+
+    await RegistroHistoriaClinica.create({
+      id_admision: admision.id_admision,
+      fecha_registro: new Date(fecha_hora_ingreso),
+      id_usuario: null,
+      descripcion: 'Ingreso por emergencia',
+      estado: 1,
+    }, { transaction: t });
+
+    await t.commit();
+
+    return res.status(200).json({
+      mensaje: 'Paciente ingresado y cama asignada correctamente.',
+      paciente: {
+        id: paciente.id_paciente,
+        nombre: paciente.nombre_p,
+        apellido: paciente.apellido_p,
+        dni: paciente.dni_paciente,
+      },
+      habitacion: camaAsignada.id_habitacion,
+      num_habitacion: camaAsignada.habitacion.num,
+      cama: camaAsignada.nombre,
+    });
+
+  } catch (error) {
+    if (t) await t.rollback();
+    console.error('Error en ingresoEmergencia:', error);
+    return res.status(500).json({ error: 'Error en el ingreso de emergencia.' });
   }
+};
 
-  
-  const form = document.getElementById('formEmergencia');
-  if (!form) return;
-
-  form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-
-    // Capturamos valores crudos
-    const fechaInput       = document.getElementById('fecha_hora_ingreso').value;
-    const sexo             = document.getElementById('sexo').value;
-    const identificadorRaw = document.getElementById('identificador').value.trim();
-
-    // ——— Validaciones ———
-    // Fecha ingreso: obligatoria y no en el futuro
-    if (!fechaInput) {
-      return Swal.fire('Atención', 'Debes indicar fecha y hora de ingreso.', 'warning');
-    }
-    const fechaIngreso = new Date(fechaInput);
-    const ahora        = new Date();
-    if (isNaN(fechaIngreso.getTime())) {
-      return Swal.fire('Atención', 'Formato de fecha y hora inválido.', 'warning');
-    }
-    if (fechaIngreso > ahora) {
-      return Swal.fire('Atención', 'La fecha de ingreso no puede ser en el futuro.', 'warning');
-    }
-
-    // Sexo: obligatorio y uno de los valores permitidos
-    const opcionesSexo = ['1', '2', '5']; // 1=M,2=F,5=NB
-    if (!sexo || !opcionesSexo.includes(sexo)) {
-      return Swal.fire('Atención', 'Selecciona una opción de sexo válida.', 'warning');
-    }
-
-    // Identificador (DNI temporal): obligatorio, numérico y mayor a cero
-    if (!identificadorRaw) {
-      return Swal.fire('Atención', 'Debes ingresar un identificador (DNI temporal).', 'warning');
-    }
-    const identificador = parseInt(identificadorRaw, 10);
-    if (isNaN(identificador) || identificador <= 0) {
-      return Swal.fire('Atención', 'El identificador debe ser un número entero positivo.', 'warning');
-    }
-
-    // Si todo pasó, enviamos la petición
-    try {
-      const res = await fetch('/api/emergencias/emergencia', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fecha_hora_ingreso: fechaInput, sexo, identificador }),
-      });
-
-      const data = await res.json();
-
-      if (res.status === 409 && data.error && data.error.includes('existe')) {
-        return Swal.fire({
-          icon: 'warning',
-          title: 'Paciente ya existe',
-          text: data.error,
-        });
-      }
-
-      if (res.ok) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Ingreso exitoso',
-          html: `
-            <p><b>Paciente:</b> ${data.paciente.apellido}, ${data.paciente.nombre} (DNI: ${data.paciente.dni})</p>
-            <p><b>Habitación:</b> ${data.num_habitacion} - <b>Cama:</b> ${data.cama}</p>
-          `,
-        }).then(() => form.reset());
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: data.error || 'No se pudo realizar el ingreso.',
-        });
-      }
-    } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error de conexión o del servidor.',
-      });
-    }
-  });
-});
+export const vistaEmergencias = (req, res) => {
+  try {
+    res.render('emergencia');
+  } catch (error) {
+    res.status(500).send('Error al cargar la vista de emergencias');
+  }
+};

@@ -1,13 +1,39 @@
 import { Op } from 'sequelize';
-import {Admision,
-	MovimientoHabitacion,
-} from '../models/index.js';
+import { Admision, MovimientoHabitacion, Cama, Paciente } from '../models/index.js';
+import { ajustarZonaHorariaArgentina } from '../helpers/timezone.helper.js';
 
+export async function validarEstadoCama(id_cama, transaction = null) {
+  const cama = await Cama.findByPk(id_cama, { transaction });
+  if (!cama) throw new Error('Cama no encontrada');
+  if (cama.estado === 1) throw new Error('La cama ya está ocupada');
+}
 
+export function validarFechaNoPasada(fecha) {
+  const ajustada = ajustarZonaHorariaArgentina(new Date(fecha));
+  const hoy = ajustarZonaHorariaArgentina(new Date());
+  hoy.setHours(0, 0, 0, 0);
+  if (ajustada < hoy) throw new Error('No se permite una fecha de ingreso en el pasado');
+}
 
-// ✅ Validar que la cama no tenga una reserva exacta o solapada
+export async function validarAdmisionActiva(id_paciente, fecha, transaction = null) {
+  const ajustada = ajustarZonaHorariaArgentina(new Date(fecha));
+  const existente = await Admision.findOne({
+    where: {
+      id_paciente,
+      fecha_hora_ingreso: { [Op.lte]: ajustada },
+      [Op.or]: [
+        { fecha_hora_egreso: null },
+        { fecha_hora_egreso: { [Op.gt]: ajustada } }
+      ]
+    },
+    transaction
+  });
+
+  if (existente) throw new Error('El paciente ya tiene una admisión vigente.');
+}
+
 export async function validarConflictoReserva({ id_cama, fecha_hora_ingreso }, transaction = null) {
-  const fecha = new Date(fecha_hora_ingreso);
+  const fecha = ajustarZonaHorariaArgentina(new Date(fecha_hora_ingreso));
 
   const conflicto = await MovimientoHabitacion.findOne({
     where: {
@@ -32,75 +58,62 @@ export async function validarConflictoReserva({ id_cama, fecha_hora_ingreso }, t
     transaction
   });
 
-  if (conflicto) {
-    throw new Error('La cama ya está reservada en esa fecha y hora.');
-  }
+  if (conflicto) throw new Error('La cama ya está reservada en esa fecha y hora.');
 }
 
-// ✅ Validar que la cama no esté ocupada en la fecha seleccionada por otra admisión activa
 export async function validarOcupacionCamaPorAdmision(id_cama, fecha, transaction = null) {
-  const fechaConsulta = new Date(fecha);
+  const fechaConsulta = ajustarZonaHorariaArgentina(new Date(fecha));
 
   const conflicto = await MovimientoHabitacion.findOne({
     where: {
       id_cama,
-      id_mov: 1, // Ingreso
+      id_mov: 1,
       estado: 1,
     },
-    include: [
-      {
-        model: Admision,
-        as: 'admision',
-        where: {
-          fecha_hora_ingreso: { [Op.lte]: fechaConsulta },
-          [Op.or]: [
-            { fecha_hora_egreso: null },
-            { fecha_hora_egreso: { [Op.gte]: fechaConsulta } },
-          ],
-        },
-      },
-    ],
+    include: [{
+      model: Admision,
+      as: 'admision',
+      where: {
+        fecha_hora_ingreso: { [Op.lte]: fechaConsulta },
+        [Op.or]: [
+          { fecha_hora_egreso: null },
+          { fecha_hora_egreso: { [Op.gte]: fechaConsulta } },
+        ]
+      }
+    }],
     transaction,
   });
 
-  if (conflicto) {
-    throw new Error('La cama ya está ocupada por otra admisión en esa fecha.');
-  }
+  if (conflicto) throw new Error('La cama ya está ocupada por otra admisión en esa fecha.');
 }
 
-// ✅ Validar ocupación de cama por otra admisión activa (excluyendo una admisión específica)
 export async function validarOcupacionCamaPorAdmisionExcepto(id_cama, fecha, id_admision_excluir, transaction = null) {
-  const fechaConsulta = new Date(fecha);
+  const fechaConsulta = ajustarZonaHorariaArgentina(new Date(fecha));
 
   const conflicto = await MovimientoHabitacion.findOne({
     where: {
       id_cama,
-      id_mov: 1, // Ingreso
+      id_mov: 1,
       estado: 1,
     },
-    include: [
-      {
-        model: Admision,
-        as: 'admision',
-        where: {
-          id_admision: { [Op.ne]: id_admision_excluir }, // excluir la actual
-          fecha_hora_ingreso: { [Op.lte]: fechaConsulta },
-          [Op.or]: [
-            { fecha_hora_egreso: null },
-            { fecha_hora_egreso: { [Op.gte]: fechaConsulta } },
-          ],
-        },
-      },
-    ],
-    transaction,
+    include: [{
+      model: Admision,
+      as: 'admision',
+      where: {
+        id_admision: { [Op.ne]: id_admision_excluir },
+        fecha_hora_ingreso: { [Op.lte]: fechaConsulta },
+        [Op.or]: [
+          { fecha_hora_egreso: null },
+          { fecha_hora_egreso: { [Op.gte]: fechaConsulta } },
+        ]
+      }
+    }],
+    transaction
   });
 
-  if (conflicto) {
-    throw new Error('La cama ya está ocupada por otra admisión en esa fecha.');
-  }
+  if (conflicto) throw new Error('La cama ya está ocupada por otra admisión en esa fecha.');
 }
 
-// ✅ Verifica si una admisión ya tiene movimiento de egreso activo
 export async function validarMovimientoEgresoExistente(id_admision, transaction = null) {
   const egreso = await MovimientoHabitacion.findOne({
     where: {
@@ -115,6 +128,35 @@ export async function validarMovimientoEgresoExistente(id_admision, transaction 
     throw new Error('No se puede modificar la admisión: ya tiene un movimiento de egreso registrado.');
   }
 }
+
+export async function verificarGeneroHabitacion(id_habitacion, id_genero, transaction = null) {
+  const movimientos = await MovimientoHabitacion.findAll({
+    where: {
+      id_habitacion,
+      fecha_hora_egreso: null,
+      estado: 1,
+    },
+    include: [
+      {
+        model: Admision,
+        as: 'admision',
+        include: [
+          { model: Paciente, as: 'paciente' }
+        ]
+      }
+    ],
+    transaction
+  });
+
+  const conflicto = movimientos.find(
+    (mov) => mov.admision?.paciente?.id_genero !== parseInt(id_genero)
+  );
+
+  if (conflicto) {
+    throw new Error('Ya hay pacientes de otro género en la habitación.');
+  }
+}
+
 
 
 

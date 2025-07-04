@@ -1,7 +1,7 @@
 import { Admision, MovimientoHabitacion, Cama, Habitacion, Sector } from '../models/index.js';
 import { Op } from 'sequelize';
+import { toUTC } from '../helpers/timezone.helper.js';
 
-// Verifica si un paciente ya tiene una cama asignada actualmente
 export const verificarPacienteConMovimientoActivo = async (req, res) => {
   const { id_paciente, fecha_hora_ingreso } = req.body;
 
@@ -10,6 +10,8 @@ export const verificarPacienteConMovimientoActivo = async (req, res) => {
   }
 
   try {
+    const fechaUTC = toUTC(fecha_hora_ingreso);
+
     const admisiones = await Admision.findAll({
       where: {
         id_paciente,
@@ -20,7 +22,7 @@ export const verificarPacienteConMovimientoActivo = async (req, res) => {
         where: {
           [Op.or]: [
             { fecha_hora_egreso: null },
-            { fecha_hora_egreso: { [Op.gt]: fecha_hora_ingreso } }
+            { fecha_hora_egreso: { [Op.gt]: fechaUTC } }
           ]
         },
         required: true
@@ -70,4 +72,5 @@ export const vistaDashboard = async (req, res) => {
     res.status(500).send('Error al cargar el panel principal');
   }
 };
+
 

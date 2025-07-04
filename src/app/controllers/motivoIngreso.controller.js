@@ -1,6 +1,5 @@
 import { MotivoIngreso } from '../models/index.js';
 
-// 🔸 Obtener todos los motivos
 export const getMotivosIngreso = async (req, res) => {
 	try {
 		const motivos = await MotivoIngreso.findAll();
@@ -10,7 +9,6 @@ export const getMotivosIngreso = async (req, res) => {
 	}
 };
 
-// 🔸 Obtener motivo por ID
 export const getMotivoIngresoById = async (req, res) => {
 	try {
 		const motivo = await MotivoIngreso.findByPk(req.params.id);
@@ -25,7 +23,6 @@ export const getMotivoIngresoById = async (req, res) => {
 	}
 };
 
-// 🔸 Crear motivo
 export const createMotivoIngreso = async (req, res) => {
 	try {
 		const { tipo } = req.body;
@@ -40,7 +37,6 @@ export const createMotivoIngreso = async (req, res) => {
 	}
 };
 
-// 🔸 Actualizar motivo
 export const updateMotivoIngreso = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -64,7 +60,6 @@ export const updateMotivoIngreso = async (req, res) => {
 	}
 };
 
-// 🔸 Eliminar motivo
 export const deleteMotivoIngreso = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -82,7 +77,6 @@ export const deleteMotivoIngreso = async (req, res) => {
 	}
 };
 
-// 🔸 Vista Pug para motivos de ingreso
 export const vistaMotivosIngreso = async (req, res) => {
 	try {
 		const motivos = await MotivoIngreso.findAll();

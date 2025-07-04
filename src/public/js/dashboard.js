@@ -104,8 +104,6 @@ function renderTablaCamas(camas) {
   });
 }
 
-
-
 $(document).ready(function () {
 	configurarBusquedaDeCamas(buscarCamasDisponibles);
 });

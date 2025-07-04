@@ -1,6 +1,9 @@
-import { obtenerFechaBusquedaFormateada } from './validacionFechas.js';
+import { obtenerFechaBusquedaFormateada, 
+	aplicarReservaSemanal,
+	parseFechaLocal,
+} from './validacionFechas.js';
 
-export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_habitacion) {
+export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_habitacion, fechaDashboard) {
 	try {
 		const [motivos, obras, medicos] = await Promise.all([
 			fetch('/api/motivos_ingreso').then(r => r.json()),
@@ -16,7 +19,24 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 			`<option value="${m.id_usuario}">${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula}</option>`
 		).join('');
 
-		const fechaFormateada = obtenerFechaBusquedaFormateada(); // 📌 yyyy-MM-ddTHH:mm o null
+		const fechaDashboard = obtenerFechaBusquedaFormateada(); // yyyy-MM-dd
+		let fechaIngresoDefault;
+
+		if (fechaDashboard) {
+			// Asegurarse de que tenga formato YYYY-MM-DD
+			const soloFecha = fechaDashboard.split('T')[0]; // Quita parte de hora si ya la trae
+			const fecha = new Date(`${soloFecha}T09:00:00`);
+			if (!isNaN(fecha.getTime())) {
+				const local = new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60000);
+				fechaIngresoDefault = local.toISOString().slice(0, 16);
+			} else {
+				console.warn('⚠️ Fecha inválida:', fechaDashboard);
+				fechaIngresoDefault = null;
+			}
+		} else {
+			const now = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
+			fechaIngresoDefault = now.toISOString().slice(0, 16);
+		}
 
 		const result = await Swal.fire({
 			title: 'Registrar Admisión',
@@ -50,6 +70,12 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 			showCancelButton: true,
 			confirmButtonText: 'Guardar',
 			focusConfirm: false,
+			didOpen: () => {
+				const inputFechaIngreso = Swal.getPopup().querySelector('#fecha_hora_ingreso');
+				if (inputFechaIngreso && fechaIngresoDefault) {
+					inputFechaIngreso.value = fechaIngresoDefault;
+				}
+			},
 			preConfirm: () => {
 				const getVal = id => Swal.getPopup().querySelector(id)?.value;
 
@@ -76,27 +102,36 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 			}
 		});
 
-		// Asignar valor por defecto al input de fecha/hora de ingreso
+		// 📌 Obtener valor del input y convertirlo correctamente
 		const inputFechaIngreso = document.querySelector('#fecha_hora_ingreso');
-		if (inputFechaIngreso) {
-			inputFechaIngreso.value = fechaFormateada ?? new Date().toISOString().slice(0, 16);
+		const fechaIngresoStr = inputFechaIngreso?.value;
+		const fechaIngreso = parseFechaLocal(fechaIngresoStr);
+		if (!fechaIngreso) {
+		Swal.fire('Error', 'La fecha de ingreso no es válida.', 'error');
+		return;
 		}
+
+		const fechaISO = fechaIngreso.toISOString(); 
+		console.log('📆 Fecha válida ISO:', fechaISO);
+
+		const inputFechaEgreso = document.querySelector('#fecha_hora_egreso');
+		const inputMotivoEgr = document.querySelector('#motivo_egr');
+		
+		const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+		const manana = new Date(hoy); manana.setDate(hoy.getDate() + 1);
 
 		if (!result.isConfirmed) return;
 
-		// 🔽 4. Determinar tipo de movimiento y lógica de reserva SOLO después de confirmar
 		const { fecha_hora_ingreso } = result.value;
-		const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
-		const seleccionFinal = new Date(fecha_hora_ingreso);
-		const manana = new Date(hoy); manana.setDate(hoy.getDate() + 1);
+		let { fecha_hora_egreso } = result.value;
 		let id_mov = 1;
-		let fecha_hora_egreso = result.value.fecha_hora_egreso;
 
+		// 🧠 Si es reserva futura:
+		const seleccionFinal = new Date(fecha_hora_ingreso);
 		if (seleccionFinal >= manana) {
 			id_mov = 3;
-			const egreso = new Date(seleccionFinal);
-			egreso.setDate(egreso.getDate() + 7);
-			fecha_hora_egreso = egreso.toISOString().slice(0, 16);
+			aplicarReservaSemanal(inputFechaIngreso, inputFechaEgreso, inputMotivoEgr);
+			fecha_hora_egreso = inputFechaEgreso.value;
 		}
 
 		if (seleccionFinal < hoy) {
@@ -106,6 +141,7 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 
 		// 🔽 5. Enviar admisión
 		Swal.showLoading();
+		console.log('🩺 ID Usuario médico asignado:', result.value.id_usuario);
 
 		const admResp = await fetch('/api/admisiones', {
 			method: 'POST',
@@ -152,8 +188,13 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 			return;
 		}
 
-		await Swal.fire('Listo', 'Paciente asignado y admitido correctamente', 'success');
+		const mensaje = id_mov === 3 
+			? 'Reserva registrada correctamente'
+			: 'Paciente ingresado correctamente';
+
+		await Swal.fire('Listo', mensaje, 'success');
 		location.reload();
+
 
 	} catch (error) {
 		console.error(error);

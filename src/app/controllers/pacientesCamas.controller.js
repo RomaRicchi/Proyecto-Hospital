@@ -1,4 +1,4 @@
-import {
+  import {
   MovimientoHabitacion,
   Admision,
   Paciente,
@@ -7,6 +7,7 @@ import {
   Habitacion,
   Sector,
 } from '../models/index.js';
+import { fromUTCToArgentina } from '../helpers/timezone.helper.js';
 
 export const vistaPacientesCamas = async (req, res) => {
   try {
@@ -56,12 +57,11 @@ export const vistaPacientesCamas = async (req, res) => {
         cama_numero:   habitacion?.num || '',
         cama_sector:   sector?.nombre || '',
         fecha_ingreso: mov.fecha_hora_ingreso
-            ? new Date(mov.fecha_hora_ingreso).toLocaleDateString('es-AR')
-            : null,
+          ? fromUTCToArgentina(mov.fecha_hora_ingreso).toLocaleDateString('es-AR')
+          : null,
         fecha_egreso: mov.fecha_hora_egreso
-            ? new Date(mov.fecha_hora_egreso).toLocaleDateString('es-AR')
-            : null,
-
+          ? fromUTCToArgentina(mov.fecha_hora_egreso).toLocaleDateString('es-AR')
+          : null,
       };
     });
 

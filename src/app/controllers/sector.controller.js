@@ -1,6 +1,5 @@
 import { Sector } from '../models/index.js';
 
-// 🔸 Obtener todos los sectores
 export const getSectores = async (req, res) => {
 	try {
 		const sectores = await Sector.findAll();
@@ -10,7 +9,6 @@ export const getSectores = async (req, res) => {
 	}
 };
 
-// 🔸 Obtener sector por ID
 export const getSectorById = async (req, res) => {
 	try {
 		const sector = await Sector.findByPk(req.params.id);
@@ -23,7 +21,6 @@ export const getSectorById = async (req, res) => {
 	}
 };
 
-// 🔸 Crear sector
 export const createSector = async (req, res) => {
 	try {
 		const { nombre } = req.body;
@@ -38,7 +35,6 @@ export const createSector = async (req, res) => {
 	}
 };
 
-// 🔸 Actualizar sector
 export const updateSector = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -60,7 +56,6 @@ export const updateSector = async (req, res) => {
 	}
 };
 
-// 🔸 Eliminar sector
 export const deleteSector = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -75,7 +70,7 @@ export const deleteSector = async (req, res) => {
 		res.status(500).json({ message: 'Error al eliminar sector' });
 	}
 };
-// En sector.controller.js
+
 export const vistaSectores = async (req, res) => {
 	try {
 		const sectores = await Sector.findAll();

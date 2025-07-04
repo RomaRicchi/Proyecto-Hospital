@@ -9,10 +9,10 @@ block content
         table#tablaReservas.table.table-striped.table-bordered
           thead
             tr
+              th Fecha de Reserva
               th Sector
               th Habitación
               th Cama
-              th Fecha de Reserva
               th Paciente
               th Motivo de Ingreso
               th Acción
@@ -21,13 +21,15 @@ block content
               each cama in camas
                 if cama.movimientos && cama.movimientos.length > 0
                   - const mov = cama.movimientos[0]
+                  - const fechaIngreso = mov && mov.fecha_hora_ingreso ? new Date(mov.fecha_hora_ingreso).toLocaleString('es-AR') : '-'
+                  - const fechaRaw = mov && mov.fecha_hora_ingreso ? mov.fecha_hora_ingreso : ''
                   - const idMovimiento = mov?.id_movimiento
                   - const paciente = mov?.admision?.paciente
-                  - const fechaIngreso = mov?.fecha_hora_ingreso ? new Date(mov.fecha_hora_ingreso).toLocaleString('es-AR') : '-'
-                  - const motivo = mov?.admision?.motivo_ing || '-'
+                  - const motivo = mov?.admision?.motivo_ingreso?.tipo || '-'
                   - const idPaciente = paciente?.id_paciente || ''
 
                   tr
+                    td= fechaIngreso
                     td
                       if cama.habitacion && cama.habitacion.sector
                         = cama.habitacion.sector.nombre
@@ -39,13 +41,16 @@ block content
                       else
                         | -
                     td= cama.nombre
-                    td= fechaIngreso
-                    td= paciente ? `${paciente.apellido_p}, ${paciente.nombre_p}` : '-'
+                    td
+                      if paciente
+                        = `${paciente.apellido_p}, ${paciente.nombre_p} (DNI: ${paciente.dni_paciente})`
+                      else
+                        | -
                     td= motivo
                     td
                       form(action='/confirmar-reserva', method='POST', style='display:inline')
                         input(type='hidden', name='id_paciente', value=idPaciente)
-                        input(type='hidden', name='fecha_actual', value=fechaIngreso)
+                        input(type='hidden', name='fecha_actual', value=fechaRaw)
                         button.btn.btn-sm.btn-success(type='submit')
                           i.fas.fa-check-circle.me-1
                           | Confirmar

@@ -1,4 +1,13 @@
-import { RegistroHistoriaClinica, Admision, Paciente, TipoRegistro, Usuario, PersonalSalud } from '../models/index.js';
+import { 
+  RegistroHistoriaClinica, 
+  Admision, 
+  Paciente, 
+  TipoRegistro,
+  Usuario, 
+  PersonalSalud 
+} from '../models/index.js';
+
+import { toUTC, fromUTCToArgentina } from '../helpers/timezone.helper.js';
 
 export const listarRegistros = async (req, res) => {
   try {
@@ -28,24 +37,24 @@ export const crearRegistro = async (req, res) => {
       id_paciente
     } = req.body;
 
-    // Validaciones básicas
     if (!id_tipo || !detalle || !fecha_hora_reg || !id_usuario) {
       return res.status(400).json({ message: 'Faltan datos obligatorios' });
     }
 
-    // Validar que al menos uno exista
     if (!id_admision && !id_paciente) {
       return res.status(400).json({
         message: 'Debe proporcionar id_admision o id_paciente'
       });
     }
 
-    // Si no hay admisión asociada, creamos una admisión ambulatoria
+    // Convertir a UTC
+    const fechaUTC = toUTC(fecha_hora_reg);
+
     let admisionId = id_admision;
     if (!admisionId) {
       const nuevaAdmision = await Admision.create({
         id_paciente,
-        fecha_hora_ingreso: fecha_hora_reg,
+        fecha_hora_ingreso: fechaUTC,
         descripcion: 'Registro ambulatorio sin internación',
         id_motivo: null,
         id_obra_social: null,
@@ -60,7 +69,7 @@ export const crearRegistro = async (req, res) => {
     const nuevo = await RegistroHistoriaClinica.create({
       id_tipo,
       detalle,
-      fecha_hora_reg,
+      fecha_hora_reg: fechaUTC,
       id_usuario,
       id_admision: admisionId
     });
@@ -87,7 +96,6 @@ export const eliminarRegistro = async (req, res) => {
 export const buscarPorDNI = async (req, res) => {
   const { dni } = req.params;
   try {
-    // Buscar paciente
     const paciente = await Paciente.findOne({
       where: { dni_paciente: dni },
       attributes: ['id_paciente', 'nombre_p', 'apellido_p', 'fecha_nac', 'dni_paciente']
@@ -97,7 +105,6 @@ export const buscarPorDNI = async (req, res) => {
       return res.status(404).json({ message: 'Paciente no encontrado' });
     }
 
-    // Buscar admisiones
     const admisiones = await Admision.findAll({
       where: { id_paciente: paciente.id_paciente },
       attributes: ['id_admision', 'fecha_hora_ingreso', 'fecha_hora_egreso']
@@ -106,12 +113,10 @@ export const buscarPorDNI = async (req, res) => {
     let ultimaAdmisionVigente = null;
     const ahora = new Date();
 
-    // Ordenar por fecha de ingreso descendente
     const admisionesOrdenadas = admisiones.sort(
       (a, b) => new Date(b.fecha_hora_ingreso) - new Date(a.fecha_hora_ingreso)
     );
 
-    // Buscar la admisión vigente más reciente
     for (const adm of admisionesOrdenadas) {
       if (!adm.fecha_hora_egreso || new Date(adm.fecha_hora_egreso) > ahora) {
         ultimaAdmisionVigente = adm;
@@ -119,7 +124,6 @@ export const buscarPorDNI = async (req, res) => {
       }
     }
 
-    // Buscar registros clínicos
     const registros = await RegistroHistoriaClinica.findAll({
       include: [
         {
@@ -143,7 +147,7 @@ export const buscarPorDNI = async (req, res) => {
     });
 
     const adaptados = registros.map(r => ({
-      fecha: r.fecha_hora_reg,
+      fecha: fromUTCToArgentina(r.fecha_hora_reg).toLocaleString('es-AR'),
       tipo: r.tipo_registro?.nombre || '-',
       detalle: r.detalle || '-',
       usuario: r.usuario?.username || '-'
@@ -161,8 +165,6 @@ export const buscarPorDNI = async (req, res) => {
     res.status(500).json({ message: 'Error interno' });
   }
 };
-
-
 
 export const vistaRegistroClinico = async (req, res) => {
   try {
@@ -184,7 +186,7 @@ export const vistaRegistroClinico = async (req, res) => {
           include: [
             {
               model: Paciente,
-              as: 'paciente_admision', // este alias debe coincidir con el que definiste en index.js
+              as: 'paciente_admision',
               attributes: ['nombre_p', 'apellido_p']
             }
           ]
@@ -196,7 +198,7 @@ export const vistaRegistroClinico = async (req, res) => {
       id: r.id_registro,
       tipo: r.tipo_registro?.nombre || '-',
       detalle: r.detalle || '-',
-      fecha: new Date(r.fecha_hora_reg).toLocaleString('es-AR'),
+      fecha: fromUTCToArgentina(r.fecha_hora_reg).toLocaleString('es-AR'),
       paciente: r.admision_historia?.paciente_admision
         ? `${r.admision_historia.paciente_admision.nombre_p} ${r.admision_historia.paciente_admision.apellido_p}`
         : '-',
@@ -205,7 +207,8 @@ export const vistaRegistroClinico = async (req, res) => {
 
     res.render('registroClinico', { registros: adaptados });
   } catch (error) {
-    console.error('💥 Error en vistaRegistroClinico:', error); // 🔴 OBLIGATORIO
+    console.error('💥 Error en vistaRegistroClinico:', error);
     res.status(500).send('Error al mostrar registros clínicos');
   }
 };
+

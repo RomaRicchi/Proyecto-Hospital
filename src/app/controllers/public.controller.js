@@ -3,7 +3,6 @@ import axios from 'axios';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-// Necesario para simular __dirname en ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 

@@ -1,23 +1,32 @@
 import {
   MovimientoHabitacion,
+  Habitacion,
   Cama,
+  Sector,
   Admision,
   Paciente,
   MotivoIngreso
 } from '../models/index.js';
 import { Op } from 'sequelize';
+import { toUTC } from '../helpers/timezone.helper.js'; 
 
-// ✅ Mostrar vista con camas reservadas
 export const vistaReservarCama = async (req, res) => {
   try {
+    const nowUTC = toUTC(new Date());
+
     const camas = await Cama.findAll({
       include: [
+        {
+          model: Habitacion,
+          as: 'habitacion',
+          include: [{ model: Sector, as: 'sector' }]
+        },
         {
           model: MovimientoHabitacion,
           as: 'movimientos',
           where: {
             id_mov: 3,
-            fecha_hora_ingreso: { [Op.gt]: new Date() },
+            fecha_hora_ingreso: { [Op.gt]: nowUTC },
             estado: 1
           },
           required: false,
@@ -43,7 +52,6 @@ export const vistaReservarCama = async (req, res) => {
   }
 };
 
-// ✅ Confirmar reserva → convertir a ingreso activo
 export const confirmarReserva = async (req, res) => {
   const { id_paciente, fecha_actual } = req.body;
 
@@ -52,11 +60,13 @@ export const confirmarReserva = async (req, res) => {
   }
 
   try {
+    const fechaUTC = toUTC(fecha_actual);
+
     const movimiento = await MovimientoHabitacion.findOne({
       where: {
         id_mov: 3,
         estado: 1,
-        fecha_hora_ingreso: new Date(fecha_actual)
+        fecha_hora_ingreso: fechaUTC
       },
       include: [{
         model: Admision,
@@ -70,7 +80,7 @@ export const confirmarReserva = async (req, res) => {
     }
 
     movimiento.id_mov = 1; // Cambiar a ingreso
-    movimiento.fecha_hora_ingreso = fecha_actual;
+    movimiento.fecha_hora_ingreso = fechaUTC;
     await movimiento.save();
 
     const cama = await Cama.findByPk(movimiento.id_cama);
@@ -86,7 +96,6 @@ export const confirmarReserva = async (req, res) => {
   }
 };
 
-// ✅ Cancelar reserva si el paciente no se presenta
 export const cancelarReserva = async (req, res) => {
   const { id } = req.params;
 
@@ -103,13 +112,9 @@ export const cancelarReserva = async (req, res) => {
       return res.status(400).send('Solo se pueden cancelar reservas');
     }
 
-    // Guardar el id_admision antes de eliminar
     const idAdmision = movimiento.id_admision;
-
-    // Eliminar el movimiento
     await movimiento.destroy();
 
-    // Verificar si la admisión ya no tiene más movimientos
     const movimientosRestantes = await MovimientoHabitacion.findAll({
       where: { id_admision: idAdmision },
     });

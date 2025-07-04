@@ -79,7 +79,6 @@ export const vistaPacienteNuevo = async (req, res) => {
 	}
 };
 
-// Obtener todos los pacientes (API REST)
 export const getPacientes = async (req, res) => {
 	try {
 		const pacientes = await Paciente.findAll({
@@ -94,7 +93,6 @@ export const getPacientes = async (req, res) => {
 	}
 };
 
-// Obtener paciente por ID
 export const getPacienteById = async (req, res) => {
 	try {
 		const paciente = await Paciente.findByPk(req.params.id, {
@@ -148,7 +146,6 @@ export const getGeneros = async (req, res) => {
 	}
 };
 
-// Crear paciente
 export const createPaciente = async (req, res) => {
 	try {
 		const nuevo = await Paciente.create(req.body);
@@ -158,7 +155,6 @@ export const createPaciente = async (req, res) => {
 	}
 };
 
-// Actualizar paciente
 export const updatePaciente = async (req, res) => {
 	try {
 		const paciente = await Paciente.findByPk(req.params.id);
@@ -171,7 +167,6 @@ export const updatePaciente = async (req, res) => {
 	}
 };
 
-// Eliminar (borrado lógico) paciente
 export const deletePaciente = async (req, res) => {
 	try {
 		const paciente = await Paciente.findByPk(req.params.id);

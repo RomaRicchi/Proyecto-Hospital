@@ -28,7 +28,8 @@
 - **Controlar usuarios y roles del sistema**, con autenticación segura.  
 
 Construido con arquitectura **MVC**, incorpora **Pug** para las vistas, **MySQL** como base de datos y manejo de sesiones para usuarios autenticados.
-
+Todas las fechas almacenadas en la base se guardan en UTC y son convertidas a horario argentino (UTC-3) mediante el helper timezone.helper.js. 
+Las funciones clave son: fromUTCToArgentina, toUTC, ajustarFechaLocal.
 ---
 
 ## 🚀 Características
@@ -65,8 +66,7 @@ El proyecto está organizado en una estructura **MVC**:
 - Editor de texto (recomendado: VS Code)  
 
 ---
-En servidor hasta el 1 de Julio del 2025 [https://proyecto-hospital-production.up.railway.app/home](https://proyecto-hospital-production.up.railway.app/home)
-o...
+
 ## 📥 Instalación
 
 ### 1️⃣ Clonar este repositorio
@@ -157,19 +157,3 @@ Materia: Desarrollo Web II (2025)
 ## 📜 Licencia
 
 Este proyecto está licenciado bajo la **Licencia MIT**. Puedes usarlo, modificarlo y distribuirlo libremente bajo los términos de esta licencia.
-
-## Vistas
-![Sin título](https://github.com/user-attachments/assets/a815ece7-e5a4-4d8a-9a0a-7d3eb4f9f76a)
-
-
-![image](https://github.com/user-attachments/assets/28241be8-dab9-41b2-81cf-3421a62a1cd5)
-
-
-![image](https://github.com/user-attachments/assets/e9224155-3641-48e0-8c7c-8d7dcdf6db96)
-
-
-
-
-
-
-

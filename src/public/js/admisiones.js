@@ -129,7 +129,7 @@ $(document).ready(function () {
           descripcion: $('#swal-descripcion').val(),
           fecha_hora_egreso: $('#swal-fecha_hora_egreso').val(),
           motivo_egr: $('#swal-motivo_egr').val(),
-          id_personal_salud: $('#swal-id_personal_salud').val() || null, // <-- aseguramos que se envía
+          id_usuario: $('#swal-id_personal_salud').val() || null,
           id_mov: esFuturo ? 3 : 1
         };
       }
@@ -174,46 +174,49 @@ $(document).ready(function () {
 	});
 });
 $(document).ready(function () {
-  fetch('/api/admisiones')
-    .then(res => res.json())
-    .then(admisiones => {
-      const tbody = $('#tbodyAdmisiones');
-      tbody.empty();
+	fetch('/api/admisiones')
+	.then(res => res.json())
+	.then(admisiones => {
+		const tbody = $('#tbodyAdmisiones');
+		tbody.empty();
 
-      if (admisiones.length === 0) {
-        tbody.append('<tr><td colspan="11" class="text-center">No hay admisiones registradas.</td></tr>');
-        return;
-      }
+		// ✅ Filtrar solo ingresos (excluir reservas)
+		admisiones = admisiones.filter(a => a.tipo_movimiento === 1);
 
-      admisiones.forEach(admision => {
-		console.log('🩺 Medico:', admision.usuario_asignado?.datos_medico);
-        tbody.append(`
-          <tr>
-            <td>${admision.paciente}</td>
-            <td>${admision.dni_paciente}</td>
-            <td>${admision.obra_social}</td>
-            <td>${admision.num_asociado}</td>
-            <td>${admision.motivo_ingreso}</td>
-            <td>${admision.descripcion}</td>
-            <td>${admision.fecha_ingreso}</td>
-            <td>${admision.fecha_egreso || '-'}</td>
-            <td>${admision.motivo_egr || '-'}</td>
-            <td>${admision.usuario_asignado}</td>
-            <td>
-              <button class="btn btn-sm btn-primary me-1 edit-btn" data-id="${admision.id_admision}">
-                <i class="fas fa-pen"></i>
-              </button>
-              <button class="btn btn-sm btn-danger me-1 delete-btn" data-id="${admision.id_admision}">
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `);
-      });
 
-      // Inicializar DataTable si no está inicializado
-      $('#tablaAdmisiones').DataTable();
-    })
+		if (admisiones.length === 0) {
+		tbody.append('<tr><td colspan="11" class="text-center">No hay admisiones registradas.</td></tr>');
+		return;
+		}
+
+		admisiones.forEach(admision => {
+		tbody.append(`
+			<tr>
+			<td>${admision.paciente}</td>
+			<td>${admision.dni_paciente}</td>
+			<td>${admision.obra_social}</td>
+			<td>${admision.num_asociado}</td>
+			<td>${admision.motivo_ingreso}</td>
+			<td>${admision.descripcion}</td>
+			<td>${admision.fecha_ingreso}</td>
+			<td>${admision.fecha_egreso || '-'}</td>
+			<td>${admision.motivo_egr || '-'}</td>
+			<td>${admision.usuario_asignado}</td>
+			<td>
+				<button class="btn btn-sm btn-primary me-1 edit-btn" data-id="${admision.id_admision}">
+				<i class="fas fa-pen"></i>
+				</button>
+				<button class="btn btn-sm btn-danger me-1 delete-btn" data-id="${admision.id_admision}">
+				<i class="fas fa-trash"></i>
+				</button>
+			</td>
+			</tr>
+		`);
+		});
+
+		$('#tablaAdmisiones').DataTable();
+	})
+
     .catch(err => {
       console.error('Error cargando admisiones:', err);
       Swal.fire('Error', 'No se pudieron cargar las admisiones.', 'error');

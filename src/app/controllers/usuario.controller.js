@@ -7,7 +7,6 @@ import {
 } from '../models/index.js';
 import bcrypt from 'bcrypt';
 
-// 🔸 Obtener todos los usuarios con relaciones (API REST)
 export const getUsuarios = async (req, res) => {
 	try {
 		const usuarios = await Usuario.findAll({
@@ -47,7 +46,6 @@ export const getUsuarios = async (req, res) => {
 	}
 };
 
-// 🔸 Vista adaptada para la tabla DataTable de PUG
 export const vistaUsuarios = async (req, res) => {
 	try {
 		const usuarios = await Usuario.findAll({
@@ -87,7 +85,6 @@ export const vistaUsuarios = async (req, res) => {
 	}
 };
 
-// 📥 Obtener un usuario por ID
 export const getUsuarioById = async (req, res) => {
 	try {
 		const usuario = await Usuario.findByPk(req.params.id);
@@ -99,7 +96,6 @@ export const getUsuarioById = async (req, res) => {
 	}
 };
 
-// ➕ Crear usuario nuevo (API REST)
 export const createUsuario = async (req, res) => {
 	try {
 		const { username, password, apellido, nombre, id_rol_usuario } = req.body;
@@ -146,7 +142,6 @@ export const createUsuario = async (req, res) => {
 	}
 };
 
-// ✏️ Actualizar usuario
 export const updateUsuario = async (req, res) => {
 	try {
 		const { username, password } = req.body;
@@ -164,7 +159,6 @@ export const updateUsuario = async (req, res) => {
 	}
 };
 
-// ❌ Borrado lógico
 export const deleteUsuario = async (req, res) => {
 	try {
 		const usuario = await Usuario.findByPk(req.params.id);
