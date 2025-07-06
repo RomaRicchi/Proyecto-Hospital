@@ -20,7 +20,10 @@ $(document).ready(function () {
     const paciente = data.paciente;
     const admision = data.admision;
     const fechaIngreso = new Date(admision.fecha_hora_ingreso);
-    const fechaIngresoStr = fechaIngreso.toLocaleString();
+    const fechaIngresoStr = fechaIngreso.toLocaleString('es-AR', {
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    });
 
     const medicos = await fetch('/api/personal-salud').then((r) => r.json());
     const medicosOptions = medicos
@@ -79,16 +82,22 @@ $(document).ready(function () {
     e.preventDefault();
     const $form = $(this);
     const fechaIngreso = new Date($form.data('fecha-ingreso'));
-    const fechaEgreso = $('#fechaEgreso').val();
+    const fechaEgresoStr = $('#fechaEgreso').val();
     const motivoEgreso = $('#motivoEgreso').val().trim();
     const idPersonal = $('#idUsuario').val();
 
-    if (!fechaEgreso) {
+    if (!fechaEgresoStr) {
       return Swal.fire('Error', 'Debes indicar la fecha y hora de egreso.', 'warning');
     }
 
-    const fechaE = new Date(fechaEgreso);
-    if (fechaE <= fechaIngreso) {
+    // Normalizar fechas a local (sin desfase de zona horaria)
+    const fechaIngresoLocal = new Date(fechaIngreso);
+    fechaIngresoLocal.setMinutes(fechaIngresoLocal.getMinutes() - fechaIngresoLocal.getTimezoneOffset());
+
+    const fechaEgreso = new Date(fechaEgresoStr);
+    fechaEgreso.setMinutes(fechaEgreso.getMinutes() - fechaEgreso.getTimezoneOffset());
+
+    if (fechaEgreso <= fechaIngresoLocal) {
       return Swal.fire('Error', 'La fecha de egreso debe ser posterior a la fecha de ingreso.', 'warning');
     }
 
@@ -102,7 +111,7 @@ $(document).ready(function () {
 
     const dni = $('#busqueda').val();
     const payload = {
-      fecha_hora_egreso: fechaEgreso,
+      fecha_hora_egreso: fechaEgreso.toISOString(), // Enviar formato ISO coherente
       motivo_egr: motivoEgreso,
       id_personal_salud: idPersonal,
     };

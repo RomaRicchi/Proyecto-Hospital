@@ -16,10 +16,11 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 		const obrasOptions = obras.map(o =>
 			`<option value="${o.id_obra_social}">${o.nombre}</option>`).join('');
 		const medicosOptions = medicos.map(m =>
-			`<option value="${m.id_usuario}">${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula}</option>`
+			`<option value="${m.id_usuario}">
+				${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula} - ${m.especialidad}
+			</option>`
 		).join('');
-
-		const fechaDashboard = obtenerFechaBusquedaFormateada(); // yyyy-MM-dd
+		
 		let fechaIngresoDefault;
 
 		if (fechaDashboard) {
@@ -27,8 +28,7 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 			const soloFecha = fechaDashboard.split('T')[0]; // Quita parte de hora si ya la trae
 			const fecha = new Date(`${soloFecha}T09:00:00`);
 			if (!isNaN(fecha.getTime())) {
-				const local = new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60000);
-				fechaIngresoDefault = local.toISOString().slice(0, 16);
+				fechaIngresoDefault = fecha.toISOString().slice(0, 16);
 			} else {
 				console.warn('⚠️ Fecha inválida:', fechaDashboard);
 				fechaIngresoDefault = null;
@@ -62,7 +62,7 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 
 				<input type="text" id="motivo_egr" class="swal2-input" placeholder="Motivo egreso (opcional)">
 
-                <select id="id_usuario" class="swal2-input">
+                <select id="id_usuario" class="swal2-input" style="max-width: 100%; overflow: hidden;">>
                     <option value="">Seleccione médico</option>
                     ${medicosOptions}
                 </select>

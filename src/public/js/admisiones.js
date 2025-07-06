@@ -1,9 +1,9 @@
 $(document).ready(function () {
 
   const tabla = $('#tablaAdmisiones');
-
+  let dt; 
 	if (tabla.length) {
-		const dt = tabla.DataTable({
+		dt = tabla.DataTable({
 			language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
 			paging: true,
       		pageLength: 10,
@@ -72,23 +72,23 @@ $(document).ready(function () {
             </select>
         `;
 		const selectPersonal = `
-            <select id="swal-id_personal_salud" class="swal2-input">
-                <option value="">-</option>
-                ${opciones.personal
-									.map(
-										(u) =>
-											`<option value="${u.id_usuario}" ${
-												admision.id_personal_salud === u.id_usuario
-													? 'selected'
-													: ''
-											}>
-                        ${u.username}
-                    </option>`
-									)
-									.join('')}
-            </select>
-        `;
-    const minFecha = null; 
+		<select id="swal-id_usuario" class="swal2-input">
+			<option value="">-</option>
+			${opciones.personal
+			.filter(u => u.datos_medico) // evita undefined
+			.map(u => {
+				const { apellido, nombre, especialidad } = u.datos_medico;
+				const espec = especialidad?.nombre || 'Sin especialidad';
+				return `
+				<option value="${u.id_usuario}" ${
+					admision.id_usuario === u.id_usuario ? 'selected' : ''
+				}>
+					${apellido}, ${nombre} - ${espec}
+				</option>`;
+			}).join('')}
+		</select>
+		`;
+
 		Swal.fire({
 			title: 'Editar Admisión',
 			html: `
@@ -97,7 +97,6 @@ $(document).ready(function () {
         <input id="swal-num_asociado" class="swal2-input" value="${admision.num_asociado || ''}" placeholder="N° Asociado">
         <input id="swal-fecha_hora_ingreso" type="datetime-local"
 			class="swal2-input"
-			${minFecha ? `min="${minFecha}"` : ''}
 			value="${admision.fecha_hora_ingreso ? admision.fecha_hora_ingreso.slice(0, 16) : ''}"
 			placeholder="Fecha Ingreso">
         ${selectMotivo}
@@ -114,6 +113,11 @@ $(document).ready(function () {
           Swal.showValidationMessage('La fecha de ingreso es obligatoria');
           return false;
         }
+		const fechaEgreso = $('#swal-fecha_hora_egreso').val();
+		if (fechaEgreso && fechaEgreso < fechaIngreso) {
+		Swal.showValidationMessage('La fecha de egreso debe ser posterior a la de ingreso');
+		return false;
+		}
 
         const hoy = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
         const fechaSeleccionada = fechaIngreso.slice(0, 10);
@@ -129,7 +133,7 @@ $(document).ready(function () {
           descripcion: $('#swal-descripcion').val(),
           fecha_hora_egreso: $('#swal-fecha_hora_egreso').val(),
           motivo_egr: $('#swal-motivo_egr').val(),
-          id_usuario: $('#swal-id_personal_salud').val() || null,
+          id_usuario: $('#swal-id_usuario').val() || null,
           id_mov: esFuturo ? 3 : 1
         };
       }
@@ -172,49 +176,39 @@ $(document).ready(function () {
 			}
 		});
 	});
-});
-$(document).ready(function () {
+
 	fetch('/api/admisiones')
 	.then(res => res.json())
 	.then(admisiones => {
 		const tbody = $('#tbodyAdmisiones');
-		tbody.empty();
-
-		// ✅ Filtrar solo ingresos (excluir reservas)
-		admisiones = admisiones.filter(a => a.tipo_movimiento === 1);
-
+		dt.clear();
 
 		if (admisiones.length === 0) {
-		tbody.append('<tr><td colspan="11" class="text-center">No hay admisiones registradas.</td></tr>');
-		return;
+			dt.draw(); // muestra tabla vacía con paginador
+			return;
 		}
 
 		admisiones.forEach(admision => {
-		tbody.append(`
-			<tr>
-			<td>${admision.paciente}</td>
-			<td>${admision.dni_paciente}</td>
-			<td>${admision.obra_social}</td>
-			<td>${admision.num_asociado}</td>
-			<td>${admision.motivo_ingreso}</td>
-			<td>${admision.descripcion}</td>
-			<td>${admision.fecha_ingreso}</td>
-			<td>${admision.fecha_egreso || '-'}</td>
-			<td>${admision.motivo_egr || '-'}</td>
-			<td>${admision.usuario_asignado}</td>
-			<td>
-				<button class="btn btn-sm btn-primary me-1 edit-btn" data-id="${admision.id_admision}">
-				<i class="fas fa-pen"></i>
-				</button>
+			dt.row.add([
+				admision.paciente,
+				admision.dni_paciente,
+				admision.obra_social,
+				admision.num_asociado,
+				admision.motivo_ingreso,
+				admision.descripcion,
+				admision.fecha_ingreso,
+				admision.fecha_egreso || '-',
+				admision.motivo_egr || '-',
+				admision.usuario_asignado,
+				`<button class="btn btn-sm btn-primary me-1 edit-btn" data-id="${admision.id_admision}">
+					<i class="fas fa-pen"></i></button>
 				<button class="btn btn-sm btn-danger me-1 delete-btn" data-id="${admision.id_admision}">
-				<i class="fas fa-trash"></i>
-				</button>
-			</td>
-			</tr>
-		`);
+					<i class="fas fa-trash"></i></button>`
+			]);
 		});
 
-		$('#tablaAdmisiones').DataTable();
+		dt.draw();
+
 	})
 
     .catch(err => {

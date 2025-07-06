@@ -33,6 +33,8 @@ import registroClinicoRoutes from './routes/registroClinico.routes.js';
 import motivoIngresoRoutes from './routes/motivoIngreso.routes.js';
 import tipoRegistroRoutes from './routes/tipoRegistro.routes.js';
 import emergenciaRoutes from './routes/emergencia.routes.js';
+import reservasRoutes from './routes/reservas.routes.js'; 
+
 // ✅ Simular __dirname en ESModules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -100,6 +102,7 @@ app.use('/api/tipos-registro', tipoRegistroRoutes);
 app.use('/api/emergencias', emergenciaRoutes);
 app.use('/api/personal-administrativo', personalAdminRoutes);
 app.use('/api/personal-salud', personalSaludRoutes);
+app.use('/api/reservas', reservasRoutes);
 app.use('/', viewsRoutes);
 
 /* 🌐 Exportar app */

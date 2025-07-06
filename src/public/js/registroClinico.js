@@ -1,3 +1,5 @@
+import { toUTC, fromUTCToArgentina } from './utils/validacionFechas.js';
+
 $(document).ready(function () {
   const $tabla = $('#tablaRegistrosContainer');
   const $info = $('#infoPaciente');
@@ -98,8 +100,8 @@ $(document).ready(function () {
       const ingreso = episodio.find(r => r.tipo === 'Ingreso');
       const egreso = episodio.find(r => r.tipo === 'Egreso');
 
-      const fechaIngreso = ingreso ? new Date(ingreso.fecha) : null;
-      const fechaEgreso = egreso ? new Date(egreso.fecha) : null;
+      const fechaIngreso = ingreso ? fromUTCToArgentina(ingreso.fecha) : null;
+      const fechaEgreso = egreso ? fromUTCToArgentina(egreso.fecha) : null;
 
       const estado = ingreso
         ? determinarEstadoAdmision(fechaIngreso, fechaEgreso)
@@ -137,7 +139,7 @@ $(document).ready(function () {
       episodio.forEach(r => {
         html += `
           <tr>
-            <td>${new Date(r.fecha).toLocaleString('es-AR')}</td>
+            <td>${fromUTCToArgentina(r.fecha).toLocaleString('es-AR')}</td>
             <td>${r.tipo}</td>
             <td>${r.detalle}</td>
             <td>${r.usuario}</td>
@@ -214,7 +216,7 @@ $(document).ready(function () {
             id_paciente: idPaciente,
             id_tipo: result.value.id_tipo,
             detalle: result.value.detalle,
-            fecha_hora_reg: result.value.fecha_hora_reg,
+            fecha_hora_reg: toUTC(result.value.fecha_hora_reg).toISOString(),
             id_usuario: 1, // 🔧 reemplazar con sesión actual
             id_admision: ultimaAdmisionPaciente  
           };

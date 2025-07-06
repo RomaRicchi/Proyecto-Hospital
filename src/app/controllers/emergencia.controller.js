@@ -6,7 +6,9 @@ import {
   Cama,
   Habitacion,
   Movimiento,
-  MovimientoHabitacion
+  MovimientoHabitacion,
+  RegistroHistoriaClinica,
+  TipoRegistro
 } from '../models/index.js';
 import { Op } from 'sequelize';
 
@@ -23,7 +25,7 @@ export const ingresoEmergencia = async (req, res) => {
   const sequelize = Admision.sequelize;
   const t = await sequelize.transaction();
   try {
-    const { fecha_hora_ingreso, sexo, identificador } = req.body;
+    const { fecha_hora_ingreso, sexo, identificador, id_usuario } = req.body;
 
     if (!fecha_hora_ingreso || !sexo || !identificador) {
       return res.status(400).json({ error: 'Faltan datos obligatorios.' });
@@ -31,10 +33,8 @@ export const ingresoEmergencia = async (req, res) => {
 
     const fechaLocal = ajustarFechaLocal(fecha_hora_ingreso);
 
-    // Validar fecha
     await validarFechaNoPasada(fechaLocal);
 
-    // Buscar o crear paciente NN
     let paciente = await Paciente.findOne({
       where: { dni_paciente: identificador },
       transaction: t,
@@ -58,7 +58,6 @@ export const ingresoEmergencia = async (req, res) => {
       estado: 1,
     }, { transaction: t });
 
-    // Validar que el paciente no tenga una admisión activa
     await validarAdmisionActiva(paciente.id_paciente, fechaLocal, t);
 
     const obraSocial = await ObraSocial.findOne({
@@ -130,7 +129,7 @@ export const ingresoEmergencia = async (req, res) => {
       descripcion: 'Ingreso por emergencia',
       fecha_hora_egreso: null,
       motivo_egr: null,
-      id_personal_salud: null,
+      id_usuario: id_usuario || null,
     }, { transaction: t });
 
     const movIngreso = await Movimiento.findOne({
@@ -158,7 +157,7 @@ export const ingresoEmergencia = async (req, res) => {
     if (tipoIngreso) {
       await RegistroHistoriaClinica.create({
         id_admision: admision.id_admision,
-        id_usuario: null,
+        id_usuario: id_usuario || null,
         fecha_hora_reg: fechaLocal,
         id_tipo: tipoIngreso.id_tipo,
         detalle: 'Ingreso por emergencia.',

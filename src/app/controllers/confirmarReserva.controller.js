@@ -62,6 +62,14 @@ export const confirmarReserva = async (req, res) => {
   try {
     const fechaUTC = toUTC(fecha_actual);
 
+    // Validar que la fecha de la reserva sea igual a hoy (en UTC)
+    const hoy = new Date();
+    const hoyStr = hoy.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+    const reservaStr = new Date(fecha_actual).toISOString().slice(0, 10);
+    if (hoyStr !== reservaStr) {
+      return res.status(400).json({ message: 'Solo se puede confirmar la reserva el día de inicio.' });
+    }
+
     const movimiento = await MovimientoHabitacion.findOne({
       where: {
         id_mov: 3,
@@ -97,11 +105,11 @@ export const confirmarReserva = async (req, res) => {
 };
 
 export const cancelarReserva = async (req, res) => {
-  const { id } = req.params;
-
+  const { id_movimiento } = req.params;
+  console.log('Cancelar reserva, id_movimiento:', id_movimiento);
   try {
-    const movimiento = await MovimientoHabitacion.findByPk(id, {
-      include: [Admision]
+    const movimiento = await MovimientoHabitacion.findByPk(id_movimiento, {
+      include: [{ model: Admision, as: 'admision' }]
     });
 
     if (!movimiento) {
@@ -123,9 +131,9 @@ export const cancelarReserva = async (req, res) => {
       await Admision.destroy({ where: { id_admision: idAdmision } });
     }
 
-    res.redirect('reserva-cama');
+    res.json({ message: 'Reserva cancelada correctamente' });
   } catch (error) {
     console.error('Error al cancelar reserva:', error);
-    res.status(500).send('Error al cancelar la reserva');
+    res.status(500).json({ message: 'Error al cancelar la reserva' });
   }
 };

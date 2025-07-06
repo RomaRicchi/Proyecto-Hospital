@@ -9,6 +9,7 @@ import {
 	PersonalSalud,
 	RegistroHistoriaClinica,
 	TipoRegistro,
+  Especialidad,
 } from '../models/index.js';
 import {
   validarConflictoReserva,
@@ -182,24 +183,46 @@ export const createAdmision = async (req, res) => {
 };
 
 export const getOpcionesAdmision = async (req, res) => {
-	try {
-		const [pacientes, obrasSociales, motivos, personal] = await Promise.all([
-			Paciente.findAll({
-				attributes: ['id_paciente', 'apellido_p', 'nombre_p'],
-			}),
-			ObraSocial.findAll({ attributes: ['id_obra_social', 'nombre'] }),
-			MotivoIngreso.findAll({ attributes: ['id_motivo', 'tipo'] }),
-			Usuario.findAll({ attributes: ['id_usuario', 'username'] }),
-		]);
-		res.json({
-			pacientes,
-			obrasSociales,
-			motivos,
-			personal,
-		});
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+  try {
+    const [pacientes, obrasSociales, motivos, personal] = await Promise.all([
+      Paciente.findAll({
+        attributes: ['id_paciente', 'apellido_p', 'nombre_p'],
+      }),
+      ObraSocial.findAll({ attributes: ['id_obra_social', 'nombre'] }),
+      MotivoIngreso.findAll({ attributes: ['id_motivo', 'tipo'] }),
+      Usuario.findAll({
+        where: {
+          '$datos_medico.id_rol_usuario$': 4 // solo médicos
+        },
+        attributes: ['id_usuario'],
+        include: [
+          {
+            model: PersonalSalud,
+            as: 'datos_medico',
+            required: true,
+            attributes: ['nombre', 'apellido'],
+            include: [
+              {
+                model: Especialidad,
+                as: 'especialidad',
+                attributes: ['nombre']
+              }
+            ]
+          }
+        ]
+      })
+    ]);
+
+    res.json({
+      pacientes,
+      obrasSociales,
+      motivos,
+      personal
+    });
+  } catch (error) {
+    console.error('❌ Error en getOpcionesAdmision:', error);
+    res.status(500).json({ message: 'Error al obtener opciones' });
+  }
 };
 
 export const getAdmisiones = async (req, res) => {
@@ -218,12 +241,12 @@ export const getAdmisiones = async (req, res) => {
         },
         {
           model: Usuario,
-          as: 'usuario_asignado',
+          as: 'usuario_medico', // ✅ alias correcto según el modelo Admision
           attributes: ['id_usuario', 'username'],
           include: [
             {
               model: PersonalSalud,
-              as: 'datos_medico',
+              as: 'datos_medico', // ✅ alias correcto según el modelo Usuario
               attributes: ['nombre', 'apellido'],
             },
           ],
@@ -273,9 +296,9 @@ export const getAdmisiones = async (req, res) => {
           ? new Date(a.fecha_hora_egreso).toLocaleString('es-AR', formatoFechaHora)
           : 'En internación',
         motivo_egr: a.motivo_egr || '-',
-        usuario_asignado: a.usuario_asignado?.datos_medico
-          ? `${a.usuario_asignado.datos_medico.apellido}, ${a.usuario_asignado.datos_medico.nombre}`
-          : a.usuario_asignado?.username || 'No asignado',
+        usuario_asignado: a.usuario_medico?.datos_medico
+          ? `${a.usuario_medico.datos_medico.apellido}, ${a.usuario_medico.datos_medico.nombre}`
+          : a.usuario_medico?.username || 'No asignado',
       };
     });
 
@@ -287,16 +310,43 @@ export const getAdmisiones = async (req, res) => {
 };
 
 export const getAdmisionById = async (req, res) => {
-	try {
-		const admision = await Admision.findByPk(req.params.id, {
-			include: ['paciente', 'obra_social', 'personal_admin', 'personal_salud'],
-		});
-		if (!admision)
-			return res.status(404).json({ message: 'Admisión no encontrada' });
-		res.json(admision);
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+  try {
+    const admision = await Admision.findByPk(req.params.id, {
+      include: [
+        {
+          model: Usuario,
+          as: 'usuario_asignado',
+          include: [
+            {
+              model: PersonalSalud,
+              as: 'datos_medico',
+              attributes: ['nombre', 'apellido'],
+              required: false, 
+            }
+          ]
+        },
+        {
+          model: MotivoIngreso,
+          as: 'motivo_ingreso',
+        },
+        {
+          model: ObraSocial,
+          as: 'obra_social',
+        },
+        {
+          model: Paciente,
+          as: 'paciente',
+        },
+      ]
+    });
+
+    if (!admision) return res.status(404).json({ message: 'No encontrada' });
+
+    res.json(admision);
+  } catch (error) {
+    console.error('❌ Error en getAdmisionById:', error);
+    res.status(500).json({ message: 'Error al obtener admisión' });
+  }
 };
 
 export const vistaAdmisiones = (req, res) => {

@@ -76,9 +76,12 @@ $(document).on('click', '.btn-asignar-paciente', function () {
 				cancelButtonText: 'No, cancelar',
 			}).then(async (confirma) => {
 				if (confirma.isConfirmed) {
-					const fechaSeleccionada = $('#fecha_busqueda').val();
-					const fechaHoraIngreso = new Date(fechaSeleccionada || Date.now());
-					fechaHoraIngreso.setHours(9, 0, 0, 0); // 09:00 AM
+					let fechaHoraIngreso = new Date();
+					const fechaBase = $('#fecha_busqueda').val();
+					if (fechaBase) {
+					fechaHoraIngreso = new Date(`${fechaBase}T09:00`);
+					}
+					const fechaISO = fechaHoraIngreso.toISOString().slice(0, 16);
 
 					const verificarGenero = await fetch('/api/movimientos_habitacion/verificar-genero', {
 						method: 'POST',
@@ -123,10 +126,10 @@ $(document).on('click', '.btn-asignar-paciente', function () {
 					console.log(`Edad: ${edad}, Género: ${pacienteSeleccionado.genero?.id_genero}, Sector: ${sectorNombre}, Compatible: ${esCompatible}`);
 				
                     mostrarFormularioYRegistrarAdmision(
-                    pacienteSeleccionado,
-                    id_cama,
-                    habitacionId,
-                    fechaSeleccionada // <-- Se la pasamos
+						pacienteSeleccionado,
+						id_cama,
+						habitacionId,
+						fechaISO,
                     );
 
 				}

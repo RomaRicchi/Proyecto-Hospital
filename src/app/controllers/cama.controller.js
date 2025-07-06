@@ -7,6 +7,7 @@ import {
 	Admision,
 	Paciente,
 	Genero,
+	MotivoIngreso,
 } from '../models/index.js';
 import { Op } from 'sequelize';
 import { toUTC } from '../helpers/timezone.helper.js';
@@ -50,8 +51,8 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
     const { fecha } = req.query;
     if (!fecha) return res.status(400).json({ message: 'Fecha requerida' });
 
-    const consultaUTC = toUTC(`${fecha}T23:59:59`);
-
+    const fechaInicio = toUTC(`${fecha}T00:00:00`);
+    const fechaFin = toUTC(`${fecha}T23:59:59`);
     const SECTORES_CON_INTERNACION = [1, 3, 7, 9, 10, 14, 26];
 
     const camas = await Cama.findAll({
@@ -93,25 +94,39 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
       let paciente = null;
       let genero = null;
 
-      const ocupadaEnFecha = cama.movimientos?.some((mov) => {
-        const adm = mov.admision;
-        if (!adm) return false;
+      // Buscar todos los movimientos que cruzan la fecha
+      const fechaSelStr = fechaInicio.toISOString().slice(0, 10); // yyyy-MM-dd
+		const movimientosEnFecha = cama.movimientos?.filter((mov) => {
+		if (!mov.fecha_hora_ingreso) return false;
 
-        const ingreso = new Date(adm.fecha_hora_ingreso);
-        const egreso = adm.fecha_hora_egreso ? new Date(adm.fecha_hora_egreso) : null;
+		const ingresoStr = mov.fecha_hora_ingreso.slice(0, 10);
+		const egresoStr = mov.fecha_hora_egreso ? mov.fecha_hora_egreso.slice(0, 10) : null;
 
-        return ingreso <= consultaUTC && (!egreso || consultaUTC <= egreso);
-      });
+		return (
+			ingresoStr <= fechaSelStr && (!egresoStr || egresoStr >= fechaSelStr)
+		);
+		}) || [];
 
-      if (ocupadaEnFecha) {
-        const mov = cama.movimientos.find(m => m.admision);
-        if (mov) {
-          estado = 'Ocupada';
-          paciente = `${mov.admision.paciente.apellido_p} ${mov.admision.paciente.nombre_p}`;
-          genero = mov.admision.paciente.genero?.nombre || null;
-        }
+
+      // Priorizar reservas (id_mov === 3) si existen en la fecha
+      const reservaEnFecha = movimientosEnFecha.find(mov => mov.tipo_movimiento?.id_mov === 3);
+      let movimientoEnFecha = null;
+      if (reservaEnFecha) {
+        estado = 'Reservada';
+        movimientoEnFecha = reservaEnFecha;
+      } else if (movimientosEnFecha.length > 0) {
+        estado = 'Ocupada';
+        movimientoEnFecha = movimientosEnFecha[0];
       }
 
+      if (movimientoEnFecha) {
+        const adm = movimientoEnFecha.admision;
+        if (adm?.paciente) {
+          paciente = `${adm.paciente.apellido_p} ${adm.paciente.nombre_p}`;
+          genero = adm.paciente.genero?.nombre || null;
+        }
+      }
+	  
       return {
         id_cama: cama.id_cama,
         nombre_cama: cama.nombre,
@@ -160,6 +175,45 @@ export const createCama = async (req, res) => {
 		console.error(error);
 		res.status(500).send('Error interno del servidor');
 	}
+};
+
+export const getCamasReservadas = async (req, res) => {
+  try {
+    const camas = await Cama.findAll({
+      include: [
+        {
+          model: Habitacion,
+          as: 'habitacion',
+          include: [{ model: Sector, as: 'sector' }]
+        },
+        {
+          model: MovimientoHabitacion,
+          as: 'movimientos',
+          where: {
+            id_mov: 3, // solo reservas
+            estado: 1
+          },
+          required: true,
+          include: [
+            {
+              model: Admision,
+              as: 'admision',
+              include: [
+                { model: Paciente, as: 'paciente' },
+                { model: MotivoIngreso, as: 'motivo_ingreso' }
+              ]
+            }
+          ]
+        }
+      ],
+      order: [['id_cama', 'ASC']]
+    });
+
+    res.json(camas);
+  } catch (error) {
+    console.error('❌ Error al obtener camas reservadas:', error);
+    res.status(500).json({ message: 'Error al obtener camas reservadas' });
+  }
 };
 
 export const updateCama = async (req, res) => {

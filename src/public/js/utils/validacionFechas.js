@@ -26,49 +26,55 @@ export function obtenerFechaBusquedaFormateada() {
 	const fecha = input.value;
 	if (!fecha) return null;
 
-	const fechaSeleccionada = new Date(fecha);
-	const offset = fechaSeleccionada.getTimezoneOffset();
-	fechaSeleccionada.setMinutes(fechaSeleccionada.getMinutes() + offset);
+	const fechaStr = `${fecha}T00:00`;
+	return fechaStr;
+}
 
-	return fechaSeleccionada.toISOString().slice(0, 16);
-}	
-
-export function aplicarReservaSemanal(inputIngreso, inputEgreso, inputMotivoEgreso) {
+export function aplicarReservaSemanal(inputIngreso, inputEgreso, inputMotivoEgr) {
 	if (!inputIngreso || !inputEgreso) return;
 
 	const ingreso = new Date(inputIngreso.value);
-	if (isNaN(ingreso.getTime())) return;
+	if (isNaN(ingreso)) return;
 
-	// Forzar hora de ingreso a las 00:00 (opcional, según tu lógica)
-	ingreso.setHours(0, 0, 0, 0);
-
-	// Calcular egreso 7 días después
 	const egreso = new Date(ingreso);
-	egreso.setDate(egreso.getDate() + 6); // 7 días total
-	egreso.setHours(23, 59); // Fin del día
+	egreso.setDate(egreso.getDate() + 7);
 
-	// Formato YYYY-MM-DDTHH:mm
-	const pad = n => n.toString().padStart(2, '0');
-	const fechaLocal = `${egreso.getFullYear()}-${pad(egreso.getMonth() + 1)}-${pad(egreso.getDate())}T${pad(egreso.getHours())}:${pad(egreso.getMinutes())}`;
+	// Formato compatible con <input type="datetime-local">
+	const egresoStr = egreso.toISOString().slice(0, 16);
 
-	inputEgreso.value = fechaLocal;
+	inputEgreso.value = egresoStr;
+	inputEgreso.disabled = true;
+	inputEgreso.title = 'El egreso se fija automáticamente a 7 días en reservas.';
 
-	// No deshabilitamos nada
-	if (inputMotivoEgreso) {
-		inputMotivoEgreso.value = 'Reserva anticipada';
+	if (inputMotivoEgr) {
+		inputMotivoEgr.disabled = true;
+		inputMotivoEgr.placeholder = '(No editable en reservas)';
+		inputMotivoEgr.title = 'Deshabilitado hasta que se confirme la reserva.';
 	}
 }
-
 export function parseFechaLocal(fechaStr) {
 	if (!fechaStr) return null;
 	if (!fechaStr.includes(':')) return null;
 
-	const partes = fechaStr.split(':');
-	if (partes.length === 2) fechaStr += ':00';
+	// Si falta el componente de segundos, lo agregamos
+	if (fechaStr.split(':').length === 2) {
+		fechaStr += ':00';
+	}
+
+	// Validar la fecha de forma más explícita
+	if (isNaN(Date.parse(fechaStr))) return null;
 
 	const fecha = new Date(fechaStr);
-	if (isNaN(fecha.getTime())) return null;
 	return fecha;
 }
 
+export function toUTC(fechaStr) {
+  const fechaLocal = new Date(fechaStr);
+  return new Date(fechaLocal.getTime() - fechaLocal.getTimezoneOffset() * 60000);
+}
+
+export function fromUTCToArgentina(dateInput) {
+  const date = new Date(dateInput);
+  return new Date(date.getTime() - 3 * 60 * 60 * 1000); // UTC-3
+}
 

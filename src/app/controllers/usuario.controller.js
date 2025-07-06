@@ -176,24 +176,30 @@ export const deleteUsuario = async (req, res) => {
 export const listarUsuariosMedicos = async (req, res) => {
 	try {
 		const medicos = await Usuario.findAll({
+			attributes: ['id_usuario', 'username'],
 			include: {
 				model: PersonalSalud,
 				as: 'datos_medico',
 				where: {
 					id_rol_usuario: 4, 
-					activo: true       
+					activo: true
 				},
 				attributes: ['id_personal_salud', 'nombre', 'apellido', 'matricula'],
+				include: {
+					model: Especialidad,
+					as: 'especialidad',
+					attributes: ['nombre'],
+				}
 			},
-			attributes: ['id_usuario', 'username'],
 		});
 
 		const resultado = medicos.map(m => ({
 			id_usuario: m.id_usuario,
-			id_personal_salud: m.datos_medico.id_personal_salud, // <-- agregar este campo
+			id_personal_salud: m.datos_medico.id_personal_salud,
 			nombre: m.datos_medico.nombre,
 			apellido: m.datos_medico.apellido,
 			matricula: m.datos_medico.matricula,
+			especialidad: m.datos_medico.especialidad?.nombre || '', // ← importante
 		}));
 
 		res.json(resultado);

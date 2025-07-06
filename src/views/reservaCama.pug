@@ -15,55 +15,13 @@ block content
               th Cama
               th Paciente
               th Motivo de Ingreso
+              th Egreso
+              th Motivo Egreso
               th Acción
           tbody
-            if camas && camas.length
-              each cama in camas
-                if cama.movimientos && cama.movimientos.length > 0
-                  - const mov = cama.movimientos[0]
-                  - const fechaIngreso = mov && mov.fecha_hora_ingreso ? new Date(mov.fecha_hora_ingreso).toLocaleString('es-AR') : '-'
-                  - const fechaRaw = mov && mov.fecha_hora_ingreso ? mov.fecha_hora_ingreso : ''
-                  - const idMovimiento = mov?.id_movimiento
-                  - const paciente = mov?.admision?.paciente
-                  - const motivo = mov?.admision?.motivo_ingreso?.tipo || '-'
-                  - const idPaciente = paciente?.id_paciente || ''
 
-                  tr
-                    td= fechaIngreso
-                    td
-                      if cama.habitacion && cama.habitacion.sector
-                        = cama.habitacion.sector.nombre
-                      else
-                        | -
-                    td
-                      if cama.habitacion
-                        = cama.habitacion.num
-                      else
-                        | -
-                    td= cama.nombre
-                    td
-                      if paciente
-                        = `${paciente.apellido_p}, ${paciente.nombre_p} (DNI: ${paciente.dni_paciente})`
-                      else
-                        | -
-                    td= motivo
-                    td
-                      form(action='/confirmar-reserva', method='POST', style='display:inline')
-                        input(type='hidden', name='id_paciente', value=idPaciente)
-                        input(type='hidden', name='fecha_actual', value=fechaRaw)
-                        button.btn.btn-sm.btn-success(type='submit')
-                          i.fas.fa-check-circle.me-1
-                          | Confirmar
-
-                      form(action=`/cancelar-reserva/${idMovimiento}`, method='POST', style='display:inline; margin-left: 6px;')
-                        button.btn.btn-sm.btn-danger(type='submit' onclick='return confirm("¿Cancelar esta reserva?")')
-                          i.fas.fa-times-circle.me-1
-                          | Cancelar
-            else
-              h1 No hay reservas activas para mostrar.
-
-        // Librerías para tabla y scripts
-        script(src="https://code.jquery.com/jquery-3.6.0.min.js")
-        script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-        link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
-        script(src="/js/reservar.js")
+      script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")
+      script(src="/js/reservar.js")

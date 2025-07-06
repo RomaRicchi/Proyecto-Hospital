@@ -1,3 +1,5 @@
+import { toUTC, fromUTCToArgentina } from './utils/validacionFechas.js';
+
 $(document).ready(function () {
 	
 	const hoyLocal = new Date();
@@ -7,13 +9,6 @@ $(document).ready(function () {
 
 	// Establecer fecha mínima
 	$('#fecha_ingreso').attr('min', hoy);
-
-	// Validación antes de enviar
-	if (fechaSeleccionada < hoy) {
-	Swal.fire('Error', 'No se puede usar una fecha anterior a hoy', 'error');
-	return;
-	}
-
 	
 	const tabla = $('#tablaMovimientosHabitacion');
 
@@ -39,7 +34,7 @@ $(document).ready(function () {
 					m.tipo_movimiento && m.tipo_movimiento.nombre
 						? m.tipo_movimiento.nombre
 						: '-',
-					m.fecha_hora_ingreso || '-',
+					m.fecha_hora_ingreso ? fromUTCToArgentina(m.fecha_hora_ingreso).toLocaleString('es-AR') : '-',
 					m.fecha_hora_egreso || '-',
 					m.estado === 1 ? 'Activo' : 'Inactivo',
 					`
@@ -115,16 +110,13 @@ $(document).ready(function () {
 			},
 			preConfirm: () => {
 				const id_admision = Swal.getPopup().querySelector('#id_admision').value;
-				const id_habitacion =
-					Swal.getPopup().querySelector('#id_habitacion').value;
+				const id_habitacion = Swal.getPopup().querySelector('#id_habitacion').value;
 				const id_cama = Swal.getPopup().querySelector('#id_cama').value;
-				const fecha_hora_ingreso = Swal.getPopup().querySelector(
-					'#fecha_hora_ingreso'
-				).value;
-				const fecha_hora_egreso =
-					Swal.getPopup().querySelector('#fecha_hora_egreso').value;
+				const fecha_hora_ingreso = Swal.getPopup().querySelector('#fecha_hora_ingreso').value;
+				const fecha_hora_egreso = Swal.getPopup().querySelector('#fecha_hora_egreso').value;
 				const id_mov = Swal.getPopup().querySelector('#id_mov').value;
 				const estado = Swal.getPopup().querySelector('#estado').value;
+
 				if (
 					!id_admision ||
 					!id_habitacion ||
@@ -132,20 +124,30 @@ $(document).ready(function () {
 					!fecha_hora_ingreso ||
 					!id_mov
 				) {
-					Swal.showValidationMessage(
-						'Por favor, completa todos los campos obligatorios'
-					);
+					Swal.showValidationMessage('Por favor, completa todos los campos obligatorios');
+					return false;
 				}
+
+				// ⏰ Validar fecha no pasada
+				const ingresoUTC = toUTC(fecha_hora_ingreso);
+				const hoyUTC = toUTC(new Date());
+				hoyUTC.setHours(0, 0, 0, 0);
+
+				if (ingresoUTC < hoyUTC) {
+					Swal.showValidationMessage('La fecha de ingreso no puede ser anterior a hoy.');
+					return false;
+				}
+
 				return {
 					id_admision,
 					id_habitacion,
 					id_cama,
-					fecha_hora_ingreso,
-					fecha_hora_egreso,
+					fecha_hora_ingreso: ingresoUTC.toISOString(),
+					fecha_hora_egreso: fecha_hora_egreso ? toUTC(fecha_hora_egreso).toISOString() : null,
 					id_mov,
 					estado,
 				};
-			},
+			}
 		}).then((result) => {
 			if (result.isConfirmed) {
 				fetch('/api/movimientos_habitacion', {
@@ -214,18 +216,14 @@ $(document).ready(function () {
 						}
 					},
 					preConfirm: () => {
-						const id_admision =
-							Swal.getPopup().querySelector('#id_admision').value;
-						const id_habitacion =
-							Swal.getPopup().querySelector('#id_habitacion').value;
+						const id_admision = Swal.getPopup().querySelector('#id_admision').value;
+						const id_habitacion = Swal.getPopup().querySelector('#id_habitacion').value;
 						const id_cama = Swal.getPopup().querySelector('#id_cama').value;
-						const fecha_hora_ingreso = Swal.getPopup().querySelector(
-							'#fecha_hora_ingreso'
-						).value;
-						const fecha_hora_egreso =
-							Swal.getPopup().querySelector('#fecha_hora_egreso').value;
+						const fecha_hora_ingreso = Swal.getPopup().querySelector('#fecha_hora_ingreso').value;
+						const fecha_hora_egreso = Swal.getPopup().querySelector('#fecha_hora_egreso').value;
 						const id_mov = Swal.getPopup().querySelector('#id_mov').value;
 						const estado = Swal.getPopup().querySelector('#estado').value;
+
 						if (
 							!id_admision ||
 							!id_habitacion ||
@@ -233,20 +231,30 @@ $(document).ready(function () {
 							!fecha_hora_ingreso ||
 							!id_mov
 						) {
-							Swal.showValidationMessage(
-								`Por favor, completa todos los campos obligatorios`
-							);
+							Swal.showValidationMessage('Por favor, completa todos los campos obligatorios');
+							return false;
 						}
+
+						// Validar que la fecha de ingreso no sea anterior a hoy
+						const ingresoUTC = toUTC(fecha_hora_ingreso);
+						const hoyUTC = toUTC(new Date());
+						hoyUTC.setHours(0, 0, 0, 0);
+
+						if (ingresoUTC < hoyUTC) {
+							Swal.showValidationMessage('La fecha de ingreso no puede ser anterior a hoy.');
+							return false;
+						}
+
 						return {
 							id_admision,
 							id_habitacion,
 							id_cama,
-							fecha_hora_ingreso,
-							fecha_hora_egreso,
+							fecha_hora_ingreso: ingresoUTC.toISOString(),
+							fecha_hora_egreso: fecha_hora_egreso ? toUTC(fecha_hora_egreso).toISOString() : null,
 							id_mov,
 							estado,
 						};
-					},
+					}
 				}).then((result) => {
 					if (result.isConfirmed) {
 						fetch(`/api/movimientos_habitacion/${id}`, {

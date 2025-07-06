@@ -17,7 +17,9 @@ function buscarCamasDisponibles(fecha) {
 }
 	
 function renderTablaCamas(camas) {
-  const fechaSeleccionada = new Date($('#fecha_busqueda').val());
+  const inputFecha = $('#fecha_busqueda').val();
+  const fechaSeleccionada = new Date(`${inputFecha}T00:00:00`);
+
   let html = `
     <table id="tablaCamas" class="table table-bordered table-hover">
       <thead class="table-light">
@@ -43,20 +45,21 @@ function renderTablaCamas(camas) {
         ? '<span class="badge bg-success">Sí</span>'
         : '<span class="badge bg-secondary">No</span>';
 
-      // Detectar si hay una reserva activa para la fecha seleccionada
       let esReservaEnFecha = false;
+
       if (Array.isArray(cama.movimientos)) {
+        const fechaSeleccionadaStr = fechaSeleccionada.toISOString().slice(0, 10);
         esReservaEnFecha = cama.movimientos.some(mov => {
-          if (mov.id_mov === 3 && mov.fecha_hora_ingreso && mov.fecha_hora_egreso) {
-            const inicio = new Date(mov.fecha_hora_ingreso);
-            const fin = new Date(mov.fecha_hora_egreso);
-            return fechaSeleccionada >= inicio && fechaSeleccionada <= fin;
+          if (mov.id_mov === 3 && mov.fecha_hora_ingreso) {
+            const ingresoStr = mov.fecha_hora_ingreso.slice(0, 10);
+            const egresoStr = mov.fecha_hora_egreso ? mov.fecha_hora_egreso.slice(0, 10) : null;
+            return ingresoStr <= fechaSeleccionadaStr && (!egresoStr || egresoStr >= fechaSeleccionadaStr);
           }
           return false;
         });
       }
 
-      // Determinar el estado visual
+
       let estadoBadge = '';
       if (esReservaEnFecha) {
         estadoBadge = '<span class="badge bg-warning text-dark">Reservada</span>';
@@ -65,6 +68,7 @@ function renderTablaCamas(camas) {
       } else {
         estadoBadge = '<span class="badge bg-success">Disponible</span>';
       }
+
 
       const deshabilitada = (
         cama.estado === 1 || cama.estado === true || cama.estado === 'Ocupada'
