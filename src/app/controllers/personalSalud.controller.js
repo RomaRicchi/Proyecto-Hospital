@@ -44,7 +44,15 @@ export const updatePersonalSalud = async (req, res) => {
 	try {
 		const persona = await PersonalSalud.findByPk(req.params.id);
 		if (!persona) return res.status(404).json({ message: 'No encontrado' });
-		await persona.update(req.body);
+
+		const { apellido, nombre, matricula, activo } = req.body;
+
+		persona.apellido = apellido;
+		persona.nombre = nombre;
+		persona.matricula = matricula || null;
+		if (typeof activo === 'boolean') persona.activo = activo;
+
+		await persona.save();
 		res.json(persona);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
@@ -57,7 +65,7 @@ export const deletePersonalSalud = async (req, res) => {
 		if (!persona) return res.status(404).json({ message: 'No encontrado' });
 		persona.activo = false;
 		await persona.save();
-		res.sendStatus(204);
+		res.json({ message: 'Baja exitosa' }); 
 	} catch (error) {
 		res.status(500).json({ message: error.message });
 	}

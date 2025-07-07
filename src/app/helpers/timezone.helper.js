@@ -17,7 +17,7 @@ export function fromUTCToArgentina(dateInput) {
 export function ajustarFechaLocal(fechaStr) {
 	const fecha = new Date(fechaStr);
 	const offset = fecha.getTimezoneOffset();
-	fecha.setMinutes(fecha.getMinutes() + offset);
+	fecha.setMinutes(fecha.getMinutes() - offset); // antes sumabas
 	return fecha;
 }
 

@@ -5,10 +5,9 @@ block content
     .gral-hero-content
       h1.text-center.px-4.pt-5 Alta de Paciente
 
-      // 🔍 Formulario para buscar paciente por DNI (sin method GET para evitar recarga)
       form#buscarPacienteForm
         .mb-3
-          label(for='busqueda') Buscar Paciente (DNI, nombre o apellido)
+          label(for='busqueda') Buscar Paciente por DNI 
           input#busqueda.form-control(type='text', name='busqueda', required)
 
         button.btn.btn-primary.mb-4(type='submit')

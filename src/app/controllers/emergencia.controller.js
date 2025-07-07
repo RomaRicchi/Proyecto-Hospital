@@ -5,12 +5,14 @@ import {
   MotivoIngreso,
   Cama,
   Habitacion,
+  Sector,
   Movimiento,
   MovimientoHabitacion,
   RegistroHistoriaClinica,
   TipoRegistro
 } from '../models/index.js';
 import { Op } from 'sequelize';
+import { verificarGeneroInterno } from './movimientoHabitacion.controller.js';
 
 import {
   validarEstadoCama,
@@ -19,20 +21,19 @@ import {
   validarConflictoReserva,
 } from '../validators/admision.validator.js';
 
-import { ajustarFechaLocal } from '../helpers/timezone.helper.js';
+import { toUTC } from '../helpers/timezone.helper.js';
 
 export const ingresoEmergencia = async (req, res) => {
   const sequelize = Admision.sequelize;
   const t = await sequelize.transaction();
   try {
-    const { fecha_hora_ingreso, sexo, identificador, id_usuario } = req.body;
+    const { fecha_hora_ingreso, sexo, identificador, id_usuario, tipo_emergencia } = req.body;
 
-    if (!fecha_hora_ingreso || !sexo || !identificador) {
+    if (!fecha_hora_ingreso || !sexo || !identificador || !tipo_emergencia) {
       return res.status(400).json({ error: 'Faltan datos obligatorios.' });
     }
 
-    const fechaLocal = ajustarFechaLocal(fecha_hora_ingreso);
-
+    const fechaLocal = toUTC(fecha_hora_ingreso);
     await validarFechaNoPasada(fechaLocal);
 
     let paciente = await Paciente.findOne({
@@ -78,12 +79,32 @@ export const ingresoEmergencia = async (req, res) => {
       return res.status(400).json({ error: 'No se encontró el motivo "emergencia".' });
     }
 
+    const sectorDestino = tipo_emergencia === 'nino' ? 'Pediatria' : 'Terapia intermedia';
+
     const camasLibres = await Cama.findAll({
       where: { estado: 0 },
-      include: [{ model: Habitacion, as: 'habitacion' }],
+      include: [
+        {
+          model: Habitacion,
+          as: 'habitacion',
+          required: true,
+          include: [
+            {
+              model: Sector,
+              as: 'sector',
+              where: {
+                nombre: { [Op.like]: `%${sectorDestino}%` }
+              }
+            }
+          ]
+        }
+      ],
       transaction: t,
     });
-
+    const generoValido = await verificarGeneroInterno(id_cama, id_genero);
+    if (!generoValido) {
+      return res.status(409).json({ error: 'La cama ya está ocupada por un paciente de otro género.' });
+    }
     let camaAsignada = null;
 
     for (const cama of camasLibres) {
@@ -113,7 +134,7 @@ export const ingresoEmergencia = async (req, res) => {
     if (!camaAsignada) {
       await t.rollback();
       return res.status(409).json({
-        error: 'No hay camas disponibles compatibles con el sexo del paciente.',
+        error: 'No hay camas disponibles compatibles con el sexo y sector del paciente.',
       });
     }
 

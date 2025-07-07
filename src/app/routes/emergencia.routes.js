@@ -3,6 +3,6 @@ import * as emergenciaController from '../controllers/emergencia.controller.js';
 
 const router = Router();
 
-router.post('/emergencia', emergenciaController.ingresoEmergencia);
+router.post('/', emergenciaController.ingresoEmergencia);
 
 export default router;

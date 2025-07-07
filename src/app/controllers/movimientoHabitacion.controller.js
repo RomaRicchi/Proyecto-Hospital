@@ -60,6 +60,31 @@ export const verificarGenero = async (req, res) => {
   }
 };
 
+export const verificarGeneroInterno = async (id_cama, id_genero) => {
+  const movimiento = await MovimientoHabitacion.findOne({
+    where: {
+      id_cama,
+      id_mov: 1, // ingreso / ocupa
+      estado: 1,
+      fecha_hora_egreso: null,
+    },
+    include: [{
+      model: Admision,
+      as: 'admision',
+      include: [{
+        model: Paciente,
+        as: 'paciente',
+        include: [{ model: Genero, as: 'genero' }]
+      }]
+    }]
+  });
+
+  if (!movimiento) return true;
+
+  const generoOcupante = movimiento.admision?.paciente?.genero?.id_genero;
+  return generoOcupante === id_genero;
+};
+
 export const getMovimientosHabitacion = async (req, res) => {
 	try {
 		const where = {};

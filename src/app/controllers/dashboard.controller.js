@@ -1,4 +1,4 @@
-import { Admision, MovimientoHabitacion, Cama, Habitacion, Sector } from '../models/index.js';
+import { Admision, Paciente, MovimientoHabitacion, Cama, Habitacion, Sector } from '../models/index.js';
 import { Op } from 'sequelize';
 import { toUTC } from '../helpers/timezone.helper.js';
 
@@ -51,6 +51,27 @@ export const vistaDashboard = async (req, res) => {
           model: Habitacion,
           as: 'habitacion',
           include: [{ model: Sector, as: 'sector' }]
+        },
+        {
+          model: MovimientoHabitacion,
+          as: 'movimientos',
+          where: {
+            fecha_hora_egreso: null,
+            estado: 1
+          },
+          required: false,
+          include: [
+            {
+              model: Admision,
+              as: 'admision',
+              include: [
+                {
+                  model: Paciente,
+                  as: 'paciente'
+                }
+              ]
+            }
+          ]
         }
       ],
       order: [['id_cama', 'ASC']]
@@ -62,7 +83,6 @@ export const vistaDashboard = async (req, res) => {
           ? `Habitación ${cama.habitacion.num} - ${cama.habitacion.sector.nombre}`
           : '-';
 
-      // Asegurarse de que desinfeccion esté presente
       cama.dataValues.desinfeccion = cama.desinfeccion;
     });
 
@@ -72,5 +92,4 @@ export const vistaDashboard = async (req, res) => {
     res.status(500).send('Error al cargar el panel principal');
   }
 };
-
 

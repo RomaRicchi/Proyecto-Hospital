@@ -47,24 +47,6 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
           a.nav-link.text-white(href="/tipoRegistro")
             i.fas.fa-file-signature.me-1
             | Tipos de Registro
-
-  // 🔹 Ubicación
-  a.nav-link.text-white.collapsed(href="#ubicacionSubmenu", data-bs-toggle="collapse", aria-expanded="false")
-    i.fas.fa-map-marked-alt.me-2
-    | Ubicación
-  ul.collapse#ubicacionSubmenu(style="list-style-type: none; padding-left: 1rem;")
-    li
-      a.nav-link.text-white(href="/sector")
-        i.fas.fa-th-large.me-1
-        | Lista de Sectores
-    li
-      a.nav-link.text-white(href="/habitacion")
-        i.fas.fa-bed.me-1
-        | Lista de Habitaciones
-    li
-      a.nav-link.text-white(href="/camas")
-        i.fas.fa-procedures.me-1
-        | Lista de Camas
     
 
   // 🔹 Admisiones
@@ -77,6 +59,10 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
         i.fas.fa-list.me-1
         | Lista de Admisiones
     li
+      a.nav-link.text-white(href="/reserva-cama")
+        i.fas.fa-procedures.me-1
+        | Reservas del dia
+    li
       a.nav-link.text-white(href="/paciente/alta")
         i.fas.fa-sign-out-alt.me-1
         | Alta de Paciente
@@ -84,10 +70,6 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
       a.nav-link.text-white(href="/emergencias")
         i.fas.fa-ambulance.me-1
         | Emergencias
-    li
-      a.nav-link.text-white(href="/reserva-cama")
-        i.fas.fa-procedures.me-1
-        | Reservar Cama
     li
       a.nav-link.text-white.collapsed(href="#auxiliaresSubmenu", data-bs-toggle="collapse", aria-expanded="false")
         i.fas.fa-tools.me-1
@@ -120,26 +102,43 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
         i.fas.fa-users.me-1
         | Lista de Usuarios
     li
-      a.nav-link.text-white(href="/rolUsuario")
-        i.fas.fa-user-tag.me-1
-        | Roles de Usuario
-
-  // 🔹 Personal
-  a.nav-link.text-white.collapsed(href="#personalSubmenu", data-bs-toggle="collapse", aria-expanded="false")
-    i.fas.fa-user-md.me-2
-    | Personal
-  ul.collapse#personalSubmenu(style="list-style-type: none; padding-left: 1rem;")
-    li
       a.nav-link.text-white(href="/personal/salud")
         i.fas.fa-stethoscope.me-1
-        | Salud
+        | Staff de Salud
     li
       a.nav-link.text-white(href="/personal/administrativo")
         i.fas.fa-user-tie.me-1
-        | Administrativo
+        | Staff Administrativo
     li
-      a.nav-link.text-white(href="/especialidad")
-        i.fas.fa-notes-medical.me-1
-        | Especialidades
+      a.nav-link.text-white.collapsed(href="#auxiliaresSubmenu2", data-bs-toggle="collapse", aria-expanded="false")
+        i.fas.fa-tools.me-1
+        | Auxiliares
+      ul.collapse#auxiliaresSubmenu2(style="list-style-type: none; padding-left: 1rem;")
+        li
+          a.nav-link.text-white(href="/especialidad")
+            i.fas.fa-notes-medical.me-1
+            | Especialidades
+        li
+          a.nav-link.text-white(href="/rolUsuario")
+            i.fas.fa-user-tag.me-1
+            | Roles
+
+  // 🔹 Ubicación
+  a.nav-link.text-white.collapsed(href="#ubicacionSubmenu", data-bs-toggle="collapse", aria-expanded="false")
+    i.fas.fa-map-marked-alt.me-2
+    | Ubicación
+  ul.collapse#ubicacionSubmenu(style="list-style-type: none; padding-left: 1rem;")
+    li
+      a.nav-link.text-white(href="/sector")
+        i.fas.fa-th-large.me-1
+        | Lista de Sectores
+    li
+      a.nav-link.text-white(href="/habitacion")
+        i.fas.fa-bed.me-1
+        | Lista de Habitaciones
+    li
+      a.nav-link.text-white(href="/camas")
+        i.fas.fa-procedures.me-1
+        | Lista de Camas
 
   

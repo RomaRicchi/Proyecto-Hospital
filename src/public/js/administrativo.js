@@ -19,7 +19,8 @@ $(document).ready(function () {
       const dataSet = lista.map(a => [
         a.apellido,
         a.nombre,
-        a.rol?.nombre || '',
+        (a.rol && a.rol.nombre) ? a.rol.nombre : '',
+        a.activo ? 'Activo' : 'Inactivo',
         `
           <button class="btn btn-sm btn-primary me-1 edit-btn" data-id="${a.id_personal_admin}">
             <i class="fas fa-pen"></i>
@@ -29,6 +30,8 @@ $(document).ready(function () {
           </button>
         `
       ]);
+      console.log('data recibida:', lista);
+      console.log('dataset procesado:', dataSet);
 
       const dt = $tabla.DataTable({
         language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
@@ -37,64 +40,14 @@ $(document).ready(function () {
           { title: 'Apellido' },
           { title: 'Nombre' },
           { title: 'Rol' },
+          { title: 'Estado' }, 
           { title: 'Acciones', orderable: false, searchable: false }
         ],
         pageLength: 10,
         responsive: true,
         destroy: true
       });
-
-      dt.on('draw', () => {
-        $('#btnAgregarAdmin').remove();
-        if (dt.rows({ filter: 'applied' }).data().length === 0) {
-          $('#tablaAdministrativo_wrapper').append(`
-            <div id="btnAgregarAdmin" class="text-center mt-3">
-              <button class="btn btn-success">
-                <i class="fas fa-plus-circle me-1"></i> Agregar Administrativo
-              </button>
-            </div>
-          `);
-        }
-      });
-      dt.draw();
-    })
-    .catch(() => Swal.fire('Error', 'No se pudo cargar el personal.', 'error'));
-
-  $(document).on('click', '#btnAgregarAdmin button', () => {
-    Swal.fire({
-      title: 'Agregar administrativo',
-      html: `
-        <input id="apellido"  class="swal2-input" placeholder="Apellido">
-        <input id="nombre"    class="swal2-input" placeholder="Nombre">
-      `,
-      showCancelButton: true,
-      confirmButtonText: 'Guardar',
-      preConfirm: () => {
-        const apellido = $('#apellido').val();
-        const nombre   = $('#nombre').val();
-        const err =
-          validarTexto(apellido, 'Apellido') ||
-          validarTexto(nombre,   'Nombre');
-        if (err) { Swal.showValidationMessage(err); return false; }
-        return { apellido: apellido.trim(), nombre: nombre.trim() };
-      }
-    }).then(r => {
-      if (!r.isConfirmed) return;
-      fetch('/api/personal-administrativo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(r.value)
-      })
-      .then(res => {
-        if (res.status === 409) throw new Error('Ya existe.');
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then(() => Swal.fire('Guardado', 'Creado correctamente', 'success')
-                    .then(()=>location.reload()))
-      .catch(err => Swal.fire('Error', err.message || 'No se pudo crear', 'error'));
     });
-  });
 
   $(document).on('click', '.edit-btn', function () {
     const id = $(this).data('id');
@@ -102,21 +55,35 @@ $(document).ready(function () {
       .then(r=>r.json())
       .then(a=>{
         Swal.fire({
-          title:'Editar administrativo',
-          html:`
+          title: 'Editar administrativo',
+          html: `
             <input id="apellido" class="swal2-input" value="${a.apellido}" placeholder="Apellido">
-            <input id="nombre"   class="swal2-input" value="${a.nombre}"   placeholder="Nombre">
+            <input id="nombre" class="swal2-input" value="${a.nombre}" placeholder="Nombre">
+            <select id="estado" class="swal2-select">
+              <option value="true" ${a.activo ? 'selected' : ''}>Activo</option>
+              <option value="false" ${!a.activo ? 'selected' : ''}>Inactivo</option>
+            </select>
           `,
-          showCancelButton:true,
-          confirmButtonText:'Guardar',
-          preConfirm:()=>{
-            const apellido=$('#apellido').val();
-            const nombre=$('#nombre').val();
+          showCancelButton: true,
+          confirmButtonText: 'Guardar',
+          preConfirm: () => {
+            const apellido = $('#apellido').val();
+            const nombre = $('#nombre').val();
+            const activo = $('#estado').val() === 'true';
+
             const err =
-              validarTexto(apellido,'Apellido') ||
-              validarTexto(nombre,'Nombre');
-            if (err){ Swal.showValidationMessage(err); return false; }
-            return { apellido: apellido.trim(), nombre: nombre.trim() };
+              validarTexto(apellido, 'Apellido') ||
+              validarTexto(nombre, 'Nombre');
+            if (err) {
+              Swal.showValidationMessage(err);
+              return false;
+            }
+
+            return {
+              apellido: apellido.trim(),
+              nombre: nombre.trim(),
+              activo
+            };
           }
         }).then(r=>{
           if(!r.isConfirmed) return;

@@ -30,15 +30,11 @@ block content
                     button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=usuario.id_usuario)
                       i.fas.fa-trash
             else
-              //- Agregar fila vacía con las 7 celdas para evitar error de DataTable
               tr
-                td(colspan="1") &nbsp;
-                td(colspan="1") &nbsp;
-                td(colspan="1") &nbsp;
-                td(colspan="1") &nbsp;
-                td(colspan="1") &nbsp;
-                td(colspan="1") &nbsp;
-                td(colspan="1") &nbsp;
+                td(colspan="6").text-center Sin usuarios registrados
+
+      // Botón de agregar si es necesario por JS
+      #btnAgregarContainer.text-center.mt-3
 
       link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
       script(src="https://code.jquery.com/jquery-3.7.1.min.js")

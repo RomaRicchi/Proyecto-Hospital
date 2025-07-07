@@ -5,7 +5,6 @@ $(document).ready(function () {
   fetch('/api/genero')
     .then((response) => response.json())
     .then((generos) => {
-      // Solo 2 columnas: [ nombre, botones ]
       const dataSet = generos.map((gen) => [
         gen.nombre,
         `
@@ -38,21 +37,16 @@ $(document).ready(function () {
       Swal.fire('Error', 'No se pudo cargar los géneros.', 'error');
     });
 
-  // El resto de tu lógica de agregar/editar/eliminar...
+  // Validación
   function validarNombreGenero(nombre) {
-    if (!nombre || !nombre.trim()) {
-      return 'El nombre es obligatorio.';
-    }
+    if (!nombre || !nombre.trim()) return 'El nombre es obligatorio.';
     const t = nombre.trim();
-    if (t.length < 3 || t.length > 30) {
-      return 'El nombre debe tener entre 3 y 30 caracteres.';
-    }
-    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(t)) {
-      return 'El nombre solo puede contener letras y espacios.';
-    }
+    if (t.length < 3 || t.length > 30) return 'El nombre debe tener entre 3 y 30 caracteres.';
+    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(t)) return 'El nombre solo puede contener letras y espacios.';
     return null;
   }
 
+  // Agregar género
   $(document).on('click', '#btnAgregarGenero', function () {
     Swal.fire({
       title: 'Agregar Género',
@@ -92,6 +86,7 @@ $(document).ready(function () {
     });
   });
 
+  // Editar género
   $(document).on('click', '.edit-btn', function () {
     const id = $(this).data('id');
     fetch(`/api/genero/${id}`)
@@ -139,6 +134,7 @@ $(document).ready(function () {
       );
   });
 
+  // Eliminar género
   $(document).on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     Swal.fire({
@@ -153,7 +149,6 @@ $(document).ready(function () {
         fetch(`/api/genero/${id}`, { method: 'DELETE' })
           .then((res) => {
             if (!res.ok) throw new Error();
-            return res.json();
           })
           .then(() =>
             Swal.fire('Eliminado', 'Género eliminado', 'success').then(() =>

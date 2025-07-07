@@ -1,4 +1,45 @@
 $(document).ready(function () {
+  
+  const tipoSelectHtml = `
+    <label for="tipo_emergencia">Tipo de emergencia</label>
+    <select id="tipo_emergencia" class="form-control" required>
+      <option value="" disabled selected>Seleccione tipo</option>
+      <option value="adulto">Adulto</option>
+      <option value="nino">Niño</option>
+    </select>
+  `;
+  $('#formEmergencia .form-group').first().before(tipoSelectHtml);
+
+  // Cargar géneros
+  fetch('/api/genero')
+    .then((r) => r.json())
+    .then((generos) => {
+      const select = $('#sexo');
+      select.empty().append('<option value="" disabled selected>Seleccione sexo</option>');
+      generos.forEach((g) => {
+        select.append(`<option value="${g.id_genero}">${g.nombre}</option>`);
+      });
+    })
+    .catch(() => {
+      Swal.fire('Error', 'No se pudo cargar el listado de géneros.', 'error');
+    });
+
+    fetch('/api/usuarios/medicos')
+      .then((r) => r.json())
+      .then((medicos) => {
+        const select = $('#id_usuario');
+        select.empty().append('<option value="" disabled selected>Seleccione médico</option>');
+        medicos.forEach((m) => {
+          const especialidad = m.especialidad || 'Sin especialidad';
+          select.append(
+            `<option value="${m.id_usuario}">${m.apellido}, ${m.nombre} — ${especialidad}</option>`
+          );
+        });
+      })
+    .catch(() => {
+      Swal.fire('Error', 'No se pudo cargar el listado de médicos.', 'error');
+    });
+
   $('#formEmergencia').submit(async function (e) {
     e.preventDefault();
 
@@ -6,8 +47,9 @@ $(document).ready(function () {
     const sexo = $('#sexo').val();
     const identificador = $('#identificador').val();
     const idUsuario = $('#id_usuario').val();
+    const tipoEmergencia = $('#tipo_emergencia').val();
 
-    if (!fechaIngreso || !sexo || !identificador) {
+    if (!fechaIngreso || !sexo || !identificador || !tipoEmergencia) {
       return Swal.fire('Error', 'Completa todos los campos obligatorios.', 'warning');
     }
 
@@ -27,10 +69,11 @@ $(document).ready(function () {
       sexo,
       identificador,
       id_usuario: idUsuario || null,
+      tipo_emergencia: tipoEmergencia
     };
 
     try {
-      const res = await fetch('/api/emergencia', {
+      const res = await fetch('/api/emergencias', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -48,19 +91,4 @@ $(document).ready(function () {
       Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
     }
   });
-
-  // Cargar médicos dinámicamente
-  fetch('/api/usuarios/medicos')
-    .then((r) => r.json())
-    .then((medicos) => {
-      const select = $('#id_usuario');
-      medicos.forEach((m) => {
-        select.append(
-          `<option value="${m.id_usuario}">${m.apellido}, ${m.nombre} — Matrícula: ${m.matricula}</option>`
-        );
-      });
-    })
-    .catch(() => {
-      Swal.fire('Error', 'No se pudo cargar el listado de médicos.', 'error');
-    });
 });
