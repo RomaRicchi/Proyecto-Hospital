@@ -3,6 +3,8 @@ import { toUTC, fromUTCToArgentina } from './utils/validacionFechas.js';
 $(document).ready(function () {
   const $tabla = $('#tablaRegistrosContainer');
   const $info = $('#infoPaciente');
+  let registrosPaciente = [];
+  let ultimaAdmisionPaciente = null;
 
   function determinarEstadoAdmision(fechaIngreso, fechaEgreso) {
     const ahora = new Date();
@@ -14,24 +16,29 @@ $(document).ready(function () {
     return 'Finalizada';
   }
 
+  const ID_INGRESO = 30;
+  const ID_EGRESO = 31;
+
   function agruparPorEpisodios(registros) {
     const grupos = [];
     let episodio = [];
 
     registros.forEach(r => {
-      if (r.tipo === 'Ingreso') {
+      if (r.id_tipo === ID_INGRESO) {
         if (episodio.length) grupos.push(episodio);
         episodio = [r];
-      } else {
+      } else if (episodio.length) {
         episodio.push(r);
-        if (r.tipo === 'Egreso') {
+        if (r.id_tipo === ID_EGRESO) {
           grupos.push(episodio);
           episodio = [];
         }
+      } else {
+        grupos.push([r]);
       }
     });
 
-    if (episodio.length) grupos.push(episodio); // por si hay registros sin egreso
+    if (episodio.length) grupos.push(episodio);
 
     return grupos;
   }
@@ -50,15 +57,24 @@ $(document).ready(function () {
       })
       .then(data => {
         ultimaAdmisionPaciente = data.ultimaAdmision?.id_admision || null;
+        registrosPaciente = data.registros;
+
         if (!data || data.registros.length === 0) {
-          mostrarInfoPaciente(data.paciente);
-          mostrarBotonesAccion(data.paciente.id_paciente);
+          if (data?.paciente) {
+            mostrarInfoPaciente(data.paciente);
+            mostrarBotonesAccion(data.paciente.id_paciente);
+          } else {
+            $info.html('');
+            $('#accionesRegistro').empty();
+          }
+
           $tabla.html('<div class="alert alert-warning">Este paciente no posee registros clínicos aún</div>');
           return;
         }
+
         mostrarInfoPaciente(data.paciente);
         mostrarBotonesAccion(data.paciente.id_paciente);
-        const episodios = agruparPorEpisodios(data.registros);
+        const episodios = agruparPorEpisodios(registrosPaciente);
         mostrarEpisodios(episodios);
       })
       .catch(() => {
@@ -97,8 +113,8 @@ $(document).ready(function () {
     let html = '';
     grupos.reverse();
     grupos.forEach((episodio, index) => {
-      const ingreso = episodio.find(r => r.tipo === 'Ingreso');
-      const egreso = episodio.find(r => r.tipo === 'Egreso');
+      const ingreso = episodio.find(r => r.id_tipo === ID_INGRESO);
+      const egreso = episodio.find(r => r.id_tipo === ID_EGRESO);
 
       const fechaIngreso = ingreso ? fromUTCToArgentina(ingreso.fecha) : null;
       const fechaEgreso = egreso ? fromUTCToArgentina(egreso.fecha) : null;
@@ -173,7 +189,7 @@ $(document).ready(function () {
           t => `<option value="${t.id_tipo}">${t.nombre}</option>`
         ).join('');
 
-        const fechaActual = new Date().toISOString().slice(0, 16); // yyyy-MM-ddTHH:mm
+        const fechaActual = new Date().toISOString().slice(0, 16);
         const ambulatorio = !ultimaAdmisionPaciente;
 
         Swal.fire({
@@ -217,26 +233,44 @@ $(document).ready(function () {
             id_tipo: result.value.id_tipo,
             detalle: result.value.detalle,
             fecha_hora_reg: toUTC(result.value.fecha_hora_reg).toISOString(),
-            id_usuario: 1, // 🔧 reemplazar con sesión actual
-            id_admision: ultimaAdmisionPaciente  
+            id_usuario: 1, // reemplazar con usuario logueado
+            id_admision: ultimaAdmisionPaciente
           };
 
-          const resp = await fetch('/api/registro-clinico', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
+          try {
+            const resp = await fetch('/api/registro-clinico', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
 
-          if (!resp.ok) {
-            const err = await resp.json();
-            throw new Error(err.message || 'Error al registrar');
+            if (!resp.ok) {
+              const err = await resp.json();
+              throw new Error(err.message || 'Error al registrar');
+            }
+
+            Swal.fire('Éxito', 'Registro clínico guardado', 'success');
+
+            const tipoSeleccionado = tipos.find(t => t.id_tipo == result.value.id_tipo);
+
+            const nuevoRegistro = {
+              fecha: new Date(result.value.fecha_hora_reg).toLocaleString('es-AR'),
+              tipo: tipoSeleccionado?.nombre || '-',
+              id_tipo: parseInt(result.value.id_tipo),
+              detalle: result.value.detalle,
+              usuario: 'Actual' // podés cambiar por el real si tenés sesión
+            };
+
+            registrosPaciente.push(nuevoRegistro);
+            registrosPaciente.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            const episodios = agruparPorEpisodios(registrosPaciente);
+            mostrarEpisodios(episodios);
+
+          } catch (e) {
+            Swal.fire('Error', e.message || 'No se pudo guardar el registro', 'error');
           }
-
-          Swal.fire('Éxito', 'Registro clínico guardado', 'success').then(() =>
-            location.reload()
-          );
         });
-
       } catch (e) {
         Swal.fire('Error', 'No se pudo cargar el formulario', 'error');
       }
@@ -249,5 +283,4 @@ $(document).ready(function () {
       $('#accionesRegistro').empty();
     });
   }
-
 });

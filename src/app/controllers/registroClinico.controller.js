@@ -129,7 +129,7 @@ export const buscarPorDNI = async (req, res) => {
         {
           model: TipoRegistro,
           as: 'tipo_registro',
-          attributes: ['nombre']
+          attributes: ['id_tipo', 'nombre']
         },
         {
           model: Usuario,
@@ -149,6 +149,7 @@ export const buscarPorDNI = async (req, res) => {
     const adaptados = registros.map(r => ({
       fecha: fromUTCToArgentina(r.fecha_hora_reg).toLocaleString('es-AR'),
       tipo: r.tipo_registro?.nombre || '-',
+      id_tipo: r.tipo_registro?.id_tipo || null,
       detalle: r.detalle || '-',
       usuario: r.usuario?.username || '-'
     }));
@@ -165,6 +166,7 @@ export const buscarPorDNI = async (req, res) => {
     res.status(500).json({ message: 'Error interno' });
   }
 };
+
 
 export const vistaRegistroClinico = async (req, res) => {
   try {

@@ -22,7 +22,7 @@ export default (sequelize, DataTypes) => {
 			id_tipo: {
 				type: DataTypes.INTEGER,
 				allowNull: false,
-			}, // Nuevo FK
+			}, 
 			detalle: {
 				type: DataTypes.STRING(500),
 				allowNull: false,
