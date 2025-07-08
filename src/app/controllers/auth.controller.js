@@ -5,12 +5,10 @@ import {
 } from '../models/index.js';
 import bcrypt from 'bcrypt';
 
-// 🧾 Vista para mostrar el login
 export const vistaLogin = (req, res) => {
 	res.render('users', { error: null });
 };
 
-// 🔐 Lógica de inicio de sesión
 export const login = async (req, res) => {
 	const { usuario, password } = req.body;
 
@@ -30,18 +28,30 @@ export const login = async (req, res) => {
 				.render('users', { error: 'Contraseña incorrecta' });
 		}
 
-		// 🧑‍💼 Buscar datos del personal administrativo y su rol
-		const personal = await PersonalAdministrativo.findOne({
+		let personal = await PersonalAdministrativo.findOne({
 			where: { id_usuario: user.id_usuario },
 			include: [{ model: RolUsuario, as: 'rol' }],
 		});
 
-		// 🗂️ Guardar info mínima en sesión
+		if (!personal) {
+			const { PersonalSalud } = await import('../models/index.js');
+			personal = await PersonalSalud.findOne({
+				where: { id_usuario: user.id_usuario },
+				include: [{ model: RolUsuario, as: 'rol' }],
+			});
+		}
+
+		if (!personal) {
+			return res
+				.status(403)
+				.render('users', { error: 'El usuario no tiene asignado un rol válido' });
+		}
+
 		req.session.usuario = {
 			id: user.id_usuario,
 			nombre: personal?.nombre || 'Usuario',
 			apellido: personal?.apellido || '',
-			rol: personal?.rol?.nombre || 'usuario',
+			rol: personal?.id_rol_usuario || 1, // 👈 numérico
 		};
 
 		res.redirect('/dashboard');
@@ -50,7 +60,6 @@ export const login = async (req, res) => {
 	}
 };
 
-// 🚪 Cierre de sesión
 export const logout = (req, res) => {
 	req.session.destroy(() => res.redirect('/home'));
 };

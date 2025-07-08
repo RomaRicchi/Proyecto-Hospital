@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { isAuthenticated } from '../middlewares/auth.middleware.js';
+import { isAuthenticated, soloRol } from '../middlewares/auth.middleware.js';
 import { vistaPacientes, vistaPacienteNuevo } from '../controllers/paciente.controller.js';
 import { vistaLocalidades } from '../controllers/localidad.controller.js';
 import { vistaGeneros } from '../controllers/genero.controller.js';
@@ -25,6 +25,7 @@ import { vistaRegistroClinico } from '../controllers/registroClinico.controller.
 import { vistaEspecialidades } from '../controllers/especialidad.controller.js';
 import { vistaRolUsuario } from '../controllers/rolUsuario.controller.js';
 import { vistaTipoRegistro } from '../controllers/tipoRegistro.controller.js';
+import { vistaPanelSalud } from '../controllers/dashSalud.controller.js';
 
 const router = Router();
 
@@ -32,44 +33,39 @@ router.get('/inicio', (req, res) => res.render('inicio'));
 router.get('/usuarios', isAuthenticated, (req, res) => res.render('users')); //loguin
 // 🔸 Panel Principal
 router.get('/dashboard', isAuthenticated, vistaDashboard);
-
+router.get('/panel-salud', isAuthenticated, soloRol([3, 4]), vistaPanelSalud);
 // 🔸 Pacientes
 router.get('/paciente', isAuthenticated, vistaPacientes);
 router.get('/paciente/nuevo', isAuthenticated, vistaPacienteNuevo);
 router.get('/pacientes/camas', isAuthenticated, vistaPacientesCamas);
-
+// 🔸 Historia clinica
+router.get('/tipoRegistro', isAuthenticated, soloRol([1]), vistaTipoRegistro);
+router.get('/registroClinico', isAuthenticated, soloRol([3, 4]), vistaRegistroClinico);
 // 🔸 Localidad y Género
-router.get('/paciente/localidad', isAuthenticated, vistaLocalidades);
-router.get('/paciente/genero', isAuthenticated, vistaGeneros);
-
+router.get('/paciente/localidad', isAuthenticated, soloRol([1]), vistaLocalidades);
+router.get('/paciente/genero', isAuthenticated, soloRol([1]), vistaGeneros);
 // 🔸 Familiar
 router.get('/familiar', isAuthenticated, vistaFamiliares);
-router.get('/familiar/parentesco', isAuthenticated, vistaParentescos);
-
+router.get('/familiar/parentesco', isAuthenticated, soloRol([1]), vistaParentescos);
 // 🔸 Ubicación
-router.get('/sector', isAuthenticated, vistaSectores);
-router.get('/habitacion', isAuthenticated, vistaHabitaciones);
-router.get('/camas', isAuthenticated, vistaCama);
-
+router.get('/sector', isAuthenticated,soloRol([1]), vistaSectores);
+router.get('/habitacion', isAuthenticated, soloRol([1]), vistaHabitaciones);
+router.get('/camas', isAuthenticated, soloRol([1]), vistaCama);
 // 🔸 Admisiones
 router.get('/admisiones', isAuthenticated, vistaAdmisiones);
-router.get('/motivoIngreso', isAuthenticated, vistaMotivosIngreso);
-router.get('/movimientoHabitacion', isAuthenticated, vistaMovimientosHabitacion);
-router.get('/movimiento', isAuthenticated, vistaMovimientos);
+router.get('/motivoIngreso', isAuthenticated, soloRol([1]), vistaMotivosIngreso);
+router.get('/movimientoHabitacion', isAuthenticated, soloRol([1]), vistaMovimientosHabitacion);
+router.get('/movimiento', isAuthenticated, soloRol([1]), vistaMovimientos);
 router.get('/paciente/alta', isAuthenticated, vistaAltaPaciente);
-router.get('/obraSocial', isAuthenticated, vistaObrasSociales);
-router.get('/reserva-cama', isAuthenticated, vistaReservarCama);
-
+router.get('/obraSocial', isAuthenticated, soloRol([1, 2]), vistaObrasSociales);
+router.get('/reserva-cama', isAuthenticated, soloRol([1, 2]), vistaReservarCama);
 // 🔸 Emergencias
-router.get('/emergencias', isAuthenticated, vistaEmergencias);
-
+router.get('/emergencias', isAuthenticated, soloRol([1, 2]),vistaEmergencias);
 // 🔸 Usuarios
-router.get('/usuario', isAuthenticated, vistaUsuarios);
-router.get('/personal/salud', isAuthenticated, vistaPersonalSalud);
-router.get('/personal/administrativo', isAuthenticated, vistaPersonalAdministrativo);
-router.get('/especialidad', isAuthenticated, vistaEspecialidades);
-router.get('/rolUsuario', isAuthenticated, vistaRolUsuario);
-router.get('/tipoRegistro', isAuthenticated, vistaTipoRegistro);
-router.get('/registroClinico', isAuthenticated, vistaRegistroClinico);
+router.get('/usuario', isAuthenticated, soloRol([1]), vistaUsuarios);
+router.get('/personal/salud', isAuthenticated,soloRol([1]), vistaPersonalSalud);
+router.get('/personal/administrativo', isAuthenticated, soloRol([1]), vistaPersonalAdministrativo);
+router.get('/especialidad', isAuthenticated, soloRol([1]), vistaEspecialidades);
+router.get('/rolUsuario', isAuthenticated, soloRol([1]), vistaRolUsuario);
 
 export default router;

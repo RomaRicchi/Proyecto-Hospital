@@ -5,3 +5,14 @@ export function isAuthenticated(req, res, next) {
 		res.redirect('/usuarios');
 	}
 }
+export function soloRol(rolesPermitidos = [1,2,3,4]) {
+	return function (req, res, next) {
+		const usuario = req.session.usuario;
+
+		if (!usuario || !rolesPermitidos.includes(usuario.rol)) {
+			return res.status(403).send('Acceso denegado');
+		}
+
+		next();
+	};
+}

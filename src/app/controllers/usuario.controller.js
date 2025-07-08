@@ -134,9 +134,15 @@ export const createUsuario = async (req, res) => {
 			return res.status(400).json({ message: 'Faltan datos requeridos' });
 		}
 
+		// Validación: usuario único
 		const existente = await Usuario.findOne({ where: { username } });
 		if (existente) {
 			return res.status(409).json({ message: 'El usuario ya existe' });
+		}
+
+		// Validación: contraseña mínima
+		if (password.length < 5) {
+			return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
 		}
 
 		const hashedPassword = await bcrypt.hash(password, 10);

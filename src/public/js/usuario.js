@@ -85,6 +85,10 @@ $(document).ready(function () {
 			Swal.showValidationMessage('Todos los campos obligatorios deben completarse');
 			return false;
 		}
+		if (password.length < 5) {
+			Swal.showValidationMessage('La contraseña debe tener al menos 5 caracteres');
+			return false;
+		}
 
 		return {
 			username,
