@@ -141,9 +141,12 @@ Luego accede a: [http://localhost:3000/home](http://localhost:3000/home)
 
 ## 🔐 Credenciales de Acceso
 
-| Usuario | Contraseña |
-| ------- | ---------- |
-| admin   | admin      |
+| Usuario  | Contraseña | Tipo          |
+|----------|------------|---------------|
+| admin    | admin      | Root          |
+| RamonC   | RamonC     | Medico        |
+| VivianaC | VivianaC   | Enfermero     |
+| GDiaz    | GDiaz      | Recepcionista |
 
 ---
 ## 👨‍💻 Autor
