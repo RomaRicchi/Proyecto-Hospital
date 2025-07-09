@@ -212,7 +212,6 @@ $(document).ready(function () {
 	})
 
     .catch(err => {
-      console.error('Error cargando admisiones:', err);
       Swal.fire('Error', 'No se pudieron cargar las admisiones.', 'error');
     });
 });

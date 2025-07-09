@@ -41,7 +41,6 @@ export const getCamaById = async (req, res) => {
 			res.status(404).send('Cama no encontrada');
 		}
 	} catch (error) {
-		console.error('Error al obtener cama:', error);
 		res.status(500).send('Error interno del servidor');
 	}
 };
@@ -146,7 +145,6 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 
     res.json(resultado);
   } catch (error) {
-    console.error('❌ getCamasDisponiblesPorFecha error:', error);
     res.status(500).json({ message: 'Error al cargar las camas' });
   }
 };
@@ -172,7 +170,6 @@ export const createCama = async (req, res) => {
 		const nuevaCama = await Cama.create(req.body);
 		res.status(201).json(nuevaCama);
 	} catch (error) {
-		console.error(error);
 		res.status(500).send('Error interno del servidor');
 	}
 };
@@ -211,7 +208,6 @@ export const getCamasReservadas = async (req, res) => {
 
     res.json(camas);
   } catch (error) {
-    console.error('❌ Error al obtener camas reservadas:', error);
     res.status(500).json({ message: 'Error al obtener camas reservadas' });
   }
 };
@@ -244,7 +240,6 @@ export const updateCama = async (req, res) => {
 		await cama.update(req.body);
 		res.json(cama);
 	} catch (error) {
-		console.error(error);
 		res.status(500).json({ message: 'Error al actualizar la cama' });
 	}
 };
@@ -290,7 +285,6 @@ export const vistaCama = async (req, res) => {
 
 		res.render('cama', { camas });
 	} catch (error) {
-		console.error('Error al cargar camas:', error);
 		res.status(500).send('Error al cargar camas');
 	}
 };

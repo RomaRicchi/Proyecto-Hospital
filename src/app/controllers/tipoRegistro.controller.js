@@ -64,7 +64,6 @@ export const vistaTipoRegistro = async (req, res) => {
 
     res.render('tiposRegistro', { tipos: tiposAdaptados }); // ⚠️ También corrige aquí el nombre de la vista si estaba mal
   } catch (error) {
-    console.error(error);
     res.status(500).send('Error al mostrar tipos de registro');
   }
 };

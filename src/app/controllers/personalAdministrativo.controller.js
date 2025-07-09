@@ -73,7 +73,6 @@ export const vistaPersonalAdministrativo = async (req, res) => {
 		});
 		res.render('administrativo', { personal });
 	} catch (error) {
-		console.error(error);
 		res.status(500).send('Error al cargar personal administrativo');
 	}
 };

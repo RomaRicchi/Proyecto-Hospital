@@ -311,7 +311,6 @@ export const listarUsuariosMedicos = async (req, res) => {
 
 		res.json(resultado);
 	} catch (error) {
-		console.error('❌ Error al listar médicos:', error);
 		res.status(500).json({ message: 'Error al obtener médicos' });
 	}
 };

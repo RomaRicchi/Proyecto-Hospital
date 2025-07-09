@@ -55,7 +55,6 @@ export const verificarGenero = async (req, res) => {
     res.json({ success: true });
 
   } catch (error) {
-    console.error('Error al verificar género:', error);
     res.status(500).json({ message: 'Error interno al verificar género' });
   }
 };
@@ -217,7 +216,6 @@ export const createMovimientoHabitacion = async (req, res) => {
 
 		res.status(201).json(nuevo);
 	} catch (error) {
-		console.error('Error en createMovimientoHabitacion:', error);
 		res.status(500).json({ message: 'Error al crear movimiento habitación' });
 	}
 };
@@ -301,7 +299,6 @@ export const vistaMovimientosHabitacion = async (req, res) => {
 		}));
 		res.render('movHabitacion', { movimientos: adaptados });
 	} catch (error) {
-		console.error(error);
 		res.status(500).send('Error al cargar movimientos habitación');
 	}
 };

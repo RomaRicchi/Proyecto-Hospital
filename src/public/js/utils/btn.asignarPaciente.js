@@ -102,10 +102,7 @@ $(document).on('click', '.btn-asignar-paciente', function () {
 					const edad = calcularEdad(pacienteSeleccionado.fecha_nac);
 					const sectorNombre = camaSeleccionada?.habitacion?.sector?.nombre.trim() || 'el sector seleccionado';
 					const criterios = obtenerCriteriosPorSector(sectorNombre);
-					console.log('🧠 Sector detectado:', `"${sectorNombre}"`);
-					console.log('🛏️ Cama seleccionada:', camaSeleccionada);
 					
-
 					const esCompatible = validarCompatibilidadPacienteSector(
 						edad,
 						pacienteSeleccionado.genero.id_genero,
@@ -123,7 +120,6 @@ $(document).on('click', '.btn-asignar-paciente', function () {
 						});
 						return;
 					}
-					console.log(`Edad: ${edad}, Género: ${pacienteSeleccionado.genero?.id_genero}, Sector: ${sectorNombre}, Compatible: ${esCompatible}`);
 				
                     mostrarFormularioYRegistrarAdmision(
 						pacienteSeleccionado,

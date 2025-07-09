@@ -75,7 +75,6 @@ export const vistaPacientesCamas = async (req, res) => {
 
     res.render('pacientesCamas', { pacientes_camas });
   } catch (error) {
-    console.error('❌ Error en vistaPacientesCamas:', error);
     res.status(500).send('Error al cargar pacientes en cama.');
   }
 };

@@ -30,9 +30,7 @@ $(document).ready(function () {
           </button>
         `
       ]);
-      console.log('data recibida:', lista);
-      console.log('dataset procesado:', dataSet);
-
+  
       const dt = $tabla.DataTable({
         language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
         data: dataSet,

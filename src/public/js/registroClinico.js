@@ -56,7 +56,6 @@ $(document).ready(function () {
         return res.json();
       })
       .then(data => {
-        console.log('📦 DATA:', data);
 
         ultimaAdmisionPaciente = data.ultimaAdmision?.id_admision || null;
 
@@ -82,7 +81,6 @@ $(document).ready(function () {
         mostrarBotonesAccion(data.paciente.id_paciente);
 
         const episodios = agruparPorEpisodios(registrosPaciente);
-        console.log('📊 episodios:', episodios);
         mostrarEpisodios(episodios);
       })
 

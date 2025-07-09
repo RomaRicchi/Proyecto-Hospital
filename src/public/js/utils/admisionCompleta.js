@@ -30,7 +30,6 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 			if (!isNaN(fecha.getTime())) {
 				fechaIngresoDefault = fecha.toISOString().slice(0, 16);
 			} else {
-				console.warn('⚠️ Fecha inválida:', fechaDashboard);
 				fechaIngresoDefault = null;
 			}
 		} else {
@@ -111,9 +110,7 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 		return;
 		}
 
-		const fechaISO = fechaIngreso.toISOString(); 
-		console.log('📆 Fecha válida ISO:', fechaISO);
-
+		const fechaISO = fechaIngreso.toISOString();
 		const inputFechaEgreso = document.querySelector('#fecha_hora_egreso');
 		const inputMotivoEgr = document.querySelector('#motivo_egr');
 		
@@ -141,8 +138,6 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 
 		// 🔽 5. Enviar admisión
 		Swal.showLoading();
-		console.log('🩺 ID Usuario médico asignado:', result.value.id_usuario);
-
 		const admResp = await fetch('/api/admisiones', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -197,7 +192,6 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 
 
 	} catch (error) {
-		console.error(error);
 		await Swal.fire('Error', 'Ocurrió un error inesperado', 'error');
 	}
 }

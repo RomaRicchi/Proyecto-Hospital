@@ -63,7 +63,6 @@ export const vistaPanelSalud = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error en vistaPanelSalud:', error);
     res.status(500).send('Error al cargar panel de salud');
   }
 };

@@ -41,14 +41,12 @@ export const validarAdmisionPorDNI = async (req, res) => {
 
     res.json({ vigente: !!admision });
   } catch (error) {
-    console.error('Error en validación:', error);
     res.status(500).json({ message: 'Error en validación' });
   }
 };
 
 export const createAdmision = async (req, res) => {
   try {
-    console.log('📝 Body recibido en createAdmision:', req.body);
 
     const {
       id_cama,
@@ -174,7 +172,6 @@ export const createAdmision = async (req, res) => {
 
     res.status(201).json(nueva);
   } catch (error) {
-    console.error('❌ Error en createAdmision:', error);
     if (error.code === 'ER_DUP_ENTRY' && error.sqlMessage?.includes('num_asociado')) {
       return res.status(400).json({ message: 'El número de asociado ya está registrado' });
     }
@@ -220,7 +217,6 @@ export const getOpcionesAdmision = async (req, res) => {
       personal
     });
   } catch (error) {
-    console.error('❌ Error en getOpcionesAdmision:', error);
     res.status(500).json({ message: 'Error al obtener opciones' });
   }
 };
@@ -304,7 +300,6 @@ export const getAdmisiones = async (req, res) => {
 
     res.json(resultado);
   } catch (error) {
-    console.error('❌ Error en getAdmisiones:', error);
     res.status(500).json({ error: 'Error al obtener admisiones' });
   }
 };
@@ -344,7 +339,6 @@ export const getAdmisionById = async (req, res) => {
 
     res.json(admision);
   } catch (error) {
-    console.error('❌ Error en getAdmisionById:', error);
     res.status(500).json({ message: 'Error al obtener admisión' });
   }
 };

@@ -1,6 +1,5 @@
 $(document).ready(function () {
-	console.log('🟢 Script de reservas cargado');
-
+	
 	async function cargarReservas() {
 		try {
 			const resp = await fetch('/api/camas/reservadas');
@@ -57,7 +56,6 @@ $(document).ready(function () {
 				destroy: true,
 			});
 		} catch (error) {
-			console.error('❌ Error al cargar reservas:', error);
 			Swal.fire('Error', error.message || 'No se pudo cargar la tabla', 'error');
 		}
 	}
@@ -102,7 +100,6 @@ $(document).ready(function () {
 			$(`#egreso-${id}`).prop('disabled', false).removeAttr('title');
 			$(`#motivoEgr-${id}`).prop('disabled', false).removeAttr('title');
 		} catch (err) {
-			console.error(err);
 			Swal.fire('Error', err.message || 'Error al confirmar', 'error');
 		}
 	});
@@ -133,7 +130,6 @@ $(document).ready(function () {
 			await Swal.fire('Cancelada', 'Reserva eliminada correctamente', 'success');
 			cargarReservas(); // recargar la tabla
 		} catch (err) {
-			console.error(err);
 			Swal.fire('Error', err.message || 'Error al cancelar', 'error');
 		}
 	});

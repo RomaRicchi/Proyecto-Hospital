@@ -38,7 +38,6 @@ export const verificarPacienteConMovimientoActivo = async (req, res) => {
     return res.json({ ok: true });
 
   } catch (error) {
-    console.error('Error al verificar paciente con cama activa:', error);
     return res.status(500).json({ message: 'Error del servidor' });
   }
 };
@@ -88,7 +87,6 @@ export const vistaDashboard = async (req, res) => {
 
     res.render('dashboard', { camas });
   } catch (error) {
-    console.error('Error al cargar el panel principal:', error);
     res.status(500).send('Error al cargar el panel principal');
   }
 };

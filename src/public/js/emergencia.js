@@ -87,7 +87,6 @@ $(document).ready(function () {
 
       Swal.fire('Ingreso exitoso', data.mensaje, 'success').then(() => location.reload());
     } catch (err) {
-      console.error(err);
       Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
     }
   });

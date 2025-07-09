@@ -80,7 +80,6 @@ export const crearRegistro = async (req, res) => {
 
     res.status(201).json(nuevo);
   } catch (e) {
-    console.error('❌ Error al crear registro:', e);
     res.status(500).json({ message: 'Error al crear registro clínico' });
   }
 };
@@ -204,7 +203,6 @@ export const buscarPorDNI = async (req, res) => {
         : null
     });
   } catch (err) {
-    console.error('❌ Error al buscar por DNI:', err);
     res.status(500).json({ message: 'Error interno' });
   }
 };
@@ -259,7 +257,6 @@ export const vistaRegistroClinico = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('💥 Error en vistaRegistroClinico:', error);
     res.status(500).send('Error al mostrar registros clínicos');
   }
 };

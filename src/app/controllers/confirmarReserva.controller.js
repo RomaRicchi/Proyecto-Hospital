@@ -47,7 +47,6 @@ export const vistaReservarCama = async (req, res) => {
 
     res.render('reservaCama', { camas });
   } catch (error) {
-    console.error('Error al mostrar camas reservadas:', error);
     res.status(500).send('Error al cargar reservas');
   }
 };
@@ -99,14 +98,12 @@ export const confirmarReserva = async (req, res) => {
 
     res.json({ message: 'Reserva confirmada exitosamente' });
   } catch (error) {
-    console.error('Error al confirmar reserva:', error);
     res.status(500).json({ message: 'Error al confirmar la reserva' });
   }
 };
 
 export const cancelarReserva = async (req, res) => {
   const { id_movimiento } = req.params;
-  console.log('Cancelar reserva, id_movimiento:', id_movimiento);
   try {
     const movimiento = await MovimientoHabitacion.findByPk(id_movimiento, {
       include: [{ model: Admision, as: 'admision' }]
@@ -133,7 +130,6 @@ export const cancelarReserva = async (req, res) => {
 
     res.json({ message: 'Reserva cancelada correctamente' });
   } catch (error) {
-    console.error('Error al cancelar reserva:', error);
     res.status(500).json({ message: 'Error al cancelar la reserva' });
   }
 };

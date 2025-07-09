@@ -132,7 +132,6 @@ export const darAltaPaciente = async (req, res) => {
 			message: 'Alta registrada correctamente',
 		});
 	} catch (error) {
-		console.error('❌ Error en darAltaPaciente:', error);
 		res.status(500).json({ success: false, message: 'Error inesperado del servidor' });
 	}
 };

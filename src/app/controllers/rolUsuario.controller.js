@@ -51,7 +51,6 @@ export const vistaRolUsuario = async (req, res) => {
 		const roles = await RolUsuario.findAll();
 		res.render('rolUsuario', { roles });
 	} catch (error) {
-		console.error('❌ Error en vistaRolUsuario:', error);
 		res.status(500).send('Error al mostrar roles de usuario');
 	}
 };

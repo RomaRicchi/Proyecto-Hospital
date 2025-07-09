@@ -72,7 +72,6 @@ export const createHabitacion = async (req, res) => {
     res.status(201).json(nueva);
 
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: 'Error al crear habitación' });
   }
 };
@@ -113,7 +112,6 @@ export const updateHabitacion = async (req, res) => {
 
     res.json(habitacion);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: 'Error al actualizar habitación' });
   }
 };

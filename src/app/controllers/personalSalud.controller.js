@@ -14,7 +14,6 @@ export const getPersonalSalud = async (req, res) => {
     });
     res.json(personal);
   } catch (error) {
-    console.error('Error al obtener personal de salud:', error);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
@@ -82,7 +81,6 @@ export const vistaPersonalSalud = async (req, res) => {
 		});
 		res.render('salud', { personal });
 	} catch (error) {
-		console.error(error);
 		res.status(500).send('Error al cargar personal de salud');
 	}
 };
