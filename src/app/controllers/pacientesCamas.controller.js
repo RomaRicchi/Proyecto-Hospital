@@ -79,3 +79,35 @@ export const vistaPacientesCamas = async (req, res) => {
     res.status(500).send('Error al cargar pacientes en cama.');
   }
 };
+
+export const obtenerCamaActual = async (id_admision) => {
+  const ahoraUTC = toUTC(new Date());
+
+  const mov = await MovimientoHabitacion.findOne({
+    where: {
+      id_mov: 1, // ingreso
+      estado: 1,
+      id_admision,
+      fecha_hora_ingreso: { [Op.lte]: ahoraUTC },
+      [Op.or]: [
+        { fecha_hora_egreso: null },
+        { fecha_hora_egreso: { [Op.gte]: ahoraUTC } },
+      ],
+    },
+    include: [
+      {
+        model: Cama,
+        as: 'cama',
+        include: [
+          {
+            model: Habitacion,
+            as: 'habitacion',
+            include: [{ model: Sector, as: 'sector' }],
+          },
+        ],
+      },
+    ],
+  });
+
+  return mov?.cama || null;
+};

@@ -4,10 +4,14 @@ import {
   Paciente, 
   TipoRegistro,
   Usuario, 
-  PersonalSalud 
+  PersonalSalud,
+  MovimientoHabitacion,
+  Cama,             
+  Habitacion,        
+  Sector 
 } from '../models/index.js';
-
-import { toUTC, fromUTCToArgentina } from '../helpers/timezone.helper.js';
+import { obtenerCamaActual } from './pacientesCamas.controller.js';
+import { toUTC } from '../helpers/timezone.helper.js';
 
 export const listarRegistros = async (req, res) => {
   try {
@@ -146,8 +150,39 @@ export const buscarPorDNI = async (req, res) => {
       order: [['fecha_hora_reg', 'DESC']]
     });
 
+    const movimiento = await MovimientoHabitacion.findOne({
+      where: {
+        estado: 1,
+        id_mov: 1,
+      },
+      include: [
+        {
+          model: Admision,
+          as: 'admision',
+          where: { id_paciente: paciente.id_paciente }
+        },
+        {
+          model: Cama,
+          as: 'cama',
+          include: [
+            {
+              model: Habitacion,
+              as: 'habitacion',
+              include: [{ model: Sector, as: 'sector' }]
+            }
+          ]
+        }
+      ]
+    });
+
+    let camaAsignada = null;
+
+    if (ultimaAdmisionVigente) {
+      camaAsignada = await obtenerCamaActual(ultimaAdmisionVigente.id_admision);
+    }
+
     const adaptados = registros.map(r => ({
-      fecha: fromUTCToArgentina(r.fecha_hora_reg).toLocaleString('es-AR'),
+      fecha: new Date(r.fecha_hora_reg).toISOString(),
       tipo: r.tipo_registro?.nombre || '-',
       id_tipo: r.tipo_registro?.id_tipo || null,
       detalle: r.detalle || '-',
@@ -159,6 +194,13 @@ export const buscarPorDNI = async (req, res) => {
       registros: adaptados,
       ultimaAdmision: ultimaAdmisionVigente
         ? { id_admision: ultimaAdmisionVigente.id_admision }
+        : null,
+      cama: movimiento
+        ? {
+            nombre: movimiento.cama?.nombre || '',
+            habitacion: movimiento.cama?.habitacion?.num || '',
+            sector: movimiento.cama?.habitacion?.sector?.nombre || ''
+          }
         : null
     });
   } catch (err) {
@@ -167,9 +209,10 @@ export const buscarPorDNI = async (req, res) => {
   }
 };
 
-
 export const vistaRegistroClinico = async (req, res) => {
   try {
+    const { dni } = req.query;
+
     const registros = await RegistroHistoriaClinica.findAll({
       include: [
         {
@@ -200,14 +243,21 @@ export const vistaRegistroClinico = async (req, res) => {
       id: r.id_registro,
       tipo: r.tipo_registro?.nombre || '-',
       detalle: r.detalle || '-',
-      fecha: fromUTCToArgentina(r.fecha_hora_reg).toLocaleString('es-AR'),
+      fecha: new Date(r.fecha_hora_reg).toISOString(), 
       paciente: r.admision_historia?.paciente_admision
         ? `${r.admision_historia.paciente_admision.nombre_p} ${r.admision_historia.paciente_admision.apellido_p}`
         : '-',
       usuario: r.usuario?.username || '-'
     }));
 
-    res.render('registroClinico', { registros: adaptados });
+    res.render('registroClinico', {
+      usuario: req.session.usuario,
+      registros: adaptados,
+      dni: dni || null,
+      username: req.session.usuario.username,
+      idUsuario: req.session.usuario.id
+    });
+
   } catch (error) {
     console.error('💥 Error en vistaRegistroClinico:', error);
     res.status(500).send('Error al mostrar registros clínicos');

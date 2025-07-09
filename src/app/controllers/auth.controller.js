@@ -51,10 +51,15 @@ export const login = async (req, res) => {
 			id: user.id_usuario,
 			nombre: personal?.nombre || 'Usuario',
 			apellido: personal?.apellido || '',
-			rol: personal?.id_rol_usuario || 1, // 👈 numérico
+			rol: personal?.id_rol_usuario || 1,
 		};
 
-		res.redirect('/dashboard');
+		if ([3, 4].includes(personal?.id_rol_usuario)) {
+			return res.redirect('/panel-salud');
+		} else {
+			return res.redirect('/dashboard');
+		}
+
 	} catch (error) {
 		res.status(500).render('users', { error: 'Error interno del servidor' });
 	}

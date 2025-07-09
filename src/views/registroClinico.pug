@@ -8,13 +8,13 @@ block content
       // 🔍 Campo para buscar por DNI
       .mb-4
         label(for="dniBuscar") DNI del paciente:
-        input#dniBuscar.form-control(type="text", placeholder="Ingrese DNI")
+        input#dniBuscar.form-control(type="text", placeholder="Ingrese DNI", value=dni)
         button#btnBuscar.btn.btn-primary.mt-2 Buscar
 
       // 👤 Info del paciente
       #infoPaciente.mt-4.text-start
       #accionesRegistro.mt-3
-
+      div#usuarioData(data-username=username data-id=idUsuario style="display: none")
 
       // 🧾 Contenedor para la tabla
       .table-responsive.mt-3

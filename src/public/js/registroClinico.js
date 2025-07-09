@@ -23,22 +23,22 @@ $(document).ready(function () {
     const grupos = [];
     let episodio = [];
 
-    registros.forEach(r => {
+    const ordenados = [...registros].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
+    ordenados.forEach(r => {
       if (r.id_tipo === ID_INGRESO) {
         if (episodio.length) grupos.push(episodio);
         episodio = [r];
-      } else if (episodio.length) {
+      } else {
         episodio.push(r);
         if (r.id_tipo === ID_EGRESO) {
           grupos.push(episodio);
           episodio = [];
         }
-      } else {
-        grupos.push([r]);
       }
     });
 
-    if (episodio.length) grupos.push(episodio);
+    if (episodio.length > 0) grupos.push(episodio);
 
     return grupos;
   }
@@ -56,12 +56,13 @@ $(document).ready(function () {
         return res.json();
       })
       .then(data => {
-        ultimaAdmisionPaciente = data.ultimaAdmision?.id_admision || null;
-        registrosPaciente = data.registros;
+        console.log('📦 DATA:', data);
 
-        if (!data || data.registros.length === 0) {
+        ultimaAdmisionPaciente = data.ultimaAdmision?.id_admision || null;
+
+        if (!data || !Array.isArray(data.registros) || data.registros.length === 0) {
           if (data?.paciente) {
-            mostrarInfoPaciente(data.paciente);
+            mostrarInfoPaciente(data.paciente, data.cama);
             mostrarBotonesAccion(data.paciente.id_paciente);
           } else {
             $info.html('');
@@ -72,30 +73,44 @@ $(document).ready(function () {
           return;
         }
 
-        mostrarInfoPaciente(data.paciente);
+        registrosPaciente = data.registros.map(r => ({
+          ...r,
+          fecha: new Date(r.fecha).toISOString()
+        }));
+
+        mostrarInfoPaciente(data.paciente, data.cama);
         mostrarBotonesAccion(data.paciente.id_paciente);
+
         const episodios = agruparPorEpisodios(registrosPaciente);
+        console.log('📊 episodios:', episodios);
         mostrarEpisodios(episodios);
       })
+
       .catch(() => {
         $tabla.html('<div class="alert alert-danger">Error al buscar registros</div>');
         $info.html('');
       });
   });
 
-  function mostrarInfoPaciente(p) {
+  function mostrarInfoPaciente(p, cama = null) {
     if (!p) {
       $info.html('');
       return;
     }
 
     const edad = calcularEdad(p.fecha_nac);
-    $info.html(`
+    let html = `
       <div class="alert alert-info">
         <strong>Paciente:</strong> ${p.apellido_p}, ${p.nombre_p} &nbsp; | &nbsp;
         <strong>Edad:</strong> ${edad} años
-      </div>
-    `);
+    `;
+
+    if (cama) {
+      html += ` &nbsp; | &nbsp; <strong>Cama:</strong> ${cama.nombre} - Hab ${cama.habitacion} (${cama.sector})`;
+    }
+
+    html += `</div>`;
+    $info.html(html);
   }
 
   function calcularEdad(fechaNac) {
@@ -155,7 +170,11 @@ $(document).ready(function () {
       episodio.forEach(r => {
         html += `
           <tr>
-            <td>${fromUTCToArgentina(r.fecha).toLocaleString('es-AR')}</td>
+            <td>${
+              r.fecha && !isNaN(new Date(r.fecha))
+                ? fromUTCToArgentina(r.fecha).toLocaleString('es-AR')
+                : '—'
+            }</td>
             <td>${r.tipo}</td>
             <td>${r.detalle}</td>
             <td>${r.usuario}</td>
@@ -258,7 +277,7 @@ $(document).ready(function () {
               tipo: tipoSeleccionado?.nombre || '-',
               id_tipo: parseInt(result.value.id_tipo),
               detalle: result.value.detalle,
-              usuario: 'Actual' // podés cambiar por el real si tenés sesión
+              usuario:  usuarioLogueado,
             };
 
             registrosPaciente.push(nuevoRegistro);

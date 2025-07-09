@@ -21,4 +21,5 @@ $(document).ready(function () {
       <div class="alert alert-warning mt-3">No hay camas ocupadas en este momento.</div>
     `);
   }
+  
 });
