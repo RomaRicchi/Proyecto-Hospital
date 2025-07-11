@@ -4,19 +4,27 @@ import {
 	ObraSocial,
 	Usuario,
 	Cama,
+  Habitacion,
+  Sector,
 	MotivoIngreso,
 	MovimientoHabitacion,
 	PersonalSalud,
 	RegistroHistoriaClinica,
 	TipoRegistro,
   Especialidad,
+  sequelize,
 } from '../models/index.js';
 import {
   validarConflictoReserva,
   validarOcupacionCamaPorAdmision,
   validarOcupacionCamaPorAdmisionExcepto,
   validarMovimientoEgresoExistente,
+  verificarGeneroHabitacion,
 } from '../validators/admision.validator.js';
+import {
+  calcularEdad,
+  validarCompatibilidadPacienteSector
+} from '../validators/validarSectorPaciente.js';
 import { ajustarFechaLocal } from '../helpers/timezone.helper.js';
 import { Op } from 'sequelize';
 
@@ -46,14 +54,14 @@ export const validarAdmisionPorDNI = async (req, res) => {
 };
 
 export const createAdmision = async (req, res) => {
+  const t = await sequelize.transaction(); 
   try {
-
     const {
       id_cama,
       id_mov,
       fecha_hora_ingreso,
       fecha_hora_egreso,
-      id_usuario,     
+      id_usuario,
       id_paciente
     } = req.body;
 
@@ -69,6 +77,10 @@ export const createAdmision = async (req, res) => {
       }
     }
 
+    const paciente = await Paciente.findByPk(id_paciente);
+    if (!paciente) return res.status(400).json({ message: 'Paciente no encontrado' });
+    const genero = paciente.id_genero;
+    const fecha_nac = paciente.fecha_nac;
     req.body.id_usuario = id_usuario;
 
     const fechaIngreso = ajustarFechaLocal(fecha_hora_ingreso);
@@ -87,12 +99,29 @@ export const createAdmision = async (req, res) => {
       return res.status(400).json({ message: 'La fecha de egreso no puede ser anterior a la de ingreso' });
     }
 
-    const cama = id_cama ? await Cama.findByPk(id_cama) : null;
+    const cama = id_cama ? await Cama.findByPk(id_cama, {
+      include: [
+        { model: Habitacion, as: 'habitacion', include: [{ model: Sector, as: 'sector' }] }
+      ],
+      transaction: t,
+    }) : null;
+
     if (id_cama && !cama) {
       return res.status(400).json({ message: 'Cama no encontrada' });
     }
 
-    if (cama && Number(cama.desinfeccion) !== 1) {
+    if (cama) {
+      const habitacionId = cama.id_habitacion;
+      await verificarGeneroHabitacion(habitacionId, genero, t);
+      const sector = cama.habitacion?.sector?.nombre || '';
+      const edad = calcularEdad(fecha_nac);
+      const compatible = validarCompatibilidadPacienteSector(edad, genero, sector);
+      if (!compatible) {
+        throw new Error(`El paciente no cumple los requisitos para el sector "${sector}".`);
+      }
+    }
+
+    if (id_mov === 1 && cama && Number(cama.desinfeccion) !== 1) {
       return res.status(400).json({ message: 'La cama aún no está desinfectada' });
     }
 
@@ -115,7 +144,8 @@ export const createAdmision = async (req, res) => {
             fecha_hora_egreso: { [Op.gte]: nuevaFecha }
           }
         ]
-      }
+      },
+      transaction: t
     });
 
     if (solapada) {
@@ -132,10 +162,24 @@ export const createAdmision = async (req, res) => {
       await validarOcupacionCamaPorAdmision(id_cama, fecha_hora_ingreso);
     }
 
-    const nueva = await Admision.create(req.body);
+    // Crear admisión
+    const nueva = await Admision.create(req.body, { transaction: t });
 
+    // Crear movimiento habitación directamente acá
+    await MovimientoHabitacion.create({
+      id_admision: nueva.id_admision,
+      id_habitacion: cama?.id_habitacion,
+      id_cama,
+      fecha_hora_ingreso: nueva.fecha_hora_ingreso,
+      fecha_hora_egreso: fecha_hora_egreso || null,
+      id_mov,
+      estado: 1
+    }, { transaction: t });
+
+    // Historia clínica
     const tipoIngreso = await TipoRegistro.findOne({
-      where: { nombre: { [Op.like]: '%ingreso%' } }
+      where: { nombre: { [Op.like]: '%ingreso%' } },
+      transaction: t
     });
 
     if (!tipoIngreso) {
@@ -149,31 +193,28 @@ export const createAdmision = async (req, res) => {
       id_tipo: tipoIngreso.id_tipo,
       detalle: `Ingreso hospitalario: ${nueva.descripcion || ''}`,
       estado: 1
-    });
-
-    if (fecha_hora_egreso) {
-      await MovimientoHabitacion.update(
-        { fecha_hora_egreso },
-        {
-          where: {
-            id_admision: nueva.id_admision,
-            fecha_hora_egreso: null,
-            estado: 1,
-            id_mov: 1,
-          },
-        }
-      );
-    }
+    }, { transaction: t });
 
     if (id_cama && id_mov === 1 && fechaIngreso <= new Date()) {
       cama.estado = 1;
-      await cama.save();
+      await cama.save({ transaction: t });
     }
 
+    await t.commit();
     res.status(201).json(nueva);
+
   } catch (error) {
-    if (error.code === 'ER_DUP_ENTRY' && error.sqlMessage?.includes('num_asociado')) {
-      return res.status(400).json({ message: 'El número de asociado ya está registrado' });
+    if (t) await t.rollback();
+    // Manejo de errores de validación esperados
+    if (
+      error.message && (
+        error.message.includes('género') ||
+        error.message.includes('otro género') ||
+        error.message.includes('requisitos para el sector') ||
+        error.message.includes('Ya hay pacientes de otro género')
+      )
+    ) {
+      return res.status(409).json({ message: error.message });
     }
     res.status(500).json({ message: error.message });
   }
@@ -237,12 +278,12 @@ export const getAdmisiones = async (req, res) => {
         },
         {
           model: Usuario,
-          as: 'usuario_medico', // ✅ alias correcto según el modelo Admision
+          as: 'usuario_medico', 
           attributes: ['id_usuario', 'username'],
           include: [
             {
               model: PersonalSalud,
-              as: 'datos_medico', // ✅ alias correcto según el modelo Usuario
+              as: 'datos_medico', 
               attributes: ['nombre', 'apellido'],
             },
           ],
@@ -269,34 +310,38 @@ export const getAdmisiones = async (req, res) => {
       hour12: false,
     };
 
-    const resultado = admisiones.map((a) => {
-      const movimientoActivo = a.movimientos_habitacion?.find(
-        (m) => m.estado === 1 || m.fecha_hora_egreso == null
-      );
+    const resultado = admisiones
+      .map((a) => {
+        const movimientoActivo = a.movimientos_habitacion?.find(
+          (m) => m.estado === 1 && m.id_mov === 1 && m.fecha_hora_egreso == null
+        );
 
-      return {
-        id_admision: a.id_admision,
-        tipo_movimiento: movimientoActivo?.id_mov || null,
-        paciente: a.paciente
-          ? `${a.paciente.apellido_p} ${a.paciente.nombre_p}`
-          : 'Sin paciente',
-        dni_paciente: a.paciente?.dni_paciente || '-',
-        obra_social: a.obra_social?.nombre || 'Sin cobertura',
-        num_asociado: a.num_asociado,
-        motivo_ingreso: a.motivo_ingreso?.tipo || '-',
-        descripcion: a.descripcion || '-',
-        fecha_ingreso: a.fecha_hora_ingreso
-          ? new Date(a.fecha_hora_ingreso).toLocaleString('es-AR', formatoFechaHora)
-          : '-',
-        fecha_egreso: a.fecha_hora_egreso
-          ? new Date(a.fecha_hora_egreso).toLocaleString('es-AR', formatoFechaHora)
-          : 'En internación',
-        motivo_egr: a.motivo_egr || '-',
-        usuario_asignado: a.usuario_medico?.datos_medico
-          ? `${a.usuario_medico.datos_medico.apellido}, ${a.usuario_medico.datos_medico.nombre}`
-          : a.usuario_medico?.username || 'No asignado',
-      };
-    });
+        if (!movimientoActivo) return null;
+
+        return {
+          id_admision: a.id_admision,
+          tipo_movimiento: movimientoActivo.id_mov,
+          paciente: a.paciente
+            ? `${a.paciente.apellido_p} ${a.paciente.nombre_p}`
+            : 'Sin paciente',
+          dni_paciente: a.paciente?.dni_paciente || '-',
+          obra_social: a.obra_social?.nombre || 'Sin cobertura',
+          num_asociado: a.num_asociado,
+          motivo_ingreso: a.motivo_ingreso?.tipo || '-',
+          descripcion: a.descripcion || '-',
+          fecha_ingreso: a.fecha_hora_ingreso
+            ? new Date(a.fecha_hora_ingreso).toLocaleString('es-AR', formatoFechaHora)
+            : '-',
+          fecha_egreso: a.fecha_hora_egreso
+            ? new Date(a.fecha_hora_egreso).toLocaleString('es-AR', formatoFechaHora)
+            : 'En internación',
+          motivo_egr: a.motivo_egr || '-',
+          usuario_asignado: a.usuario_medico?.datos_medico
+            ? `${a.usuario_medico.datos_medico.apellido}, ${a.usuario_medico.datos_medico.nombre}`
+            : a.usuario_medico?.username || 'No asignado',
+        };
+      })
+      .filter(Boolean);
 
     res.json(resultado);
   } catch (error) {

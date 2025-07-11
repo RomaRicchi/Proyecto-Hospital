@@ -1,9 +1,15 @@
-import { obtenerFechaBusquedaFormateada, 
-	aplicarReservaSemanal,
-	parseFechaLocal,
+import {
+	validarCompatibilidadPacienteSector,
+	obtenerCriteriosPorSector
+} from './validarSectorPaciente.js';
+import {
+  aplicarReservaSemanal,
+  parseFechaLocal,
+  getFechaLocalParaInput,
+  toUTC, 
 } from './validacionFechas.js';
 
-export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_habitacion, fechaDashboard) {
+export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_habitacion, fechaDashboard, edad, sector_nombre) {
 	try {
 		const [motivos, obras, medicos] = await Promise.all([
 			fetch('/api/motivos_ingreso').then(r => r.json()),
@@ -20,22 +26,10 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 				${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula} - ${m.especialidad}
 			</option>`
 		).join('');
-		
-		let fechaIngresoDefault;
-
-		if (fechaDashboard) {
-			// Asegurarse de que tenga formato YYYY-MM-DD
-			const soloFecha = fechaDashboard.split('T')[0]; // Quita parte de hora si ya la trae
-			const fecha = new Date(`${soloFecha}T09:00:00`);
-			if (!isNaN(fecha.getTime())) {
-				fechaIngresoDefault = fecha.toISOString().slice(0, 16);
-			} else {
-				fechaIngresoDefault = null;
-			}
-		} else {
-			const now = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
-			fechaIngresoDefault = now.toISOString().slice(0, 16);
-		}
+				
+		let fechaIngresoDefault = fechaDashboard
+			? new Date(`${fechaDashboard.split('T')[0]}T09:00:00`).toISOString().slice(0, 16)
+			: getFechaLocalParaInput();
 
 		const result = await Swal.fire({
 			title: 'Registrar Admisión',
@@ -61,7 +55,7 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 
 				<input type="text" id="motivo_egr" class="swal2-input" placeholder="Motivo egreso (opcional)">
 
-                <select id="id_usuario" class="swal2-input" style="max-width: 100%; overflow: hidden;">>
+                <select id="id_usuario" class="swal2-input" style="max-width: 100%; overflow: hidden;">
                     <option value="">Seleccione médico</option>
                     ${medicosOptions}
                 </select>
@@ -101,49 +95,58 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 			}
 		});
 
-		// 📌 Obtener valor del input y convertirlo correctamente
+		//  Obtener valor del input y convertirlo correctamente
 		const inputFechaIngreso = document.querySelector('#fecha_hora_ingreso');
-		const fechaIngresoStr = inputFechaIngreso?.value;
-		const fechaIngreso = parseFechaLocal(fechaIngresoStr);
+		const inputFechaEgreso = document.querySelector('#fecha_hora_egreso');
+		const inputMotivoEgr = document.querySelector('#motivo_egr');
+
+		const fechaIngreso = parseFechaLocal(inputFechaIngreso?.value);
 		if (!fechaIngreso) {
-		Swal.fire('Error', 'La fecha de ingreso no es válida.', 'error');
+		await Swal.fire('Error', 'La fecha de ingreso no es válida.', 'error');
 		return;
 		}
 
-		const fechaISO = fechaIngreso.toISOString();
-		const inputFechaEgreso = document.querySelector('#fecha_hora_egreso');
-		const inputMotivoEgr = document.querySelector('#motivo_egr');
-		
-		const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
-		const manana = new Date(hoy); manana.setDate(hoy.getDate() + 1);
-
+		const hoy = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
+		hoy.setHours(0, 0, 0, 0);
+		const manana = new Date(hoy);
+		manana.setDate(hoy.getDate() + 1);
+				
 		if (!result.isConfirmed) return;
-
+		
 		const { fecha_hora_ingreso } = result.value;
 		let { fecha_hora_egreso } = result.value;
 		let id_mov = 1;
 
-		// 🧠 Si es reserva futura:
-		const seleccionFinal = new Date(fecha_hora_ingreso);
+		const seleccionFinalLocal = new Date(fecha_hora_ingreso); 
+		const seleccionFinal = new Date(seleccionFinalLocal.getTime() - seleccionFinalLocal.getTimezoneOffset() * 60000); // lo pasás a UTC real
+		if (seleccionFinal < hoy) {
+			await Swal.fire('Error', 'No se permite una fecha de ingreso en el pasado', 'error');
+			return;
+		}
 		if (seleccionFinal >= manana) {
 			id_mov = 3;
 			aplicarReservaSemanal(inputFechaIngreso, inputFechaEgreso, inputMotivoEgr);
 			fecha_hora_egreso = inputFechaEgreso.value;
 		}
 
-		if (seleccionFinal < hoy) {
-			await Swal.fire('Error', 'No se puede seleccionar una fecha pasada', 'error');
-			return;
+		if (fecha_hora_egreso) {
+			const ingreso = new Date(fecha_hora_ingreso);
+			const egreso = new Date(fecha_hora_egreso);
+			if (egreso < ingreso) {
+				await Swal.fire('Error', 'La fecha de egreso debe ser posterior a la de ingreso', 'error');
+				return;
+			}
 		}
 
-		// 🔽 5. Enviar admisión
+		// Enviar admisión
 		Swal.showLoading();
 		const admResp = await fetch('/api/admisiones', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				...result.value,
-				fecha_hora_egreso,
+				fecha_hora_ingreso: toUTC(result.value.fecha_hora_ingreso).toISOString(),
+				fecha_hora_egreso: fecha_hora_egreso ? toUTC(fecha_hora_egreso).toISOString() : null,
 				id_paciente: paciente.id_paciente,
 				id_cama,
 				id_mov,
@@ -159,27 +162,6 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 		const admision = await admResp.json();
 		if (!admision?.id_admision) {
 			await Swal.fire('Error', 'No se pudo obtener el ID de la admisión creada.', 'error');
-			return;
-		}
-
-		// 🔽 6. Registrar movimiento
-		const movResp = await fetch('/api/movimientos_habitacion', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				id_admision: admision.id_admision,
-				id_habitacion,
-				id_cama,
-				fecha_hora_ingreso: admision.fecha_hora_ingreso,
-				fecha_hora_egreso: fecha_hora_egreso || admision.fecha_hora_egreso || null,
-				id_mov,
-				estado: 1
-			})
-		});
-
-		if (!movResp.ok) {
-			const err = await movResp.json();
-			await Swal.fire('Error', err.message || 'No se pudo registrar el movimiento', 'error');
 			return;
 		}
 

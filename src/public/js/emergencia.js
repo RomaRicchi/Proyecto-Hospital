@@ -1,5 +1,8 @@
+import { getFechaLocalParaInput } from './utils/validacionFechas.js';
+
 $(document).ready(function () {
-  
+  $('#fecha_hora_ingreso').val(getFechaLocalParaInput());
+
   const tipoSelectHtml = `
     <label for="tipo_emergencia">Tipo de emergencia</label>
     <select id="tipo_emergencia" class="form-control" required>

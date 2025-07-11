@@ -7,7 +7,7 @@ import {
 	updateMovimientoHabitacion,
 	verificarGenero,
 	deleteMovimientoHabitacion,
-	
+	getMovimientosActivosPorHabitacion,
 } from '../controllers/movimientoHabitacion.controller.js';
 
 import {
@@ -18,7 +18,7 @@ import {
 const router = Router();
 
 router.post('/verificar-genero', verificarGenero);
-
+router.get('/activos/habitacion/:id_habitacion', getMovimientosActivosPorHabitacion);
 router.get('/', getMovimientosHabitacion);
 router.get('/:id', getMovimientoHabitacionById);
 router.post('/', createMovimientoHabitacion);

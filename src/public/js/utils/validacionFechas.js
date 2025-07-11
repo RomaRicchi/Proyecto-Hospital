@@ -52,6 +52,7 @@ export function aplicarReservaSemanal(inputIngreso, inputEgreso, inputMotivoEgr)
 		inputMotivoEgr.title = 'Deshabilitado hasta que se confirme la reserva.';
 	}
 }
+
 export function parseFechaLocal(fechaStr) {
 	if (!fechaStr) return null;
 	if (!fechaStr.includes(':')) return null;
@@ -78,3 +79,8 @@ export function fromUTCToArgentina(dateInput) {
   return new Date(date.getTime() - 3 * 60 * 60 * 1000); // UTC-3
 }
 
+export function getFechaLocalParaInput() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 16);
+}

@@ -42,46 +42,24 @@ export const verificarGenero = async (req, res) => {
       // No hay nadie en la cama, permitir
       return res.json({ success: true });
     }
-
-    const generoOcupante = movimiento.admision?.paciente?.genero?.id_genero;
-
-    // Comparar géneros
-    if (generoOcupante && generoOcupante !== id_genero) {
-      return res.status(409).json({
-        message: 'La cama ya está ocupada por un paciente de otro género.'
-      });
+    const generoOcupante = Number(movimiento.admision?.paciente?.genero?.id_genero);
+    const generoIngresado = Number(id_genero);
+    if (
+        generoOcupante !== undefined &&
+        generoIngresado !== undefined &&
+        generoOcupante !== generoIngresado
+    ) {
+        return res.status(409).json({
+            message: 'La cama ya está ocupada por un paciente de otro género.'
+        });
     }
+    console.log('Ocupante:', generoOcupante, 'Ingresado:', generoIngresado);
 
     res.json({ success: true });
 
   } catch (error) {
     res.status(500).json({ message: 'Error interno al verificar género' });
   }
-};
-
-export const verificarGeneroInterno = async (id_cama, id_genero) => {
-  const movimiento = await MovimientoHabitacion.findOne({
-    where: {
-      id_cama,
-      id_mov: 1, // ingreso / ocupa
-      estado: 1,
-      fecha_hora_egreso: null,
-    },
-    include: [{
-      model: Admision,
-      as: 'admision',
-      include: [{
-        model: Paciente,
-        as: 'paciente',
-        include: [{ model: Genero, as: 'genero' }]
-      }]
-    }]
-  });
-
-  if (!movimiento) return true;
-
-  const generoOcupante = movimiento.admision?.paciente?.genero?.id_genero;
-  return generoOcupante === id_genero;
 };
 
 export const getMovimientosHabitacion = async (req, res) => {
@@ -166,11 +144,15 @@ export const createMovimientoHabitacion = async (req, res) => {
 		const fechaEgreso = fecha_hora_egreso ? toUTC(fecha_hora_egreso) : null;
 		const esReserva = id_mov === 3 || fechaIngreso > new Date();
 
+		console.log('📩 Datos recibidos:', req.body);
+
 		const admisionNueva = await Admision.findByPk(id_admision, {
 			include: [{ model: Paciente, as: 'paciente' }],
 		});
 		if (!admisionNueva)
 			return res.status(404).json({ message: 'Admisión no encontrada' });
+
+		console.log('🧍 Paciente nuevo:', admisionNueva.paciente?.id_paciente, 'Género:', admisionNueva.paciente?.id_genero);
 
 		const movimientoOcupado = await MovimientoHabitacion.findOne({
 			where: {
@@ -178,7 +160,10 @@ export const createMovimientoHabitacion = async (req, res) => {
 				id_cama: { [Op.ne]: id_cama },
 				estado: 1,
 				id_mov: 1,
-				fecha_hora_egreso: null,
+				[Op.or]: [
+					{ fecha_hora_egreso: null },
+					{ fecha_hora_egreso: { [Op.gt]: new Date() } }
+				]
 			},
 			include: [{
 				model: Admision,
@@ -187,10 +172,14 @@ export const createMovimientoHabitacion = async (req, res) => {
 			}],
 		});
 
+		console.log('🛏️ Movimiento ocupado encontrado:', movimientoOcupado?.id_movimiento);
+		console.log('➡️ Género ocupante:', movimientoOcupado?.admision?.paciente?.id_genero);
+
 		if (
 			movimientoOcupado &&
 			movimientoOcupado.admision?.paciente?.id_genero !== admisionNueva.paciente.id_genero
 		) {
+			console.log('❌ Conflicto de género detectado');
 			return res.status(400).json({
 				message: 'No se puede internar porque hay un paciente de diferente género en la otra cama.',
 			});
@@ -216,6 +205,7 @@ export const createMovimientoHabitacion = async (req, res) => {
 
 		res.status(201).json(nuevo);
 	} catch (error) {
+		console.error('💥 Error en createMovimientoHabitacion:', error);
 		res.status(500).json({ message: 'Error al crear movimiento habitación' });
 	}
 };
@@ -301,5 +291,41 @@ export const vistaMovimientosHabitacion = async (req, res) => {
 	} catch (error) {
 		res.status(500).send('Error al cargar movimientos habitación');
 	}
+};
+
+export const getMovimientosActivosPorHabitacion = async (req, res) => {
+  try {
+    const { id_habitacion } = req.params;
+
+    const movimientos = await MovimientoHabitacion.findAll({
+      where: {
+        id_habitacion,
+        estado: 1,
+        id_mov: 1,
+        [Op.or]: [
+          { fecha_hora_egreso: null },
+          { fecha_hora_egreso: { [Op.gt]: new Date() } }
+        ]
+      },
+      include: [
+        {
+          model: Admision,
+          as: 'admision',
+          include: [
+            {
+              model: Paciente,
+              as: 'paciente',
+              include: [{ model: Genero, as: 'genero' }]
+            }
+          ]
+        }
+      ]
+    });
+
+    res.json(movimientos);
+  } catch (error) {
+    console.error('Error al obtener movimientos activos por habitación:', error.message);
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
 };
 

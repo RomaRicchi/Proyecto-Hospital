@@ -12,7 +12,7 @@ import {
   TipoRegistro
 } from '../models/index.js';
 import { Op } from 'sequelize';
-import { verificarGeneroInterno } from './movimientoHabitacion.controller.js';
+import { verificarGeneroHabitacion } from '../validators/admision.validator.js';
 
 import {
   validarEstadoCama,
@@ -101,10 +101,7 @@ export const ingresoEmergencia = async (req, res) => {
       ],
       transaction: t,
     });
-    const generoValido = await verificarGeneroInterno(id_cama, id_genero);
-    if (!generoValido) {
-      return res.status(409).json({ error: 'La cama ya está ocupada por un paciente de otro género.' });
-    }
+
     let camaAsignada = null;
 
     for (const cama of camasLibres) {
@@ -140,7 +137,8 @@ export const ingresoEmergencia = async (req, res) => {
 
     await validarEstadoCama(camaAsignada.id_cama, t);
     await validarConflictoReserva({ id_cama: camaAsignada.id_cama, fecha_hora_ingreso: fechaLocal }, t);
-
+    await verificarGeneroHabitacion(camaAsignada.id_habitacion, sexo, t); 
+    
     const admision = await Admision.create({
       id_paciente: paciente.id_paciente,
       id_obra_social: obraSocial.id_obra_social,

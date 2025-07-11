@@ -1,6 +1,7 @@
-import { toUTC, fromUTCToArgentina } from './utils/validacionFechas.js';
+import { toUTC, fromUTCToArgentina, getFechaLocalParaInput } from './utils/validacionFechas.js';
 
 $(document).ready(function () {
+  $('#fecha_hora_ingreso').val(getFechaLocalParaInput());
   const $tabla = $('#tablaRegistrosContainer');
   const $info = $('#infoPaciente');
   let registrosPaciente = [];
@@ -56,7 +57,6 @@ $(document).ready(function () {
         return res.json();
       })
       .then(data => {
-
         ultimaAdmisionPaciente = data.ultimaAdmision?.id_admision || null;
 
         if (!data || !Array.isArray(data.registros) || data.registros.length === 0) {
@@ -83,7 +83,6 @@ $(document).ready(function () {
         const episodios = agruparPorEpisodios(registrosPaciente);
         mostrarEpisodios(episodios);
       })
-
       .catch(() => {
         $tabla.html('<div class="alert alert-danger">Error al buscar registros</div>');
         $info.html('');
@@ -206,7 +205,7 @@ $(document).ready(function () {
           t => `<option value="${t.id_tipo}">${t.nombre}</option>`
         ).join('');
 
-        const fechaActual = new Date().toISOString().slice(0, 16);
+        const fechaActual = getFechaLocalParaInput();
         const ambulatorio = !ultimaAdmisionPaciente;
 
         Swal.fire({
@@ -275,7 +274,7 @@ $(document).ready(function () {
               tipo: tipoSeleccionado?.nombre || '-',
               id_tipo: parseInt(result.value.id_tipo),
               detalle: result.value.detalle,
-              usuario:  usuarioLogueado,
+              usuario: usuarioLogueado,
             };
 
             registrosPaciente.push(nuevoRegistro);

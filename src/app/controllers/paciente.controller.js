@@ -7,6 +7,7 @@ import {
 	Familiar,
 	Parentesco,
 } from '../models/index.js';
+import { calcularEdad } from '../validators/validarSectorPaciente.js';
 
 export const vistaPacientes = async (req, res) => {
 	try {
@@ -147,24 +148,43 @@ export const getGeneros = async (req, res) => {
 };
 
 export const createPaciente = async (req, res) => {
-	try {
-		const nuevo = await Paciente.create(req.body);
-		res.status(201).json(nuevo);
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+  try {
+    const { fecha_nac } = req.body;
+
+    if (fecha_nac) {
+      const edad = calcularEdad(fecha_nac);
+      if (edad < 0 || edad > 120) {
+        return res.status(400).json({ message: 'La fecha de nacimiento no es válida.' });
+      }
+    }
+
+    const nuevo = await Paciente.create(req.body);
+    res.status(201).json(nuevo);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const updatePaciente = async (req, res) => {
-	try {
-		const paciente = await Paciente.findByPk(req.params.id);
-		if (!paciente)
-			return res.status(404).json({ message: 'Paciente no encontrado' });
-		await paciente.update(req.body);
-		res.json(paciente);
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+  try {
+    const paciente = await Paciente.findByPk(req.params.id);
+    if (!paciente)
+      return res.status(404).json({ message: 'Paciente no encontrado' });
+
+    const { fecha_nac } = req.body;
+
+    if (fecha_nac) {
+      const edad = calcularEdad(fecha_nac);
+      if (edad < 0 || edad > 120) {
+        return res.status(400).json({ message: 'La fecha de nacimiento no es válida.' });
+      }
+    }
+
+    await paciente.update(req.body);
+    res.json(paciente);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const deletePaciente = async (req, res) => {
