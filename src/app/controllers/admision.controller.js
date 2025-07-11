@@ -278,12 +278,12 @@ export const getAdmisiones = async (req, res) => {
         },
         {
           model: Usuario,
-          as: 'usuario_medico', 
+          as: 'usuario_medico',
           attributes: ['id_usuario', 'username'],
           include: [
             {
               model: PersonalSalud,
-              as: 'datos_medico', 
+              as: 'datos_medico',
               attributes: ['nombre', 'apellido'],
             },
           ],
@@ -297,6 +297,7 @@ export const getAdmisiones = async (req, res) => {
           model: MovimientoHabitacion,
           as: 'movimientos_habitacion',
           attributes: ['id_mov', 'fecha_hora_egreso', 'estado'],
+          required: false, // 🔧 permite incluir admisiones sin movimientos aún
         },
       ],
     });
@@ -310,41 +311,50 @@ export const getAdmisiones = async (req, res) => {
       hour12: false,
     };
 
-    const resultado = admisiones
-      .map((a) => {
-        const movimientoActivo = a.movimientos_habitacion?.find(
-          (m) => m.estado === 1 && m.id_mov === 1 && m.fecha_hora_egreso == null
-        );
+    const ahora = new Date();
 
-        if (!movimientoActivo) return null;
+const resultado = admisiones
+  .map((a) => {
+    const ahora = new Date();
 
-        return {
-          id_admision: a.id_admision,
-          tipo_movimiento: movimientoActivo.id_mov,
-          paciente: a.paciente
-            ? `${a.paciente.apellido_p} ${a.paciente.nombre_p}`
-            : 'Sin paciente',
-          dni_paciente: a.paciente?.dni_paciente || '-',
-          obra_social: a.obra_social?.nombre || 'Sin cobertura',
-          num_asociado: a.num_asociado,
-          motivo_ingreso: a.motivo_ingreso?.tipo || '-',
-          descripcion: a.descripcion || '-',
-          fecha_ingreso: a.fecha_hora_ingreso
-            ? new Date(a.fecha_hora_ingreso).toLocaleString('es-AR', formatoFechaHora)
-            : '-',
-          fecha_egreso: a.fecha_hora_egreso
-            ? new Date(a.fecha_hora_egreso).toLocaleString('es-AR', formatoFechaHora)
-            : 'En internación',
-          motivo_egr: a.motivo_egr || '-',
-          usuario_asignado: a.usuario_medico?.datos_medico
-            ? `${a.usuario_medico.datos_medico.apellido}, ${a.usuario_medico.datos_medico.nombre}`
-            : a.usuario_medico?.username || 'No asignado',
-        };
-      })
-      .filter(Boolean);
+    const movimientoActivo = a.movimientos_habitacion?.find((m) => {
+      const { id_mov, estado, fecha_hora_egreso } = m.dataValues;
+      return (
+        estado === true &&
+        id_mov === 1 &&
+        (!fecha_hora_egreso || new Date(fecha_hora_egreso) > ahora)
+      );
+    });
+
+    if (!movimientoActivo) return null;
+
+    return {
+      id_admision: a.id_admision,
+      paciente: a.paciente
+        ? `${a.paciente.apellido_p} ${a.paciente.nombre_p}`
+        : 'Sin paciente',
+      dni_paciente: a.paciente?.dni_paciente || '-',
+      obra_social: a.obra_social?.nombre || 'Sin cobertura',
+      num_asociado: a.num_asociado,
+      motivo_ingreso: a.motivo_ingreso?.tipo || '-',
+      descripcion: a.descripcion || '-',
+      fecha_ingreso: a.fecha_hora_ingreso
+        ? new Date(a.fecha_hora_ingreso).toLocaleString('es-AR')
+        : '-',
+      fecha_egreso: a.fecha_hora_egreso
+        ? new Date(a.fecha_hora_egreso).toLocaleString('es-AR')
+        : 'En internación',
+      motivo_egr: a.motivo_egr || '-',
+      usuario_asignado: a.usuario_medico?.datos_medico
+        ? `${a.usuario_medico.datos_medico.apellido}, ${a.usuario_medico.datos_medico.nombre}`
+        : a.usuario_medico?.username || 'No asignado',
+    };
+  })
+  .filter(Boolean);
 
     res.json(resultado);
   } catch (error) {
+    console.error('❌ Error en getAdmisiones:', error);
     res.status(500).json({ error: 'Error al obtener admisiones' });
   }
 };

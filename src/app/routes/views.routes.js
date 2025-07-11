@@ -40,7 +40,7 @@ router.get('/paciente/nuevo', isAuthenticated, vistaPacienteNuevo);
 router.get('/pacientes/camas', isAuthenticated, vistaPacientesCamas);
 // 🔸 Historia clinica
 router.get('/tipoRegistro', isAuthenticated, soloRol([1]), vistaTipoRegistro);
-router.get('/registroClinico', isAuthenticated, soloRol([3, 4]), vistaRegistroClinico);
+router.get('/registroClinico', isAuthenticated, soloRol([1, 3, 4]), vistaRegistroClinico);
 // 🔸 Localidad y Género
 router.get('/paciente/localidad', isAuthenticated, soloRol([1, 2]), vistaLocalidades);
 router.get('/paciente/genero', isAuthenticated, soloRol([1]), vistaGeneros);

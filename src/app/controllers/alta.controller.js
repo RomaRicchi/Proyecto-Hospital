@@ -99,6 +99,7 @@ export const darAltaPaciente = async (req, res) => {
 		const cama = await Cama.findByPk(ultimoMov.id_cama);
 		if (cama) {
 			cama.estado = 0;
+			cama.desinfeccion = false; 
 			await cama.save();
 		}
 

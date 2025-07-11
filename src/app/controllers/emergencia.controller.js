@@ -82,7 +82,7 @@ export const ingresoEmergencia = async (req, res) => {
     const sectorDestino = tipo_emergencia === 'nino' ? 'Pediatria' : 'Terapia intermedia';
 
     const camasLibres = await Cama.findAll({
-      where: { estado: 0 },
+      where: { estado: 0,  desinfeccion: true },
       include: [
         {
           model: Habitacion,

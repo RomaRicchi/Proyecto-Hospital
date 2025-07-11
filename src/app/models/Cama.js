@@ -30,12 +30,6 @@ export default (sequelize, DataTypes) => {
 		}
 	);
 
-	Cama.associate = (models) => {
-		Cama.belongsTo(models.Habitacion, {
-			foreignKey: 'id_habitacion',
-			as: 'habitacion',
-		});
-	};
 
 	Cama.associate = (models) => {
 	

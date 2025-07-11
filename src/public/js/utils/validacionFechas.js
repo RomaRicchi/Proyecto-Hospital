@@ -39,8 +39,9 @@ export function aplicarReservaSemanal(inputIngreso, inputEgreso, inputMotivoEgr)
 	const egreso = new Date(ingreso);
 	egreso.setDate(egreso.getDate() + 7);
 
-	// Formato compatible con <input type="datetime-local">
-	const egresoStr = egreso.toISOString().slice(0, 16);
+	// Convertir a formato yyyy-MM-ddTHH:mm en hora local (NO UTC)
+	const pad = (n) => n.toString().padStart(2, '0');
+	const egresoStr = `${egreso.getFullYear()}-${pad(egreso.getMonth() + 1)}-${pad(egreso.getDate())}T${pad(egreso.getHours())}:${pad(egreso.getMinutes())}`;
 
 	inputEgreso.value = egresoStr;
 	inputEgreso.disabled = true;

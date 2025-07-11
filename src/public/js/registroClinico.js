@@ -6,6 +6,8 @@ $(document).ready(function () {
   const $info = $('#infoPaciente');
   let registrosPaciente = [];
   let ultimaAdmisionPaciente = null;
+  const usuarioLogueado = $('#usuarioData').data('username') || '-';
+  const idUsuarioLogueado = $('#usuarioData').data('id') || 1;
 
   function determinarEstadoAdmision(fechaIngreso, fechaEgreso) {
     const ahora = new Date();
@@ -249,7 +251,7 @@ $(document).ready(function () {
             id_tipo: result.value.id_tipo,
             detalle: result.value.detalle,
             fecha_hora_reg: toUTC(result.value.fecha_hora_reg).toISOString(),
-            id_usuario: 1, // reemplazar con usuario logueado
+            id_usuario: idUsuarioLogueado,
             id_admision: ultimaAdmisionPaciente
           };
 
