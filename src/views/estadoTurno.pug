@@ -1,0 +1,14 @@
+extends layout_modular
+
+block content
+  h1 Estado de Turnos
+  button.btn.btn-success.mb-3(onclick="mostrarFormularioCrear()") Nuevo Estado
+  table#tablaEstadoTurno.table.table-striped
+    thead
+      tr
+        th ID
+        th Nombre
+        th Acciones
+    tbody
+
+  script(src="/js/estadoTurno.js")

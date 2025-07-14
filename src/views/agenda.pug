@@ -1,0 +1,19 @@
+extends layout_modular
+
+block content
+  h1 Agenda de Profesionales
+
+  button.btn.btn-success.mb-3#btnNuevaAgenda Nueva Agenda
+
+  table#tablaAgendas.table.table-striped
+    thead
+      tr
+        th Profesional
+        th Día
+        th Hora inicio
+        th Hora fin
+        th Duración
+        th Acciones
+    tbody
+
+  script(src="/js/agenda.js")

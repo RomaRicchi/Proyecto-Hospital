@@ -24,7 +24,11 @@ import defineMovimientoHabitacion from './MovimientoHabitacion.js';
 import defineAdmision from './Admision.js';
 import defineRegistroHistoriaClinica from './RegistroHistoriaClinica.js';
 import defineMotivoIngreso from './MotivoIngreso.js';
+import defineTurno from './Turno.js';
+import defineAgenda from './Agenda.js';
 import defineTipoRegistro from './TipoRegistro.js';
+import defineDia from './Dia.js';
+import defineEstadoTurno from './EstadoTurno.js';
 
 // Inicializar modelos
 const Genero = defineGenero(sequelize, Sequelize.DataTypes);
@@ -47,7 +51,10 @@ const Admision = defineAdmision(sequelize, Sequelize.DataTypes);
 const RegistroHistoriaClinica = defineRegistroHistoriaClinica(sequelize, Sequelize.DataTypes);
 const MotivoIngreso = defineMotivoIngreso(sequelize, Sequelize.DataTypes);
 const TipoRegistro = defineTipoRegistro(sequelize, Sequelize.DataTypes);
-
+const Turno = defineTurno(sequelize, Sequelize.DataTypes);
+const Agenda = defineAgenda(sequelize, Sequelize.DataTypes);
+const Dia = defineDia(sequelize, Sequelize.DataTypes);
+const EstadoTurno = defineEstadoTurno(sequelize, Sequelize.DataTypes);
 
 PersonalAdministrativo.associate?.({ Usuario, RolUsuario });
 PersonalSalud.associate?.({ Usuario, RolUsuario, Especialidad });
@@ -71,8 +78,8 @@ Admision.associate?.({
 	RegistroHistoriaClinica,
 });
 MotivoIngreso.associate?.({ Admision });
-
 Paciente.associate?.({ Admision });
+
 Paciente.belongsTo(Genero, { foreignKey: 'id_genero', as: 'genero' });
 Paciente.belongsTo(Localidad, { foreignKey: 'id_localidad', as: 'localidad' });
 Paciente.hasMany(Familiar, { foreignKey: 'id_paciente', as: 'familiares' });
@@ -91,6 +98,15 @@ Admision.belongsTo(Usuario, { as: 'usuario_medico', foreignKey: 'id_usuario' });
 
 PersonalSalud.belongsTo(Usuario, {  foreignKey: 'id_usuario',  as: 'datos_usuario'});
 Usuario.hasOne(PersonalSalud, { foreignKey: 'id_usuario',  as: 'dato_doctor'});
+
+Turno.belongsTo(Paciente, { foreignKey: 'id_paciente' });
+Turno.belongsTo(Agenda, { foreignKey: 'id_agenda' });
+Turno.belongsTo(EstadoTurno, { foreignKey: 'id_estado' });
+Turno.belongsTo(MotivoIngreso, { foreignKey: 'id_motivo' });
+
+Agenda.belongsTo(Dia, { foreignKey: 'id_dia' });
+Agenda.belongsTo(PersonalSalud, { foreignKey: 'id_personal_salud' });
+
 export {
 	sequelize,
 	Sequelize,
@@ -114,4 +130,8 @@ export {
 	RegistroHistoriaClinica,
 	MotivoIngreso,
 	TipoRegistro,
+	Turno,
+	Agenda,
+	Dia,
+	EstadoTurno,
 };

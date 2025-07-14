@@ -26,6 +26,10 @@ import { vistaEspecialidades } from '../controllers/especialidad.controller.js';
 import { vistaRolUsuario } from '../controllers/rolUsuario.controller.js';
 import { vistaTipoRegistro } from '../controllers/tipoRegistro.controller.js';
 import { vistaPanelSalud } from '../controllers/dashSalud.controller.js';
+import { vistaTurnos } from '../controllers/turno.controller.js';
+import { vistaEstadoTurno } from '../controllers/estadoTurno.controller.js';
+import { vistaAgendas } from '../controllers/agenda.controller.js';
+import { vistaDiasSemana } from '../controllers/dia.controller.js';
 
 const router = Router();
 
@@ -67,5 +71,10 @@ router.get('/personal/salud', isAuthenticated,soloRol([1]), vistaPersonalSalud);
 router.get('/personal/administrativo', isAuthenticated, soloRol([1]), vistaPersonalAdministrativo);
 router.get('/especialidad', isAuthenticated, soloRol([1]), vistaEspecialidades);
 router.get('/rolUsuario', isAuthenticated, soloRol([1]), vistaRolUsuario);
+
+router.get('/turnos', isAuthenticated, soloRol([1, 2, 3, 4]), vistaTurnos);
+router.get('/agenda', isAuthenticated, soloRol([1, 3, 4]), vistaAgendas);
+router.get('/dias-semana', isAuthenticated, soloRol([1]), vistaDiasSemana);
+router.get('/estado-turno', isAuthenticated, soloRol([1]), vistaEstadoTurno);
 
 export default router;

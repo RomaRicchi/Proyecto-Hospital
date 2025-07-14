@@ -1,0 +1,19 @@
+extends layout_modular
+
+block content
+  h1 Turnos Programados
+
+  button.btn.btn-success.mb-3#btnNuevoTurno Nuevo Turno
+
+  table#tablaTurnos.table.table-striped
+    thead
+      tr
+        th Paciente
+        th Agenda
+        th Fecha
+        th Hora
+        th Estado
+        th Acciones
+    tbody
+
+  script(src="/js/turno.js")
