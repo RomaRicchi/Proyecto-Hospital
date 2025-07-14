@@ -7,7 +7,7 @@ import {
   Habitacion,
   Sector,
 } from '../models/index.js';
-import { fromUTCToArgentina, toUTC } from '../helpers/timezone.helper.js';
+import {ajustarZonaHorariaArgentina, toUTC } from '../helpers/timezone.helper.js';
 import { Op } from 'sequelize';
 
 export const vistaPacientesCamas = async (req, res) => {
@@ -65,10 +65,10 @@ export const vistaPacientesCamas = async (req, res) => {
         cama_numero: habitacion?.num || '',
         cama_sector: sector?.nombre || '',
         fecha_ingreso: mov.fecha_hora_ingreso
-          ? fromUTCToArgentina(mov.fecha_hora_ingreso).toLocaleDateString('es-AR')
+          ? ajustarZonaHorariaArgentina(mov.fecha_hora_ingreso).toLocaleDateString('es-AR')
           : '-',
         fecha_egreso: mov.fecha_hora_egreso
-          ? fromUTCToArgentina(mov.fecha_hora_egreso).toLocaleDateString('es-AR')
+          ? ajustarZonaHorariaArgentina(mov.fecha_hora_egreso).toLocaleDateString('es-AR')
           : '-',
       };
     });

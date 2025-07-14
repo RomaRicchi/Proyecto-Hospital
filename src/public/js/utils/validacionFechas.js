@@ -75,13 +75,13 @@ export function toUTC(fechaStr) {
   return new Date(fechaLocal.getTime() - fechaLocal.getTimezoneOffset() * 60000);
 }
 
-export function fromUTCToArgentina(dateInput) {
-  const date = new Date(dateInput);
-  return new Date(date.getTime() - 3 * 60 * 60 * 1000); // UTC-3
-}
-
 export function getFechaLocalParaInput() {
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
   return now.toISOString().slice(0, 16);
 }
+
+export function ajustarZonaHorariaArgentina(fechaUTC) {
+  return new Date(fechaUTC); // esto ya devuelve local en Argentina si el navegador lo está mostrando así
+}
+

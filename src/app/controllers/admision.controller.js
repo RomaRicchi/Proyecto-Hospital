@@ -25,14 +25,12 @@ import {
   calcularEdad,
   validarCompatibilidadPacienteSector
 } from '../validators/validarSectorPaciente.js';
-import { ajustarFechaLocal } from '../helpers/timezone.helper.js';
 import { Op } from 'sequelize';
 
 export const validarAdmisionPorDNI = async (req, res) => {
   try {
     const { dni } = req.params;
-    const fechaEvaluar = req.query.fecha ? ajustarFechaLocal(req.query.fecha) : new Date();
-
+    const fechaEvaluar = req.query.fecha ? new Date(req.query.fecha) : new Date();
     const paciente = await Paciente.findOne({ where: { dni_paciente: dni } });
     if (!paciente) return res.json({ vigente: false });
 
@@ -83,8 +81,8 @@ export const createAdmision = async (req, res) => {
     const fecha_nac = paciente.fecha_nac;
     req.body.id_usuario = id_usuario;
 
-    const fechaIngreso = ajustarFechaLocal(fecha_hora_ingreso);
-    const fechaEgreso = fecha_hora_egreso ? ajustarFechaLocal(fecha_hora_egreso) : null;
+    const fechaIngreso = fecha_hora_ingreso;
+    const fechaEgreso = fecha_hora_egreso ? fecha_hora_egreso : null;
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
 
     if (fechaIngreso < hoy) {
@@ -133,7 +131,7 @@ export const createAdmision = async (req, res) => {
       return res.status(400).json({ message: 'La cama ya está ocupada' });
     }
 
-    const nuevaFecha = ajustarFechaLocal(fecha_hora_ingreso);
+    const nuevaFecha = new Date(fecha_hora_ingreso);
     const solapada = await Admision.findOne({
       where: {
         id_paciente,
@@ -421,10 +419,10 @@ export const updateAdmision = async (req, res) => {
 		}
 
 		if (fecha_hora_ingreso) {
-			req.body.fecha_hora_ingreso = ajustarFechaLocal(new Date(fecha_hora_ingreso));
+			req.body.fecha_hora_ingreso = new Date(fecha_hora_ingreso);
 		}
 		if (fecha_hora_egreso) {
-			req.body.fecha_hora_egreso = ajustarFechaLocal(new Date(fecha_hora_egreso));
+			req.body.fecha_hora_egreso = new Date(fecha_hora_egreso);
 		}
 
 		await admision.update(req.body);

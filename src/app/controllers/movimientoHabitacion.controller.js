@@ -9,7 +9,7 @@ import {
 	Cama,
 } from '../models/index.js';
 import { Op } from 'sequelize';
-import { toUTC, fromUTCToArgentina } from '../helpers/timezone.helper.js';
+import { toUTC, ajustarZonaHorariaArgentina } from '../helpers/timezone.helper.js';
 
 export const verificarGenero = async (req, res) => {
   const { id_cama, id_genero } = req.body;
@@ -281,10 +281,10 @@ export const vistaMovimientosHabitacion = async (req, res) => {
 		const adaptados = movimientos.map(m => ({
 			...m.toJSON(),
 			fecha_hora_ingreso: m.fecha_hora_ingreso
-				? fromUTCToArgentina(m.fecha_hora_ingreso).toLocaleString('es-AR')
+				? ajustarZonaHorariaArgentina(m.fecha_hora_ingreso).toLocaleString('es-AR')
 				: '-',
 			fecha_hora_egreso: m.fecha_hora_egreso
-				? fromUTCToArgentina(m.fecha_hora_egreso).toLocaleString('es-AR')
+				? ajustarZonaHorariaArgentina(m.fecha_hora_egreso).toLocaleString('es-AR')
 				: '-',
 		}));
 		res.render('movHabitacion', { movimientos: adaptados });

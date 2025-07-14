@@ -29,7 +29,7 @@
 
 Construido con arquitectura **MVC**, incorpora **Pug** para las vistas, **MySQL** como base de datos y manejo de sesiones para usuarios autenticados.
 Todas las fechas almacenadas en la base se guardan en UTC y son convertidas a horario argentino (UTC-3) mediante el helper timezone.helper.js. 
-Las funciones clave son: fromUTCToArgentina, toUTC, ajustarFechaLocal.
+Las funciones clave son: fromUTCToArgentina, toUTC
 ---
 
 ## 🚀 Características

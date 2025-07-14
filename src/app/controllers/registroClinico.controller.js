@@ -11,24 +11,6 @@ import {
   Sector 
 } from '../models/index.js';
 import { obtenerCamaActual } from './pacientesCamas.controller.js';
-import { toUTC } from '../helpers/timezone.helper.js';
-
-export const listarRegistros = async (req, res) => {
-  try {
-    const registros = await RegistroHistoriaClinica.findAll({
-      include: [
-        { model: Admision, as: 'admision' },
-        { model: TipoRegistro, as: 'tipo' },
-        { model: Usuario, as: 'usuario' },
-        { model: PersonalSalud, as: 'profesional' }
-      ],
-      order: [['fecha_hora', 'DESC']]
-    });
-    res.json(registros);
-  } catch (e) {
-    res.status(500).json({ message: 'Error al obtener registros' });
-  }
-};
 
 export const crearRegistro = async (req, res) => {
   try {
@@ -51,14 +33,17 @@ export const crearRegistro = async (req, res) => {
       });
     }
 
-    // Convertir a UTC
-    const fechaUTC = toUTC(fecha_hora_reg);
+    // ✅ Convertimos string ISO recibido en UTC a objeto Date
+    const fechaUTC = new Date(fecha_hora_reg);
+    if (isNaN(fechaUTC)) {
+      return res.status(400).json({ message: 'Fecha inválida' });
+    }
 
     let admisionId = id_admision;
     if (!admisionId) {
       const nuevaAdmision = await Admision.create({
         id_paciente,
-        fecha_hora_ingreso: fechaUTC,
+        fecha_hora_ingreso: fechaUTC, // ya está en UTC
         descripcion: 'Registro ambulatorio sin internación',
         id_motivo: null,
         id_obra_social: null,
@@ -73,14 +58,32 @@ export const crearRegistro = async (req, res) => {
     const nuevo = await RegistroHistoriaClinica.create({
       id_tipo,
       detalle,
-      fecha_hora_reg: fechaUTC,
+      fecha_hora_reg: fechaUTC, // UTC
       id_usuario,
       id_admision: admisionId
     });
 
     res.status(201).json(nuevo);
   } catch (e) {
+    console.error('Error al crear registro clínico:', e);
     res.status(500).json({ message: 'Error al crear registro clínico' });
+  }
+};
+
+export const listarRegistros = async (req, res) => {
+  try {
+    const registros = await RegistroHistoriaClinica.findAll({
+      include: [
+        { model: Admision, as: 'admision' },
+        { model: TipoRegistro, as: 'tipo' },
+        { model: Usuario, as: 'usuario' },
+        { model: PersonalSalud, as: 'profesional' }
+      ],
+      order: [['fecha_hora', 'DESC']]
+    });
+    res.json(registros);
+  } catch (e) {
+    res.status(500).json({ message: 'Error al obtener registros' });
   }
 };
 
@@ -181,7 +184,8 @@ export const buscarPorDNI = async (req, res) => {
     }
 
     const adaptados = registros.map(r => ({
-      fecha: new Date(r.fecha_hora_reg).toISOString(),
+      id: r.id_registro, 
+      fecha: r.fecha_hora_reg,
       tipo: r.tipo_registro?.nombre || '-',
       id_tipo: r.tipo_registro?.id_tipo || null,
       detalle: r.detalle || '-',
@@ -241,7 +245,7 @@ export const vistaRegistroClinico = async (req, res) => {
       id: r.id_registro,
       tipo: r.tipo_registro?.nombre || '-',
       detalle: r.detalle || '-',
-      fecha: new Date(r.fecha_hora_reg).toISOString(), 
+      fecha: r.fecha_hora_reg,
       paciente: r.admision_historia?.paciente_admision
         ? `${r.admision_historia.paciente_admision.nombre_p} ${r.admision_historia.paciente_admision.apellido_p}`
         : '-',
@@ -257,7 +261,43 @@ export const vistaRegistroClinico = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('Error al mostrar registros clínicos:', error);
     res.status(500).send('Error al mostrar registros clínicos');
   }
 };
 
+export const editarRegistro = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      id_tipo,
+      detalle,
+      fecha_hora_reg
+    } = req.body;
+
+    if (!id_tipo || !detalle || !fecha_hora_reg) {
+      return res.status(400).json({ message: 'Faltan datos obligatorios' });
+    }
+
+    const registro = await RegistroHistoriaClinica.findByPk(id);
+    if (!registro) {
+      return res.status(404).json({ message: 'Registro no encontrado' });
+    }
+
+    const fechaUTC = new Date(fecha_hora_reg);
+    if (isNaN(fechaUTC)) {
+      return res.status(400).json({ message: 'Fecha inválida' });
+    }
+
+    registro.id_tipo = id_tipo;
+    registro.detalle = detalle;
+    registro.fecha_hora_reg = fechaUTC;
+
+    await registro.save();
+
+    res.json({ message: 'Registro actualizado correctamente' });
+  } catch (e) {
+    console.error('Error al editar registro:', e);
+    res.status(500).json({ message: 'Error al editar registro' });
+  }
+};

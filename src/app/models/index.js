@@ -70,6 +70,8 @@ Admision.associate?.({
 	MovimientoHabitacion,
 	RegistroHistoriaClinica,
 });
+MotivoIngreso.associate?.({ Admision });
+
 Paciente.associate?.({ Admision });
 Paciente.belongsTo(Genero, { foreignKey: 'id_genero', as: 'genero' });
 Paciente.belongsTo(Localidad, { foreignKey: 'id_localidad', as: 'localidad' });

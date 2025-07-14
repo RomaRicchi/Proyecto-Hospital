@@ -10,7 +10,7 @@ import {
   sequelize,
 } from '../models/index.js';
 import { Op } from 'sequelize';
-import { toUTC, ajustarFechaLocal } from '../helpers/timezone.helper.js'; 
+import { toUTC } from '../helpers/timezone.helper.js'; 
 import {
   verificarGeneroHabitacion,
 } from '../validators/admision.validator.js';
@@ -55,10 +55,10 @@ export const confirmarReserva = async (req, res) => {
     }
 
     // Validar que solo se pueda confirmar el día correspondiente (en horario argentino)
-    const ahoraArg = ajustarFechaLocal(new Date());
+    const ahoraArg = new Date();
     const hoy = ahoraArg.toISOString().split('T')[0];
 
-    const reservaArg = ajustarFechaLocal(new Date(movimiento.fecha_hora_ingreso));
+    const reservaArg = new Date(movimiento.fecha_hora_ingreso);
     const fechaReserva = reservaArg.toISOString().split('T')[0];
 
     if (fechaReserva !== hoy) {
@@ -85,7 +85,7 @@ export const confirmarReserva = async (req, res) => {
 
     // Actualizar movimiento a ingreso
     movimiento.id_mov = 1;
-    movimiento.fecha_hora_ingreso = ajustarFechaLocal(movimiento.fecha_hora_ingreso);
+    movimiento.fecha_hora_ingreso = movimiento.fecha_hora_ingreso;
     movimiento.estado = 1;
     await movimiento.save({ transaction: t });
 

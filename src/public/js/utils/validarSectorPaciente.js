@@ -1,6 +1,8 @@
-export function calcularEdad(fechaNacimiento) {
+export function calcularEdad(fechaNac) {
+  if (!fechaNac) return 'x';
   const hoy = new Date();
-  const nacimiento = new Date(fechaNacimiento);
+  const nacimiento = new Date(fechaNac);
+  if (isNaN(nacimiento)) return 'x'; // por si la fecha no es válida
   let edad = hoy.getFullYear() - nacimiento.getFullYear();
   const m = hoy.getMonth() - nacimiento.getMonth();
   if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {

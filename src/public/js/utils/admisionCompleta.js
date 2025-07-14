@@ -1,8 +1,4 @@
 import {
-	validarCompatibilidadPacienteSector,
-	obtenerCriteriosPorSector
-} from './validarSectorPaciente.js';
-import {
   aplicarReservaSemanal,
   parseFechaLocal,
   getFechaLocalParaInput,
@@ -81,7 +77,7 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 					Swal.showValidationMessage('Completa todos los campos obligatorios');
 					return false;
 				}
-
+				
 				return {
 					id_obra_social,
 					num_asociado,
@@ -118,7 +114,7 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 		let id_mov = 1;
 
 		const seleccionFinalLocal = new Date(fecha_hora_ingreso); 
-		const seleccionFinal = new Date(seleccionFinalLocal.getTime() - seleccionFinalLocal.getTimezoneOffset() * 60000); // lo pasás a UTC real
+		const seleccionFinal = toUTC(seleccionFinalLocal);
 		if (seleccionFinal < hoy) {
 			await Swal.fire('Error', 'No se permite una fecha de ingreso en el pasado', 'error');
 			return;

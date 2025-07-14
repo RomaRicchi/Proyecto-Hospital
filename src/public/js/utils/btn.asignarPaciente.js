@@ -113,7 +113,7 @@ $(document).on('click', '.btn-asignar-paciente', async function () {
 		});
 		return;
 	}
-
+	
 	// 🔹 Mostrar formulario
 	mostrarFormularioYRegistrarAdmision(
 		pacienteSeleccionado,

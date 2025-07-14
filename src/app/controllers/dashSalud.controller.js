@@ -1,17 +1,17 @@
 import {
   MovimientoHabitacion,
   Admision,
+  MotivoIngreso,
   Paciente,
   Cama,
   Habitacion,
   Sector
 } from '../models/index.js';
-import { toUTC } from '../helpers/timezone.helper.js';
 import { Op } from 'sequelize';
 
 export const vistaPanelSalud = async (req, res) => {
   try {
-    const ahora = toUTC(new Date());
+    const ahora = new Date();
     const esEnfermero = req.session.usuario.rol === 3;
 
     const movimientos = await MovimientoHabitacion.findAll({
@@ -32,11 +32,9 @@ export const vistaPanelSalud = async (req, res) => {
             ? {}
             : { where: { id_usuario: req.session.usuario.id } }),
           include: [
-            {
-              model: Paciente,
-              as: 'paciente'
-            }
-          ]
+            { model: Paciente, as: 'paciente' },
+            { model: MotivoIngreso, as: 'motivo_ingreso' }
+          ],
         },
         {
           model: Cama,
@@ -63,6 +61,7 @@ export const vistaPanelSalud = async (req, res) => {
     });
 
   } catch (error) {
+    console.error(error); 
     res.status(500).send('Error al cargar panel de salud');
   }
 };

@@ -1,4 +1,5 @@
 import { configurarBusquedaDeCamas } from './utils/validacionFechas.js';
+import { toUTC } from './utils/validacionFechas.js';
 
 function buscarCamasDisponibles(fecha) {
 	$('#tablaCamasContainer').html(
@@ -17,8 +18,8 @@ function buscarCamasDisponibles(fecha) {
 }
 	
 function renderTablaCamas(camas) {
-  const inputFecha = $('#fecha_busqueda').val();
-  const fechaSeleccionada = new Date(`${inputFecha}T00:00:00`);
+const inputFecha = $('#fecha_busqueda').val();
+const fechaSeleccionada = toUTC(`${inputFecha}T00:00`);
 
   let html = `
     <table id="tablaCamas" class="table table-bordered table-hover">

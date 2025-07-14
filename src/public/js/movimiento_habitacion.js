@@ -1,4 +1,4 @@
-import { toUTC, fromUTCToArgentina } from './utils/validacionFechas.js';
+import { toUTC,ajustarZonaHorariaArgentina } from './utils/validacionFechas.js';
 
 $(document).ready(function () {
 	
@@ -34,7 +34,7 @@ $(document).ready(function () {
 					m.tipo_movimiento && m.tipo_movimiento.nombre
 						? m.tipo_movimiento.nombre
 						: '-',
-					m.fecha_hora_ingreso ? fromUTCToArgentina(m.fecha_hora_ingreso).toLocaleString('es-AR') : '-',
+					m.fecha_hora_ingreso ? ajustarZonaHorariaArgentina(m.fecha_hora_ingreso).toLocaleString('es-AR') : '-',
 					m.fecha_hora_egreso || '-',
 					m.estado === 1 ? 'Activo' : 'Inactivo',
 					`

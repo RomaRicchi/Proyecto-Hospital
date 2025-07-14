@@ -71,11 +71,15 @@ $(document).ready(function () {
         ${selectObraSocial}
         <input id="swal-num_asociado" class="swal2-input" value="${admision.num_asociado || ''}" placeholder="N° Asociado">
         <input id="swal-fecha_hora_ingreso" type="datetime-local" class="swal2-input"
-          value="${admision.fecha_hora_ingreso ? admision.fecha_hora_ingreso.slice(0, 16) : ''}" placeholder="Fecha Ingreso">
+          value="${admision.fecha_hora_ingreso 
+            ? new Date(admision.fecha_hora_ingreso).toISOString().slice(0, 16) 
+            : ''}" placeholder="Fecha Ingreso">
         ${selectMotivo}
         <input id="swal-descripcion" class="swal2-input" value="${admision.descripcion || ''}" placeholder="Descripción">
         <input id="swal-fecha_hora_egreso" type="datetime-local" class="swal2-input"
-          value="${admision.fecha_hora_egreso ? admision.fecha_hora_egreso.slice(0, 16) : ''}" placeholder="Fecha Egreso">
+          value="${admision.fecha_hora_egreso 
+            ? new Date(admision.fecha_hora_egreso).toISOString().slice(0, 16) 
+            : ''}" placeholder="Fecha Egreso (opcional)">
         <input id="swal-motivo_egr" class="swal2-input" value="${admision.motivo_egr || ''}" placeholder="Motivo Egreso">
         ${selectPersonal}
       `,
@@ -112,12 +116,20 @@ $(document).ready(function () {
         };
       }
     }).then((result) => {
-      if (result.isConfirmed) {
-        fetch(`/api/admisiones/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(result.value),
-        })
+        if (result.isConfirmed) {
+          const datos = {
+            ...result.value,
+            fecha_hora_ingreso: new Date(result.value.fecha_hora_ingreso).toISOString(),
+            fecha_hora_egreso: result.value.fecha_hora_egreso
+              ? new Date(result.value.fecha_hora_egreso).toISOString()
+              : null,
+          };
+
+          fetch(`/api/admisiones/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos),
+          })
           .then(() => Swal.fire('Actualizado', 'Admisión modificada', 'success').then(() => location.reload()))
           .catch(() => Swal.fire('Error', 'No se pudo actualizar', 'error'));
       }
