@@ -8,6 +8,7 @@ import {
 	Parentesco,
 } from '../models/index.js';
 import { calcularEdad } from '../validators/validarSectorPaciente.js';
+import { Op } from 'sequelize';
 
 export const vistaPacientes = async (req, res) => {
 	try {
@@ -198,4 +199,33 @@ export const deletePaciente = async (req, res) => {
 	} catch (error) {
 		res.status(500).json({ message: error.message });
 	}
+};
+
+export const buscarPacientes = async (req, res) => {
+  try {
+    const q = req.query.q?.toLowerCase() || '';
+    if (!q || q.length < 2) return res.json([]);
+
+    const pacientes = await Paciente.findAll({
+      where: {
+        estado: true,
+        [Op.or]: [
+          { dni_paciente: { [Op.like]: `%${q}%` } },
+          { nombre_p: { [Op.like]: `%${q}%` } },
+          { apellido_p: { [Op.like]: `%${q}%` } }
+        ]
+      },
+      limit: 10,
+      order: [['apellido_p', 'ASC']]
+    });
+
+    const resultados = pacientes.map(p => ({
+      id: p.id_paciente,
+      text: `${p.dni_paciente} - ${p.apellido_p}, ${p.nombre_p}`
+    }));
+
+    res.json(resultados);
+  } catch (error) {
+    res.status(500).json({ message: 'Error en la búsqueda' });
+  }
 };

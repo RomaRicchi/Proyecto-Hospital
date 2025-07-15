@@ -1,30 +1,41 @@
+import { mostrarFormulario } from './utils/formAgenda.js';
+import { crearCalendario } from './utils/calendarManager.js';
+
 $(document).ready(function () {
   const tabla = $('#tablaAgendas').DataTable({
     language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
-    columns: [
-      null, null, null, null, null,
-      { orderable: false }
-    ]
+    columns: [null, null, null, null, null, { orderable: false }]
   });
 
   function cargarAgendas() {
-    fetch('/api/agendas')
+    const idProfesional = $('#filtroProfesional').val();
+
+    fetch('/api/agenda')
       .then(res => res.json())
       .then(agendas => {
         tabla.clear();
-        agendas.forEach(a => {
+        const filtradas = idProfesional
+          ? agendas.filter(a => a.id_personal_salud == idProfesional)
+          : agendas;
+
+        filtradas.forEach(a => {
+          const profesional = a.personal
+            ? `${a.personal.apellido}, ${a.personal.nombre} (${a.personal.especialidad?.nombre || '-'})`
+            : a.profesional?.username || '-';
+
           tabla.row.add([
-            a.profesional?.username || '-',
+            profesional,
             a.dia?.nombre || '-',
             a.hora_inicio,
             a.hora_fin,
-            a.duracion_minutos + ' min',
+            a.duracion + ' min',
             `
             <button class="btn btn-sm btn-primary editar" data-id="${a.id_agenda}">Editar</button>
             <button class="btn btn-sm btn-danger eliminar" data-id="${a.id_agenda}">Eliminar</button>
             `
           ]);
         });
+
         tabla.draw();
       });
   }
@@ -33,47 +44,9 @@ $(document).ready(function () {
 
   $('#btnNuevaAgenda').on('click', () => mostrarFormulario());
 
-  function mostrarFormulario(agenda = {}) {
-    Swal.fire({
-      title: agenda.id_agenda ? 'Editar Agenda' : 'Nueva Agenda',
-      html: `
-        <input id="usuario" class="swal2-input" placeholder="ID Profesional" value="${agenda.id_usuario || ''}">
-        <input id="dia" class="swal2-input" placeholder="ID Día Semana" value="${agenda.id_dia_semana || ''}">
-        <input id="inicio" type="time" class="swal2-input" value="${agenda.hora_inicio || ''}">
-        <input id="fin" type="time" class="swal2-input" value="${agenda.hora_fin || ''}">
-        <input id="duracion" type="number" class="swal2-input" placeholder="Duración (min)" value="${agenda.duracion_minutos || ''}">
-      `,
-      showCancelButton: true,
-      confirmButtonText: 'Guardar',
-      preConfirm: () => ({
-        id_usuario: $('#usuario').val(),
-        id_dia_semana: $('#dia').val(),
-        hora_inicio: $('#inicio').val(),
-        hora_fin: $('#fin').val(),
-        duracion_minutos: $('#duracion').val(),
-      })
-    }).then(result => {
-      if (!result.isConfirmed) return;
-
-      const metodo = agenda.id_agenda ? 'PUT' : 'POST';
-      const url = agenda.id_agenda ? `/api/agendas/${agenda.id_agenda}` : '/api/agendas';
-
-      fetch(url, {
-        method: metodo,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(result.value)
-      })
-        .then(() => {
-          Swal.fire('Éxito', 'Agenda guardada', 'success');
-          cargarAgendas();
-        })
-        .catch(() => Swal.fire('Error', 'No se pudo guardar', 'error'));
-    });
-  }
-
   $(document).on('click', '.editar', async function () {
     const id = $(this).data('id');
-    const agenda = await fetch(`/api/agendas/${id}`).then(r => r.json());
+    const agenda = await fetch(`/api/agenda/${id}`).then(r => r.json());
     mostrarFormulario(agenda);
   });
 
@@ -85,7 +58,7 @@ $(document).ready(function () {
       confirmButtonText: 'Eliminar'
     }).then(result => {
       if (result.isConfirmed) {
-        fetch(`/api/agendas/${id}`, { method: 'DELETE' })
+        fetch(`/api/agenda/${id}`, { method: 'DELETE' })
           .then(() => {
             Swal.fire('Eliminada', '', 'success');
             cargarAgendas();
@@ -93,4 +66,69 @@ $(document).ready(function () {
       }
     });
   });
+  const filtroGuardado = localStorage.getItem('filtroProfesionalId');
+  // 🔄 Filtro por profesionaL
+  $('#filtroProfesional').select2({
+    placeholder: 'Buscar por profesional o especialidad',
+    ajax: {
+      url: '/api/agenda/buscar',
+      dataType: 'json',
+      delay: 250,
+      data: params => ({ q: params.term }),
+      processResults: data => ({ results: data }),
+      cache: true
+    },
+    width: 'resolve',
+    allowClear: true
+  });
+
+  if (filtroGuardado) {
+    fetch(`/api/agenda/buscar?q=${filtroGuardado}`)
+      .then(res => res.json())
+      .then(data => {
+        const op = data.find(p => p.id == filtroGuardado);
+        if (op) {
+          const option = new Option(op.text, op.id, true, true);
+          $('#filtroProfesional').append(option).trigger('change');
+        }
+      });
+  }
+
+  $('#filtroProfesional').on('change', function () {
+    const valor = $(this).val();
+    localStorage.setItem('filtroProfesionalId', valor); // 🔸 guardar
+    if (calendar) calendar.refetchEvents();
+  });
+
+  let calendar = null;
+
+  $('#toggleVista').on('click', function () {
+    const tabla = $('#vistaTabla');
+    const calendario = $('#calendar');
+    const mostrandoTabla = tabla.is(':visible');
+
+    if (mostrandoTabla) {
+      tabla.hide();
+      calendario.show();
+      $(this).text('Ver como tabla');
+      localStorage.setItem('vistaActiva', 'calendario');
+
+      if (!calendar) {
+        calendar = crearCalendario();
+      } else {
+        calendar.refetchEvents();
+      }
+    } else {
+      calendario.hide();
+      tabla.show();
+      $(this).text('Ver como calendario');
+      localStorage.setItem('vistaActiva', 'tabla');
+    }
+  });
+
+  const vista = localStorage.getItem('vistaActiva') || 'tabla';
+  if (vista === 'calendario') {
+    $('#toggleVista').click(); 
+  }
+
 });

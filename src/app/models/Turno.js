@@ -27,9 +27,7 @@ export default (sequelize, DataTypes) => {
     }
   }, {
     tableName: 'turno',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: false
+    timestamps: false
   });
 
   return Turno;

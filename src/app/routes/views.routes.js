@@ -29,7 +29,7 @@ import { vistaPanelSalud } from '../controllers/dashSalud.controller.js';
 import { vistaTurnos } from '../controllers/turno.controller.js';
 import { vistaEstadoTurno } from '../controllers/estadoTurno.controller.js';
 import { vistaAgendas } from '../controllers/agenda.controller.js';
-import { vistaDiasSemana } from '../controllers/dia.controller.js';
+import { vistaDias } from '../controllers/dia.controller.js';
 
 const router = Router();
 
@@ -74,7 +74,7 @@ router.get('/rolUsuario', isAuthenticated, soloRol([1]), vistaRolUsuario);
 
 router.get('/turnos', isAuthenticated, soloRol([1, 2, 3, 4]), vistaTurnos);
 router.get('/agenda', isAuthenticated, soloRol([1, 3, 4]), vistaAgendas);
-router.get('/dias-semana', isAuthenticated, soloRol([1]), vistaDiasSemana);
+router.get('/dias-semana', isAuthenticated, soloRol([1]), vistaDias);
 router.get('/estado-turno', isAuthenticated, soloRol([1]), vistaEstadoTurno);
 
 export default router;

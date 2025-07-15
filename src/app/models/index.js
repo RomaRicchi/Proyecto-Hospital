@@ -60,7 +60,11 @@ PersonalAdministrativo.associate?.({ Usuario, RolUsuario });
 PersonalSalud.associate?.({ Usuario, RolUsuario, Especialidad });
 Cama.associate?.({ Habitacion, MovimientoHabitacion });
 Habitacion.associate?.({ Sector, Cama, MovimientoHabitacion });
-MovimientoHabitacion.associate?.({ Admision, Habitacion, Movimiento, Cama });
+MovimientoHabitacion.associate?.({ 
+	Admision, 
+	Habitacion, 
+	Movimiento, 
+	Cama });
 Usuario.associate?.({
   PersonalSalud,
   PersonalAdministrativo,
@@ -99,13 +103,15 @@ Admision.belongsTo(Usuario, { as: 'usuario_medico', foreignKey: 'id_usuario' });
 PersonalSalud.belongsTo(Usuario, {  foreignKey: 'id_usuario',  as: 'datos_usuario'});
 Usuario.hasOne(PersonalSalud, { foreignKey: 'id_usuario',  as: 'dato_doctor'});
 
-Turno.belongsTo(Paciente, { foreignKey: 'id_paciente' });
-Turno.belongsTo(Agenda, { foreignKey: 'id_agenda' });
-Turno.belongsTo(EstadoTurno, { foreignKey: 'id_estado' });
-Turno.belongsTo(MotivoIngreso, { foreignKey: 'id_motivo' });
+Turno.belongsTo(Paciente, { foreignKey: 'id_paciente', as: 'cliente'});
+Turno.belongsTo(Agenda, { foreignKey: 'id_agenda', as: 'agenda' });
+Turno.belongsTo(EstadoTurno, { foreignKey: 'id_estado', as: 'estado_turno' });
+Turno.belongsTo(MotivoIngreso, { foreignKey: 'id_motivo', as: 'motivo_turno' });
+EstadoTurno.hasMany(Turno, { foreignKey: 'id_estado' });
 
-Agenda.belongsTo(Dia, { foreignKey: 'id_dia' });
-Agenda.belongsTo(PersonalSalud, { foreignKey: 'id_personal_salud' });
+Agenda.belongsTo(Dia, { foreignKey: 'id_dia', as: 'dia' });
+Agenda.belongsTo(PersonalSalud, { foreignKey: 'id_personal_salud', as: 'personal' });
+Especialidad.hasMany(PersonalSalud, { as: 'profesionales', foreignKey: 'id_especialidad' });
 
 export {
 	sequelize,

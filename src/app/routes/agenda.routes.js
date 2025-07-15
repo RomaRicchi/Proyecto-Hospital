@@ -5,11 +5,17 @@ import {
   createAgenda,
   updateAgenda,
   deleteAgenda,
+  buscarPersonal,
+  getAgendasRecurrentes,
+  getCalendarioCompleto,
 } from '../controllers/agenda.controller.js';
 
 const router = Router();
 
 router.get('/', getAgendas);
+router.get('/buscar', buscarPersonal);
+router.get('/semana', getAgendasRecurrentes);
+router.get('/calendario/turnos', getCalendarioCompleto);
 router.get('/:id', getAgendaById);
 router.post('/', createAgenda);
 router.put('/:id', updateAgenda);

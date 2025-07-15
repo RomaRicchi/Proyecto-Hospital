@@ -1,18 +1,18 @@
 import { Router } from 'express';
 import {
-  getDiasSemana,
-  getDiaSemanaById,
-  createDiaSemana,
-  updateDiaSemana,
-  deleteDiaSemana,
-} from '../controllers/diaSemana.controller.js';
+  getDia,
+  getDiaById,
+  createDia,
+  updateDia,
+  deleteDia,
+} from '../controllers/dia.controller.js';
 
 const router = Router();
 
-router.get('/', getDiasSemana);
-router.get('/:id', getDiaSemanaById);
-router.post('/', createDiaSemana);
-router.put('/:id', updateDiaSemana);
-router.delete('/:id', deleteDiaSemana);
+router.get('/', getDia);
+router.get('/:id', getDiaById);
+router.post('/', createDia);
+router.put('/:id', updateDia);
+router.delete('/:id', deleteDia);
 
 export default router;

@@ -7,13 +7,14 @@ import {
 	updatePaciente,
 	getLocalidades,
 	deletePaciente,
+	buscarPacientes,
 } from '../controllers/paciente.controller.js';
 
 const router = Router();
 
 router.get('/localidad', getLocalidades); 
 router.get('/genero', getGeneros); 
-
+router.get('/buscar', buscarPacientes);
 router.get('/', getPacientes); 
 router.get('/:id', getPacienteById); 
 router.post('/', createPaciente); 
