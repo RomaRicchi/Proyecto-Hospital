@@ -4,13 +4,12 @@ block content
   .gral-hero.d-flex.align-items-center.justify-content-center.text-center
     .gral-hero-cont
       h1 Agenda de Profesionales
-      button#toggleVista.btn.btn-warning.mb-3 Ver en calendario
+      button#toggleVista.btn.btn-warning.me-2 Ver como tabla
+      button.btn.btn-success#btnNuevaAgenda Nueva Agenda
 
-      button.btn.btn-success.mb-3#btnNuevaAgenda Nueva Agenda
+      label#filtroProfesionalLabel(for="filtroProfesional") Filtrar por profesional
+      select#filtroProfesional.select-estilizado
 
-
-      label(for="filtroProfesional").fw-bold.mt-2 Filtrar por profesional:
-      select#filtroProfesional.form-select.select-estilizado(style="width: 300px;")
 
       #vistaTabla
         table#tablaAgendas.table.table-striped

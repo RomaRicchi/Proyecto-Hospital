@@ -4,7 +4,7 @@ import { eliminarTurnosPasados } from './eliminarTurnosPasados.js';
 
 export function iniciarActualizacionTurnos() {
   // ⏱ Cada 5 minutos: actualizar estado de turnos pasados a "atendido"
-  cron.schedule('*/5 * * * *', async () => {
+  cron.schedule('*/30 * * * *', async () => {
     const ahora = new Date();
     console.log('⏳ Verificando turnos vencidos...');
 

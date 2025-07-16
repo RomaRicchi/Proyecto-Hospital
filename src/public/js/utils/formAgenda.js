@@ -1,3 +1,5 @@
+import { toUTC } from './validacionFechas.js';
+
 export function mostrarFormulario(agenda = {}) {
   Swal.fire({
     title: agenda.id_agenda ? 'Editar Agenda' : 'Nueva Agenda',
@@ -60,14 +62,18 @@ export function mostrarFormulario(agenda = {}) {
       }
 
       const duracion = minutosFin - minutosInicio;
+      const fechaDummy = '2000-01-01'; // Día genérico
+      const inicioUTC = toUTC(`${fechaDummy}T${hora_inicio}`);
+      const finUTC = toUTC(`${fechaDummy}T${hora_fin}`);
 
       return {
         id_personal_salud,
         id_dia,
-        hora_inicio,
-        hora_fin,
+        hora_inicio: inicioUTC.toISOString().substring(11, 16), // solo "HH:MM"
+        hora_fin: finUTC.toISOString().substring(11, 16),
         duracion
       };
+
     }
   }).then(result => {
     if (!result.isConfirmed) return;

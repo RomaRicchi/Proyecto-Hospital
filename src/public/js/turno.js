@@ -1,4 +1,4 @@
-import { formatDate, formatHour } from './utils/validacionFechas.js';
+import { formatDate, formatHour, toUTC } from './utils/validacionFechas.js';
 
 $(document).ready(function () {
   const tabla = $('#tablaTurnos').DataTable({
@@ -144,11 +144,13 @@ $(document).ready(function () {
           return false;
         }
 
+        const fechaLocal = new Date(`${fecha_turno}T${hora_turno}`);
+        const fechaUTC = toUTC(fechaLocal);
+
         return {
           id_paciente,
           id_agenda,
-          fecha_turno,
-          hora_turno,
+          fecha_hora: fechaUTC.toISOString(), 
           id_estado,
           id_motivo
         };
