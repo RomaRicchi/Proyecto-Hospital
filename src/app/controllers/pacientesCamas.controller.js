@@ -7,21 +7,20 @@ import {
   Habitacion,
   Sector,
 } from '../models/index.js';
-import {ajustarZonaHorariaArgentina, toUTC } from '../helpers/timezone.helper.js';
 import { Op } from 'sequelize';
 
 export const vistaPacientesCamas = async (req, res) => {
   try {
-    const ahoraUTC = toUTC(new Date());
+    const ahora = new Date();
 
     const movimientos = await MovimientoHabitacion.findAll({
       where: {
-        id_mov: 1, // ingreso / ocupa
+        id_mov: 1,
         estado: 1,
-        fecha_hora_ingreso: { [Op.lte]: ahoraUTC },
+        fecha_hora_ingreso: { [Op.lte]: ahora },
         [Op.or]: [
           { fecha_hora_egreso: null },
-          { fecha_hora_egreso: { [Op.gte]: ahoraUTC } },
+          { fecha_hora_egreso: { [Op.gte]: ahora } },
         ],
       },
       include: [
@@ -65,10 +64,10 @@ export const vistaPacientesCamas = async (req, res) => {
         cama_numero: habitacion?.num || '',
         cama_sector: sector?.nombre || '',
         fecha_ingreso: mov.fecha_hora_ingreso
-          ? ajustarZonaHorariaArgentina(mov.fecha_hora_ingreso).toLocaleDateString('es-AR')
+          ? new Date(mov.fecha_hora_ingreso).toLocaleDateString('es-AR')
           : '-',
         fecha_egreso: mov.fecha_hora_egreso
-          ? ajustarZonaHorariaArgentina(mov.fecha_hora_egreso).toLocaleDateString('es-AR')
+          ? new Date(mov.fecha_hora_egreso).toLocaleDateString('es-AR')
           : '-',
       };
     });
@@ -80,17 +79,17 @@ export const vistaPacientesCamas = async (req, res) => {
 };
 
 export const obtenerCamaActual = async (id_admision) => {
-  const ahoraUTC = toUTC(new Date());
+  const ahora = new Date();
 
   const mov = await MovimientoHabitacion.findOne({
     where: {
       id_mov: 1, // ingreso
       estado: 1,
       id_admision,
-      fecha_hora_ingreso: { [Op.lte]: ahoraUTC },
+      fecha_hora_ingreso: { [Op.lte]: ahora },
       [Op.or]: [
         { fecha_hora_egreso: null },
-        { fecha_hora_egreso: { [Op.gte]: ahoraUTC } },
+        { fecha_hora_egreso: { [Op.gte]: ahora } },
       ],
     },
     include: [
@@ -110,3 +109,4 @@ export const obtenerCamaActual = async (id_admision) => {
 
   return mov?.cama || null;
 };
+

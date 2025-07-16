@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
-
+import { iniciarEliminacionReservas } from '../jobs/eliminarReservasVencidas.js';
 import { iniciarActualizacionTurnos } from '../jobs/actualizarTurnos.js'; 
 import express from 'express';
 import morgan from 'morgan';
@@ -39,6 +39,7 @@ import diaRoutes from './routes/dia.routes.js';
 import agendaRoutes from './routes/agenda.routes.js';
 import turnoRoutes from './routes/turno.routes.js';
 import estadoTurnoRoutes from './routes/estadoTurno.routes.js';
+
 // ✅ Simular __dirname en ESModules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -113,5 +114,6 @@ app.use('/api/estadoTurno', estadoTurnoRoutes);
 app.use('/api/agenda', agendaRoutes);
 app.use('/', viewsRoutes);
 iniciarActualizacionTurnos();
+iniciarEliminacionReservas();
 /* 🌐 Exportar app */
 export default app;

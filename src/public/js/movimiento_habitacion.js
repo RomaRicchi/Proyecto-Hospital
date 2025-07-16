@@ -1,83 +1,88 @@
-import { toUTC,ajustarZonaHorariaArgentina } from './utils/validacionFechas.js';
+import { toUTC } from './utils/validacionFechas.js';
 
 $(document).ready(function () {
-	
-	const hoyLocal = new Date();
-	const offset = hoyLocal.getTimezoneOffset();
-	hoyLocal.setMinutes(hoyLocal.getMinutes() - offset);
-	const hoy = hoyLocal.toISOString().split('T')[0];
+  const hoyLocal = new Date();
+  const offset = hoyLocal.getTimezoneOffset();
+  hoyLocal.setMinutes(hoyLocal.getMinutes() - offset);
+  const hoy = hoyLocal.toISOString().split('T')[0];
 
-	// Establecer fecha mínima
-	$('#fecha_ingreso').attr('min', hoy);
-	
-	const tabla = $('#tablaMovimientosHabitacion');
+  // Establecer fecha mínima
+  $('#fecha_ingreso').attr('min', hoy);
 
-	if (tabla.length) {
-		fetch('/api/movimientos_habitacion')
-			.then((response) => {
-				if (!response.ok) {
-					throw new Error(`HTTP error ${response.status}`);
-				}
-				return response.json();
-			})
-			.then((movimientos) => {
-				const dataSet = (movimientos || []).map((m) => [
-					m.id_movimiento,
-					m.admision && m.admision.paciente
-						? `${m.admision.paciente.apellido_p}, ${m.admision.paciente.nombre_p}`
-						: '-',
-					m.habitacion && m.habitacion.num ? m.habitacion.num : '-',
-					m.habitacion && m.habitacion.sector
-						? m.habitacion.sector.nombre
-						: '-',
-					m.cama && m.cama.nombre ? m.cama.nombre : m.id_cama || '-', // 👈 Mostrar cama
-					m.tipo_movimiento && m.tipo_movimiento.nombre
-						? m.tipo_movimiento.nombre
-						: '-',
-					m.fecha_hora_ingreso ? ajustarZonaHorariaArgentina(m.fecha_hora_ingreso).toLocaleString('es-AR') : '-',
-					m.fecha_hora_egreso || '-',
-					m.estado === 1 ? 'Activo' : 'Inactivo',
-					`
-                    <button class="btn btn-sm btn-primary edit-btn" data-id="${m.id_movimiento}">
-                        <i class="fas fa-pen"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger delete-btn" data-id="${m.id_movimiento}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    `,
-				]);
+  const tabla = $('#tablaMovimientosHabitacion');
 
-				const dataTable = tabla.DataTable({
-					language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
-					paging: true,
-      				pageLength: 10,
-      				searching: true,
-      				ordering: true,  
-      				responsive: true,
-		  			scrollX: false,
-					columnDefs: [{ targets: [6], orderable: false, searchable: false }], 
-				});
+  if (tabla.length) {
+    fetch('/api/movimientos_habitacion')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((movimientos) => {
+        const dataSet = (movimientos || []).map((m) => [
+          m.id_movimiento,
+          m.admision && m.admision.paciente
+            ? `${m.admision.paciente.apellido_p}, ${m.admision.paciente.nombre_p}`
+            : '-',
+          m.habitacion && m.habitacion.num ? m.habitacion.num : '-',
+          m.habitacion && m.habitacion.sector
+            ? m.habitacion.sector.nombre
+            : '-',
+          m.cama && m.cama.nombre ? m.cama.nombre : m.id_cama || '-',
+          m.tipo_movimiento && m.tipo_movimiento.nombre
+            ? m.tipo_movimiento.nombre
+            : '-',
+          m.fecha_hora_ingreso
+            ? new Date(m.fecha_hora_ingreso).toLocaleString('es-AR')
+            : '-',
+          m.fecha_hora_egreso
+            ? new Date(m.fecha_hora_egreso).toLocaleString('es-AR')
+            : '-',
+          m.estado === 1 ? 'Activo' : 'Inactivo',
+          `
+            <button class="btn btn-sm btn-primary edit-btn" data-id="${m.id_movimiento}">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="btn btn-sm btn-danger delete-btn" data-id="${m.id_movimiento}">
+              <i class="fas fa-trash"></i>
+            </button>
+          `,
+        ]);
 
-				dataTable.on('draw', function () {
-					const noResults =
-						dataTable.rows({ filter: 'applied' }).data().length === 0;
-					$('#btnAgregarMovimiento').remove();
-					if (noResults) {
-						$('#tablaMovimientosHabitacion_wrapper').append(`
-                            <div class="text-center mt-3">
-                                <button id="btnAgregarMovimiento" class="btn btn-success">
-                                    Agregar Movimiento Habitación
-                                </button>
-                            </div>
-                        `);
-					}
-				});
-			})
-			.catch((error) => {
-				$('#tablaMovimientosHabitacion').html(
-					'<tr><td colspan="10" class="text-center">No se pudo cargar los movimientos habitación.</td></tr>'
-				);
-			});
+        const dataTable = tabla.DataTable({
+          language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+          },
+          paging: true,
+          pageLength: 10,
+          searching: true,
+          ordering: true,
+          responsive: true,
+          scrollX: false,
+          columnDefs: [{ targets: [6], orderable: false, searchable: false }],
+        });
+
+        dataTable.on('draw', function () {
+          const noResults =
+            dataTable.rows({ filter: 'applied' }).data().length === 0;
+          $('#btnAgregarMovimiento').remove();
+          if (noResults) {
+            $('#tablaMovimientosHabitacion_wrapper').append(`
+              <div class="text-center mt-3">
+                <button id="btnAgregarMovimiento" class="btn btn-success">
+                  Agregar Movimiento Habitación
+                </button>
+              </div>
+            `);
+          }
+        });
+      })
+      .catch((error) => {
+        $('#tablaMovimientosHabitacion').html(
+          '<tr><td colspan="10" class="text-center">No se pudo cargar los movimientos habitación.</td></tr>'
+        );
+      });
 	}
 
 	// 🔸 Botón emergente agregar movimiento habitación

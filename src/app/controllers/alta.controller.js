@@ -9,7 +9,6 @@ import {
 	PersonalSalud  
 } from '../models/index.js'; 
 import { Op } from 'sequelize';
-import { toUTC } from '../helpers/timezone.helper.js';
 
 export const buscarAdmisionVigente = async (req, res) => {
 	
@@ -38,8 +37,7 @@ export const darAltaPaciente = async (req, res) => {
 		const { dni } = req.params;
 		let { fecha_hora_egreso, motivo_egr, id_personal_salud } = req.body;
 
-		// ⏱️ Ajustar fecha a UTC
-		fecha_hora_egreso = toUTC(fecha_hora_egreso);
+		fecha_hora_egreso = new Date();
 
 		const paciente = await Paciente.findOne({ where: { dni_paciente: dni } });
 		if (!paciente) {

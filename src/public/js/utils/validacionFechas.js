@@ -81,10 +81,6 @@ export function getFechaLocalParaInput() {
   return now.toISOString().slice(0, 16);
 }
 
-export function ajustarZonaHorariaArgentina(fechaUTC) {
-  return new Date(fechaUTC); // esto ya devuelve local en Argentina si el navegador lo está mostrando así
-}
-
 export function formatDate(fechaISO) {
     const date = new Date(fechaISO);
     const dia = String(date.getDate()).padStart(2, '0');

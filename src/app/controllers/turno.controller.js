@@ -8,8 +8,15 @@ import {
   Especialidad,
   MotivoIngreso
 } from '../models/index.js';
-import { calcularHoraFin } from '../helpers/timezone.helper.js';
 import { Op } from 'sequelize';
+
+function calcularHoraFin(fechaHoraInicio, duracionMinutos) {
+  const inicio = new Date(fechaHoraInicio);
+  if (isNaN(inicio.getTime())) return null;
+
+  const fin = new Date(inicio.getTime() + duracionMinutos * 60000);
+  return fin.toISOString();
+}
 
 export const getTurnos = async (req, res) => {
   try {

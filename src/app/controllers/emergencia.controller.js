@@ -13,7 +13,6 @@ import {
 } from '../models/index.js';
 import { Op } from 'sequelize';
 import { verificarGeneroHabitacion } from '../validators/admision.validator.js';
-
 import {
   validarEstadoCama,
   validarFechaNoPasada,
@@ -21,7 +20,6 @@ import {
   validarConflictoReserva,
 } from '../validators/admision.validator.js';
 
-import { toUTC } from '../helpers/timezone.helper.js';
 
 export const ingresoEmergencia = async (req, res) => {
   const sequelize = Admision.sequelize;
@@ -33,7 +31,7 @@ export const ingresoEmergencia = async (req, res) => {
       return res.status(400).json({ error: 'Faltan datos obligatorios.' });
     }
 
-    const fechaLocal = toUTC(fecha_hora_ingreso);
+    const fechaLocal = new Date(fecha_hora_ingreso);
     await validarFechaNoPasada(fechaLocal);
 
     let paciente = await Paciente.findOne({

@@ -1,6 +1,5 @@
 import { Op } from 'sequelize';
 import { Admision, MovimientoHabitacion, Cama, Paciente } from '../models/index.js';
-import { ajustarZonaHorariaArgentina } from '../helpers/timezone.helper.js';
 
 export async function validarEstadoCama(id_cama, transaction = null) {
   const cama = await Cama.findByPk(id_cama, { transaction });
@@ -9,21 +8,26 @@ export async function validarEstadoCama(id_cama, transaction = null) {
 }
 
 export function validarFechaNoPasada(fecha) {
-  const ajustada = ajustarZonaHorariaArgentina(new Date(fecha));
-  const hoy = ajustarZonaHorariaArgentina(new Date());
-  hoy.setHours(0, 0, 0, 0);
-  if (ajustada < hoy) throw new Error('No se permite una fecha de ingreso en el pasado');
+  const fechaUTC = toUTC(fecha); // convierte a UTC normalizado
+  const hoyUTC = toUTC(new Date());
+
+  hoyUTC.setUTCHours(0, 0, 0, 0);
+
+  if (fechaUTC < hoyUTC) {
+    throw new Error('No se permite una fecha de ingreso en el pasado');
+  }
 }
 
 export async function validarAdmisionActiva(id_paciente, fecha, transaction = null) {
-  const ajustada = ajustarZonaHorariaArgentina(new Date(fecha));
+  const fechaUTC = new Date(fecha); // ya viene en UTC del frontend
+
   const existente = await Admision.findOne({
     where: {
       id_paciente,
-      fecha_hora_ingreso: { [Op.lte]: ajustada },
+      fecha_hora_ingreso: { [Op.lte]: fechaUTC },
       [Op.or]: [
         { fecha_hora_egreso: null },
-        { fecha_hora_egreso: { [Op.gt]: ajustada } }
+        { fecha_hora_egreso: { [Op.gt]: fechaUTC } }
       ]
     },
     transaction
@@ -33,7 +37,7 @@ export async function validarAdmisionActiva(id_paciente, fecha, transaction = nu
 }
 
 export async function validarConflictoReserva({ id_cama, fecha_hora_ingreso }, transaction = null) {
-  const fecha = ajustarZonaHorariaArgentina(new Date(fecha_hora_ingreso));
+  const fecha = new Date(fecha_hora_ingreso); // ya viene en UTC desde el front
 
   const conflicto = await MovimientoHabitacion.findOne({
     where: {
@@ -62,12 +66,12 @@ export async function validarConflictoReserva({ id_cama, fecha_hora_ingreso }, t
 }
 
 export async function validarOcupacionCamaPorAdmision(id_cama, fecha, transaction = null) {
-  const fechaConsulta = ajustarZonaHorariaArgentina(new Date(fecha));
+  const fechaConsulta = new Date(fecha); // asumimos que ya viene en UTC
 
   const conflicto = await MovimientoHabitacion.findOne({
     where: {
       id_cama,
-      id_mov: 1,
+      id_mov: 1, // Ocupación
       estado: 1,
     },
     include: [{
@@ -88,8 +92,7 @@ export async function validarOcupacionCamaPorAdmision(id_cama, fecha, transactio
 }
 
 export async function validarOcupacionCamaPorAdmisionExcepto(id_cama, fecha, id_admision_excluir, transaction = null) {
-  const fechaConsulta = ajustarZonaHorariaArgentina(new Date(fecha));
-
+  const fechaConsulta = new Date(fecha); 
   const conflicto = await MovimientoHabitacion.findOne({
     where: {
       id_cama,

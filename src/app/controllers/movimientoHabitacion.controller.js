@@ -9,7 +9,6 @@ import {
 	Cama,
 } from '../models/index.js';
 import { Op } from 'sequelize';
-import { toUTC, ajustarZonaHorariaArgentina } from '../helpers/timezone.helper.js';
 
 export const verificarGenero = async (req, res) => {
   const { id_cama, id_genero } = req.body;
@@ -140,11 +139,8 @@ export const createMovimientoHabitacion = async (req, res) => {
 			estado,
 		} = req.body;
 
-		const fechaIngreso = toUTC(fecha_hora_ingreso);
-		const fechaEgreso = fecha_hora_egreso ? toUTC(fecha_hora_egreso) : null;
-		const esReserva = id_mov === 3 || fechaIngreso > new Date();
-
-		console.log('📩 Datos recibidos:', req.body);
+		const fechaIngreso = new Date(fecha_hora_ingreso);
+		const fechaEgreso = fecha_hora_egreso ? new Date(fecha_hora_egreso) : null;
 
 		const admisionNueva = await Admision.findByPk(id_admision, {
 			include: [{ model: Paciente, as: 'paciente' }],
@@ -226,15 +222,17 @@ export const updateMovimientoHabitacion = async (req, res) => {
 			id_mov,
 			estado,
 		} = req.body;
+
 		await movimiento.update({
 			id_admision,
 			id_habitacion,
 			id_cama, 
-			fecha_hora_ingreso: toUTC(fecha_hora_ingreso),
-			fecha_hora_egreso: fecha_hora_egreso ? toUTC(fecha_hora_egreso) : null,
+			fecha_hora_ingreso: new Date(fecha_hora_ingreso),
+			fecha_hora_egreso: fecha_hora_egreso ? new Date(fecha_hora_egreso) : null,
 			id_mov,
 			estado,
 		});
+		
 		res.json(movimiento);
 	} catch (error) {
 		res.status(500).json({ message: 'Error al actualizar movimiento habitación' });
@@ -278,15 +276,17 @@ export const vistaMovimientosHabitacion = async (req, res) => {
 				},
 			],
 		});
+
 		const adaptados = movimientos.map(m => ({
 			...m.toJSON(),
 			fecha_hora_ingreso: m.fecha_hora_ingreso
-				? ajustarZonaHorariaArgentina(m.fecha_hora_ingreso).toLocaleString('es-AR')
+				? new Date(m.fecha_hora_ingreso).toLocaleString('es-AR')
 				: '-',
 			fecha_hora_egreso: m.fecha_hora_egreso
-				? ajustarZonaHorariaArgentina(m.fecha_hora_egreso).toLocaleString('es-AR')
+				? new Date(m.fecha_hora_egreso).toLocaleString('es-AR')
 				: '-',
 		}));
+
 		res.render('movHabitacion', { movimientos: adaptados });
 	} catch (error) {
 		res.status(500).send('Error al cargar movimientos habitación');

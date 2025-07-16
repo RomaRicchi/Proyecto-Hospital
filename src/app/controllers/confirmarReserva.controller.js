@@ -10,9 +10,7 @@ import {
   sequelize,
 } from '../models/index.js';
 import { Op } from 'sequelize';
-import { toUTC } from '../helpers/timezone.helper.js'; 
-import {
-  verificarGeneroHabitacion,
+import {  verificarGeneroHabitacion,
 } from '../validators/admision.validator.js';
 import {
   calcularEdad,
@@ -21,7 +19,7 @@ import {
 
 export const vistaReservarCama = (req, res) => {
   try {
-    res.render('reservaCama'); // no necesita camas
+    res.render('reservaCama'); 
   } catch (error) {
     res.status(500).send('Error al cargar reservas');
   }
@@ -54,14 +52,11 @@ export const confirmarReserva = async (req, res) => {
       return res.status(404).json({ message: 'Movimiento no encontrado' });
     }
 
-    // Validar que solo se pueda confirmar el día correspondiente (en horario argentino)
-    const ahoraArg = new Date();
-    const hoy = ahoraArg.toISOString().split('T')[0];
+    const ahora = new Date();
+    const hoyLocal = ahora.toLocaleDateString('sv-SE'); // "YYYY-MM-DD"
+    const fechaReserva = new Date(movimiento.fecha_hora_ingreso).toLocaleDateString('sv-SE');
 
-    const reservaArg = new Date(movimiento.fecha_hora_ingreso);
-    const fechaReserva = reservaArg.toISOString().split('T')[0];
-
-    if (fechaReserva !== hoy) {
+    if (fechaReserva !== hoyLocal) {
       await t.rollback();
       return res.status(400).json({ message: 'Solo se puede confirmar la reserva el día de inicio.' });
     }
@@ -73,27 +68,24 @@ export const confirmarReserva = async (req, res) => {
     const genero = paciente.id_genero;
     const edad = calcularEdad(paciente.fecha_nac);
 
-    // Validación de género
     await verificarGeneroHabitacion(habitacion.id_habitacion, genero, t);
 
-    // Validación de compatibilidad por sector
     const compatible = validarCompatibilidadPacienteSector(edad, genero, sector);
     if (!compatible) {
       await t.rollback();
-      return res.status(409).json({ message: `El paciente no cumple los requisitos del sector "${sector}".` });
+      return res.status(409).json({
+        message: `El paciente no cumple los requisitos del sector "${sector}".`
+      });
     }
 
-    // Actualizar movimiento a ingreso
-    movimiento.id_mov = 1;
+    movimiento.id_mov = 1; // cambio a "ingreso"
     movimiento.fecha_hora_ingreso = movimiento.fecha_hora_ingreso;
     movimiento.estado = 1;
     await movimiento.save({ transaction: t });
 
-    // Actualizar cama
     cama.estado = 1;
     await cama.save({ transaction: t });
 
-    // Crear registro clínico
     const tipoIngreso = await TipoRegistro.findOne({
       where: { nombre: { [Op.like]: '%ingreso%' } }
     });
@@ -119,34 +111,110 @@ export const confirmarReserva = async (req, res) => {
   }
 };
 
+export const updateReserva = async (req, res) => {
+  const { id_movimiento } = req.params;
+  const { nueva_fecha_hora } = req.body;
+  const t = await sequelize.transaction();
+
+  try {
+    const movimiento = await MovimientoHabitacion.findByPk(id_movimiento, {
+      include: [
+        {
+          model: Admision,
+          as: 'admision',
+          include: [{ model: Paciente, as: 'paciente' }]
+        },
+        {
+          model: Habitacion,
+          as: 'habitacion',
+          include: [{ model: Sector, as: 'sector' }]
+        },
+        { model: Cama, as: 'cama' }
+      ],
+      transaction: t
+    });
+
+    if (!movimiento) {
+      await t.rollback();
+      return res.status(404).json({ message: 'Reserva no encontrada' });
+    }
+
+    if (movimiento.id_mov !== 3) {
+      await t.rollback();
+      return res.status(400).json({ message: 'Solo se pueden modificar reservas' });
+    }
+
+    const fechaReserva = new Date(nueva_fecha_hora);
+    const ahora = new Date();
+    if (isNaN(fechaReserva.getTime()) || fechaReserva < ahora) {
+      await t.rollback();
+      return res.status(400).json({ message: 'La nueva fecha debe ser futura' });
+    }
+
+    // Validar compatibilidad de habitación y sector
+    const paciente = movimiento.admision.paciente;
+    const habitacion = movimiento.habitacion;
+    const sector = habitacion?.sector?.nombre || '';
+    const genero = paciente.id_genero;
+    const edad = calcularEdad(paciente.fecha_nac);
+
+    await verificarGeneroHabitacion(habitacion.id_habitacion, genero, t);
+
+    const compatible = validarCompatibilidadPacienteSector(edad, genero, sector);
+    if (!compatible) {
+      await t.rollback();
+      return res.status(409).json({
+        message: `El paciente no cumple los requisitos del sector "${sector}".`
+      });
+    }
+
+    movimiento.fecha_hora_ingreso = fechaReserva;
+    await movimiento.save({ transaction: t });
+
+    await t.commit();
+    return res.json({ message: 'Reserva actualizada correctamente' });
+  } catch (error) {
+    console.error('❌ Error al actualizar reserva:', error);
+    if (t) await t.rollback();
+    res.status(500).json({ message: error.message || 'Error interno' });
+  }
+};
+
 export const cancelarReserva = async (req, res) => {
   const { id_movimiento } = req.params;
+
   try {
     const movimiento = await MovimientoHabitacion.findByPk(id_movimiento, {
       include: [{ model: Admision, as: 'admision' }]
     });
 
     if (!movimiento) {
-      return res.status(404).send('Reserva no encontrada');
+      return res.status(404).json({ message: 'Reserva no encontrada' });
     }
 
     if (movimiento.id_mov !== 3) {
-      return res.status(400).send('Solo se pueden cancelar reservas');
+      return res.status(400).json({ message: 'Solo se pueden cancelar reservas' });
     }
 
     const idAdmision = movimiento.id_admision;
+
+    // Eliminar la reserva
     await movimiento.destroy();
 
-    const movimientosRestantes = await MovimientoHabitacion.findAll({
-      where: { id_admision: idAdmision },
+    // Buscar si quedan más movimientos para esa admisión
+    const movimientosRestantes = await MovimientoHabitacion.count({
+      where: { id_admision: idAdmision }
     });
 
-    if (movimientosRestantes.length === 0) {
+    // Si no hay ninguno más, eliminar la admisión
+    if (movimientosRestantes === 0) {
       await Admision.destroy({ where: { id_admision: idAdmision } });
     }
 
     res.json({ message: 'Reserva cancelada correctamente' });
+
   } catch (error) {
+    console.error('❌ Error en cancelarReserva:', error);
     res.status(500).json({ message: 'Error al cancelar la reserva' });
   }
 };
@@ -154,21 +222,19 @@ export const cancelarReserva = async (req, res) => {
 export const eliminarReservasVencidas = async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    // Día actual en Argentina (inicio del día)
-    const ahoraArgentina = new Date();
-    const fechaHoyArgentina = new Date(
-      ahoraArgentina.getFullYear(),
-      ahoraArgentina.getMonth(),
-      ahoraArgentina.getDate(),
-      0, 0, 0
-    );
+    // Calcular la fecha de ayer en formato YYYY-MM-DD
+    const ayer = new Date();
+    ayer.setDate(ayer.getDate() - 1);
+    const fechaAyer = ayer.toISOString().split('T')[0];
 
-    const hoyUTC = toUTC(fechaHoyArgentina);
-
+    // Obtener todas las reservas cuya fecha de ingreso fue AYER (hora local)
     const reservasVencidas = await MovimientoHabitacion.findAll({
       where: {
         id_mov: 3, // tipo reserva
-        fecha_hora_ingreso: { [Op.lt]: hoyUTC },
+        fecha_hora_ingreso: {
+          [Op.gte]: new Date(`${fechaAyer}T00:00:00`),
+          [Op.lt]: new Date(`${fechaAyer}T23:59:59`)
+        }
       },
       transaction: t
     });
@@ -195,4 +261,3 @@ export const eliminarReservasVencidas = async (req, res) => {
     res.status(500).json({ message: 'Error al eliminar reservas vencidas' });
   }
 };
-
