@@ -11,14 +11,17 @@ block content
         thead
           tr
             th Paciente
-            th Agenda
+            th Profesional
             th Fecha
             th Hora
             th Estado
+            th Motivo
             th Acciones
         tbody
-        
+
       script(src="https://code.jquery.com/jquery-3.6.0.min.js")
       script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
-      script(src="/js/turno.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")
+      script(src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js")
+      link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css")
+      script(type="module" src="/js/turno.js")

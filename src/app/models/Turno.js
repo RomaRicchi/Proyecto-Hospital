@@ -29,6 +29,28 @@ export default (sequelize, DataTypes) => {
     tableName: 'turno',
     timestamps: false
   });
+  Turno.associate = (models) => {
+    Turno.belongsTo(models.Agenda, {
+      foreignKey: 'id_agenda',
+      as: 'agenda'
+    });
+
+    Turno.belongsTo(models.Paciente, {
+      foreignKey: 'id_paciente',
+      as: 'cliente'
+    });
+
+    Turno.belongsTo(models.EstadoTurno, {
+      foreignKey: 'id_estado',
+      as: 'estado_turno'
+    });
+
+    Turno.belongsTo(models.MotivoIngreso, {
+      foreignKey: 'id_motivo',
+      as: 'motivo_turno'
+    });
+  };
+
 
   return Turno;
 };

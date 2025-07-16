@@ -7,6 +7,8 @@ $(document).ready(function () {
     columns: [null, null, null, null, null, { orderable: false }]
   });
 
+  let calendar = null;
+
   function cargarAgendas() {
     const idProfesional = $('#filtroProfesional').val();
 
@@ -14,6 +16,7 @@ $(document).ready(function () {
       .then(res => res.json())
       .then(agendas => {
         tabla.clear();
+
         const filtradas = idProfesional
           ? agendas.filter(a => a.id_personal_salud == idProfesional)
           : agendas;
@@ -37,23 +40,30 @@ $(document).ready(function () {
         });
 
         tabla.draw();
+      })
+      .catch(err => {
+        console.error('❌ Error al cargar agendas:', err);
+        Swal.fire('Error', 'No se pudieron cargar las agendas', 'error');
       });
   }
-
-  cargarAgendas();
 
   $('#btnNuevaAgenda').on('click', () => mostrarFormulario());
 
   $(document).on('click', '.editar', async function () {
     const id = $(this).data('id');
-    const agenda = await fetch(`/api/agenda/${id}`).then(r => r.json());
-    mostrarFormulario(agenda);
+    try {
+      const agenda = await fetch(`/api/agenda/${id}`).then(r => r.json());
+      mostrarFormulario(agenda);
+    } catch {
+      Swal.fire('Error', 'No se pudo cargar la agenda', 'error');
+    }
   });
 
   $(document).on('click', '.eliminar', function () {
     const id = $(this).data('id');
     Swal.fire({
       title: '¿Eliminar agenda?',
+      icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Eliminar'
     }).then(result => {
@@ -62,12 +72,15 @@ $(document).ready(function () {
           .then(() => {
             Swal.fire('Eliminada', '', 'success');
             cargarAgendas();
-          });
+          })
+          .catch(() => Swal.fire('Error', 'No se pudo eliminar', 'error'));
       }
     });
   });
+
+  // Guardar y cargar filtro de profesional
   const filtroGuardado = localStorage.getItem('filtroProfesionalId');
-  // 🔄 Filtro por profesionaL
+
   $('#filtroProfesional').select2({
     placeholder: 'Buscar por profesional o especialidad',
     ajax: {
@@ -91,16 +104,19 @@ $(document).ready(function () {
           const option = new Option(op.text, op.id, true, true);
           $('#filtroProfesional').append(option).trigger('change');
         }
-      });
+        cargarAgendas(); // solo después de cargar el filtro
+      })
+      .catch(() => cargarAgendas());
+  } else {
+    cargarAgendas();
   }
 
   $('#filtroProfesional').on('change', function () {
     const valor = $(this).val();
-    localStorage.setItem('filtroProfesionalId', valor); // 🔸 guardar
+    localStorage.setItem('filtroProfesionalId', valor);
+    cargarAgendas();
     if (calendar) calendar.refetchEvents();
   });
-
-  let calendar = null;
 
   $('#toggleVista').on('click', function () {
     const tabla = $('#vistaTabla');
@@ -128,7 +144,6 @@ $(document).ready(function () {
 
   const vista = localStorage.getItem('vistaActiva') || 'tabla';
   if (vista === 'calendario') {
-    $('#toggleVista').click(); 
+    $('#toggleVista').click();
   }
-
 });

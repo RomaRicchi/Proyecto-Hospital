@@ -85,3 +85,17 @@ export function ajustarZonaHorariaArgentina(fechaUTC) {
   return new Date(fechaUTC); // esto ya devuelve local en Argentina si el navegador lo está mostrando así
 }
 
+export function formatDate(fechaISO) {
+    const date = new Date(fechaISO);
+    const dia = String(date.getDate()).padStart(2, '0');
+    const mes = String(date.getMonth() + 1).padStart(2, '0');
+    const anio = date.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+}
+
+export function formatHour(fechaISO) {
+    const date = new Date(fechaISO);
+    const horas = String(date.getHours()).padStart(2, '0');
+    const minutos = String(date.getMinutes()).padStart(2, '0');
+    return `${horas}:${minutos}`;
+}

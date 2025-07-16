@@ -1,22 +1,44 @@
+import { formatDate, formatHour } from './utils/validacionFechas.js';
+
 $(document).ready(function () {
   const tabla = $('#tablaTurnos').DataTable({
     language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
-    columns: [null, null, null, null, null, null, { orderable: false }]
+    paging: true,
+    pageLength: 10,
+    searching: true,
+    ordering: true,
+    responsive: true,
+    scrollX: false,
+    columnDefs: [{ targets: [6], orderable: false, searchable: false }], 
   });
+  
 
   function cargarTurnos() {
-    fetch('/api/turnos')
-      .then(res => res.json())
+    fetch('/api/turnos/listado')
+      .then(res => {
+        if (!res.ok) throw new Error('Error en la carga de turnos');
+        return res.json();
+      })
       .then(turnos => {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0); 
+        if (!Array.isArray(turnos)) {
+          throw new Error('La respuesta no es una lista válida de turnos');
+        }
+
         tabla.clear();
-        turnos.forEach(t => {
+        turnos
+        .filter(t => new Date(t.fecha_hora) >= hoy)
+        .forEach(t => {
           tabla.row.add([
             `${t.cliente?.apellido_p || ''}, ${t.cliente?.nombre_p || ''}`,
-            t.agenda ? `${t.agenda.personal?.apellido}, ${t.agenda.personal?.nombre} (${t.agenda.personal?.especialidad?.nombre})` : '-',
-            formatDate(t.fecha_hora),  // si lo tenés formateado
-            formatHour(t.fecha_hora),
+            t.agenda?.personal
+              ? `${t.agenda.personal.apellido}, ${t.agenda.personal.nombre} (${t.agenda.personal?.especialidad?.nombre || ''})`
+              : '-',
+            t.fecha_hora ? formatDate(t.fecha_hora) : '-',
+            t.fecha_hora ? formatHour(t.fecha_hora) : '-',
             t.estado_turno?.nombre || '-',
-            t.motivo_turno?.tipo || '-'
+            t.motivo_turno?.tipo || '-',
             `
               <button class="btn btn-sm btn-primary editar" data-id="${t.id_turno}">Editar</button>
               <button class="btn btn-sm btn-danger eliminar" data-id="${t.id_turno}">Eliminar</button>
@@ -24,10 +46,12 @@ $(document).ready(function () {
           ]);
         });
         tabla.draw();
+      })
+      .catch(err => {
+        console.error('❌ Error al cargar los turnos:', err.message);
+        Swal.fire('Error', 'No se pudieron cargar los turnos', 'error');
       });
   }
-
-  cargarTurnos();
 
   $('#btnNuevoTurno').on('click', () => mostrarFormulario());
 
@@ -74,10 +98,10 @@ $(document).ready(function () {
           ${pacienteOptions}
         </select>
         <select id="id_agenda" class="swal2-input">${agendaOptions}</select>
-        <input id="fecha_turno" type="date" class="swal2-input" value="${turno.fecha_turno || ''}">
-        <input id="hora_turno" type="time" class="swal2-input" value="${turno.hora_turno || ''}">
+        <input id="fecha_turno" type="date" class="swal2-input" value="${turno.fecha_hora ? formatDate(turno.fecha_hora) : ''}">
+        <input id="hora_turno" type="time" class="swal2-input" value="${turno.fecha_hora ? formatHour(turno.fecha_hora) : ''}">
           ${turno.id_turno ? `
-            <select id="id_estado" class="swal2-input">${estadoOptions}</select>
+        <select id="id_estado" class="swal2-input">${estadoOptions}</select>
           ` : ''}
         <select id="id_motivo" class="swal2-input">${motivoOptions}</select>
       `,
@@ -100,20 +124,35 @@ $(document).ready(function () {
         });
       },
       preConfirm: () => {
-        const id_estado = turno.id_turno
-          ? parseInt($('#id_estado').val()) // en edición
-          : 1; // valor fijo para "Pendiente" si es creación
+        const id_paciente = parseInt($('#id_paciente').val());
+        const id_agenda = parseInt($('#id_agenda').val());
+        const fecha_turno = $('#fecha_turno').val();
+        const hora_turno = $('#hora_turno').val();
+        const id_motivo = parseInt($('#id_motivo').val());
+        const id_estado = turno.id_turno ? parseInt($('#id_estado').val()) : 1;
+
+        // Validar campos obligatorios
+        if (!id_paciente || !id_agenda || !fecha_turno || !hora_turno || !id_motivo) {
+          Swal.showValidationMessage('Todos los campos son obligatorios');
+          return false;
+        }
+
+        // Validar que la fecha y hora del turno sean futuras
+        const fechaHora = new Date(`${fecha_turno}T${hora_turno}`);
+        if (isNaN(fechaHora.getTime()) || fechaHora < new Date()) {
+          Swal.showValidationMessage('La fecha y hora del turno deben ser futuras');
+          return false;
+        }
 
         return {
-          id_paciente: parseInt($('#id_paciente').val()),
-          id_agenda: parseInt($('#id_agenda').val()),
-          fecha_turno: $('#fecha_turno').val(),
-          hora_turno: $('#hora_turno').val(),
+          id_paciente,
+          id_agenda,
+          fecha_turno,
+          hora_turno,
           id_estado,
-          id_motivo: parseInt($('#id_motivo').val())
+          id_motivo
         };
       }
-
     }).then(result => {
       if (!result.isConfirmed) return;
 
@@ -153,4 +192,5 @@ $(document).ready(function () {
       }
     });
   });
+  cargarTurnos();
 });

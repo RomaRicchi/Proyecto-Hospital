@@ -84,7 +84,7 @@ $(document).ready(function () {
 
       registrosPaciente = data.registros.map(r => ({
         ...r,
-        fecha: new Date(r.fecha),// ✅ importante: NO toISOString +3hs
+        fecha: new Date(r.fecha),// importante: NO toISOString +3hs
         id: r.id  
       }));
 
@@ -407,7 +407,6 @@ $(document).ready(function () {
 
         Swal.fire('Actualizado', 'El registro fue editado correctamente', 'success');
 
-        // 🆕 Recargar registros para ese paciente
         $('#btnBuscar').click(); // simula nueva búsqueda
 
       } catch (e) {

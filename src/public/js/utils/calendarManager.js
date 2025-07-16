@@ -15,11 +15,17 @@ export function crearCalendario() {
     },
     events: function (fetchInfo, successCallback, failureCallback) {
       const profesionalId = $('#filtroProfesional').val();
-      fetch(`/api/agenda/calendario/turnos?profesionalId=${profesionalId || ''}`)
+
+      if (!profesionalId) {
+        return successCallback([]);  // Vaciar calendario
+      }
+
+      fetch(`/api/agenda/calendario/turnos?profesionalId=${profesionalId}`)
         .then(res => res.json())
         .then(successCallback)
         .catch(failureCallback);
     },
+
     selectable: true,
     dateClick: function (info) {
       const profesionalId = $('#filtroProfesional').val();
@@ -29,15 +35,14 @@ export function crearCalendario() {
         return;
       }
 
-      const fecha = info.dateStr.split('T')[0];
-      const hora = info.dateStr.split('T')[1]?.substring(0, 5) || '';
+      const [fecha, hora] = info.dateStr.split('T');
 
       Swal.fire({
         title: 'Asignar nuevo turno',
         html: `
           <select id="pacienteTurno" class="swal2-select" style="width:100%"></select>
           <input type="date" id="fechaTurno" class="swal2-input" value="${fecha}">
-          <input type="time" id="horaTurno" class="swal2-input" value="${hora}">
+          <input type="time" id="horaTurno" class="swal2-input" value="${hora?.slice(0, 5) || ''}">
         `,
         didOpen: () => {
           $('#pacienteTurno').select2({
@@ -58,14 +63,18 @@ export function crearCalendario() {
         confirmButtonText: 'Crear turno',
         preConfirm: () => {
           const pacienteId = $('#pacienteTurno').val();
-          const fechaHora = `${$('#fechaTurno').val()}T${$('#horaTurno').val()}`;
+          const fechaTurno = $('#fechaTurno').val();
+          const horaTurno = $('#horaTurno').val();
 
-          if (!pacienteId || !fechaHora) {
+          if (!pacienteId || !fechaTurno || !horaTurno) {
             Swal.showValidationMessage('Completa todos los campos');
             return false;
           }
 
-          return { pacienteId, fechaHora };
+          return {
+            pacienteId,
+            fechaHora: `${fechaTurno}T${horaTurno}`
+          };
         }
       }).then(result => {
         if (result.isConfirmed) {
@@ -89,15 +98,16 @@ export function crearCalendario() {
     },
 
     eventClick: function (info) {
-      const turno = info.event;
+      const evento = info.event;
+      const idTurno = evento.id; // ✅ Este id ahora está disponible gracias al backend
 
       Swal.fire({
         title: 'Detalle del turno',
         html: `
-          <strong>Profesional:</strong> ${turno.title}<br>
-          <strong>Paciente:</strong> ${turno.extendedProps.paciente || 'Sin asignar'}<br>
-          <strong>Estado:</strong> ${turno.extendedProps.estado || '---'}<br>
-          <strong>Hora:</strong> ${turno.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${turno.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}<br><br>
+          <strong>Profesional:</strong> ${evento.title}<br>
+          <strong>Paciente:</strong> ${evento.extendedProps.paciente || 'Sin asignar'}<br>
+          <strong>Estado:</strong> ${evento.extendedProps.estado || '---'}<br>
+          <strong>Hora:</strong> ${evento.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${evento.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}<br><br>
           <button id="btnReagendar" class="swal2-confirm swal2-styled" style="margin-right: 5px; background-color:#28a745">Reagendar</button>
           <button id="btnCancelar" class="swal2-cancel swal2-styled" style="background-color:#dc3545">Cancelar</button>
         `,
@@ -125,7 +135,7 @@ export function crearCalendario() {
             }).then(result => {
               if (result.isConfirmed) {
                 const nuevaFechaHora = `${result.value.fecha}T${result.value.hora}`;
-                fetch(`/api/turnos/${turno.id}`, {
+                fetch(`/api/turnos/${idTurno}`, {
                   method: 'PUT',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ fecha_hora: nuevaFechaHora })
@@ -147,7 +157,7 @@ export function crearCalendario() {
               confirmButtonText: 'Sí, cancelar',
             }).then(res => {
               if (res.isConfirmed) {
-                fetch(`/api/turnos/${turno.id}`, {
+                fetch(`/api/turnos/${idTurno}`, {
                   method: 'DELETE'
                 })
                 .then(() => {

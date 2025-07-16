@@ -1,11 +1,19 @@
-import { Agenda, Turno, Dia, PersonalSalud, Usuario, Paciente, Especialidad } from '../models/index.js';
+import { 
+  Agenda, 
+  Turno, 
+  EstadoTurno,
+  Dia, 
+  PersonalSalud, 
+  Usuario, 
+  Paciente, 
+  Especialidad 
+} from '../models/index.js';
 import { Op } from 'sequelize';
 
 export const getCalendarioCompleto = async (req, res) => {
   try {
     const { profesionalId } = req.query;
 
-    // 1. Agendas
     const agendaWhere = profesionalId ? { id_personal_salud: profesionalId } : {};
 
     const agendas = await Agenda.findAll({
@@ -40,30 +48,55 @@ export const getCalendarioCompleto = async (req, res) => {
         {
           model: Agenda,
           as: 'agenda',
-          attributes: [],
+          include: [
+            {
+              model: PersonalSalud,
+              as: 'personal',
+              attributes: ['apellido', 'nombre']
+            }
+          ]
         },
         {
           model: Paciente,
           as: 'cliente',
           attributes: ['nombre_p', 'apellido_p']
+        },
+        {
+          model: EstadoTurno,
+          as: 'estado_turno',
+          attributes: ['nombre']
         }
       ]
     });
 
     const eventosTurnos = turnos.map(t => {
-      const fin = new Date(new Date(t.fecha_hora).getTime() + t.duracion * 60000);
+      const duracion = t.agenda?.duracion || 30;
+      const fin = new Date(new Date(t.fecha_hora).getTime() + duracion * 60000);
+
       return {
-        title: `${t.cliente?.apellido_p || ''}, ${t.cliente?.nombre_p || ''}`,
+        id: t.id_turno, 
+        title: t.cliente
+          ? `${t.cliente.apellido_p}, ${t.cliente.nombre_p}`
+          : 'Paciente no asignado',
         start: t.fecha_hora,
         end: fin.toISOString(),
-        color: '#ffe0b3',
+        extendedProps: {
+          paciente: t.cliente
+            ? `${t.cliente.apellido_p}, ${t.cliente.nombre_p}`
+            : 'Sin asignar',
+          estado: t.estado_turno?.nombre || '---',
+          profesional: t.agenda?.personal
+            ? `${t.agenda.personal.apellido}, ${t.agenda.personal.nombre}`
+            : ''
+        },
+        color: '#ffe0b3'
       };
     });
 
     res.json([...eventosAgendas, ...eventosTurnos]);
   } catch (error) {
-    console.error('Error al cargar el calendario combinado:', error);
-    res.status(500).json({ message: 'Error al cargar el calendario combinado' });
+    console.error('❌ Error al cargar el calendario combinado:', error);
+    res.status(500).json({ message: 'Error al cargar el calendario' });
   }
 };
 
@@ -172,29 +205,31 @@ export const getAgendas = async (req, res) => {
 
 export const createAgenda = async (req, res) => {
   try {
-    const nueva = await Agenda.create(req.body);
-    const completa = await Agenda.findByPk(nueva.id_agenda, {
-      include: [
-        {
-          model: PersonalSalud,
-          as: 'personal',
-          attributes: ['id_personal_salud', 'nombre', 'apellido'],
-          include: [
-            { model: Usuario, as: 'datos_usuario', attributes: ['username'] },
-            { model: Especialidad, as: 'especialidad', attributes: ['nombre'] }
-          ]
-        },
-        {
-          model: Dia,
-          as: 'dia',
-          attributes: ['nombre']
-        }
-      ]
-    });
-    res.status(201).json(completa);
+    const { id_personal_salud, id_dia, hora_inicio, hora_fin, duracion } = req.body;
+    if (!id_personal_salud || !id_dia || !hora_inicio || !hora_fin || !duracion) {
+      return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+    }
+    if (!/^\d{2}:\d{2}$/.test(hora_inicio) || !/^\d{2}:\d{2}$/.test(hora_fin)) {
+      return res.status(400).json({ message: 'Formato de hora inválido' });
+    }
+    const [hInicio, mInicio] = hora_inicio.split(':').map(Number);
+    const [hFin, mFin] = hora_fin.split(':').map(Number);
+    const inicio = new Date(0, 0, 0, hInicio, mInicio);
+    const fin = new Date(0, 0, 0, hFin, mFin);
+    if (fin <= inicio) {
+      return res.status(400).json({ message: 'La hora de fin debe ser posterior a la de inicio' });
+    }
+
+    const existe = await Agenda.findOne({ where: { id_personal_salud, id_dia } });
+    if (existe) {
+      return res.status(409).json({ message: 'Ya existe una agenda para ese profesional ese día' });
+    }
+
+    const nueva = await Agenda.create({ id_personal_salud, id_dia, hora_inicio, hora_fin, duracion });
+    res.status(201).json(nueva);
   } catch (error) {
     console.error('Error al crear agenda:', error);
-    res.status(500).json({ message: 'Error al crear agenda' });
+    res.status(500).json({ message: 'Error interno al crear la agenda' });
   }
 };
 
@@ -223,12 +258,42 @@ export const getAgendaById = async (req, res) => {
 
 export const updateAgenda = async (req, res) => {
   try {
-    const agenda = await Agenda.findByPk(req.params.id);
-    if (!agenda) return res.status(404).json({ message: 'No encontrada' });
-    await agenda.update(req.body);
+    const { id } = req.params;
+    const { id_personal_salud, id_dia, hora_inicio, hora_fin, duracion } = req.body;
+
+    const agenda = await Agenda.findByPk(id);
+    if (!agenda) {
+      return res.status(404).json({ message: 'Agenda no encontrada' });
+    }
+
+    if (!id_personal_salud || !id_dia || !hora_inicio || !hora_fin || !duracion) {
+      return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+    }
+
+    const [hInicio, mInicio] = hora_inicio.split(':').map(Number);
+    const [hFin, mFin] = hora_fin.split(':').map(Number);
+    const inicio = new Date(0, 0, 0, hInicio, mInicio);
+    const fin = new Date(0, 0, 0, hFin, mFin);
+    if (fin <= inicio) {
+      return res.status(400).json({ message: 'La hora de fin debe ser posterior a la de inicio' });
+    }
+
+    const existente = await Agenda.findOne({
+      where: {
+        id_personal_salud,
+        id_dia,
+        id_agenda: { [Op.ne]: id }
+      }
+    });
+    if (existente) {
+      return res.status(409).json({ message: 'Ese profesional ya tiene una agenda para ese día' });
+    }
+
+    await agenda.update({ id_personal_salud, id_dia, hora_inicio, hora_fin, duracion });
     res.json(agenda);
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar agenda' });
+    console.error('Error al actualizar agenda:', error);
+    res.status(500).json({ message: 'Error interno al actualizar la agenda' });
   }
 };
 

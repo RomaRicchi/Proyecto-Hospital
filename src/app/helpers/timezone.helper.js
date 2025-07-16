@@ -7,3 +7,10 @@ export const toUTC = (fechaStr) => {
   return new Date(fechaLocal.getTime() - fechaLocal.getTimezoneOffset() * 60000);
 };
 
+export function calcularHoraFin(fechaHoraInicio, duracionMinutos) {
+  const inicio = new Date(fechaHoraInicio);
+  if (isNaN(inicio.getTime())) return null;
+
+  const fin = new Date(inicio.getTime() + duracionMinutos * 60000);
+  return fin.toISOString();
+}
