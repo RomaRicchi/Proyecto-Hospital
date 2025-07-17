@@ -8,10 +8,11 @@ import {
   buscarPersonal,
   getAgendasRecurrentes,
   getCalendarioCompleto,
+  getAgendasByProfesional,
 } from '../controllers/agenda.controller.js';
 
 const router = Router();
-
+router.get('/profesional/:id', getAgendasByProfesional);
 router.get('/', getAgendas);
 router.get('/buscar', buscarPersonal);
 router.get('/semana', getAgendasRecurrentes);

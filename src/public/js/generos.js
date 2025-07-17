@@ -46,7 +46,6 @@ $(document).ready(function () {
     return null;
   }
 
-  // Agregar género
   $(document).on('click', '#btnAgregarGenero', function () {
     Swal.fire({
       title: 'Agregar Género',
@@ -55,6 +54,9 @@ $(document).ready(function () {
       inputPlaceholder: 'Ingrese el nombre del género',
       showCancelButton: true,
       confirmButtonText: 'Guardar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
       preConfirm: (nombre) => {
         const error = validarNombreGenero(nombre);
         if (error) {
@@ -86,7 +88,6 @@ $(document).ready(function () {
     });
   });
 
-  // Editar género
   $(document).on('click', '.edit-btn', function () {
     const id = $(this).data('id');
     fetch(`/api/genero/${id}`)
@@ -99,6 +100,9 @@ $(document).ready(function () {
           inputValue: genero.nombre,
           showCancelButton: true,
           confirmButtonText: 'Guardar',
+          customClass: {
+            popup: 'swal2-card-style'
+          },
           preConfirm: (nombre) => {
             const error = validarNombreGenero(nombre);
             if (error) {
@@ -134,7 +138,6 @@ $(document).ready(function () {
       );
   });
 
-  // Eliminar género
   $(document).on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     Swal.fire({
@@ -143,7 +146,10 @@ $(document).ready(function () {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         fetch(`/api/genero/${id}`, { method: 'DELETE' })

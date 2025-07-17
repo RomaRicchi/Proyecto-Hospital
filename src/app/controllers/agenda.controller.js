@@ -9,6 +9,7 @@ import {
   Especialidad 
 } from '../models/index.js';
 import { Op } from 'sequelize';
+import { parseFechaUTC, validarHoraRango } from '../helper/timeZone.js';
 
 export const getCalendarioCompleto = async (req, res) => {
   try {
@@ -37,7 +38,7 @@ export const getCalendarioCompleto = async (req, res) => {
       color: '#d0e7ff'
     }));
 
-    // 2. Turnos
+    // Turnos
     const turnoWhere = profesionalId
       ? { '$agenda.id_personal_salud$': profesionalId }
       : {};
@@ -48,37 +49,24 @@ export const getCalendarioCompleto = async (req, res) => {
         {
           model: Agenda,
           as: 'agenda',
-          include: [
-            {
-              model: PersonalSalud,
-              as: 'personal',
-              attributes: ['apellido', 'nombre']
-            }
-          ]
+          include: [{ model: PersonalSalud, as: 'personal', attributes: ['apellido', 'nombre'] }]
         },
-        {
-          model: Paciente,
-          as: 'cliente',
-          attributes: ['nombre_p', 'apellido_p']
-        },
-        {
-          model: EstadoTurno,
-          as: 'estado_turno',
-          attributes: ['nombre']
-        }
+        { model: Paciente, as: 'cliente', attributes: ['nombre_p', 'apellido_p'] },
+        { model: EstadoTurno, as: 'estado_turno', attributes: ['nombre'] }
       ]
     });
 
     const eventosTurnos = turnos.map(t => {
       const duracion = t.agenda?.duracion || 30;
-      const fin = new Date(new Date(t.fecha_hora).getTime() + duracion * 60000);
+      const startUTC = parseFechaUTC(t.fecha_hora);
+      const fin = new Date(startUTC.getTime() + duracion * 60000);
 
       return {
-        id: t.id_turno, 
+        id: t.id_turno,
         title: t.cliente
           ? `${t.cliente.apellido_p}, ${t.cliente.nombre_p}`
           : 'Paciente no asignado',
-        start: t.fecha_hora,
+        start: startUTC.toISOString(),
         end: fin.toISOString(),
         extendedProps: {
           paciente: t.cliente
@@ -206,18 +194,13 @@ export const getAgendas = async (req, res) => {
 export const createAgenda = async (req, res) => {
   try {
     const { id_personal_salud, id_dia, hora_inicio, hora_fin, duracion } = req.body;
+
     if (!id_personal_salud || !id_dia || !hora_inicio || !hora_fin || !duracion) {
       return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
-    if (!/^\d{2}:\d{2}$/.test(hora_inicio) || !/^\d{2}:\d{2}$/.test(hora_fin)) {
-      return res.status(400).json({ message: 'Formato de hora inválido' });
-    }
-    const [hInicio, mInicio] = hora_inicio.split(':').map(Number);
-    const [hFin, mFin] = hora_fin.split(':').map(Number);
-    const inicio = new Date(0, 0, 0, hInicio, mInicio);
-    const fin = new Date(0, 0, 0, hFin, mFin);
-    if (fin <= inicio) {
-      return res.status(400).json({ message: 'La hora de fin debe ser posterior a la de inicio' });
+
+    if (!validarHoraRango(hora_inicio, hora_fin)) {
+      return res.status(400).json({ message: 'Formato de hora inválido o la hora de fin es anterior a la de inicio' });
     }
 
     const existe = await Agenda.findOne({ where: { id_personal_salud, id_dia } });
@@ -270,12 +253,8 @@ export const updateAgenda = async (req, res) => {
       return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
 
-    const [hInicio, mInicio] = hora_inicio.split(':').map(Number);
-    const [hFin, mFin] = hora_fin.split(':').map(Number);
-    const inicio = new Date(0, 0, 0, hInicio, mInicio);
-    const fin = new Date(0, 0, 0, hFin, mFin);
-    if (fin <= inicio) {
-      return res.status(400).json({ message: 'La hora de fin debe ser posterior a la de inicio' });
+    if (!validarHoraRango(hora_inicio, hora_fin)) {
+      return res.status(400).json({ message: 'Formato de hora inválido o la hora de fin es anterior a la de inicio' });
     }
 
     const existente = await Agenda.findOne({
@@ -285,6 +264,7 @@ export const updateAgenda = async (req, res) => {
         id_agenda: { [Op.ne]: id }
       }
     });
+
     if (existente) {
       return res.status(409).json({ message: 'Ese profesional ya tiene una agenda para ese día' });
     }
@@ -310,4 +290,21 @@ export const deleteAgenda = async (req, res) => {
 
 export const vistaAgendas = async (req, res) => {
   res.render('agenda');
+};
+
+export const getAgendasByProfesional = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const agendas = await Agenda.findAll({
+      where: { id_personal_salud: id },
+      include: [
+        { model: Dia, as: 'dia', attributes: ['id_dia', 'nombre'] }
+      ]
+    });
+
+    res.json(agendas);
+  } catch (error) {
+    console.error('Error al obtener agendas por profesional:', error);
+    res.status(500).json({ message: 'Error al obtener agendas del profesional' });
+  }
 };

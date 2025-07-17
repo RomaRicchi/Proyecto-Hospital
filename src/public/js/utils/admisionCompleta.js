@@ -56,6 +56,9 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
                     ${medicosOptions}
                 </select>
             `,
+			customClass: {
+				popup: 'swal2-card-style'
+			},
 			showCancelButton: true,
 			confirmButtonText: 'Guardar',
 			focusConfirm: false,
@@ -134,7 +137,6 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 			}
 		}
 
-		// Enviar admisión
 		Swal.showLoading();
 		const admResp = await fetch('/api/admisiones', {
 			method: 'POST',

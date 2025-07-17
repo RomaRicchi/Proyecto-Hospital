@@ -62,6 +62,9 @@ $(document).ready(function () {
 				`,
 				showCancelButton: true,
 				confirmButtonText: 'Guardar',
+				customClass: {
+					popup: 'swal2-card-style'
+				},
 				preConfirm: () => {
 					const paciente = {
 						dni_paciente: $('#dni_paciente').val().trim(),
@@ -141,6 +144,9 @@ $(document).ready(function () {
 				`,
 				showCancelButton: true,
 				confirmButtonText: 'Guardar',
+				customClass: {
+					popup: 'swal2-card-style'
+				},
 				preConfirm: () => {
 					const updated = {
 						dni_paciente: $('#dni_paciente').val().trim(),
@@ -191,6 +197,9 @@ $(document).ready(function () {
 			showCancelButton: true,
 			confirmButtonText: 'Sí, eliminar',
 			cancelButtonText: 'Cancelar',
+			customClass: {
+					popup: 'swal2-card-style'
+				},
 		}).then(result => {
 			if (result.isConfirmed) {
 				fetch(`/api/pacientes/${id}`, {
@@ -234,6 +243,9 @@ $(document).ready(function () {
 						
 					`,
 					confirmButtonText: 'Cerrar',
+					customClass: {
+						popup: 'swal2-card-style'
+					},
 				});
 			});
 	});

@@ -64,6 +64,9 @@ $(document).ready(function () {
           `,
           showCancelButton: true,
           confirmButtonText: 'Guardar',
+          customClass: {
+            popup: 'swal2-card-style'
+          },
           preConfirm: () => {
             const apellido = $('#apellido').val();
             const nombre = $('#nombre').val();
@@ -106,7 +109,10 @@ $(document).ready(function () {
       icon:'warning',
       showCancelButton:true,
       confirmButtonText:'Sí, continuar',
-      cancelButtonText:'Cancelar'
+      cancelButtonText:'Cancelar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
     }).then(r=>{
       if(!r.isConfirmed) return;
       fetch(`/api/personal-administrativo/${id}`,{ method:'DELETE' })

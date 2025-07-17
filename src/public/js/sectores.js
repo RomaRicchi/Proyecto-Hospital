@@ -56,7 +56,6 @@ $(document).ready(function () {
     });
   }
 
-  // Agregar sector
   $(document).on('click', '#btnAgregarSector', () => {
     Swal.fire({
       title: 'Nuevo Sector',
@@ -64,6 +63,9 @@ $(document).ready(function () {
       inputLabel: 'Nombre',
       showCancelButton: true,
       confirmButtonText: 'Guardar',
+      customClass: {
+					popup: 'swal2-card-style'
+				},
       preConfirm: (v) => {
         if (!v || v.trim().length < 3) {
           Swal.showValidationMessage('Debe ingresar al menos 3 letras');
@@ -87,7 +89,6 @@ $(document).ready(function () {
     });
   });
 
-  // Editar sector
   $(document).on('click', '.edit-btn', function () {
     const id = $(this).data('id');
     fetch(`/api/sectores/${id}`)
@@ -99,6 +100,9 @@ $(document).ready(function () {
           inputValue: sector.nombre,
           showCancelButton: true,
           confirmButtonText: 'Actualizar',
+          customClass: {
+					  popup: 'swal2-card-style'
+				  },
           preConfirm: (v) => {
             if (!v || v.trim().length < 3) {
               Swal.showValidationMessage('Debe ingresar al menos 3 letras');
@@ -123,14 +127,16 @@ $(document).ready(function () {
       });
   });
 
-  // Eliminar sector
   $(document).on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     Swal.fire({
       title: '¿Eliminar sector?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar'
+      confirmButtonText: 'Sí, eliminar',
+      customClass: {
+					popup: 'swal2-card-style'
+				},
     }).then(result => {
       if (!result.isConfirmed) return;
       fetch(`/api/sectores/${id}`, { method: 'DELETE' })

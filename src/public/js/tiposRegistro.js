@@ -51,13 +51,15 @@ $(document).ready(function () {
     });
   }
 
-  // Alta
   $(document).on('click', '#btnAdd', () => {
     Swal.fire({
       title: 'Nuevo Tipo',
       input: 'text',
       inputLabel: 'Nombre',
       showCancelButton: true,
+      customClass: {
+					popup: 'swal2-card-style'
+				},
       preConfirm: v => {
         const e = validar(v); if (e) { Swal.showValidationMessage(e); return false; }
         return v.trim();
@@ -79,7 +81,6 @@ $(document).ready(function () {
     });
   });
 
-  // Editar
   $(document).on('click', '.edit', function () {
     const id = $(this).data('id'); const desc = $(this).data('desc');
     Swal.fire({
@@ -87,6 +88,9 @@ $(document).ready(function () {
       input: 'text',
       inputValue: desc,
       showCancelButton: true,
+      customClass: {
+					popup: 'swal2-card-style'
+				},
       preConfirm: v => {
         const e = validar(v); if (e) { Swal.showValidationMessage(e); return false; }
         return v.trim();
@@ -104,7 +108,6 @@ $(document).ready(function () {
     });
   });
 
-  // Eliminar
   $(document).on('click', '.del', function () {
     const id = $(this).data('id');
     Swal.fire({ title: '¿Eliminar?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar' })

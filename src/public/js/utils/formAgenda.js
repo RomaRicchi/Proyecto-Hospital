@@ -4,15 +4,42 @@ export function mostrarFormulario(agenda = {}) {
   Swal.fire({
     title: agenda.id_agenda ? 'Editar Agenda' : 'Nueva Agenda',
     html: `
-      <select id="profesional" class="swal2-input">
-        <option value="">Seleccione un profesional</option>
-      </select>
-      <select id="dia" class="swal2-input">
-        <option value="">Seleccione un día</option>
-      </select>
-      <input id="hora_inicio" type="time" class="swal2-input" value="${agenda.hora_inicio || ''}">
-      <input id="hora_fin" type="time" class="swal2-input" value="${agenda.hora_fin || ''}">
+      <form id="agendaForm">
+        <div class="mb-3">
+          <label for="profesional" class="form-label text-white">Profesional</label>
+          <select id="profesional" class="form-select">
+            <option value="">Seleccione un profesional</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="dia" class="form-label text-white">Día</label>
+          <select id="dia" class="form-select">
+            <option value="">Seleccione un día</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="hora_inicio" class="form-label text-white">Hora inicio</label>
+          <input id="hora_inicio" type="time" class="form-control" value="${agenda.hora_inicio || ''}">
+        </div>
+        <div class="mb-3">
+          <label for="hora_fin" class="form-label text-white">Hora fin</label>
+          <input id="hora_fin" type="time" class="form-control" value="${agenda.hora_fin || ''}">
+        </div>
+        <div class="mb-3">
+          <label for="duracion_turno" class="form-label text-white">Duración del turno</label>
+          <select id="duracion_turno" class="form-select">
+            <option value="">Duración de cada turno</option>
+            <option value="15">15 minutos</option>
+            <option value="30">30 minutos</option>
+            <option value="45">45 minutos</option>
+            <option value="60">60 minutos</option>
+          </select>
+        </div>
+      </form>
     `,
+    customClass: {
+      popup: 'swal2-card-style'
+    },
     focusConfirm: false,
     showCancelButton: true,
     confirmButtonText: 'Guardar',
@@ -39,15 +66,21 @@ export function mostrarFormulario(agenda = {}) {
         if (agenda.id_dia === d.id_dia) opt.selected = true;
         diaSelect.appendChild(opt);
       });
+
+      if (agenda.duracion) {
+        const duracionSelect = document.getElementById('duracion_turno');
+        duracionSelect.value = String(agenda.duracion);
+      }
     },
     preConfirm: () => {
       const id_personal_salud = parseInt(document.getElementById('profesional').value);
       const id_dia = parseInt(document.getElementById('dia').value);
       const hora_inicio = document.getElementById('hora_inicio').value;
       const hora_fin = document.getElementById('hora_fin').value;
+      const duracion = parseInt(document.getElementById('duracion_turno').value);
 
-      if (!id_personal_salud || !id_dia || !hora_inicio || !hora_fin) {
-        Swal.showValidationMessage('Todos los campos son obligatorios');
+      if (!id_personal_salud || !id_dia || !hora_inicio || !hora_fin || !duracion) {
+        Swal.showValidationMessage('Todos los campos son obligatorios, incluyendo la duración');
         return false;
       }
 
@@ -61,19 +94,18 @@ export function mostrarFormulario(agenda = {}) {
         return false;
       }
 
-      const duracion = minutosFin - minutosInicio;
-      const fechaDummy = '2000-01-01'; // Día genérico
-      const inicioUTC = toUTC(`${fechaDummy}T${hora_inicio}`);
-      const finUTC = toUTC(`${fechaDummy}T${hora_fin}`);
+      if (duracion > (minutosFin - minutosInicio)) {
+        Swal.showValidationMessage('La duración del turno no puede ser mayor al intervalo disponible');
+        return false;
+      }
 
       return {
         id_personal_salud,
         id_dia,
-        hora_inicio: inicioUTC.toISOString().substring(11, 16), // solo "HH:MM"
-        hora_fin: finUTC.toISOString().substring(11, 16),
+        hora_inicio,
+        hora_fin,
         duracion
       };
-
     }
   }).then(result => {
     if (!result.isConfirmed) return;

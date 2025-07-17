@@ -77,4 +77,39 @@
   border-radius: 0.5rem;
 }
 
+.swal2-card-style {
+  border-radius: 12px;
+  padding: 0;
+  background: #0f4b90;
+  color: white;
+  font-family: 'Roboto', sans-serif;
+}
+
+.swal2-card-style .swal2-title {
+  background: #0f4b90;
+  padding-top: 20px;
+  font-size: 20px;
+  color: white;
+}
+
+.swal2-card-style .swal2-html-container {
+  padding: 20px;
+  text-align: left;
+}
+
+.swal2-card-style .swal2-input,
+.swal2-card-style select,
+.swal2-card-style input[type="time"] {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px 10px;
+  width: 100%;
+  margin-bottom: 12px;
+  color: #000;
+}
+
+.swal2-card-style .swal2-confirm {
+  background-color: #198754 !important; /* botón verde */
+}
+
 

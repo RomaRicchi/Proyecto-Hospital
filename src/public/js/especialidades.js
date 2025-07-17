@@ -58,6 +58,7 @@ $(document).ready(function () {
         </thead>
         <tbody>
     `;
+    
     data.forEach(e => {
       html += `
         <tr>
@@ -79,19 +80,18 @@ $(document).ready(function () {
         language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
         paging: true,
         pageLength: 10,
-     	searching: true,
+     	  searching: true,
       	ordering: true,  
-		destroy: true,
+		    destroy: true,
       	responsive: true,
-		scrollX: false,
-		columns: [
-				{ title: 'Nombre' },
-				{ title: 'Acciones', orderable: false, searchable: false },
-        ]
-    });
-  }
+		    scrollX: false,
+        columns: [
+          { title: 'Nombre' },
+          { title: 'Acciones', orderable: false, searchable: false },
+          ]
+      });
+    }
 
-  // Crear nueva especialidad
   $(document).on('click', '#btnAgregar', () => {
     Swal.fire({
       title: 'Nueva Especialidad',
@@ -100,6 +100,9 @@ $(document).ready(function () {
       inputPlaceholder: 'Ej: Pediatría',
       showCancelButton: true,
       confirmButtonText: 'Guardar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
       preConfirm: (value) => {
         if (!value || value.trim().length < 3) {
           Swal.showValidationMessage('Debe ingresar al menos 3 letras');
@@ -124,7 +127,6 @@ $(document).ready(function () {
     });
   });
 
-  // Editar
   $(document).on('click', '.edit-btn', function () {
     const id = $(this).data('id');
     const nombreActual = $(this).data('nombre');
@@ -135,6 +137,9 @@ $(document).ready(function () {
       inputValue: nombreActual,
       showCancelButton: true,
       confirmButtonText: 'Actualizar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
       preConfirm: (value) => {
         if (!value || value.trim().length < 3) {
           Swal.showValidationMessage('Debe ingresar al menos 3 letras');
@@ -158,7 +163,6 @@ $(document).ready(function () {
     });
   });
 
-  // Eliminar
   $(document).on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     Swal.fire({
@@ -167,7 +171,10 @@ $(document).ready(function () {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
     }).then(result => {
       if (!result.isConfirmed) return;
       fetch(`/api/especialidades/${id}`, { method: 'DELETE' })

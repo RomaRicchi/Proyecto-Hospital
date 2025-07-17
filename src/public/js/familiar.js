@@ -31,7 +31,6 @@ $(document).ready(function () {
     });
   }
 
-  // 📌 Función para cargar parentescos desde la API
   async function cargarParentescos() {
     const response = await fetch('/api/parentescos');
     const parentescos = await response.json();
@@ -40,14 +39,12 @@ $(document).ready(function () {
       .join('');
   }
 
-  // 📌 Función para buscar paciente por DNI
   async function buscarPacientePorDNI(dni) {
     const response = await fetch('/api/pacientes');
     const pacientes = await response.json();
     return pacientes.find((p) => p.dni_paciente == dni);
   }
 
-  // 🟢 Agregar familiar
   $(document).on('click', '#btnAgregarFamiliar', async function () {
     const opcionesParentesco = await cargarParentescos();
 
@@ -65,6 +62,9 @@ $(document).ready(function () {
       `,
       showCancelButton: true,
       confirmButtonText: 'Guardar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
       preConfirm: async () => {
         const dniRaw       = document.getElementById('swal-dni').value.trim();
         const nombre       = document.getElementById('swal-nombre').value.trim();
@@ -125,7 +125,6 @@ $(document).ready(function () {
     });
   });
 
-  // 🟠 Editar familiar
   $(document).on('click', '.edit-btn', async function () {
     const id = $(this).data('id');
     const opcionesParentesco = await cargarParentescos();
@@ -147,8 +146,10 @@ $(document).ready(function () {
           `,
           showCancelButton: true,
           confirmButtonText: 'Guardar',
+          customClass: {
+            popup: 'swal2-card-style'
+          },
           didOpen: () => {
-            // Preseleccionar parentesco actual
             document.getElementById('swal-parentesco').value = familiar.id_parentesco;
           },
           preConfirm: async () => {
@@ -158,7 +159,7 @@ $(document).ready(function () {
             const telefonoRaw  = document.getElementById('swal-telefono').value.trim();
             const id_parentesco = document.getElementById('swal-parentesco').value;
 
-            // Validaciones (mismas que al crear)
+            // Validaciones 
             if (!/^\d{7,}$/.test(dniRaw)) {
               Swal.showValidationMessage('DNI inválido (mínimo 7 dígitos numéricos).');
               return false;
@@ -211,7 +212,6 @@ $(document).ready(function () {
       });
   });
 
-  // 🔴 Eliminar familiar
   $(document).on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     Swal.fire({
@@ -221,6 +221,9 @@ $(document).ready(function () {
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         fetch(`/api/familiares/${id}`, { method: 'DELETE' })
@@ -233,7 +236,6 @@ $(document).ready(function () {
       }
     });
   });
-  // 🔄 Detectar si viene con idPaciente por URL y abrir Swal automáticamente
   const urlParams = new URLSearchParams(window.location.search);
   const idPaciente = urlParams.get('idPaciente');
 
@@ -241,7 +243,6 @@ $(document).ready(function () {
     abrirSwalAgregarFamiliarConPaciente(idPaciente);
   }
 
-  // 🧩 Función para abrir el Swal precargado con un paciente por ID
   async function abrirSwalAgregarFamiliarConPaciente(idPaciente) {
     const [paciente, opcionesParentesco] = await Promise.all([
       fetch(`/api/pacientes/${idPaciente}`).then(r => r.json()),
@@ -267,6 +268,9 @@ $(document).ready(function () {
       `,
       showCancelButton: true,
       confirmButtonText: 'Guardar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
       preConfirm: async () => {
         const nombre = document.getElementById('swal-nombre').value.trim();
         const apellido = document.getElementById('swal-apellido').value.trim();

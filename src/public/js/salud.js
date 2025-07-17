@@ -2,7 +2,6 @@ $(document).ready(function () {
   const $tabla = $('#tablaSalud');
   if (!$tabla.length) return;
 
-  // Validaciones básicas
   function validarNombreCampo(texto, campo, min = 2, max = 50) {
     if (!texto || !texto.trim()) return `El campo "${campo}" es obligatorio.`;
     const val = texto.trim();
@@ -69,6 +68,9 @@ $(document).ready(function () {
           `,
           showCancelButton: true,
           confirmButtonText: 'Guardar',
+          customClass: {
+					  popup: 'swal2-card-style'
+				  },
           preConfirm: () => {
             const apellido = $('#apellido').val();
             const nombre = $('#nombre').val();
@@ -121,7 +123,10 @@ $(document).ready(function () {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, continuar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
+      customClass: {
+					popup: 'swal2-card-style'
+				},
     }).then(result => {
       if (!result.isConfirmed) return;
 

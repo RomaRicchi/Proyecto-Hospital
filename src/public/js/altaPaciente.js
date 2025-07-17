@@ -128,8 +128,15 @@ $(document).ready(function () {
         }
         const data = await res.json();
         if (data.success) {
-          Swal.fire('Alta realizada', 'El paciente fue dado de alta correctamente', 'success')
-            .then(() => location.reload());
+          Swal.fire({
+            title: 'Alta realizada',
+            text: 'El paciente fue dado de alta correctamente',
+            icon: 'success',
+            customClass: {
+              popup: 'swal2-card-style'
+            }
+          })
+          .then(() => location.reload());
         } else {
           Swal.fire('Error', data.message || 'No se pudo procesar el alta', 'error');
         }

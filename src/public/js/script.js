@@ -1,6 +1,6 @@
 // public/js/script.js
 document.addEventListener('DOMContentLoaded', () => {
-	// ⏰ Reloj en navbar
+
 	function actualizarReloj() {
 		const reloj = document.getElementById('reloj');
 		if (reloj) {
@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	setInterval(actualizarReloj, 1000);
 	actualizarReloj();
 
-	// 📦 Animación de tarjetas en home
 	const cards = document.querySelectorAll('.expandible');
 	cards.forEach((card) => {
 		card.addEventListener('click', (e) => {
@@ -53,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		cards.forEach((c) => c.classList.remove('expandida'));
 	});
 
-	// ☰ Toggle sidebar
 	const sidebarToggle = document.getElementById('sidebarToggle');
 	const sidebar = document.getElementById('sidenavAccordion');
 	if (sidebarToggle) {

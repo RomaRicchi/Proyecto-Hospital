@@ -2,7 +2,6 @@ $(document).ready(function () {
   const $tabla = $('#tablaLocalidades');
   if (!$tabla.length) return;
 
-  // Validación para el nombre de localidad: 3–50 caracteres, solo letras y espacios
   function validarLocalidad(nombre) {
     if (!nombre || !nombre.trim()) {
       return 'El nombre de la localidad es obligatorio.';
@@ -16,10 +15,8 @@ $(document).ready(function () {
     }
 
     return null;
-
   }
 
-  // 1) Cargar y renderizar DataTable
   fetch('/api/localidades')
     .then(r => r.json())
     .then(localidades => {
@@ -51,7 +48,6 @@ $(document).ready(function () {
         ]
       });
 
-      // Mostrar botón Agregar si no hay filas
       dt.on('draw', () => {
         $('#btnAgregarLocalidad').remove();
         if (dt.rows({ filter: 'applied' }).data().length === 0) {
@@ -64,13 +60,12 @@ $(document).ready(function () {
           `);
         }
       });
-      dt.draw(); // disparar draw inicial
+      dt.draw(); 
     })
     .catch(() => {
       Swal.fire('Error', 'No se pudo cargar las localidades.', 'error');
     });
 
-  // 2) Agregar nueva localidad
   $(document).on('click', '#btnAgregarLocalidad button', () => {
     Swal.fire({
       title: 'Agregar Localidad',
@@ -79,6 +74,9 @@ $(document).ready(function () {
       inputPlaceholder: 'Ingrese el nombre de la localidad',
       showCancelButton: true,
       confirmButtonText: 'Guardar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
       preConfirm: (nombre) => {
         const error = validarLocalidad(nombre);
         if (error) {
@@ -108,7 +106,6 @@ $(document).ready(function () {
     });
   });
 
-  // 3) Editar localidad
   $(document).on('click', '.edit-btn', function () {
     const id = $(this).data('id');
     fetch(`/api/localidades/${id}`)
@@ -121,6 +118,9 @@ $(document).ready(function () {
           inputValue: localidad.nombre,
           showCancelButton: true,
           confirmButtonText: 'Guardar',
+          customClass: {
+            popup: 'swal2-card-style'
+          },
           preConfirm: (nombre) => {
             const error = validarLocalidad(nombre);
             if (error) {
@@ -162,7 +162,10 @@ $(document).ready(function () {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
+      customClass: {
+        popup: 'swal2-card-style'
+      }
     }).then(result => {
       if (!result.isConfirmed) return;
       fetch(`/api/localidades/${id}`, { method: 'DELETE' })

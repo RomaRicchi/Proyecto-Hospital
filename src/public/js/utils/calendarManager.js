@@ -44,6 +44,9 @@ export function crearCalendario() {
           <input type="date" id="fechaTurno" class="swal2-input" value="${fecha}">
           <input type="time" id="horaTurno" class="swal2-input" value="${hora?.slice(0, 5) || ''}">
         `,
+        customClass: {
+          popup: 'swal2-card-style'
+        },
         didOpen: () => {
           $('#pacienteTurno').select2({
             dropdownParent: $('.swal2-popup'),
@@ -111,6 +114,9 @@ export function crearCalendario() {
           <button id="btnReagendar" class="swal2-confirm swal2-styled" style="margin-right: 5px; background-color:#28a745">Reagendar</button>
           <button id="btnCancelar" class="swal2-cancel swal2-styled" style="background-color:#dc3545">Cancelar</button>
         `,
+        customClass: {
+          popup: 'swal2-card-style'
+        },
         showConfirmButton: false,
         showCancelButton: false,
         didOpen: () => {
@@ -121,6 +127,9 @@ export function crearCalendario() {
                 <input id="nuevaFecha" type="date" class="swal2-input">
                 <input id="nuevaHora" type="time" class="swal2-input">
               `,
+              customClass: {
+                popup: 'swal2-card-style'
+              },
               showCancelButton: true,
               confirmButtonText: 'Guardar',
               preConfirm: () => {

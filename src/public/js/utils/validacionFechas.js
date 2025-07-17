@@ -1,4 +1,4 @@
-export function configurarBusquedaDeCamas(callbackBuscarCamas) {
+export function configurarBusquedaDeCamas(callbackBuscarCamas) { 
 	const hoyLocal = new Date();
 	const offset = hoyLocal.getTimezoneOffset();
 	hoyLocal.setMinutes(hoyLocal.getMinutes() - offset);
@@ -39,11 +39,9 @@ export function aplicarReservaSemanal(inputIngreso, inputEgreso, inputMotivoEgr)
 	const egreso = new Date(ingreso);
 	egreso.setDate(egreso.getDate() + 7);
 
-	// Convertir a formato yyyy-MM-ddTHH:mm en hora local (NO UTC)
-	const pad = (n) => n.toString().padStart(2, '0');
-	const egresoStr = `${egreso.getFullYear()}-${pad(egreso.getMonth() + 1)}-${pad(egreso.getDate())}T${pad(egreso.getHours())}:${pad(egreso.getMinutes())}`;
-
-	inputEgreso.value = egresoStr;
+	// Convertir a UTC ISO para backend
+	const isoUTC = toUTC(egreso);
+	inputEgreso.value = isoUTC;
 	inputEgreso.disabled = true;
 	inputEgreso.title = 'El egreso se fija automáticamente a 7 días en reservas.';
 
@@ -67,12 +65,13 @@ export function parseFechaLocal(fechaStr) {
 	if (isNaN(Date.parse(fechaStr))) return null;
 
 	const fecha = new Date(fechaStr);
-	return fecha;
+	return new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60000); // convierte a UTC
 }
 
-export function toUTC(fechaStr) {
-  const fechaLocal = new Date(fechaStr);
-  return new Date(fechaLocal.getTime() - fechaLocal.getTimezoneOffset() * 60000);
+export function toUTC(inputDate) {
+  const date = new Date(inputDate); // acepta tanto string como Date
+  const iso = date.toISOString();   // ej: '2025-07-17T16:00:00.000Z'
+  return iso.slice(0, 19).replace("T", " "); // '2025-07-17 16:00:00'
 }
 
 export function getFechaLocalParaInput() {

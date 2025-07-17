@@ -2,7 +2,6 @@ $(document).ready(function () {
   const $tabla = $('#tablaMotivoIngreso');
   if (!$tabla.length) return;
 
-  // 🔍 Validación para el campo "Tipo": 3–50 caracteres, sólo letras y espacios
   function validarTipo(tipo) {
     if (!tipo || !tipo.trim()) {
       return 'El tipo de motivo es obligatorio.';
@@ -17,7 +16,6 @@ $(document).ready(function () {
     return null;
   }
 
-  // 🟡 Inicializar DataTable sin columna ID
   fetch('/api/motivos_ingreso')
     .then(r => r.json())
     .then(motivos => {
@@ -48,7 +46,6 @@ $(document).ready(function () {
         ]
       });
 
-      // Mostrar botón Agregar si no hay filas
       dt.on('draw', () => {
         $('#btnAgregarMotivo').remove();
         if (dt.rows({ filter: 'applied' }).data().length === 0) {
@@ -66,7 +63,6 @@ $(document).ready(function () {
     })
     .catch(() => Swal.fire('Error', 'No se pudo cargar los motivos.', 'error'));
 
-  // 🟢 Agregar Motivo
   $(document).on('click', '#btnAgregarMotivo button', () => {
     Swal.fire({
       title: 'Agregar Motivo',
@@ -75,6 +71,9 @@ $(document).ready(function () {
       inputPlaceholder: 'Ingrese el tipo',
       showCancelButton: true,
       confirmButtonText: 'Guardar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
       preConfirm: tipo => {
         const err = validarTipo(tipo);
         if (err) {
@@ -100,7 +99,6 @@ $(document).ready(function () {
     });
   });
 
-  // 🟠 Editar Motivo
   $(document).on('click', '.edit-btn', function () {
     const id = $(this).data('id');
     fetch(`/api/motivos_ingreso/${id}`)
@@ -113,6 +111,9 @@ $(document).ready(function () {
           inputValue: m.tipo,
           showCancelButton: true,
           confirmButtonText: 'Guardar',
+          customClass: {
+            popup: 'swal2-card-style'
+          },
           preConfirm: tipo => {
             const err = validarTipo(tipo);
             if (err) {
@@ -139,7 +140,6 @@ $(document).ready(function () {
       .catch(() => Swal.fire('Error', 'No se pudo cargar el motivo.', 'error'));
   });
 
-  // 🔴 Eliminar Motivo
   $(document).on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     Swal.fire({
@@ -147,7 +147,10 @@ $(document).ready(function () {
       text: 'Esta acción eliminará el motivo permanentemente.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar'
+      confirmButtonText: 'Sí, eliminar',
+      customClass: {
+        popup: 'swal2-card-style'
+      }
     }).then(result => {
       if (!result.isConfirmed) return;
       fetch(`/api/motivos_ingreso/${id}`, { method: 'DELETE' })

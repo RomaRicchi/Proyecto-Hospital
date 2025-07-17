@@ -6,7 +6,6 @@ $(document).ready(function () {
 			if (!resp.ok) throw new Error('No se pudieron cargar las reservas');
 			const camas = await resp.json();
 
-			// ⚠️ Destruir DataTable si existe
 			if ($.fn.DataTable.isDataTable('#tablaReservas')) {
 				$('#tablaReservas').DataTable().clear().destroy();
 			}
@@ -51,8 +50,6 @@ $(document).ready(function () {
 					tbody.append(fila);
 				});
 			}
-
-			// ⚠️ SIEMPRE volver a inicializar DataTable (aunque esté vacío)
 			$('#tablaReservas').DataTable({
 				language: {
 					url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
@@ -63,8 +60,6 @@ $(document).ready(function () {
 		}
 	}
 
-
-	// Confirmar reserva
 	$(document).on('click', '.btn-confirmar-reserva', async function () {
 		const idPaciente = $(this).data('paciente');
 		const fecha = $(this).data('fecha');
@@ -79,6 +74,9 @@ $(document).ready(function () {
 			showCancelButton: true,
 			confirmButtonText: 'Sí, confirmar',
 			cancelButtonText: 'Cancelar',
+			customClass: {
+					popup: 'swal2-card-style'
+				},
 		});
 
 		if (!confirmar.isConfirmed) return;
@@ -117,6 +115,9 @@ $(document).ready(function () {
 			showCancelButton: true,
 			confirmButtonText: 'Sí, cancelar',
 			cancelButtonText: 'No',
+			customClass: {
+					popup: 'swal2-card-style'
+				},
 		});
 
 		if (!confirmar.isConfirmed) return;
@@ -142,7 +143,10 @@ $(document).ready(function () {
 			icon: 'warning',
 			showCancelButton: true,
 			confirmButtonText: 'Sí, eliminar',
-			cancelButtonText: 'Cancelar'
+			cancelButtonText: 'Cancelar',
+			customClass: {
+					popup: 'swal2-card-style'
+				},
 		});
 
 		if (!confirmar.isConfirmed) return;

@@ -370,6 +370,9 @@ $(document).ready(function () {
       `,
       showCancelButton: true,
       confirmButtonText: 'Guardar cambios',
+      customClass: {
+					popup: 'swal2-card-style'
+				},
       preConfirm: () => {
         const id_tipo = $('#swal-tipo').val();
         const detalle = $('#swal-detalle').val().trim();
@@ -407,7 +410,7 @@ $(document).ready(function () {
 
         Swal.fire('Actualizado', 'El registro fue editado correctamente', 'success');
 
-        $('#btnBuscar').click(); // simula nueva búsqueda
+        $('#btnBuscar').click(); 
 
       } catch (e) {
         Swal.fire('Error', e.message || 'No se pudo actualizar el registro', 'error');

@@ -17,7 +17,6 @@ $(document).ready(function () {
 		return null;
 	}
 
-	// 🔄 Cargar tabla
 	fetch('/api/parentescos')
 		.then(res => res.json())
 		.then(parentescos => {
@@ -66,7 +65,6 @@ $(document).ready(function () {
 			Swal.fire('Error', 'No se pudo cargar los parentescos.', 'error');
 		});
 
-	// 🟢 Agregar parentesco
 	$(document).on('click', '#btnAgregarParentesco button', function () {
 		Swal.fire({
 			title: 'Agregar Parentesco',
@@ -75,6 +73,9 @@ $(document).ready(function () {
 			inputPlaceholder: 'Ingrese el nombre',
 			showCancelButton: true,
 			confirmButtonText: 'Guardar',
+			customClass: {
+					popup: 'swal2-card-style'
+				},
 			preConfirm: (nombre) => {
 				const err = validarNombre(nombre);
 				if (err) {
@@ -95,7 +96,6 @@ $(document).ready(function () {
 		});
 	});
 
-	// ✏️ Editar
 	$(document).on('click', '.edit-btn', function () {
 		const id = $(this).data('id');
 		fetch(`/api/parentescos/${id}`)
@@ -108,6 +108,9 @@ $(document).ready(function () {
 					inputLabel: 'Nombre del parentesco',
 					showCancelButton: true,
 					confirmButtonText: 'Guardar',
+					customClass: {
+						popup: 'swal2-card-style'
+					},
 					preConfirm: (nombre) => {
 						const err = validarNombre(nombre);
 						if (err) {
@@ -130,7 +133,6 @@ $(document).ready(function () {
 			.catch(() => Swal.fire('Error', 'No se pudo cargar el parentesco', 'error'));
 	});
 
-	// 🗑️ Eliminar
 	$(document).on('click', '.delete-btn', function () {
 		const id = $(this).data('id');
 		Swal.fire({
@@ -139,7 +141,10 @@ $(document).ready(function () {
 			icon: 'warning',
 			showCancelButton: true,
 			confirmButtonText: 'Sí, eliminar',
-			cancelButtonText: 'Cancelar'
+			cancelButtonText: 'Cancelar',
+			customClass: {
+					popup: 'swal2-card-style'
+				},
 		}).then(result => {
 			if (!result.isConfirmed) return;
 			fetch(`/api/parentescos/${id}`, { method: 'DELETE' })

@@ -15,7 +15,6 @@ $(document).ready(function () {
     scrollX: false,
   });
 
-  // Opcional: mensaje si no hay ocupaciones
   if (dt.data().count() === 0) {
     $('#tablaPacientesCamas_wrapper').prepend(`
       <div class="alert alert-warning mt-3">No hay camas ocupadas en este momento.</div>

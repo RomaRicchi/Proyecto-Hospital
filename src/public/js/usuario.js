@@ -48,8 +48,7 @@ $(document).ready(function () {
 		<input id="swal-matricula" class="swal2-input" placeholder="Matrícula" style="display:none;">
 		`,
 		customClass: {
-    		popup: 'swal-wide',   
-			htmlContainer: 'swal-center-form'
+			popup: 'swal2-card-style'
 		},
 		didOpen: () => {
 		const rolSelect = document.getElementById('swal-rol');
@@ -68,10 +67,13 @@ $(document).ready(function () {
 		};
 
 		rolSelect.addEventListener('change', toggleFields);
-		toggleFields(); // por si ya hay uno seleccionado
+		toggleFields();
 		},
 		showCancelButton: true,
 		confirmButtonText: 'Guardar',
+		customClass: {
+			popup: 'swal2-card-style'
+		},
 		preConfirm: () => {
 		const username = $('#swal-username').val();
 		const password = $('#swal-password').val();
@@ -142,8 +144,7 @@ $(document).ready(function () {
 		</select>
 		`,
 		customClass: {
-    		popup: 'swal-wide',   
-			htmlContainer: 'swal-center-form'
+			popup: 'swal2-card-style'
 		},
 		didOpen: () => {
 		const rolSelect = document.getElementById('swal-rol');
@@ -166,6 +167,9 @@ $(document).ready(function () {
 		},
 		showCancelButton: true,
 		confirmButtonText: 'Guardar',
+		customClass: {
+			popup: 'swal2-card-style'
+		},
 		preConfirm: () => {
 		return {
 			username: $('#swal-username').val(),
@@ -197,6 +201,9 @@ $(document).ready(function () {
 		showCancelButton: true,
 		confirmButtonText: 'Sí, eliminar',
 		cancelButtonText: 'Cancelar',
+		customClass: {
+			popup: 'swal2-card-style'
+		},
 	}).then((result) => {
 		if (result.isConfirmed) {
 		fetch(`/api/usuarios/${id}`, {
@@ -211,17 +218,4 @@ $(document).ready(function () {
 		}
 	});
 	});
-	$(`<style>
-		.swal2-html-container {
-			display: flex !important;
-			flex-direction: column;
-			align-items: center;
-		}
-		.swal2-input, .swal2-select {
-			width: 250px !important;
-			text-align: center;
-		}
-		</style>`).appendTo('head');
-
-
 });

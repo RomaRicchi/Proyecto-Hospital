@@ -10,7 +10,6 @@ $(document).on('click', '.btn-asignar-paciente', async function () {
 	let pacienteSeleccionado = null;
 	let habitacionId = null;
 
-	// 🔹 Buscar paciente por DNI
 	const resultado = await Swal.fire({
 		title: 'Buscar Paciente por DNI',
 		input: 'text',
@@ -18,6 +17,9 @@ $(document).on('click', '.btn-asignar-paciente', async function () {
 		inputPlaceholder: 'DNI',
 		showCancelButton: true,
 		confirmButtonText: 'Buscar',
+		customClass: {
+			popup: 'swal2-card-style'
+		},
 		preConfirm: async (dni) => {
 			if (!dni) {
 				Swal.showValidationMessage('Debe ingresar un DNI');
@@ -43,17 +45,16 @@ $(document).on('click', '.btn-asignar-paciente', async function () {
 			icon: 'question',
 			showCancelButton: true,
 			confirmButtonText: 'Registrar',
+			customClass: {
+				popup: 'swal2-card-style'
+			}
 		});
 		if (confirmar.isConfirmed) window.location.href = '/paciente';
 		return;
 	}
 
-	// 🔹 Obtener datos de la cama seleccionada
 	const camaSeleccionada = await fetch(`/api/camas/${id_cama}`).then(r => r.json());
 	habitacionId = camaSeleccionada.id_habitacion;
-
-	// 🔹 Validar conflicto de género en toda la habitación
-	const generoIngresado = pacienteSeleccionado?.genero?.id_genero;
 
 	let movimientos = [];
 	try {
@@ -62,10 +63,18 @@ $(document).on('click', '.btn-asignar-paciente', async function () {
 		movimientos = await res.json();
 	} catch (e) {
 		console.error('❌ Error al obtener movimientos:', e);
-		await Swal.fire('Error', 'No se pudo verificar el estado de la habitación.', 'error');
+		await Swal.fire({
+			title: 'Error',
+			text: 'No se pudo verificar el estado de la habitación.',
+			icon: 'error',
+			customClass: {
+				popup: 'swal2-card-style'
+			}
+		});
 		return;
 	}
 
+	const generoIngresado = pacienteSeleccionado?.genero?.id_genero;
 	const conflictoGenero = movimientos.some(mov => {
 		const generoExistente = mov?.admision?.paciente?.genero?.id_genero;
 		return generoExistente !== undefined &&
@@ -78,11 +87,13 @@ $(document).on('click', '.btn-asignar-paciente', async function () {
 			icon: 'error',
 			title: 'No permitido',
 			html: `Ya hay un paciente de otro género en esta habitación.`,
+			customClass: {
+				popup: 'swal2-card-style'
+			}
 		});
 		return;
 	}
 
-	// 🔹 Confirmar datos del paciente
 	const datos = `
 		<strong>Nombre:</strong> ${pacienteSeleccionado.apellido_p}, ${pacienteSeleccionado.nombre_p}<br>
 		<strong>DNI:</strong> ${pacienteSeleccionado.dni_paciente}<br>
@@ -94,11 +105,13 @@ $(document).on('click', '.btn-asignar-paciente', async function () {
 		html: datos,
 		showCancelButton: true,
 		confirmButtonText: 'Sí, continuar',
+		customClass: {
+			popup: 'swal2-card-style'
+		}
 	});
 
 	if (!confirmar.isConfirmed) return;
 
-	// 🔹 Validar compatibilidad edad/género con el sector
 	const fechaBase = $('#fecha_busqueda').val();
 	const fechaDashboard = fechaBase || null;
 	const edad = calcularEdad(pacienteSeleccionado.fecha_nac);
@@ -110,11 +123,13 @@ $(document).on('click', '.btn-asignar-paciente', async function () {
 			icon: 'warning',
 			title: 'Sector no compatible',
 			html: `El paciente no cumple con los criterios para <strong>${sectorNombre}</strong>.<br><em>Requisitos:</em> ${criterios}`,
+			customClass: {
+				popup: 'swal2-card-style'
+			}
 		});
 		return;
 	}
-	
-	// 🔹 Mostrar formulario
+
 	mostrarFormularioYRegistrarAdmision(
 		pacienteSeleccionado,
 		id_cama,

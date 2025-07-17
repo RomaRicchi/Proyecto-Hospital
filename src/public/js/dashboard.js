@@ -37,7 +37,7 @@ const fechaSeleccionada = toUTC(`${inputFecha}T00:00`);
       </thead>
       <tbody>
   `;
-
+  
   if (camas.length === 0) {
     html += `<tr><td colspan="8" class="text-center">No hay camas para la fecha seleccionada.</td></tr>`;
   } else {

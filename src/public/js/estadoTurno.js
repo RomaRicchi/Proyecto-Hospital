@@ -45,6 +45,9 @@ $(document).ready(function () {
       inputLabel: 'Nombre del Estado',
       showCancelButton: true,
       confirmButtonText: 'Crear',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
       preConfirm: nombre => {
         if (!nombre) {
           Swal.showValidationMessage('El nombre es obligatorio');
@@ -68,7 +71,10 @@ $(document).ready(function () {
       input: 'text',
       inputValue: nombre,
       showCancelButton: true,
-      confirmButtonText: 'Actualizar'
+      confirmButtonText: 'Actualizar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
     }).then(result => {
       if (result.isConfirmed) {
         fetch(`/api/estadoTurno/${id}`, {
@@ -85,7 +91,10 @@ $(document).ready(function () {
       title: 'Confirmar eliminación',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Eliminar'
+      confirmButtonText: 'Eliminar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
     }).then(result => {
       if (result.isConfirmed) {
         fetch(`/api/estadoTurno/${id}`, { method: 'DELETE' }).then(cargarEstados);

@@ -2,7 +2,6 @@ $(document).ready(function () {
   const $tabla = $('#tablaHabitacion');
   if (!$tabla.length) return;
 
-  // Validación para el campo "Número": entero positivo, hasta 4 dígitos
   function validarNumero(num) {
     if (!num) return 'El número es obligatorio.';
     if (!/^[1-9]\d{0,3}$/.test(num)) {
@@ -10,8 +9,6 @@ $(document).ready(function () {
     }
     return null;
   }
-
-  // 1) Inicializar DataTable
   const dt = $tabla.DataTable({
     language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
     paging: true,
@@ -24,9 +21,7 @@ $(document).ready(function () {
     columnDefs: [{ targets: 3, orderable: false, searchable: false }],
   });
 
-  // 2) Función para mostrar el botón "Agregar" cuando la tabla esté vacía
   function toggleAddButton() {
-    // Eliminar instancia previa si existe
     $('#btnAgregarHabitacion').remove();
 
     const $btn = $(`
@@ -37,16 +32,12 @@ $(document).ready(function () {
       </div>
     `);
 
-    // Insertar arriba del wrapper de DataTables
     $('#tablaHabitacion_wrapper').prepend($btn);
   }
 
-
-  // 3) Ejecutar al dibujar y al iniciar
   dt.on('draw', toggleAddButton);
   toggleAddButton();
 
-  // 4) Click en el botón dinámico "Agregar Habitación"
   $(document).on('click', '#btnAgregarHabitacion button', async function () {
     try {
       const sectores = await fetch('/api/sectores').then((r) => r.json());
@@ -65,6 +56,9 @@ $(document).ready(function () {
         `,
         showCancelButton: true,
         confirmButtonText: 'Guardar',
+        customClass: {
+          popup: 'swal2-card-style'
+        },
         preConfirm: () => {
           const num = $('#swal-num').val().trim();
           const id_sector = $('#swal-sector').val();
@@ -104,7 +98,6 @@ $(document).ready(function () {
     }
   });
 
-  // 5) Botón Editar
   $(document).on('click', '.edit-btn', async function () {
     const id = $(this).data('id');
     try {
@@ -131,6 +124,9 @@ $(document).ready(function () {
         `,
         showCancelButton: true,
         confirmButtonText: 'Guardar',
+        customClass: {
+          popup: 'swal2-card-style'
+        },
         preConfirm: () => {
           const num = $('#swal-num').val().trim();
           const id_sector = $('#swal-sector').val();
@@ -171,7 +167,6 @@ $(document).ready(function () {
     }
   });
 
-  // 6) Botón Eliminar
   $(document).on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     Swal.fire({
@@ -180,6 +175,9 @@ $(document).ready(function () {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
     }).then((result) => {
       if (!result.isConfirmed) return;
       fetch(`/api/habitaciones/${id}`, { method: 'DELETE' })

@@ -21,7 +21,6 @@ $(document).ready(function () {
     return await res.json();
   }
 
-  // 🔸 Editar admisión
   $(document).on('click', '.edit-btn', async function () {
     const id = $(this).data('id');
     const admision = await fetch(`/api/admisiones/${id}`).then((r) => r.json());
@@ -85,6 +84,9 @@ $(document).ready(function () {
       `,
       showCancelButton: true,
       confirmButtonText: 'Guardar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
       preConfirm: () => {
         const fechaIngreso = $('#swal-fecha_hora_ingreso').val();
         const fechaEgreso = $('#swal-fecha_hora_egreso').val();
@@ -136,7 +138,6 @@ $(document).ready(function () {
     });
   });
 
-  // 🔸 Eliminar admisión
   $(document).on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     Swal.fire({
@@ -146,6 +147,9 @@ $(document).ready(function () {
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
+      customClass: {
+        popup: 'swal2-card-style'
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         fetch(`/api/admisiones/${id}`, { method: 'DELETE' })
@@ -155,7 +159,6 @@ $(document).ready(function () {
     });
   });
 
-  // 🔹 Cargar tabla
   fetch('/api/admisiones')
     .then(res => res.json())
     .then(admisiones => {

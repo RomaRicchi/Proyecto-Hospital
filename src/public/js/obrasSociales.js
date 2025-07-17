@@ -53,7 +53,6 @@ $(document).ready(function () {
 			});
 	}
 
-	// 🔸 Agregar obra social con SweetAlert
 	$(document).on('click', '#btnAgregarObraSocial', function () {
 		Swal.fire({
 			title: 'Agregar Obra Social',
@@ -62,6 +61,9 @@ $(document).ready(function () {
 			inputPlaceholder: 'Ingrese el nombre',
 			showCancelButton: true,
 			confirmButtonText: 'Guardar',
+			customClass: {
+				popup: 'swal2-card-style'
+			},
 			preConfirm: (nombre) => {
 				if (!nombre) {
 					Swal.showValidationMessage('El nombre es obligatorio');
@@ -88,7 +90,6 @@ $(document).ready(function () {
 		});
 	});
 
-	// 🔸 Editar obra social
 	$(document).on('click', '.edit-btn', function () {
 		const id = $(this).data('id');
 		fetch(`/api/obras-sociales/${id}`) // 🟢 Corrección ruta
@@ -101,6 +102,9 @@ $(document).ready(function () {
 					inputValue: obra.nombre,
 					showCancelButton: true,
 					confirmButtonText: 'Guardar',
+					customClass: {
+						popup: 'swal2-card-style'
+					},
 					preConfirm: (nombre) => {
 						if (!nombre) {
 							Swal.showValidationMessage('El nombre es obligatorio');
@@ -110,7 +114,6 @@ $(document).ready(function () {
 				}).then((result) => {
 					if (result.isConfirmed) {
 						fetch(`/api/obras-sociales/${id}`, {
-							// 🟢 Corrección ruta
 							method: 'PUT',
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify(result.value),
@@ -130,7 +133,7 @@ $(document).ready(function () {
 			});
 	});
 
-	// 🔸 Eliminar obra social
+	
 	$(document).on('click', '.delete-btn', function () {
 		const id = $(this).data('id');
 		Swal.fire({
@@ -140,6 +143,9 @@ $(document).ready(function () {
 			showCancelButton: true,
 			confirmButtonText: 'Sí, eliminar',
 			cancelButtonText: 'Cancelar',
+			customClass: {
+					popup: 'swal2-card-style'
+				},
 		}).then((result) => {
 			if (result.isConfirmed) {
 				fetch(`/api/obras-sociales/${id}`, { method: 'DELETE' }) // 🟢 Corrección ruta

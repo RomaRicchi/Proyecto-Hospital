@@ -6,7 +6,6 @@ $(document).ready(function () {
   hoyLocal.setMinutes(hoyLocal.getMinutes() - offset);
   const hoy = hoyLocal.toISOString().split('T')[0];
 
-  // Establecer fecha mínima
   $('#fecha_ingreso').attr('min', hoy);
 
   const tabla = $('#tablaMovimientosHabitacion');
@@ -85,7 +84,6 @@ $(document).ready(function () {
       });
 	}
 
-	// 🔸 Botón emergente agregar movimiento habitación
 	$(document).on('click', '#btnAgregarMovimiento', function () {
 		Swal.fire({
 			title: 'Agregar Movimiento Habitación',
@@ -113,6 +111,9 @@ $(document).ready(function () {
 					});
 				}
 			},
+			customClass: {
+				popup: 'swal2-card-style'
+			},
 			preConfirm: () => {
 				const id_admision = Swal.getPopup().querySelector('#id_admision').value;
 				const id_habitacion = Swal.getPopup().querySelector('#id_habitacion').value;
@@ -132,8 +133,6 @@ $(document).ready(function () {
 					Swal.showValidationMessage('Por favor, completa todos los campos obligatorios');
 					return false;
 				}
-
-				// ⏰ Validar fecha no pasada
 				const ingresoUTC = toUTC(fecha_hora_ingreso);
 				const hoyUTC = toUTC(new Date());
 				hoyUTC.setHours(0, 0, 0, 0);
@@ -172,117 +171,83 @@ $(document).ready(function () {
 		});
 	});
 
-	// 🔸 Editar Movimiento (delegación sobre tbody)
 	$('#tablaMovimientosHabitacion tbody').on('click', '.edit-btn', function () {
-		const id = $(this).data('id');
-		fetch(`/api/movimientos_habitacion/${id}`)
-			.then((res) => res.json())
-			.then((m) => {
-				Swal.fire({
-					title: 'Editar Movimiento',
-					html: `
-            <input type="number" id="id_admision" class="swal2-input" value="${
-							m.id_admision
-						}">
-            <input type="number" id="id_habitacion" class="swal2-input" value="${
-							m.id_habitacion
-						}">
-            <input type="number" id="id_cama" class="swal2-input" value="${
-							m.id_cama || ''
-						}">
-            <input type="text" id="fecha_hora_ingreso" class="swal2-input" value="${
-							m.fecha_hora_ingreso
-						}">
-            <input type="text" id="fecha_hora_egreso" class="swal2-input" value="${
-							m.fecha_hora_egreso || ''
-						}">
-            <input type="number" id="id_mov" class="swal2-input" value="${
-							m.id_mov
-						}">
-            <select id="estado" class="swal2-select">
-              <option value="1" ${
-								m.estado === 1 ? 'selected' : ''
-							}>Activo</option>
-              <option value="0" ${
-								m.estado === 0 ? 'selected' : ''
-							}>Inactivo</option>
-            </select>
-          `,
-					didOpen: () => {
-						if (typeof flatpickr !== 'undefined') {
-							flatpickr(Swal.getPopup().querySelector('#fecha_hora_ingreso'), {
-								enableTime: true,
-								dateFormat: 'Y-m-d H:i',
-							});
-							flatpickr(Swal.getPopup().querySelector('#fecha_hora_egreso'), {
-								enableTime: true,
-								dateFormat: 'Y-m-d H:i',
-							});
-						}
-					},
-					preConfirm: () => {
-						const id_admision = Swal.getPopup().querySelector('#id_admision').value;
-						const id_habitacion = Swal.getPopup().querySelector('#id_habitacion').value;
-						const id_cama = Swal.getPopup().querySelector('#id_cama').value;
-						const fecha_hora_ingreso = Swal.getPopup().querySelector('#fecha_hora_ingreso').value;
-						const fecha_hora_egreso = Swal.getPopup().querySelector('#fecha_hora_egreso').value;
-						const id_mov = Swal.getPopup().querySelector('#id_mov').value;
-						const estado = Swal.getPopup().querySelector('#estado').value;
+	const id = $(this).data('id');
+	fetch(`/api/movimientos_habitacion/${id}`)
+		.then((res) => res.json())
+		.then((m) => {
+		const ingresoLocal = m.fecha_hora_ingreso
+			? new Date(m.fecha_hora_ingreso).toISOString().slice(0, 16)
+			: '';
+		const egresoLocal = m.fecha_hora_egreso
+			? new Date(m.fecha_hora_egreso).toISOString().slice(0, 16)
+			: '';
 
-						if (
-							!id_admision ||
-							!id_habitacion ||
-							!id_cama ||
-							!fecha_hora_ingreso ||
-							!id_mov
-						) {
-							Swal.showValidationMessage('Por favor, completa todos los campos obligatorios');
-							return false;
-						}
+		Swal.fire({
+			title: 'Editar Movimiento',
+			html: `
+			<input type="number" id="id_admision" class="swal2-input" value="${m.id_admision}">
+			<input type="number" id="id_habitacion" class="swal2-input" value="${m.id_habitacion}">
+			<input type="number" id="id_cama" class="swal2-input" value="${m.id_cama || ''}">
+			<input type="datetime-local" id="fecha_hora_ingreso" class="swal2-input" value="${ingresoLocal}">
+			<input type="datetime-local" id="fecha_hora_egreso" class="swal2-input" value="${egresoLocal}">
+			<input type="number" id="id_mov" class="swal2-input" value="${m.id_mov}">
+			<select id="estado" class="swal2-select">
+				<option value="1" ${m.estado === 1 ? 'selected' : ''}>Activo</option>
+				<option value="0" ${m.estado === 0 ? 'selected' : ''}>Inactivo</option>
+			</select>
+			`,
+			customClass: {
+			popup: 'swal2-card-style'
+			},
+			preConfirm: () => {
+			const id_admision = $('#id_admision').val();
+			const id_habitacion = $('#id_habitacion').val();
+			const id_cama = $('#id_cama').val();
+			const fecha_hora_ingreso = $('#fecha_hora_ingreso').val();
+			const fecha_hora_egreso = $('#fecha_hora_egreso').val();
+			const id_mov = $('#id_mov').val();
+			const estado = $('#estado').val();
 
-						// Validar que la fecha de ingreso no sea anterior a hoy
-						const ingresoUTC = toUTC(fecha_hora_ingreso);
-						const hoyUTC = toUTC(new Date());
-						hoyUTC.setHours(0, 0, 0, 0);
+			if (!id_admision || !id_habitacion || !id_cama || !fecha_hora_ingreso || !id_mov) {
+				Swal.showValidationMessage('Por favor, completa todos los campos obligatorios');
+				return false;
+			}
 
-						if (ingresoUTC < hoyUTC) {
-							Swal.showValidationMessage('La fecha de ingreso no puede ser anterior a hoy.');
-							return false;
-						}
+			const ingresoUTC = toUTC(fecha_hora_ingreso);
+			const hoy = new Date();
+			hoy.setUTCHours(0, 0, 0, 0);
 
-						return {
-							id_admision,
-							id_habitacion,
-							id_cama,
-							fecha_hora_ingreso: ingresoUTC.toISOString(),
-							fecha_hora_egreso: fecha_hora_egreso ? toUTC(fecha_hora_egreso).toISOString() : null,
-							id_mov,
-							estado,
-						};
-					}
-				}).then((result) => {
-					if (result.isConfirmed) {
-						fetch(`/api/movimientos_habitacion/${id}`, {
-							method: 'PUT',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify(result.value),
-						})
-							.then(() =>
-								Swal.fire(
-									'Actualizado',
-									'Movimiento modificado',
-									'success'
-								).then(() => location.reload())
-							)
-							.catch(() =>
-								Swal.fire('Error', 'No se pudo actualizar', 'error')
-							);
-					}
-				});
-			});
+			if (ingresoUTC < hoy) {
+				Swal.showValidationMessage('La fecha de ingreso no puede ser anterior a hoy.');
+				return false;
+			}
+
+			return {
+				id_admision,
+				id_habitacion,
+				id_cama,
+				fecha_hora_ingreso: ingresoUTC.toISOString(),
+				fecha_hora_egreso: fecha_hora_egreso ? toUTC(fecha_hora_egreso).toISOString() : null,
+				id_mov,
+				estado,
+			};
+			}
+		}).then((result) => {
+			if (result.isConfirmed) {
+			fetch(`/api/movimientos_habitacion/${id}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(result.value),
+			})
+				.then(() => Swal.fire('Actualizado', 'Movimiento modificado', 'success')
+				.then(() => location.reload()))
+				.catch(() => Swal.fire('Error', 'No se pudo actualizar', 'error'));
+			}
+		});
+		});
 	});
 
-	// 🔸 Eliminar Movimiento (delegación sobre tbody)
 	$('#tablaMovimientosHabitacion tbody').on(
 		'click',
 		'.delete-btn',
@@ -295,6 +260,9 @@ $(document).ready(function () {
 				showCancelButton: true,
 				confirmButtonText: 'Sí, eliminar',
 				cancelButtonText: 'Cancelar',
+				customClass: {
+					popup: 'swal2-card-style'
+				}
 			}).then((result) => {
 				if (result.isConfirmed) {
 					fetch(`/api/movimientos_habitacion/${id}`, { method: 'DELETE' })

@@ -2,7 +2,6 @@ $(document).ready(function () {
   const tabla = $('#tablaMovimiento');
   if (!tabla.length) return;
 
-  // 🧪 Validación de nombre
   function validarNombre(nombre) {
     if (!nombre || !nombre.trim()) {
       return 'El nombre es obligatorio.';
@@ -17,7 +16,6 @@ $(document).ready(function () {
     return null;
   }
 
-  // 🔄 Cargar movimientos
   fetch('/api/movimientos')
     .then((res) => res.json())
     .then((movimientos) => {
@@ -48,7 +46,6 @@ $(document).ready(function () {
         ]
       });
 
-      // Mostrar botón Agregar si tabla vacía
       dataTable.on('draw', function () {
         $('#btnAgregarMovimiento').remove();
         if (dataTable.rows({ filter: 'applied' }).data().length === 0) {
@@ -68,7 +65,6 @@ $(document).ready(function () {
       Swal.fire('Error', 'No se pudo cargar los movimientos.', 'error');
     });
 
-  // 🟢 Agregar movimiento
   $(document).on('click', '#btnAgregarMovimiento button', function () {
     Swal.fire({
       title: 'Agregar Movimiento',
@@ -77,6 +73,9 @@ $(document).ready(function () {
       inputPlaceholder: 'Ingrese el nombre',
       showCancelButton: true,
       confirmButtonText: 'Guardar',
+      customClass: {
+					popup: 'swal2-card-style'
+			},
       preConfirm: (nombre) => {
         const err = validarNombre(nombre);
         if (err) {
@@ -97,7 +96,6 @@ $(document).ready(function () {
     });
   });
 
-  // 🟠 Editar movimiento
   $(document).on('click', '.edit-btn', function () {
     const id = $(this).data('id');
     fetch(`/api/movimientos/${id}`)
@@ -110,6 +108,9 @@ $(document).ready(function () {
           inputLabel: 'Nombre del movimiento',
           showCancelButton: true,
           confirmButtonText: 'Guardar',
+          customClass: {
+            popup: 'swal2-card-style'
+          },
           preConfirm: (nombre) => {
             const err = validarNombre(nombre);
             if (err) {
@@ -132,7 +133,6 @@ $(document).ready(function () {
       .catch(() => Swal.fire('Error', 'No se pudo cargar el movimiento.', 'error'));
   });
 
-  // 🔴 Eliminar movimiento
   $(document).on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     Swal.fire({
@@ -141,7 +141,10 @@ $(document).ready(function () {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
+      customClass: {
+					popup: 'swal2-card-style'
+				},
     }).then((result) => {
       if (!result.isConfirmed) return;
       fetch(`/api/movimientos/${id}`, { method: 'DELETE' })

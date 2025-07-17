@@ -69,6 +69,9 @@ $(document).ready(function () {
       inputLabel: 'Nombre',
       showCancelButton: true,
       confirmButtonText: 'Guardar',
+      customClass: {
+					popup: 'swal2-card-style'
+				},
       preConfirm: (v) => {
         if (!v || v.trim().length < 3) {
           Swal.showValidationMessage('Debe ingresar al menos 3 letras');
@@ -103,6 +106,9 @@ $(document).ready(function () {
       inputValue: actual,
       showCancelButton: true,
       confirmButtonText: 'Actualizar',
+      customClass: {
+					popup: 'swal2-card-style'
+				},
       preConfirm: (v) => {
         if (!v || v.trim().length < 3) {
           Swal.showValidationMessage('Debe ingresar al menos 3 letras');
@@ -132,7 +138,11 @@ $(document).ready(function () {
       title: '¿Eliminar rol?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar'
+      confirmButtonText: 'Sí, eliminar',
+      customClass: {
+					popup: 'swal2-card-style'
+				},
+      
     }).then(result => {
       if (!result.isConfirmed) return;
       fetch(`/api/roles/${id}`, { method: 'DELETE' })

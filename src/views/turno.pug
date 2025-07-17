@@ -6,6 +6,9 @@ block content
       h1 Turnos Programados
 
       button.btn.btn-success.mb-3#btnNuevoTurno Nuevo Turno
+      .col-md-6.text-end        
+        label(for="filtroProfesionalTurno").me-2.mb-0  Filtrar por profesional:
+        select#filtroProfesionalTurno(style="width: 300px")
 
       table#tablaTurnos.table.table-striped
         thead
@@ -18,7 +21,7 @@ block content
             th Motivo
             th Acciones
         tbody
-
+      
       script(src="https://code.jquery.com/jquery-3.6.0.min.js")
       script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
       link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")

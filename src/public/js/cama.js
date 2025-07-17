@@ -62,6 +62,9 @@ $(document).ready(function () {
           <option value="1">Ocupada</option>
         </select>
       `,
+      customClass: {
+        popup: 'swal2-card-style'
+      },
       showCancelButton: true,
       confirmButtonText: 'Guardar',
       didOpen: () => {
