@@ -11,5 +11,4 @@ export const eliminarTurnosPasados = async () => {
     }
   });
 
-  console.log(`🧹 Se eliminaron ${eliminados} turnos pasados.`);
 };

@@ -159,11 +159,8 @@ export const createAdmision = async (req, res) => {
     if (id_cama && id_mov === 1) {
       await validarOcupacionCamaPorAdmision(id_cama, fecha_hora_ingreso);
     }
-
-    // Crear admisión
     const nueva = await Admision.create(req.body, { transaction: t });
 
-    // Crear movimiento habitación directamente acá
     await MovimientoHabitacion.create({
       id_admision: nueva.id_admision,
       id_habitacion: cama?.id_habitacion,
@@ -174,7 +171,6 @@ export const createAdmision = async (req, res) => {
       estado: 1
     }, { transaction: t });
 
-    // Historia clínica
     const tipoIngreso = await TipoRegistro.findOne({
       where: { nombre: { [Op.like]: '%ingreso%' } },
       transaction: t

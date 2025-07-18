@@ -1,25 +1,26 @@
 import { configurarBusquedaDeCamas } from './utils/validacionFechas.js';
-import { toUTC } from './utils/validacionFechas.js';
 
-function buscarCamasDisponibles(fecha) {
+function buscarCamasDisponibles(fechaSeleccionada) {
 	$('#tablaCamasContainer').html(
 		'<div class="text-center my-4"><div class="spinner-border"></div> Cargando...</div>'
 	);
-	fetch(`/api/camas/disponibles?fecha=${fecha}`)
-		.then((res) => res.json())
-		.then((camas) => {
-			renderTablaCamas(camas);
-		})
-		.catch(() => {
-			$('#tablaCamasContainer').html(
-				'<div class="alert alert-danger">Error al cargar las camas.</div>'
-			);
-	});
-}
+  fetch(`/api/camas/disponibles?fecha=${fechaSeleccionada}`)
+    .then((res) => res.json())
+    .then((camas) => {
+      renderTablaCamas(camas);
+    })
+    .catch((err) => {
+      console.error('❌ Error en fetch camas:', err);
+      $('#tablaCamasContainer').html(
+        '<div class="alert alert-danger">Error al cargar las camas.</div>'
+      );
+    });
+
+  }
 	
 function renderTablaCamas(camas) {
-const inputFecha = $('#fecha_busqueda').val();
-const fechaSeleccionada = toUTC(`${inputFecha}T00:00`);
+  const inputFecha = $('#fecha_busqueda').val();
+  const fechaSeleccionada = inputFecha; 
 
   let html = `
     <table id="tablaCamas" class="table table-bordered table-hover">
@@ -37,7 +38,7 @@ const fechaSeleccionada = toUTC(`${inputFecha}T00:00`);
       </thead>
       <tbody>
   `;
-  
+
   if (camas.length === 0) {
     html += `<tr><td colspan="8" class="text-center">No hay camas para la fecha seleccionada.</td></tr>`;
   } else {
@@ -49,7 +50,7 @@ const fechaSeleccionada = toUTC(`${inputFecha}T00:00`);
       let esReservaEnFecha = false;
 
       if (Array.isArray(cama.movimientos)) {
-        const fechaSeleccionadaStr = fechaSeleccionada.toISOString().slice(0, 10);
+        const fechaSeleccionadaStr = fechaSeleccionada;
         esReservaEnFecha = cama.movimientos.some(mov => {
           if (mov.id_mov === 3 && mov.fecha_hora_ingreso) {
             const ingresoStr = mov.fecha_hora_ingreso.slice(0, 10);
@@ -60,7 +61,6 @@ const fechaSeleccionada = toUTC(`${inputFecha}T00:00`);
         });
       }
 
-
       let estadoBadge = '';
       if (esReservaEnFecha) {
         estadoBadge = '<span class="badge bg-warning text-dark">Reservada</span>';
@@ -69,7 +69,6 @@ const fechaSeleccionada = toUTC(`${inputFecha}T00:00`);
       } else {
         estadoBadge = '<span class="badge bg-success">Disponible</span>';
       }
-
 
       const deshabilitada = (
         cama.estado === 1 || cama.estado === true || cama.estado === 'Ocupada'

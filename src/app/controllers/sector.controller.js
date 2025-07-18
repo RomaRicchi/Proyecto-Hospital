@@ -57,18 +57,26 @@ export const updateSector = async (req, res) => {
 };
 
 export const deleteSector = async (req, res) => {
-	try {
-		const { id } = req.params;
-		const sector = await Sector.findByPk(id);
-		if (!sector) {
-			return res.status(404).json({ message: 'Sector no encontrado' });
-		}
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
 
-		await sector.destroy();
-		res.status(204).send();
-	} catch (error) {
-		res.status(500).json({ message: 'Error al eliminar sector' });
-	}
+    // 🔍 Buscar por id_sector explícitamente
+    const sector = await Sector.findOne({ where: { id_sector: id } });
+
+    if (!sector) {
+      return res.status(404).json({ message: 'Sector no encontrado' });
+    }
+
+    await sector.destroy();
+    res.status(204).send();
+
+  } catch (error) {
+    console.error('❌ Error al eliminar sector:', error);
+    res.status(500).json({ message: 'Error al eliminar sector' });
+  }
 };
 
 export const vistaSectores = async (req, res) => {

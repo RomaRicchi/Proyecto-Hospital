@@ -12,20 +12,26 @@ block content
       .col-xl-3.col-md-6
         a.card.h-100.bg-danger.text-white.text-center.mb-4(href="/emergencias", style="text-decoration:none;")
           .card-body.d-flex.flex-column.justify-content-center
-            i.fas.fa-exclamation-triangle.fa-2x.mb-2
+            i.fas.fa-ambulance.fa-2x.mb-2
             h5 Emergencias
 
       .col-xl-3.col-md-6
         a.card.h-100.bg-warning.text-dark.text-center.mb-4(href="/reserva-cama", style="text-decoration:none;")
           .card-body.d-flex.flex-column.justify-content-center
-            i.fas.fa-bed.fa-2x.mb-2
+            i.fas.fa-calendar-day.fa-2x.mb-2
             h5 Reservas de hoy
 
       .col-xl-3.col-md-6
-        a.card.h-100.bg-success.text-dark.text-center.mb-4(href="/turnos", style="text-decoration:none;")
+        a.card.h-100.bg-success.text-white.text-center.mb-4(href="/turnos", style="text-decoration:none;")
           .card-body.d-flex.flex-column.justify-content-center
-            i.fas.fa-bed.fa-2x.mb-2
+            i.fas.fa-user-clock.fa-2x.mb-2
             h5 Turnos
+
+      .col-xl-3.col-md-6
+        a.card.h-100.bg-info.text-white.text-center.mb-4(href="/agenda", style="text-decoration:none;")
+          .card-body.d-flex.flex-column.justify-content-center
+            i.fas.fa-calendar-alt.fa-2x.mb-2
+            h5 Agenda médica
 
     // 🔹 Nueva Internación
     h1.mt-4 Nueva Internacion
@@ -49,9 +55,9 @@ block content
       .col-12
         #tablaCamasContainer
 
-  // Scripts
-  script(src="https://code.jquery.com/jquery-3.6.0.min.js")
-  script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
-  link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")        
-  script(type="module", src="/js/dashboard.js") 
-  script(type="module" src="/js/utils/btn.asignarPaciente.js")
+    // Scripts
+    script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+    script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+    link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")        
+    script(type="module", src="/js/dashboard.js") 
+    script(type="module", src="/js/utils/btn.asignarPaciente.js")

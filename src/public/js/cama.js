@@ -8,17 +8,16 @@ $(document).ready(function () {
       pageLength: 10,
       searching: true,
       ordering: true,
-	    destroy: true,
-      responsive: true,    
+      destroy: true,
+      responsive: true,
       scrollX: false,
-      columnDefs: [     
-      { targets: [4], orderable: false, searchable: false }
+      columnDefs: [
+        { targets: [4], orderable: false, searchable: false }
       ]
     });
 
     dt.on('draw', function () {
       $('#btnAgregarCama').remove();
-
       $('#tablaCamas_wrapper').prepend(`
         <div id="btnAgregarCama" class="text-end mb-3">
           <button class="btn btn-success">
@@ -29,71 +28,73 @@ $(document).ready(function () {
     });
   }
 
-  // 🔸 Botón Agregar
   $(document).on('click', '#btnAgregarCama', async function () {
     const habitaciones = await cargarHabitaciones();
+    const habitacionesPorSector = {};
+    habitaciones.forEach(h => {
+      const sector = h.sector?.nombre || 'Sin sector';
+      if (!habitacionesPorSector[sector]) habitacionesPorSector[sector] = [];
+      habitacionesPorSector[sector].push(h);
+    });
 
     Swal.fire({
       title: 'Agregar Nueva Cama',
       html: `
-        <input id="swal-nombre" class="swal2-input" placeholder="Nombre (1 letra)">
-        <select id="swal-id_habitacion" class="swal2-input">
-          <option disabled selected value="">Seleccionar habitación</option>
-          ${habitaciones
-            .map(
-              (h) =>
-                `<option value="${h.id_habitacion}">Habitación ${h.num} - ${
-                  h.sector?.nombre || 'Sin sector'
-                }</option>`
-            )
-            .join('')}
+        <input id="swal-nombre" class="swal2-input" placeholder="Nombre (1 letra)" style="text-align:center;">
+        
+        <label class="mt-2 text-start d-block"><strong>Sector:</strong></label>
+        <select id="swal-sector" class="swal2-input">
+          <option disabled selected value="">Seleccionar sector</option>
+          ${Object.keys(habitacionesPorSector).map(sector => `
+            <option value="${sector}">${sector}</option>`).join('')}
         </select>
-        <div id="detalle-habitacion" class="text-start p-2 border rounded" style="background-color: #f8f9fa;">
-          Selecciona una habitación para ver detalles.
-        </div>
+
+        <label class="mt-2 text-start d-block"><strong>Habitación:</strong></label>
+        <select id="swal-id_habitacion" class="swal2-input" disabled>
+          <option value="">Seleccionar una habitación</option>
+        </select>
+
         <label class="mt-2 text-start d-block"><strong>Desinfección ok:</strong></label>
         <select id="swal-desinfeccion" class="swal2-input">
           <option value="0">No</option>
           <option value="1">Sí</option>
         </select>
+
         <label class="mt-2 text-start d-block"><strong>Estado:</strong></label>
         <select id="swal-estado" class="swal2-input">
           <option value="0">Disponible</option>
           <option value="1">Ocupada</option>
         </select>
       `,
-      customClass: {
-        popup: 'swal2-card-style'
-      },
+      customClass: { popup: 'swal2-card-style' },
       showCancelButton: true,
       confirmButtonText: 'Guardar',
       didOpen: () => {
-        const select = document.getElementById('swal-id_habitacion');
-        const detalleDiv = document.getElementById('detalle-habitacion');
-        select.addEventListener('change', function () {
-          const habitacion = habitaciones.find(
-            (h) => h.id_habitacion == this.value
-          );
-          if (habitacion) {
-            const camasNombres = habitacion.camas?.length
-              ? habitacion.camas.map((c) => c.nombre).join(', ')
-              : 'No hay camas registradas';
-            detalleDiv.innerHTML = `
-              <strong>Sector:</strong> ${habitacion.sector?.nombre || 'Sin sector'}<br>
-              <strong>Número Habitación:</strong> ${habitacion.num}<br>
-              <strong>Camas en Habitación:</strong> ${habitacion.camas?.length || 0} (${camasNombres})
-            `;
-          }
+        const selectSector = document.getElementById('swal-sector');
+        const selectHabitacion = document.getElementById('swal-id_habitacion');
+
+        selectSector.addEventListener('change', function () {
+          const sectorSeleccionado = this.value;
+          const habitacionesFiltradas = habitacionesPorSector[sectorSeleccionado] || [];
+
+          selectHabitacion.innerHTML = '<option value="">Seleccionar una habitación</option>';
+          habitacionesFiltradas.forEach(h => {
+            const option = document.createElement('option');
+            option.value = h.id_habitacion;
+            option.textContent = `Hab. ${h.num}`;
+            selectHabitacion.appendChild(option);
+          });
+
+          selectHabitacion.disabled = habitacionesFiltradas.length === 0;
         });
       },
       preConfirm: () => {
-        const nombre       = document.getElementById('swal-nombre').value.trim().toUpperCase();
+        const nombre = document.getElementById('swal-nombre').value.trim().toUpperCase();
         const id_habitacion = document.getElementById('swal-id_habitacion').value;
-        const desinfeccion  = document.getElementById('swal-desinfeccion').value;
-        const estado        = document.getElementById('swal-estado').value;
+        const desinfeccion = document.getElementById('swal-desinfeccion').value;
+        const estado = document.getElementById('swal-estado').value;
 
-        // Validar que el nombre sea exactamente un carácter alfabético
-        if (!/^[A-Za-z]$/.test(nombre)) {
+        if (!/^[A-Z]$/.test(nombre)) {
           Swal.showValidationMessage('El nombre debe ser una sola letra (A–Z).');
           return false;
         }
@@ -124,12 +125,13 @@ $(document).ready(function () {
               location.reload()
             )
           )
-          .catch(() => Swal.fire('Error', 'No se pudo crear la cama', 'error'));
+          .catch((err) =>
+            Swal.fire('Error', err.message || 'No se pudo crear la cama', 'error')
+          );
       }
     });
   });
 
-  // 🔸 Botón Editar
   $(document).on('click', '.edit-btn', async function () {
     const id = $(this).data('id');
     try {
@@ -138,70 +140,96 @@ $(document).ready(function () {
         cargarHabitaciones()
       ]);
 
-      const opcionesHabitacion = habitaciones
-        .map(
-          (h) => `<option value="${h.id_habitacion}" ${
-            h.id_habitacion == cama.id_habitacion ? 'selected' : ''
-          }>
-            Hab. ${h.num} - ${h.sector.nombre}
-          </option>`
-        )
-        .join('');
+      // Agrupar por sector
+      const habitacionesPorSector = {};
+      habitaciones.forEach(h => {
+        const sector = h.sector?.nombre || 'Sin sector';
+        if (!habitacionesPorSector[sector]) habitacionesPorSector[sector] = [];
+        habitacionesPorSector[sector].push(h);
+      });
+
+      // Buscar sector actual de la cama
+      const habitacionActual = habitaciones.find(h => h.id_habitacion == cama.id_habitacion);
+      const sectorActual = habitacionActual?.sector?.nombre || '';
 
       Swal.fire({
         title: 'Editar Cama',
         html: `
-          <input id="swal-nombre" class="swal2-input" value="${cama.nombre}" placeholder="Nombre (1 letra)">
-          <select id="swal-id_habitacion" class="swal2-input">${opcionesHabitacion}</select>
-          <div id="detalle-habitacion" class="text-start p-2 border rounded" style="background-color: #f8f9fa; margin-top:10px;">
-            Selecciona una habitación para ver detalles.
-          </div>
+          <style>
+            .swal2-popup .swal2-input,
+            .swal2-popup select {
+              max-width: 320px !important;
+              width: 100% !important;
+              margin: 0 auto !important;
+              display: block !important;
+            }
+          </style>
+
+          <input id="swal-nombre" class="swal2-input" value="${cama.nombre}" placeholder="Nombre (1 letra)" style="text-align:center;">
+
+          <label class="mt-2 text-start d-block"><strong>Sector:</strong></label>
+          <select id="swal-sector" class="swal2-input">
+            <option disabled value="">Seleccionar sector</option>
+            ${Object.keys(habitacionesPorSector).map(sector => `
+              <option value="${sector}" ${sector === sectorActual ? 'selected' : ''}>${sector}</option>
+            `).join('')}
+          </select>
+
+          <label class="mt-2 text-start d-block"><strong>Habitación:</strong></label>
+          <select id="swal-id_habitacion" class="swal2-input">
+            <option value="">Seleccionar una habitación</option>
+          </select>
+
           <label class="mt-2 text-start d-block"><strong>Desinfección ok:</strong></label>
           <select id="swal-desinfeccion" class="swal2-input">
             <option value="0" ${!cama.desinfeccion ? 'selected' : ''}>No</option>
             <option value="1" ${cama.desinfeccion ? 'selected' : ''}>Sí</option>
           </select>
+
           <label class="mt-2 text-start d-block"><strong>Estado:</strong></label>
           <select id="swal-estado" class="swal2-input">
             <option value="0" ${!cama.estado ? 'selected' : ''}>Disponible</option>
             <option value="1" ${cama.estado ? 'selected' : ''}>Ocupada</option>
           </select>
         `,
+        customClass: { popup: 'swal2-card-style' },
         showCancelButton: true,
         confirmButtonText: 'Guardar',
         didOpen: () => {
-          const select = document.getElementById('swal-id_habitacion');
-          const detalleDiv = document.getElementById('detalle-habitacion');
-          const habInicial = habitaciones.find(
-            (h) => h.id_habitacion == cama.id_habitacion
-          );
-          if (habInicial) {
-            const camasNombres = habInicial.camas?.map((c) => c.nombre).join(', ') || '–';
-            detalleDiv.innerHTML = `
-              <strong>Sector:</strong> ${habInicial.sector.nombre}<br>
-              <strong>Número Habitación:</strong> ${habInicial.num}<br>
-              <strong>Camas en Habitación:</strong> ${habInicial.camas.length} (${camasNombres})
-            `;
+          const selectSector = document.getElementById('swal-sector');
+          const selectHabitacion = document.getElementById('swal-id_habitacion');
+
+          // Cargar habitaciones del sector actual
+          if (sectorActual) {
+            const habs = habitacionesPorSector[sectorActual] || [];
+            habs.forEach(h => {
+              const option = document.createElement('option');
+              option.value = h.id_habitacion;
+              option.textContent = `Hab. ${h.num}`;
+              if (h.id_habitacion == cama.id_habitacion) option.selected = true;
+              selectHabitacion.appendChild(option);
+            });
           }
-          select.addEventListener('change', function () {
-            const hab = habitaciones.find((h) => h.id_habitacion == this.value);
-            if (hab) {
-              const camasNombres = hab.camas?.map((c) => c.nombre).join(', ') || '–';
-              detalleDiv.innerHTML = `
-                <strong>Sector:</strong> ${hab.sector.nombre}<br>
-                <strong>Número Habitación:</strong> ${hab.num}<br>
-                <strong>Camas en Habitación:</strong> ${hab.camas.length} (${camasNombres})
-              `;
-            }
+
+          // Cambiar habitaciones al seleccionar otro sector
+          selectSector.addEventListener('change', function () {
+            const seleccionadas = habitacionesPorSector[this.value] || [];
+            selectHabitacion.innerHTML = '<option value="">Seleccionar una habitación</option>';
+            seleccionadas.forEach(h => {
+              const option = document.createElement('option');
+              option.value = h.id_habitacion;
+              option.textContent = `Hab. ${h.num}`;
+              selectHabitacion.appendChild(option);
+            });
           });
         },
         preConfirm: () => {
-          const nombre        = document.getElementById('swal-nombre').value.trim();
+          const nombre = document.getElementById('swal-nombre').value.trim().toUpperCase();
           const id_habitacion = document.getElementById('swal-id_habitacion').value;
-          const desinfeccion  = document.getElementById('swal-desinfeccion').value;
-          const estado        = document.getElementById('swal-estado').value;
+          const desinfeccion = document.getElementById('swal-desinfeccion').value;
+          const estado = document.getElementById('swal-estado').value;
 
-          if (!/^[A-Za-z]$/.test(nombre)) {
+          if (!/^[A-Z]$/.test(nombre)) {
             Swal.showValidationMessage('El nombre debe ser una sola letra (A–Z).');
             return false;
           }
@@ -209,6 +237,7 @@ $(document).ready(function () {
             Swal.showValidationMessage('Debes seleccionar una habitación.');
             return false;
           }
+
           return { nombre, id_habitacion, desinfeccion, estado };
         }
       }).then((result) => {
@@ -226,21 +255,22 @@ $(document).ready(function () {
               if (!response.ok) throw new Error('Error al actualizar la cama');
               return response.json();
             })
-
             .then(() =>
               Swal.fire('Actualizado', 'Cama modificada con éxito', 'success').then(() =>
                 location.reload()
               )
             )
-            .catch(() => Swal.fire('Error', 'No se pudo actualizar la cama', 'error'));
+            .catch((err) => {
+              Swal.fire('Error', err.message || 'No se pudo actualizar la cama', 'error');
+            });
         }
       });
-    } catch {
+    } catch (err) {
+      console.error('❌ Error al cargar cama:', err);
       Swal.fire('Error', 'No se pudo cargar los datos para editar', 'error');
     }
   });
 
-  // 🔸 Eliminar cama
   $(document).on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     Swal.fire({
@@ -267,7 +297,6 @@ $(document).ready(function () {
     });
   });
 
-  // 🔸 Función auxiliar para cargar habitaciones
   async function cargarHabitaciones() {
     try {
       const response = await fetch('/api/habitaciones');

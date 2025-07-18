@@ -17,9 +17,17 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
     | Pacientes
   ul.collapse#pacientesSubmenu(style="list-style-type: none; padding-left: 1rem;")
     li
+      a.nav-link.text-white(href="/turnos")
+        i.fas.fa-calendar-day.me-1
+        | Lista de Turnos
+    li
       a.nav-link.text-white(href="/paciente")
         i.fas.fa-list.me-1
         | Lista de Pacientes
+    li
+      a.nav-link.text-white(href="/registroClinico")
+        i.fas.fa-file-alt.me-1
+        | Registros clínicos
     li
       a.nav-link.text-white(href="/pacientes/camas")
         i.fas.fa-procedures.me-1
@@ -28,11 +36,6 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
       a.nav-link.text-white(href="/familiar")
         i.fas.fa-list.me-1
         | Lista de Familiares
-    if [1, 3, 4].includes(usuario.rol)
-      li
-        a.nav-link.text-white(href="/registroClinico")
-          i.fas.fa-file-alt.me-1
-          | Registros clínicos
     if usuario.rol === 1
       li
         a.nav-link.text-white.collapsed(href="#auxiliaresPacientesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
@@ -56,6 +59,10 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
           a.nav-link.text-white(href="/tipoRegistro")
             i.fas.fa-file-signature.me-1
             | Tipos de Registro
+        li
+          a.nav-link.text-white(href="/estado-turno")
+            i.fas.fa-info-circle.me-1
+            | Estados de Turno
 
   // 🔹 Admisiones
   a.nav-link.text-white.collapsed(href="#admisionesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
@@ -119,6 +126,10 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
           i.fas.fa-stethoscope.me-1
           | Staff de Salud
       li
+        a.nav-link.text-white(href="/agenda")
+          i.fas.fa-clock.me-1
+          | Agendas
+      li
         a.nav-link.text-white(href="/personal/administrativo")
           i.fas.fa-user-tie.me-1
           | Staff Administrativo
@@ -135,6 +146,10 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
           a.nav-link.text-white(href="/rolUsuario")
             i.fas.fa-user-tag.me-1
             | Roles
+        li
+          a.nav-link.text-white(href="/dias-semana")
+            i.fas.fa-calendar-week.me-1
+            | Días de la Semana
 
   // 🔹 Ubicación
   if usuario.rol === 1
@@ -155,28 +170,3 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
           i.fas.fa-procedures.me-1
           | Lista de Camas
 
-
-
-  // 🔹 Turnos
-  a.nav-link.text-white.collapsed(href="#turnosSubmenu", data-bs-toggle="collapse", aria-expanded="false")
-    i.fas.fa-calendar-check.me-2
-    | Turnos
-  ul.collapse#turnosSubmenu(style="list-style-type: none; padding-left: 1rem;")
-    li
-      a.nav-link.text-white(href="/turnos")
-        i.fas.fa-calendar-day.me-1
-        | Lista de Turnos
-    if [1, 3, 4].includes(usuario.rol)
-      li
-        a.nav-link.text-white(href="/agenda")
-          i.fas.fa-clock.me-1
-          | Agendas
-    if usuario.rol === 1
-      li
-        a.nav-link.text-white(href="/dias-semana")
-          i.fas.fa-calendar-week.me-1
-          | Días de la Semana
-      li
-        a.nav-link.text-white(href="/estado-turno")
-          i.fas.fa-info-circle.me-1
-          | Estados de Turno

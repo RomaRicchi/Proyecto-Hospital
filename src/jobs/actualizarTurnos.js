@@ -6,7 +6,6 @@ export function iniciarActualizacionTurnos() {
   // ⏱ Cada 5 minutos: actualizar estado de turnos pasados a "atendido"
   cron.schedule('*/30 * * * *', async () => {
     const ahora = new Date();
-    console.log('⏳ Verificando turnos vencidos...');
 
     try {
       const turnos = await Turno.findAll({
@@ -21,7 +20,6 @@ export function iniciarActualizacionTurnos() {
 
         if (ahora >= fin) {
           await turno.update({ id_estado: 2 }); // atendido
-          console.log(`✅ Turno ${turno.id_turno} marcado como atendido`);
         }
       }
     } catch (error) {

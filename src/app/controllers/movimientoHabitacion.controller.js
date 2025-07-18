@@ -52,9 +52,7 @@ export const verificarGenero = async (req, res) => {
             message: 'La cama ya está ocupada por un paciente de otro género.'
         });
     }
-    console.log('Ocupante:', generoOcupante, 'Ingresado:', generoIngresado);
-
-    res.json({ success: true });
+       res.json({ success: true });
 
   } catch (error) {
     res.status(500).json({ message: 'Error interno al verificar género' });
@@ -148,8 +146,6 @@ export const createMovimientoHabitacion = async (req, res) => {
 		if (!admisionNueva)
 			return res.status(404).json({ message: 'Admisión no encontrada' });
 
-		console.log('🧍 Paciente nuevo:', admisionNueva.paciente?.id_paciente, 'Género:', admisionNueva.paciente?.id_genero);
-
 		const movimientoOcupado = await MovimientoHabitacion.findOne({
 			where: {
 				id_habitacion,
@@ -168,14 +164,10 @@ export const createMovimientoHabitacion = async (req, res) => {
 			}],
 		});
 
-		console.log('🛏️ Movimiento ocupado encontrado:', movimientoOcupado?.id_movimiento);
-		console.log('➡️ Género ocupante:', movimientoOcupado?.admision?.paciente?.id_genero);
-
 		if (
 			movimientoOcupado &&
 			movimientoOcupado.admision?.paciente?.id_genero !== admisionNueva.paciente.id_genero
 		) {
-			console.log('❌ Conflicto de género detectado');
 			return res.status(400).json({
 				message: 'No se puede internar porque hay un paciente de diferente género en la otra cama.',
 			});

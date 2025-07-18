@@ -162,7 +162,7 @@ $(document).ready(function () {
   fetch('/api/admisiones')
     .then(res => res.json())
     .then(admisiones => {
-      console.log('📦 Admisiones recibidas:', admisiones);
+      
       dt.clear();
 
       if (admisiones.length === 0) {

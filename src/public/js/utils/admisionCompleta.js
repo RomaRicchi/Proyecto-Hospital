@@ -94,35 +94,26 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 			}
 		});
 
-		//  Obtener valor del input y convertirlo correctamente
+		if (!result.isConfirmed) return;
+
 		const inputFechaIngreso = document.querySelector('#fecha_hora_ingreso');
 		const inputFechaEgreso = document.querySelector('#fecha_hora_egreso');
 		const inputMotivoEgr = document.querySelector('#motivo_egr');
 
-		const fechaIngreso = parseFechaLocal(inputFechaIngreso?.value);
-		if (!fechaIngreso) {
-		await Swal.fire('Error', 'La fecha de ingreso no es válida.', 'error');
+		const { fecha_hora_ingreso } = result.value;
+		let { fecha_hora_egreso } = result.value;
+		const fechaIngresoUTC = toUTC(fecha_hora_ingreso);
+		const fechaSeleccionadaStr = fechaIngresoUTC.slice(0, 10);
+		const hoyStr = new Date().toISOString().slice(0, 10);
+				
+		let id_mov = 1;
+
+		if (fechaSeleccionadaStr < hoyStr) {
+		await Swal.fire('Error', 'No se permite una fecha de ingreso en el pasado', 'error');
 		return;
 		}
 
-		const hoy = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
-		hoy.setHours(0, 0, 0, 0);
-		const manana = new Date(hoy);
-		manana.setDate(hoy.getDate() + 1);
-				
-		if (!result.isConfirmed) return;
-		
-		const { fecha_hora_ingreso } = result.value;
-		let { fecha_hora_egreso } = result.value;
-		let id_mov = 1;
-
-		const seleccionFinalLocal = new Date(fecha_hora_ingreso); 
-		const seleccionFinal = toUTC(seleccionFinalLocal);
-		if (seleccionFinal < hoy) {
-			await Swal.fire('Error', 'No se permite una fecha de ingreso en el pasado', 'error');
-			return;
-		}
-		if (seleccionFinal >= manana) {
+		if (fechaSeleccionadaStr > hoyStr) {
 			id_mov = 3;
 			aplicarReservaSemanal(inputFechaIngreso, inputFechaEgreso, inputMotivoEgr);
 			fecha_hora_egreso = inputFechaEgreso.value;
@@ -143,8 +134,8 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				...result.value,
-				fecha_hora_ingreso: toUTC(result.value.fecha_hora_ingreso).toISOString(),
-				fecha_hora_egreso: fecha_hora_egreso ? toUTC(fecha_hora_egreso).toISOString() : null,
+				fecha_hora_ingreso: toUTC(result.value.fecha_hora_ingreso),
+				fecha_hora_egreso: fecha_hora_egreso ? toUTC(fecha_hora_egreso) : null,
 				id_paciente: paciente.id_paciente,
 				id_cama,
 				id_mov,
@@ -152,8 +143,14 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 		});
 
 		if (!admResp.ok) {
-			const err = await admResp.json();
-			await Swal.fire('Error', err.message || 'No se pudo registrar la admisión', 'error');
+			let errMsg = 'No se pudo registrar la admisión';
+			try {
+				const err = await admResp.json();
+				errMsg = err.message || errMsg;
+			} catch (e) {
+				console.error('❌ Error al parsear respuesta de error:', e);
+			}
+			await Swal.fire('Error', errMsg, 'error');
 			return;
 		}
 
@@ -172,6 +169,8 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 
 
 	} catch (error) {
+		console.error('❌ Error inesperado en mostrarFormularioYRegistrarAdmision:', error);
 		await Swal.fire('Error', 'Ocurrió un error inesperado', 'error');
 	}
+
 }

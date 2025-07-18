@@ -67,7 +67,7 @@ $(document).ready(function () {
     })
     .then(data => {
       ultimaAdmisionPaciente = data.ultimaAdmision?.id_admision || null;
-      console.log('Respuesta del servidor:', data);
+      
       if (!data || !Array.isArray(data.registros) || data.registros.length === 0) {
         if (data?.paciente) {
           mostrarInfoPaciente(data.paciente, data.cama);
@@ -80,8 +80,7 @@ $(document).ready(function () {
         $tabla.html('<div class="alert alert-warning">Este paciente no posee registros clínicos aún</div>');
         return;
       }
-        console.log("Fechas crudas:", data.registros.map(r => r.fecha));
-
+      
       registrosPaciente = data.registros.map(r => ({
         ...r,
         fecha: new Date(r.fecha),// importante: NO toISOString +3hs

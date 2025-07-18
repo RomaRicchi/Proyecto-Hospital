@@ -45,7 +45,7 @@ $(document).ready(function () {
   function renderTurnos(tabla, turnos, filtroId) {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
-
+    const isMedico = window.usuario?.rol === 'medico';
     tabla.clear();
     turnos
       .filter(t => {
@@ -70,10 +70,12 @@ $(document).ready(function () {
           hora,
           estado,
           motivo,
-          `
-            <button class="btn btn-sm btn-primary editar" data-id="${t.id_turno}">Editar</button>
-            <button class="btn btn-sm btn-danger eliminar" data-id="${t.id_turno}">Eliminar</button>
-          `
+          isMedico
+            ? `<button class="btn btn-sm btn-success btn-atender-turno" data-id="${t.id_turno}" data-id-paciente="${t.id_paciente}">
+                  Atender
+              </button>`
+            : `<button class="btn btn-sm btn-primary editar" data-id="${t.id_turno}">Editar</button>
+              <button class="btn btn-sm btn-danger eliminar" data-id="${t.id_turno}">Eliminar</button>`
         ]);
       });
 
@@ -92,6 +94,13 @@ $(document).ready(function () {
         Swal.fire('Error', 'No se pudieron cargar los turnos', 'error');
       });
   }
+
+  $(document).on('click', '.btn-atender-turno', function () {
+    const idPaciente = $(this).data('id-paciente');
+    if (idPaciente) {
+      window.location.href = `/registro-clinico/${idPaciente}`;
+    }
+  });
 
   function configurarFiltroProfesional() {
     const guardado = localStorage.getItem('filtroProfesionalTurnoId');

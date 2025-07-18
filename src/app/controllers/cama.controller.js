@@ -93,9 +93,6 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
   try {
     const { fecha } = req.query;
     if (!fecha) return res.status(400).json({ message: 'Fecha requerida' });
-
-    const SECTORES_CON_INTERNACION = [1, 3, 7, 9, 10, 14, 26];
-
     const camas = await Cama.findAll({
       include: [
         {
@@ -106,7 +103,6 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
             model: Sector,
             as: 'sector',
             required: true,
-            where: { id_sector: { [Op.in]: SECTORES_CON_INTERNACION } }
           }]
         },
         {
@@ -139,7 +135,7 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
       const movimientosEnFecha = cama.movimientos?.filter((mov) => {
         if (!mov.fecha_hora_ingreso) return false;
 
-        const fechaSel = fecha; // ya viene en formato 'YYYY-MM-DD'
+        const fechaSel = fecha; 
         const ingresoStr = mov.fecha_hora_ingreso.slice(0, 10);
         const egresoStr = mov.fecha_hora_egreso ? mov.fecha_hora_egreso.slice(0, 10) : null;
 
@@ -189,14 +185,17 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
 
 export const createCama = async (req, res) => {
   try {
-    const { nombre, id_habitacion } = req.body;
+    let { nombre, id_habitacion, desinfeccion, estado } = req.body;
 
-    // Validaciones básicas
+    // Normalizar
+    nombre = nombre.trim().toUpperCase();
+
+    // Validaciones
     if (!nombre || !id_habitacion) {
       return res.status(400).json({ message: 'Nombre e id_habitacion son obligatorios' });
     }
 
-    // Verificar si ya existe una cama con ese nombre en la misma habitación
+    // Verificar duplicado
     const existente = await Cama.findOne({
       where: {
         nombre,
@@ -210,10 +209,15 @@ export const createCama = async (req, res) => {
       });
     }
 
-    // Crear cama
-    const nuevaCama = await Cama.create({ nombre, id_habitacion });
+    const nuevaCama = await Cama.create({
+      nombre,
+      id_habitacion,
+      desinfeccion: parseInt(desinfeccion) || 0,
+      estado: parseInt(estado) || 0
+    });
+
     res.status(201).json(nuevaCama);
-    
+
   } catch (error) {
     console.error('❌ Error al crear cama:', error);
     res.status(500).send('Error interno del servidor');
@@ -236,7 +240,7 @@ export const getCamasReservadas = async (req, res) => {
           as: 'movimientos',
           required: true,
           where: {
-            id_mov: 3, // solo reservas
+            id_mov: 3, 
             estado: 1
           },
           include: [
@@ -254,7 +258,6 @@ export const getCamasReservadas = async (req, res) => {
       order: [['id_cama', 'ASC']]
     });
 
-    // Opcional: Formatear salida si no querés exponer todo
     const resultado = camas.map(c => ({
       id_cama: c.id_cama,
       nombre: c.nombre,
@@ -263,9 +266,7 @@ export const getCamasReservadas = async (req, res) => {
       movimientos: c.movimientos.map(m => ({
         id_movimiento: m.id_movimiento,
         fecha_reserva: m.fecha_hora_ingreso,
-        paciente: m.admision?.paciente
-          ? `${m.admision.paciente.apellido_p}, ${m.admision.paciente.nombre_p}`
-          : 'Sin datos',
+        paciente: m.admision?.paciente || null,
         motivo: m.admision?.motivo_ingreso?.tipo || 'Sin motivo'
       }))
     }));
@@ -281,7 +282,10 @@ export const getCamasReservadas = async (req, res) => {
 export const updateCama = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, id_habitacion } = req.body;
+    let { nombre, id_habitacion, desinfeccion, estado } = req.body;
+
+    // Normalizar
+    nombre = nombre.trim().toUpperCase();
 
     if (!nombre || !id_habitacion) {
       return res.status(400).json({ message: 'Nombre e ID de habitación son requeridos' });
@@ -292,7 +296,7 @@ export const updateCama = async (req, res) => {
       return res.status(404).json({ message: 'Cama no encontrada' });
     }
 
-    // Verificar duplicado
+    // Verificar duplicado (excepto la actual)
     const duplicada = await Cama.findOne({
       where: {
         nombre,
@@ -307,7 +311,13 @@ export const updateCama = async (req, res) => {
       });
     }
 
-    await cama.update({ nombre, id_habitacion });
+    await cama.update({
+      nombre,
+      id_habitacion,
+      desinfeccion: parseInt(desinfeccion) || 0,
+      estado: parseInt(estado) || 0
+    });
+
     res.json(cama);
 
   } catch (error) {

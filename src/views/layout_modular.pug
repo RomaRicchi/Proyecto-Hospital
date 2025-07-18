@@ -30,11 +30,14 @@ html
       // 👉 Contenido principal que ocupa el resto del espacio
       main.flex-grow-1
         block content
-
+        
     // 👉 Scripts base
     script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js")
     script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
     script(src="/js/script.js")
     
+    if usuario
+      script.
+        window.usuario = !{JSON.stringify(usuario)};
 
       

@@ -36,8 +36,8 @@ $(document).ready(function () {
             <button class="btn btn-warning btn-sm edit-btn" data-id="${sec.id_sector}">
               <i class="fas fa-edit"></i>
             </button>
-            <button class="btn btn-danger btn-sm delete-btn" data-id="${sec.id_sector}">
-              <i class="fas fa-trash-alt"></i>
+            <button class="btn btn-sm btn-danger btn-eliminar-sector" data-id="${sec.id_sector}">
+              <i class="fas fa-trash"></i>
             </button>
           </td>
         </tr>`;
@@ -127,26 +127,39 @@ $(document).ready(function () {
       });
   });
 
-  $(document).on('click', '.delete-btn', function () {
+  $(document).on('click', '.btn-eliminar-sector', async function () {
     const id = $(this).data('id');
-    Swal.fire({
-      title: '¿Eliminar sector?',
+    if (!id) return;
+
+    const confirmar = await Swal.fire({
+      title: '¿Eliminar Sector?',
+      text: 'Esta acción no se puede deshacer.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
       customClass: {
-					popup: 'swal2-card-style'
-				},
-    }).then(result => {
-      if (!result.isConfirmed) return;
-      fetch(`/api/sectores/${id}`, { method: 'DELETE' })
-        .then(res => {
-          if (!res.ok) throw new Error();
-          return res.json();
-        })
-        .then(() => Swal.fire('Eliminado', 'Sector eliminado', 'success').then(cargarSectores))
-        .catch(() => Swal.fire('Error', 'No se pudo eliminar', 'error'));
+        popup: 'swal2-card-style'
+      }
     });
+
+    if (!confirmar.isConfirmed) return;
+
+    try {
+      const resp = await fetch(`/api/sectores/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!resp.ok) {
+        const data = await resp.json();
+        throw new Error(data.message || 'No se pudo eliminar');
+      }
+
+      await Swal.fire('Eliminado', 'Sector eliminado correctamente', 'success');
+      cargarSectores(); // actualiza tabla
+    } catch (err) {
+      await Swal.fire('Error', err.message || 'Error al eliminar', 'error');
+    }
   });
 
   cargarSectores();
