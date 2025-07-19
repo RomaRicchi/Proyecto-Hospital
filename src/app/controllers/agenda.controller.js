@@ -14,8 +14,16 @@ import { parseFechaUTC, validarHoraRango } from '../helper/timeZone.js';
 export const getCalendarioCompleto = async (req, res) => {
   try {
     const { profesionalId } = req.query;
+    const usuario = req.session.usuario;
+    let agendaWhere = {};
 
-    const agendaWhere = profesionalId ? { id_personal_salud: profesionalId } : {};
+    if (usuario.rol === 4) {
+      const profesional = await PersonalSalud.findOne({ where: { id_usuario: usuario.id } });
+      if (!profesional) return res.status(403).json({ message: 'Profesional no encontrado' });
+      agendaWhere.id_personal_salud = profesional.id_personal_salud;
+    } else if (profesionalId) {
+      agendaWhere.id_personal_salud = profesionalId;
+    }
 
     const agendas = await Agenda.findAll({
       where: agendaWhere,
@@ -38,10 +46,15 @@ export const getCalendarioCompleto = async (req, res) => {
       color: '#d0e7ff'
     }));
 
-    // Turnos
-    const turnoWhere = profesionalId
-      ? { '$agenda.id_personal_salud$': profesionalId }
-      : {};
+    let turnoWhere = {};
+
+    if (usuario.rol === 4) {
+      const profesional = await PersonalSalud.findOne({ where: { id_usuario: usuario.id } });
+      if (!profesional) return res.status(403).json({ message: 'Profesional no encontrado' });
+      turnoWhere['$agenda.id_personal_salud$'] = profesional.id_personal_salud;
+    } else if (profesionalId) {
+      turnoWhere['$agenda.id_personal_salud$'] = profesionalId;
+    }
 
     const turnos = await Turno.findAll({
       where: turnoWhere,

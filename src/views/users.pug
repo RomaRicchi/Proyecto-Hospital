@@ -19,6 +19,8 @@ block content
               label.form-label(for="password") Contraseña
               input.form-control(type="password" name="password" id="password" required placeholder="Contraseña")
             button.btn.btn-primary.mt-auto(type="submit") Ingresar
+          li
+            a.dropdown-item(href="/recuperar-password") ¿Olvidaste tu contraseña?
 
           if error
             .alert.alert-danger.mt-3.text-center= error

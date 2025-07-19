@@ -6,9 +6,11 @@ block content
       h1 Turnos Programados
 
       button.btn.btn-success.mb-3#btnNuevoTurno Nuevo Turno
-      .col-md-6.text-end        
-        label(for="filtroProfesionalTurno").me-2.mb-0  Filtrar por profesional:
-        select#filtroProfesionalTurno(style="width: 300px")
+      .row
+        .col-md-6.text-end        
+          label#filtroProfesionalTurnoLabel(for="filtroProfesionalTurno") Filtrar por profesional:
+          select#filtroProfesionalTurno.select-estilizado
+
 
       table#tablaTurnos.table.table-striped
         thead

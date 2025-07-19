@@ -72,6 +72,23 @@ export const getTurnos = async (req, res) => {
 
 export const getTurnosListado = async (req, res) => {
   try {
+    const usuario = req.session.usuario;
+    const esMedico = usuario && usuario.rol === 4;
+
+    const whereAgenda = {};
+
+    if (esMedico) {
+      const profesional = await PersonalSalud.findOne({
+        where: { id_usuario: usuario.id }
+      });
+
+      if (!profesional) {
+        return res.status(403).json({ message: 'Profesional no encontrado' });
+      }
+
+      whereAgenda.id_personal_salud = profesional.id_personal_salud;
+    }
+
     const turnos = await Turno.findAll({
       include: [
         { model: Paciente, as: 'cliente' },
@@ -80,6 +97,7 @@ export const getTurnosListado = async (req, res) => {
         {
           model: Agenda,
           as: 'agenda',
+          where: whereAgenda,
           include: [
             {
               model: PersonalSalud,

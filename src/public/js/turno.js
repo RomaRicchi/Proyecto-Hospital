@@ -2,7 +2,12 @@ import { formatDate, formatHour } from './utils/validacionFechas.js';
 import { mostrarFormulario } from './utils/formTurno.js';
 
 $(document).ready(function () {
-  
+  const isMedico = window.usuario?.rol === 4;
+  if (isMedico) {
+    $('#filtroProfesionalTurno').closest('.row').hide();
+    cargarTurnos();
+  } 
+
   const tabla = $('#tablaTurnos').DataTable({
     language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
     paging: true,
@@ -13,9 +18,6 @@ $(document).ready(function () {
     scrollX: false,
     columnDefs: [{ targets: [6], orderable: false, searchable: false }],
   });
-
-  configurarFiltroProfesional();
-  cargarTurnos();
 
   $('#btnNuevoTurno').on('click', () => mostrarFormulario(null, cargarTurnos));
 
@@ -106,6 +108,7 @@ $(document).ready(function () {
   });
 
   function configurarFiltroProfesional() {
+    
     const guardado = localStorage.getItem('filtroProfesionalTurnoId');
 
     $('#filtroProfesionalTurno').select2({

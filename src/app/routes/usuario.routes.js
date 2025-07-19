@@ -6,9 +6,13 @@ import {
 	updateUsuario,
 	deleteUsuario,
 	listarUsuariosMedicos,
+	vistaCambiarPassword,
+	vistaRecuperarPassword
 } from '../controllers/usuario.controller.js';
 
 const router = Router();
+router.get('/cambiar-password', vistaCambiarPassword);
+router.get('/recuperar-password', vistaRecuperarPassword);
 router.get('/medicos', listarUsuariosMedicos);
 router.get('/', getUsuarios);
 router.get('/:id', getUsuarioById);

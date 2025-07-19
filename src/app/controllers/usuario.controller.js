@@ -318,3 +318,15 @@ export const listarUsuariosMedicos = async (req, res) => {
 		res.status(500).json({ message: 'Error al obtener médicos' });
 	}
 };
+
+export const vistaPerfil = (req, res) => {
+  res.render('perfil', { usuario: req.session.usuario });
+};
+
+export const vistaCambiarPassword = (req, res) => {
+  res.render('cambiarPassword', { usuario: req.session.usuario });
+};
+
+export const vistaRecuperarPassword = (req, res) => {
+  res.render('recuperarPassword');
+};

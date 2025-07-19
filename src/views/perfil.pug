@@ -1,0 +1,15 @@
+extends layout_modular
+
+block content
+  .container.mt-5
+    h2 Mi Perfil
+    ul.list-group
+      li.list-group-item
+        strong Nombre: 
+        | #{usuario.nombre} #{usuario.apellido}
+      li.list-group-item
+        strong Usuario: 
+        | #{usuario.username}
+      li.list-group-item
+        strong Rol: 
+        | #{usuario.rol}

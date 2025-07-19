@@ -13,14 +13,16 @@ export function crearCalendario() {
       center: 'title',
       right: 'timeGridWeek,timeGridDay'
     },
+
     events: function (fetchInfo, successCallback, failureCallback) {
-      const profesionalId = $('#filtroProfesional').val();
+      const isMedico = window.usuario?.rol === 4;
+      const profesionalId = isMedico ? null : $('#filtroProfesional').val();
 
-      if (!profesionalId) {
-        return successCallback([]);  // Vaciar calendario
-      }
+      const url = profesionalId
+        ? `/api/agenda/calendario/turnos?profesionalId=${profesionalId}`
+        : `/api/agenda/calendario/turnos`;
 
-      fetch(`/api/agenda/calendario/turnos?profesionalId=${profesionalId}`)
+      fetch(url)
         .then(res => res.json())
         .then(successCallback)
         .catch(failureCallback);
@@ -28,6 +30,9 @@ export function crearCalendario() {
 
     selectable: true,
     dateClick: function (info) {
+      const isMedico = window.usuario?.rol === 4;
+      if (isMedico) return; 
+      
       const profesionalId = $('#filtroProfesional').val();
 
       if (!profesionalId) {
@@ -102,7 +107,8 @@ export function crearCalendario() {
 
     eventClick: function (info) {
       const evento = info.event;
-      const idTurno = evento.id; // ✅ Este id ahora está disponible gracias al backend
+      const idTurno = evento.id;
+      const isMedico = window.usuario?.rol === 4;
 
       Swal.fire({
         title: 'Detalle del turno',
@@ -111,8 +117,10 @@ export function crearCalendario() {
           <strong>Paciente:</strong> ${evento.extendedProps.paciente || 'Sin asignar'}<br>
           <strong>Estado:</strong> ${evento.extendedProps.estado || '---'}<br>
           <strong>Hora:</strong> ${evento.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${evento.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}<br><br>
-          <button id="btnReagendar" class="swal2-confirm swal2-styled" style="margin-right: 5px; background-color:#28a745">Reagendar</button>
-          <button id="btnCancelar" class="swal2-cancel swal2-styled" style="background-color:#dc3545">Cancelar</button>
+          ${!isMedico ? `
+            <button id="btnReagendar" class="swal2-confirm swal2-styled" style="margin-right: 5px; background-color:#28a745">Reagendar</button>
+            <button id="btnCancelar" class="swal2-cancel swal2-styled" style="background-color:#dc3545">Cancelar</button>
+          ` : ''}
         `,
         customClass: {
           popup: 'swal2-card-style'
@@ -120,63 +128,65 @@ export function crearCalendario() {
         showConfirmButton: false,
         showCancelButton: false,
         didOpen: () => {
-          $('#btnReagendar').on('click', () => {
-            Swal.fire({
-              title: 'Reagendar turno',
-              html: `
-                <input id="nuevaFecha" type="date" class="swal2-input">
-                <input id="nuevaHora" type="time" class="swal2-input">
-              `,
-              customClass: {
-                popup: 'swal2-card-style'
-              },
-              showCancelButton: true,
-              confirmButtonText: 'Guardar',
-              preConfirm: () => {
-                const fecha = $('#nuevaFecha').val();
-                const hora = $('#nuevaHora').val();
-                if (!fecha || !hora) {
-                  Swal.showValidationMessage('Debe ingresar fecha y hora');
-                  return false;
+          if (!isMedico) {
+            $('#btnReagendar').on('click', () => {
+              Swal.fire({
+                title: 'Reagendar turno',
+                html: `
+                  <input id="nuevaFecha" type="date" class="swal2-input">
+                  <input id="nuevaHora" type="time" class="swal2-input">
+                `,
+                customClass: {
+                  popup: 'swal2-card-style'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                preConfirm: () => {
+                  const fecha = $('#nuevaFecha').val();
+                  const hora = $('#nuevaHora').val();
+                  if (!fecha || !hora) {
+                    Swal.showValidationMessage('Debe ingresar fecha y hora');
+                    return false;
+                  }
+                  return { fecha, hora };
                 }
-                return { fecha, hora };
-              }
-            }).then(result => {
-              if (result.isConfirmed) {
-                const nuevaFechaHora = `${result.value.fecha}T${result.value.hora}`;
-                fetch(`/api/turnos/${idTurno}`, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ fecha_hora: nuevaFechaHora })
-                })
-                .then(() => {
-                  Swal.fire('Turno actualizado', '', 'success');
-                  calendar.refetchEvents();
-                })
-                .catch(() => Swal.fire('Error al actualizar turno', '', 'error'));
-              }
+              }).then(result => {
+                if (result.isConfirmed) {
+                  const nuevaFechaHora = `${result.value.fecha}T${result.value.hora}`;
+                  fetch(`/api/turnos/${idTurno}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fecha_hora: nuevaFechaHora })
+                  })
+                  .then(() => {
+                    Swal.fire('Turno actualizado', '', 'success');
+                    calendar.refetchEvents();
+                  })
+                  .catch(() => Swal.fire('Error al actualizar turno', '', 'error'));
+                }
+              });
             });
-          });
 
-          $('#btnCancelar').on('click', () => {
-            Swal.fire({
-              title: '¿Cancelar turno?',
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonText: 'Sí, cancelar',
-            }).then(res => {
-              if (res.isConfirmed) {
-                fetch(`/api/turnos/${idTurno}`, {
-                  method: 'DELETE'
-                })
-                .then(() => {
-                  Swal.fire('Turno cancelado', '', 'success');
-                  calendar.refetchEvents();
-                })
-                .catch(() => Swal.fire('Error al cancelar turno', '', 'error'));
-              }
+            $('#btnCancelar').on('click', () => {
+              Swal.fire({
+                title: '¿Cancelar turno?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, cancelar',
+              }).then(res => {
+                if (res.isConfirmed) {
+                  fetch(`/api/turnos/${idTurno}`, {
+                    method: 'DELETE'
+                  })
+                  .then(() => {
+                    Swal.fire('Turno cancelado', '', 'success');
+                    calendar.refetchEvents();
+                  })
+                  .catch(() => Swal.fire('Error al cancelar turno', '', 'error'));
+                }
+              });
             });
-          });
+          }
         }
       });
     }

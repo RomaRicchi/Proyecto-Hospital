@@ -2,6 +2,14 @@ import { mostrarFormulario } from './utils/formAgenda.js';
 import { crearCalendario } from './utils/calendarManager.js';
 
 $(document).ready(function () {
+  const isMedico = window.usuario?.rol === 4;
+
+  if (isMedico) {
+    $('#filtroProfesional').hide();
+    $('#filtroProfesionalLabel').hide();
+    cargarAgendas();
+  }
+
   const tabla = $('#tablaAgendas').DataTable({
     language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
     columns: [null, null, null, null, null, { orderable: false }]
@@ -10,9 +18,12 @@ $(document).ready(function () {
   let calendar = null;
 
   function cargarAgendas() {
-    const idProfesional = $('#filtroProfesional').val();
+    const idProfesional = isMedico ? null : $('#filtroProfesional').val();
+    const url = idProfesional
+      ? `/api/agenda?profesionalId=${idProfesional}`
+      : `/api/agenda`;
 
-    fetch('/api/agenda')
+    fetch(url)
       .then(res => res.json())
       .then(agendas => {
         tabla.clear();
@@ -78,45 +89,46 @@ $(document).ready(function () {
     });
   });
 
-  // Guardar y cargar filtro de profesional
-  const filtroGuardado = localStorage.getItem('filtroProfesionalId');
+  if (!isMedico) {
+    const filtroGuardado = localStorage.getItem('filtroProfesionalId');
 
-  $('#filtroProfesional').select2({
-    placeholder: 'Buscar por profesional o especialidad',
-    ajax: {
-      url: '/api/agenda/buscar',
-      dataType: 'json',
-      delay: 250,
-      data: params => ({ q: params.term }),
-      processResults: data => ({ results: data }),
-      cache: true
-    },
-    width: 'resolve',
-    allowClear: true
-  });
+    $('#filtroProfesional').select2({
+      placeholder: 'Buscar por profesional o especialidad',
+      ajax: {
+        url: '/api/agenda/buscar',
+        dataType: 'json',
+        delay: 250,
+        data: params => ({ q: params.term }),
+        processResults: data => ({ results: data }),
+        cache: true
+      },
+      width: 'resolve',
+      allowClear: true
+    });
 
-  if (filtroGuardado) {
-    fetch(`/api/agenda/buscar?q=${filtroGuardado}`)
-      .then(res => res.json())
-      .then(data => {
-        const op = data.find(p => p.id == filtroGuardado);
-        if (op) {
-          const option = new Option(op.text, op.id, true, true);
-          $('#filtroProfesional').append(option).trigger('change');
-        }
-        cargarAgendas(); // solo después de cargar el filtro
-      })
-      .catch(() => cargarAgendas());
-  } else {
-    cargarAgendas();
+    if (filtroGuardado) {
+      fetch(`/api/agenda/buscar?q=${filtroGuardado}`)
+        .then(res => res.json())
+        .then(data => {
+          const op = data.find(p => p.id == filtroGuardado);
+          if (op) {
+            const option = new Option(op.text, op.id, true, true);
+            $('#filtroProfesional').append(option).trigger('change');
+          }
+          cargarAgendas();
+        })
+        .catch(() => cargarAgendas());
+    } else {
+      cargarAgendas();
+    }
+
+    $('#filtroProfesional').on('change', function () {
+      const valor = $(this).val();
+      localStorage.setItem('filtroProfesionalId', valor);
+      cargarAgendas();
+      if (calendar) calendar.refetchEvents();
+    });
   }
-
-  $('#filtroProfesional').on('change', function () {
-    const valor = $(this).val();
-    localStorage.setItem('filtroProfesionalId', valor);
-    cargarAgendas();
-    if (calendar) calendar.refetchEvents();
-  });
 
   $('#toggleVista').on('click', function () {
     const tabla = $('#vistaTabla');
