@@ -48,7 +48,11 @@ export const eliminarEspecialidad = async (req, res) => {
 export const vistaEspecialidades = async (req, res) => {
   try {
     const especialidades = await Especialidad.findAll();
-    res.render('especialidad', { especialidades });
+    res.render('especialidad', { 
+      especialidades , 
+      usuario: req.session.usuario,
+      autenticado: true
+    });
   } catch (error) {
     res.status(500).send('Error al mostrar especialidades');
   }

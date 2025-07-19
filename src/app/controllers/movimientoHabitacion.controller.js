@@ -279,7 +279,11 @@ export const vistaMovimientosHabitacion = async (req, res) => {
 				: '-',
 		}));
 
-		res.render('movHabitacion', { movimientos: adaptados });
+		res.render('movHabitacion', { 
+			movimientos: adaptados , 
+  			usuario: req.session.usuario,
+  			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error al cargar movimientos habitación');
 	}

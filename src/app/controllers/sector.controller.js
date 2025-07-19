@@ -82,7 +82,11 @@ export const deleteSector = async (req, res) => {
 export const vistaSectores = async (req, res) => {
 	try {
 		const sectores = await Sector.findAll();
-		res.render('sector', { sectores });
+		res.render('sector', { 
+			sectores, 
+			usuario: req.session.usuario,
+			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error al cargar sectores');
 	}

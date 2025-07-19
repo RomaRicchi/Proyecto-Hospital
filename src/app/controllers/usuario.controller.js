@@ -79,7 +79,11 @@ export const vistaUsuarios = async (req, res) => {
 			};
 		});
 
-		res.render('usuario', { usuarios: usuariosAdaptados });
+		res.render('usuario', { 
+			usuarios: usuariosAdaptados , 
+			usuario: req.session.usuario,
+			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error al mostrar usuarios');
 	}

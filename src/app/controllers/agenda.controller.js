@@ -289,7 +289,10 @@ export const deleteAgenda = async (req, res) => {
 };
 
 export const vistaAgendas = async (req, res) => {
-  res.render('agenda');
+    res.render('agenda', {
+    usuario: req.session.usuario,
+    autenticado: true
+  });
 };
 
 export const getAgendasByProfesional = async (req, res) => {

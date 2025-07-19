@@ -49,7 +49,11 @@ export const eliminarRol = async (req, res) => {
 export const vistaRolUsuario = async (req, res) => {
 	try {
 		const roles = await RolUsuario.findAll();
-		res.render('rolUsuario', { roles });
+		res.render('rolUsuario', { 
+      roles, 
+      usuario: req.session.usuario,
+      autenticado: true
+    });
 	} catch (error) {
 		res.status(500).send('Error al mostrar roles de usuario');
 	}

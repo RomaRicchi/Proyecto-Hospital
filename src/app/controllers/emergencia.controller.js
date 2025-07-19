@@ -204,7 +204,10 @@ export const ingresoEmergencia = async (req, res) => {
 
 export const vistaEmergencias = (req, res) => {
   try {
-    res.render('emergencia');
+    res.render('emergencia', {
+    usuario: req.session.usuario,
+    autenticado: true
+  });
   } catch (error) {
     res.status(500).send('Error al cargar la vista de emergencias');
   }

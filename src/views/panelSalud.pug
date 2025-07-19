@@ -2,39 +2,26 @@ extends layout_modular
 
 block content
   .admin-hero
-      
-      h1.text-center.px-4.text-primary.fw-bold Panel de Salud
-      if usuario
-        p.text-end.text-muted
-          strong Usuario: 
-          | #{usuario.nombre} #{usuario.apellido}
+    h1.text-center.px-4.text-primary.fw-bold Panel de Salud
 
-      h4.mt-4.mb-3.text-center.fw-bold Pacientes asignados
+    if usuario
+      p.text-end.text-muted
+        strong Usuario: 
+        | #{usuario.nombre} #{usuario.apellido}
 
-      .table-responsive
-        table#tablaPacientes.table.table-striped.table-bordered.w-100
-          thead
-            tr
-              th DNI
-              th Nombre completo
-              th Cama
-              th Fecha de ingreso
-              th Motivo ingreso
-              th Acciones
-          tbody
-            each m in movimientos
-              - var habNum = (m.cama && m.cama.habitacion && m.cama.habitacion.num) || '?'
-              - var sectorNombre = (m.cama && m.cama.habitacion && m.cama.habitacion.sector && m.cama.habitacion.sector.nombre) || '?'
-              tr(data-dni=m.admision.paciente.dni_paciente style="cursor:pointer; white-space: nowrap;")
-                td= m.admision.paciente.dni_paciente
-                td= `${m.admision.paciente.apellido_p}, ${m.admision.paciente.nombre_p}`
-                td= m.cama ? `${m.cama.nombre} - Hab ${habNum} / ${sectorNombre}` : '-'
-                td= m.fecha_hora_ingreso.toLocaleString('es-AR')
-                td= m.admision.motivo_ingreso ? m.admision.motivo_ingreso.nombre : '-'
-                td
-                  a.btn.btn-sm.btn-primary(href=`/registroClinico?dni=${m.admision.paciente.dni_paciente}`)
-                    i.fas.fa-notes-medical.me-1
-                    | Registro
+    h4.mt-4.mb-3.text-center.fw-bold Internaciones asignadas
+
+    .table-responsive
+      table#tablaPacientes.table.table-striped.table-bordered.w-100
+        thead
+          tr
+            th DNI
+            th Nombre completo
+            th Cama
+            th Fecha de ingreso
+            th Motivo ingreso
+            th Acciones
+        tbody
 
 
       // Scripts

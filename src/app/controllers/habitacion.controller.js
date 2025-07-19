@@ -49,7 +49,11 @@ export const vistaHabitaciones = async (req, res) => {
 		}));
 
 
-		res.render('habitacion', { habitaciones: habitacionesAdaptadas });
+		res.render('habitacion', { 
+			habitaciones: habitacionesAdaptadas , 
+			usuario: req.session.usuario,
+			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error interno al mostrar habitaciones');
 	}

@@ -49,6 +49,12 @@ export default (sequelize, DataTypes) => {
       foreignKey: 'id_motivo',
       as: 'motivo_turno'
     });
+
+    Turno.belongsTo(ObraSocial, {
+      foreignKey: 'id_obra_social',
+      as: 'obra_social'
+    });
+
   };
 
 

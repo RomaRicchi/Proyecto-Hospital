@@ -56,7 +56,11 @@ export const deleteObraSocial = async (req, res) => {
 export const vistaObrasSociales = async (req, res) => {
 	try {
 		const obras = await ObraSocial.findAll();
-		res.render('obraSocial', { obras_sociales: obras });
+		res.render('obraSocial', { 
+			obras_sociales: obras , 
+  			usuario: req.session.usuario,
+  			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error al cargar obras sociales');
 	}

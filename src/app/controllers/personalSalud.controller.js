@@ -79,7 +79,11 @@ export const vistaPersonalSalud = async (req, res) => {
 			],
 			where: { activo: true }
 		});
-		res.render('salud', { personal });
+		res.render('salud', { 
+			personal , 
+			usuario: req.session.usuario,
+			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error al cargar personal de salud');
 	}

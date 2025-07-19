@@ -57,5 +57,8 @@ export const deleteDia = async (req, res) => {
 };
 
 export const vistaDias = async (req, res) => {
-  res.render('dia');
+    res.render('dia', {
+    usuario: req.session.usuario,
+    autenticado: true
+  });
 };

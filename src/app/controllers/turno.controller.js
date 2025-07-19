@@ -279,5 +279,8 @@ export const deleteTurno = async (req, res) => {
 };
 
 export const vistaTurnos = (req, res) => {
-  res.render('turno');
+  res.render('turno', {
+    usuario: req.session.usuario,
+    autenticado: true
+  });
 };

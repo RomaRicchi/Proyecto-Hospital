@@ -74,7 +74,11 @@ export const deleteParentesco = async (req, res) => {
 export const vistaParentescos = async (req, res) => {
 	try {
 		const parentescos = await Parentesco.findAll();
-		res.render('parentesco', { parentescos });
+		res.render('parentesco', { 
+			parentescos , 
+  			usuario: req.session.usuario,
+  			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error al cargar parentescos');
 	}

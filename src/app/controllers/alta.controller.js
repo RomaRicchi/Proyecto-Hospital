@@ -137,7 +137,10 @@ export const darAltaPaciente = async (req, res) => {
 
 export const vistaAltaPaciente = (req, res) => {
   try {
-    res.render('altaPaciente');
+    	res.render('altaPaciente', {
+		usuario: req.session.usuario,
+		autenticado: true
+	});
   } catch (error) {
     res.status(500).send('Error al cargar el formulario de alta de paciente');
   }

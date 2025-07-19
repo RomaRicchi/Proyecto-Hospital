@@ -60,7 +60,11 @@ export const vistaPacientes = async (req, res) => {
 			};
 		});
 
-		res.render('paciente', { pacientes: pacientesAdaptados || [] });
+		res.render('paciente', { 
+			pacientes: pacientesAdaptados || [] , 
+  			usuario: req.session.usuario,
+  			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error en el servidor');
 	}
@@ -75,7 +79,12 @@ export const vistaPacienteNuevo = async (req, res) => {
 			attributes: ['id_localidad', 'nombre'],
 		});
 
-		res.render('pacienteNuevo', { generos, localidades });
+		res.render('pacienteNuevo', { 
+			generos, 
+			localidades , 
+  			usuario: req.session.usuario,
+  			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error al cargar formulario de paciente');
 	}

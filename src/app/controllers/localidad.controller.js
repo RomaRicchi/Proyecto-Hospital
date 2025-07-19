@@ -69,8 +69,12 @@ export const deleteLocalidad = async (req, res) => {
 export const vistaLocalidades = async (req, res) => {
 	try {
 		const localidades = await Localidad.findAll();
-		res.render('localidad', { localidades }); // Renderiza la vista con los datos
+		res.render('localidad', { 
+			localidades, 
+			usuario: req.session.usuario,
+			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error al cargar la vista de localidades');
-	}
+	};
 };

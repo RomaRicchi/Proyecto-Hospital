@@ -56,7 +56,11 @@ export const deleteMovimiento = async (req, res) => {
 export const vistaMovimientos = async (req, res) => {
 	try {
 		const movimientos = await Movimiento.findAll();
-		res.render('movimiento', { movimientos });
+		res.render('movimiento', { 
+			movimientos , 
+			usuario: req.session.usuario,
+			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error al cargar movimientos');
 	}

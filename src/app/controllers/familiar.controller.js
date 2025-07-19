@@ -54,7 +54,11 @@ export const vistaFamiliares = async (req, res) => {
 			parentesco: f.parentesco?.nombre || '-', // Aquí ya adaptado
 		}));
 
-		res.render('familiar', { familiares: familiaresAdaptados || [] });
+		res.render('familiar', { 
+			familiares: familiaresAdaptados || [] , 
+			usuario: req.session.usuario,
+			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error interno al mostrar familiares');
 	}

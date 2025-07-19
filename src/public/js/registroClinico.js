@@ -8,6 +8,7 @@ $(document).ready(function () {
   const $info = $('#infoPaciente');
   let registrosPaciente = [];
   let ultimaAdmisionPaciente = null;
+  let esInternacionActiva = false;
   const idUsuarioLogueado = $('#usuarioData').data('id') || 1;
   const dniGuardado = localStorage.getItem('dniParaBuscar');
   if (dniGuardado) {
@@ -67,7 +68,7 @@ $(document).ready(function () {
     })
     .then(data => {
       ultimaAdmisionPaciente = data.ultimaAdmision?.id_admision || null;
-      
+      esInternacionActiva = data.esInternado || false;
       if (!data || !Array.isArray(data.registros) || data.registros.length === 0) {
         if (data?.paciente) {
           mostrarInfoPaciente(data.paciente, data.cama);
@@ -83,7 +84,7 @@ $(document).ready(function () {
       
       registrosPaciente = data.registros.map(r => ({
         ...r,
-        fecha: new Date(r.fecha),// importante: NO toISOString +3hs
+        fecha: new Date(r.fecha),
         id: r.id  
       }));
 
@@ -98,26 +99,32 @@ $(document).ready(function () {
     });
   });
 
-  function mostrarInfoPaciente(p, cama = null) {
-    if (!p) {
-      $info.html('');
-      return;
-    }
-
-    const edad = calcularEdad(p.fecha_nac);
-    let html = `
-      <div class="alert alert-info">
-        <strong>Paciente:</strong> ${p.apellido_p}, ${p.nombre_p} &nbsp; | &nbsp;
-        <strong>Edad:</strong> ${edad} años
-    `;
-
-    if (cama) {
-      html += ` &nbsp; | &nbsp; <strong>Cama:</strong> ${cama.nombre} - Hab ${cama.habitacion} (${cama.sector})`;
-    }
-
-    html += `</div>`;
-    $info.html(html);
+function mostrarInfoPaciente(p, cama = null) {
+  if (!p) {
+    $info.html('');
+    return;
   }
+
+  const edad = calcularEdad(p.fecha_nac);
+  let html = `
+    <div class="alert alert-info">
+      <strong>Paciente:</strong> ${p.apellido_p}, ${p.nombre_p} &nbsp; | &nbsp;
+      <strong>Edad:</strong> ${edad} años
+  `;
+
+  if (cama) {
+    html += ` &nbsp; | &nbsp; <strong>Cama:</strong> ${cama.nombre} - Hab ${cama.habitacion} (${cama.sector})`;
+  }
+
+  if (Array.isArray(p.familiares) && p.familiares.length > 0) {
+    const f = p.familiares[0];
+    html += ` &nbsp; | &nbsp; <strong>Familiar:</strong> ${f.nombre} ${f.apellido} (${f.parentesco?.nombre || '-'}) – Tel: ${f.telefono || '-'}`;
+  }
+
+  html += `</div>`;
+  $info.html(html);
+}
+
 
   function mostrarEpisodios(grupos) {
     let html = '';
@@ -211,7 +218,7 @@ $(document).ready(function () {
         <button id="btnNuevoRegistro" class="btn btn-success px-4">
           <i class="fas fa-notes-medical me-1"></i> Nuevo evento clínico
         </button>
-        <button id="btnDarAlta" class="btn btn-danger px-4" ${!ultimaAdmisionPaciente ? 'disabled' : ''}>
+        <button id="btnDarAlta" class="btn btn-danger px-4" ${!(ultimaAdmisionPaciente && esInternacionActiva) ? 'disabled' : ''}>
           <i class="fas fa-sign-out-alt me-1"></i> Dar de alta
         </button>
         <button id="btnLimpiarBusqueda" class="btn btn-secondary px-4">
@@ -263,6 +270,9 @@ $(document).ready(function () {
           `,
           showCancelButton: true,
           confirmButtonText: 'Guardar',
+          customClass: {
+            popup: 'swal2-card-style'
+          },
           preConfirm: () => {
             const id_tipo = $('#swal-tipo').val();
             const detalle = $('#swal-detalle').val().trim();
@@ -285,7 +295,7 @@ $(document).ready(function () {
             id_paciente: idPaciente,
             id_tipo: result.value.id_tipo,
             detalle: result.value.detalle,
-            fecha_hora_reg: toUTC(result.value.fecha_hora_reg).toISOString(),
+            fecha_hora_reg: toUTC(result.value.fecha_hora_reg),
             id_usuario: idUsuarioLogueado,
             id_admision: ultimaAdmisionPaciente
           };
@@ -304,7 +314,6 @@ $(document).ready(function () {
 
             Swal.fire('Éxito', 'Registro clínico guardado', 'success');
 
-            // 🔄 Recargar registros del paciente desde el backend
             fetch(`/api/registro-clinico/dni/${dniActual}`)
               .then(res => res.json())
               .then(data => {
@@ -390,12 +399,12 @@ $(document).ready(function () {
       const payload = {
         id_tipo: result.value.id_tipo,
         detalle: result.value.detalle,
-        fecha_hora_reg: toUTC(result.value.fecha_hora_reg).toISOString(),
+        fecha_hora_reg: toUTC(result.value.fecha_hora_reg),
         id_usuario: idUsuarioLogueado
       };
 
       try {
-        const idRegistro = registrosPaciente[index].id;
+        const idRegistro = id;
         const resp = await fetch(`/api/registro-clinico/${idRegistro}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },

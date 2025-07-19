@@ -72,7 +72,11 @@ export const vistaPacientesCamas = async (req, res) => {
       };
     });
 
-    res.render('pacientesCamas', { pacientes_camas });
+    res.render('pacientesCamas', { 
+      pacientes_camas , 
+      usuario: req.session.usuario,
+      autenticado: true
+    });
   } catch (error) {
     res.status(500).send('Error al cargar pacientes en cama.');
   }

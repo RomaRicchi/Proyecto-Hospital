@@ -4,11 +4,13 @@ import {
     listarRegistros, 
     crearRegistro, 
     buscarPorDNI, 
-    eliminarRegistro 
+    eliminarRegistro,
+    vistaRegistroClinico
 } from '../controllers/registroClinico.controller.js';
 
 const router = express.Router();
 
+router.get('/registroClinico/:id', vistaRegistroClinico);
 router.get('/', listarRegistros);
 router.post('/', crearRegistro);
 router.put('/:id', editarRegistro);

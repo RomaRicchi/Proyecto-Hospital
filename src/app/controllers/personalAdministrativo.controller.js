@@ -71,7 +71,11 @@ export const vistaPersonalAdministrativo = async (req, res) => {
 			include: [{ model: RolUsuario, as: 'rol' }],
 			where: { activo: true }
 		});
-		res.render('administrativo', { personal });
+		res.render('administrativo', { 
+			personal , 
+			usuario: req.session.usuario,
+			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error al cargar personal administrativo');
 	}

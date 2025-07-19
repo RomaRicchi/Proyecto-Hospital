@@ -85,7 +85,11 @@ export const vistaDashboard = async (req, res) => {
       cama.dataValues.desinfeccion = cama.desinfeccion;
     });
 
-    res.render('dashboard', { camas });
+    res.render('dashboard', { 
+      camas ,
+      usuario: req.session.usuario,
+      autenticado: true
+    });
   } catch (error) {
     res.status(500).send('Error al cargar el panel principal');
   }

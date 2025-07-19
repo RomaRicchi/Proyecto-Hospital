@@ -1,30 +1,53 @@
 $(document).ready(function () {
-  const tabla = $('#tablaPacientes');
-
-  if (!tabla.length) return;
-
-  const dataTable = tabla.DataTable({
+  const tabla = $('#tablaPacientes').DataTable({
     language: {
       url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
     },
     paging: true,
-    pageLength: 10,
     searching: true,
     ordering: true,
-    destroy: true,
     responsive: true,
     scrollX: true,
-    columnDefs: [
-      { targets: -1, orderable: false, searchable: false }
+    columns: [
+      { title: 'DNI' },
+      { title: 'Nombre completo' },
+      { title: 'Cama' },
+      { title: 'Fecha de ingreso' },
+      { title: 'Motivo ingreso' },
+      { title: 'Acciones' }
     ]
   });
 
-  tabla.on('click', 'tbody tr', function (e) {
-    if ($(e.target).closest('a, button').length > 0) return;
+  async function cargarPacientesAsignados() {
+    try {
+      const res = await fetch('/api/personal-salud/asignados',{
+        credentials: 'include'
+      });
+      if (!res.ok) throw new Error('Error al cargar pacientes');
 
-    const dni = $(this).data('dni');
-    if (dni) {
-      window.location.href = `/registroClinico?dni=${dni}`;
+      const movimientos = await res.json();
+      tabla.clear();
+
+      movimientos.forEach(m => {
+        const fecha = new Date(m.fecha_ingreso).toLocaleString('es-AR');
+
+        tabla.row.add([
+          m.dni,
+          m.nombre,
+          m.cama,
+          fecha,
+          m.motivo,
+          `<a class="btn btn-sm btn-primary" href="/registroClinico?dni=${m.dni}">
+            <i class="fas fa-notes-medical me-1"></i> Registro
+          </a>`
+        ]);
+      });
+      tabla.draw();
+    } catch (error) {
+      console.error('❌ Error al cargar pacientes:', error);
+      Swal.fire('Error', 'No se pudieron cargar los pacientes asignados', 'error');
     }
-  });
+  }
+
+  cargarPacientesAsignados();
 });

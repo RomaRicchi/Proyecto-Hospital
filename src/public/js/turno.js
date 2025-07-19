@@ -30,7 +30,10 @@ $(document).ready(function () {
     Swal.fire({
       title: '¿Eliminar turno?',
       showCancelButton: true,
-      confirmButtonText: 'Eliminar'
+      confirmButtonText: 'Eliminar',
+      customClass: {
+					popup: 'swal2-card-style'
+				},
     }).then(result => {
       if (result.isConfirmed) {
         fetch(`/api/turnos/${id}`, { method: 'DELETE' })
@@ -45,7 +48,7 @@ $(document).ready(function () {
   function renderTurnos(tabla, turnos, filtroId) {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
-    const isMedico = window.usuario?.rol === 'medico';
+    const isMedico = window.usuario?.rol === 4;
     tabla.clear();
     turnos
       .filter(t => {
@@ -71,7 +74,7 @@ $(document).ready(function () {
           estado,
           motivo,
           isMedico
-            ? `<button class="btn btn-sm btn-success btn-atender-turno" data-id="${t.id_turno}" data-id-paciente="${t.id_paciente}">
+            ? `<button class="btn btn-sm btn-success btn-atender-turno" data-id="${t.id_turno}" data-dni="${t.cliente?.dni_paciente}">
                   Atender
               </button>`
             : `<button class="btn btn-sm btn-primary editar" data-id="${t.id_turno}">Editar</button>
@@ -96,9 +99,9 @@ $(document).ready(function () {
   }
 
   $(document).on('click', '.btn-atender-turno', function () {
-    const idPaciente = $(this).data('id-paciente');
-    if (idPaciente) {
-      window.location.href = `/registro-clinico/${idPaciente}`;
+    const dni = $(this).data('dni');
+    if (dni) {
+      window.location.href = `/registroClinico?dni=${dni}`;
     }
   });
 

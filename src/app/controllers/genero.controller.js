@@ -74,7 +74,11 @@ export const deleteGenero = async (req, res) => {
 export const vistaGeneros = async (req, res) => {
 	try {
 		const generos = await Genero.findAll();
-		res.render('genero', { generos }); // Pasar los datos a la vista
+		res.render('genero', { 
+			generos , 
+			usuario: req.session.usuario,
+			autenticado: true
+		});
 	} catch (error) {
 		res.status(500).send('Error al cargar géneros');
 	}

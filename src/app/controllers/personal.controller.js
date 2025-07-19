@@ -14,7 +14,11 @@ export const vistaPersonalSalud = async (req, res) => {
       ],
       where: { activo: 1 }
     });
-    res.render('salud', { personal });
+    res.render('salud', { 
+      personal , 
+      usuario: req.session.usuario,
+      autenticado: true
+    });
   } catch (error) {
     res.status(500).send('Error al cargar personal de salud');
   }
@@ -26,7 +30,11 @@ export const vistaPersonalAdministrativo = async (req, res) => {
       include: [{ model: RolUsuario, as: 'rol' }],
       where: { activo: 1 }
     });
-    res.render('administrativo', { personal });
+    res.render('administrativo', { 
+      personal , 
+      usuario: req.session.usuario,
+      autenticado: true
+    });
   } catch (error) {
     res.status(500).send('Error al cargar personal administrativo');
   }

@@ -19,7 +19,10 @@ import {
 
 export const vistaReservarCama = (req, res) => {
   try {
-    res.render('reservaCama'); 
+    res.render('reservaCama', {
+    usuario: req.session.usuario,
+    autenticado: true
+  });
   } catch (error) {
     res.status(500).send('Error al cargar reservas');
   }

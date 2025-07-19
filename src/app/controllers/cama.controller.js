@@ -365,7 +365,11 @@ export const vistaCama = async (req, res) => {
 					: '—';
 		});
 
-		res.render('cama', { camas });
+		res.render('cama', {
+      camas,
+      usuario: req.session.usuario,
+      autenticado: true
+    });
 	} catch (error) {
 		res.status(500).send('Error al cargar camas');
 	}

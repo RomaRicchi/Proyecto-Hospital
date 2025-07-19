@@ -393,7 +393,10 @@ export const getAdmisionById = async (req, res) => {
 };
 
 export const vistaAdmisiones = (req, res) => {
-  res.render('admision'); 
+  res.render('admision', {
+    usuario: req.session.usuario,
+    autenticado: true
+  });
 };
 
 export const updateAdmision = async (req, res) => {

@@ -60,6 +60,7 @@ export default (sequelize, DataTypes) => {
 			foreignKey: 'id_paciente',
 			as: 'admisiones',
 		});
+		
 	};
 
 	return Paciente;

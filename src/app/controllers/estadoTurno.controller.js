@@ -34,4 +34,8 @@ export const deleteEstadoTurno = async (req, res) => {
   res.sendStatus(204);
 };
 
-export const vistaEstadoTurno = (req, res) => res.render('estadoTurno');
+export const vistaEstadoTurno = (req, res) => 
+  res.render('estadoTurno', {
+  usuario: req.session.usuario,
+  autenticado: true
+});
