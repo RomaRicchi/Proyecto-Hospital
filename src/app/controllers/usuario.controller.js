@@ -6,6 +6,7 @@ import {
 	Especialidad,
 } from '../models/index.js';
 import bcrypt from 'bcrypt';
+import axios from 'axios';
 
 export const getUsuarios = async (req, res) => {
 	try {
@@ -319,12 +320,103 @@ export const listarUsuariosMedicos = async (req, res) => {
 	}
 };
 
-export const vistaPerfil = (req, res) => {
-  res.render('perfil', { usuario: req.session.usuario });
+export const vistaPerfil = async (req, res) => {
+  const usuario = req.session.usuario;
+  let foto = '/img/doctor1.webp'; 
+
+  try {
+    const response = await axios.get('https://randomuser.me/api/');
+    const userData = response.data.results[0];
+    if (userData && userData.picture?.large) {
+      foto = userData.picture.large;
+    }
+  } catch (error) {
+    console.warn('⚠️ Error obteniendo imagen randomuser:', error.message);
+  }
+
+  try {
+    let especialidad = null;
+
+    if (usuario.rol === 4) {
+      const profesional = await PersonalSalud.findOne({
+        where: { id_usuario: usuario.id },
+        include: [{ model: Especialidad, as: 'especialidad' }]
+      });
+
+      if (profesional?.especialidad) {
+        especialidad = profesional.especialidad.nombre;
+      }
+    }
+
+    res.render('perfil', {
+      usuario,
+      foto,
+      especialidad
+    });
+  } catch (error) {
+    console.error('❌ Error al cargar perfil:', error);
+    res.status(500).send('Error al cargar perfil');
+  }
 };
 
-export const vistaCambiarPassword = (req, res) => {
-  res.render('cambiarPassword', { usuario: req.session.usuario });
+export const vistaCambiarPassword = async (req, res) => {
+  const { actual, nueva, confirmar } = req.body;
+  const id = req.session.usuario?.id;
+
+  if (!id || !actual || !nueva || !confirmar) {
+    return res.status(400).send('Faltan campos obligatorios');
+  }
+
+  if (nueva !== confirmar) {
+    return res.status(400).send('Las contraseñas no coinciden');
+  }
+
+  try {
+    const user = await Usuario.findByPk(id);
+    const esValida = await bcrypt.compare(actual, user.password);
+    if (!esValida) {
+      return res.status(400).send('Contraseña actual incorrecta');
+    }
+
+    const hashNueva = await bcrypt.hash(nueva, 10);
+    await user.update({ password: hashNueva });
+	if (!esValida) {
+	return res.redirect('/perfil?error=1'); // contraseña incorrecta
+	}
+
+	if (nueva !== confirmar) {
+	return res.redirect('/perfil?error=2'); // no coinciden
+	}
+
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error);
+    res.status(500).send('Error interno');
+  }
+};
+
+export const actualizarPerfil = async (req, res) => {
+  const { nombre, apellido } = req.body;
+  const id = req.session.usuario?.id;
+
+  if (!id || !nombre || !apellido) {
+    return res.status(400).send('Faltan datos');
+  }
+
+  try {
+    const admin = await PersonalAdministrativo.findOne({ where: { id_usuario: id } });
+    const salud = await PersonalSalud.findOne({ where: { id_usuario: id } });
+
+    if (admin) await admin.update({ nombre, apellido });
+    if (salud) await salud.update({ nombre, apellido });
+
+    req.session.usuario.nombre = nombre;
+    req.session.usuario.apellido = apellido;
+
+    return res.redirect('/perfil?editado=1');
+  } catch (error) {
+    console.error('❌ Error al actualizar perfil:', error);
+    return res.status(500).send('Error al actualizar perfil');
+  }
 };
 
 export const vistaRecuperarPassword = (req, res) => {

@@ -71,7 +71,7 @@ router.get('/personal/salud', isAuthenticated,soloRol([1]), vistaPersonalSalud);
 router.get('/personal/administrativo', isAuthenticated, soloRol([1]), vistaPersonalAdministrativo);
 router.get('/especialidad', isAuthenticated, soloRol([1]), vistaEspecialidades);
 router.get('/rolUsuario', isAuthenticated, soloRol([1]), vistaRolUsuario);
-router.get('/perfil', isAuthenticated, vistaPerfil);
+
 router.get('/turnos', isAuthenticated, soloRol([1, 2, 4]), vistaTurnos);
 router.get('/agenda', isAuthenticated, soloRol([1, 2, 4]), vistaAgendas);
 router.get('/dias-semana', isAuthenticated, soloRol([1]), vistaDias);

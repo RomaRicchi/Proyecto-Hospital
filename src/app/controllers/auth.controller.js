@@ -52,6 +52,7 @@ export const login = async (req, res) => {
 			nombre: personal?.nombre || 'Usuario',
 			apellido: personal?.apellido || '',
 			rol: personal?.id_rol_usuario || 1,
+			username: user.username,
 		};
 
 		if ([3, 4].includes(personal?.id_rol_usuario)) {

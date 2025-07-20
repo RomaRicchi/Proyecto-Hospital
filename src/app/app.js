@@ -46,6 +46,10 @@ const __dirname = dirname(__filename);
 
 const app = express();
 
+/* 📋 Middleware */
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(morgan('dev'));
 /* 📦 Sesion */
 app.use(
 	session({
@@ -65,10 +69,6 @@ app.use('/sb-admin', express.static(join(__dirname, '../public/sb-admin')));
 app.use('/css', express.static(join(__dirname, '../public/css')));
 app.use('/js', express.static(join(__dirname, '../public/js')));
 
-/* 📋 Middleware */
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(morgan('dev'));
 
 app.use((req, res, next) => {
 	res.locals.usuario = req.session.usuario || null;
@@ -113,6 +113,7 @@ app.use('/api/turnos', turnoRoutes);
 app.use('/api/estadoTurno', estadoTurnoRoutes);
 app.use('/api/agenda', agendaRoutes);
 app.use('/', viewsRoutes);
+app.use('/', usuariosRoutes); 
 iniciarActualizacionTurnos();
 iniciarEliminacionReservas();
 /* 🌐 Exportar app */
