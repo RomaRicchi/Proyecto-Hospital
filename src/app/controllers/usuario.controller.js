@@ -322,16 +322,10 @@ export const listarUsuariosMedicos = async (req, res) => {
 
 export const vistaPerfil = async (req, res) => {
   const usuario = req.session.usuario;
-  let foto = '/img/doctor1.webp'; 
-
-  try {
-    const response = await axios.get('https://randomuser.me/api/');
-    const userData = response.data.results[0];
-    if (userData && userData.picture?.large) {
-      foto = userData.picture.large;
-    }
-  } catch (error) {
-    console.warn('⚠️ Error obteniendo imagen randomuser:', error.message);
+  let foto = '/img/user.png'; 
+  
+  if (!usuario) {
+    return res.status(400).send('Faltan datos de sesión');
   }
 
   try {

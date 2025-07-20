@@ -159,3 +159,27 @@
 .swal2-card-style .swal2-html-container {
   text-align: center !important;
 }
+
+.card-perfil {
+  max-width: 500px;
+  border: none;
+  border-radius: 1rem;
+}
+
+.perfil-body {
+  background-color: #cb6af5;
+  border-radius: 1rem;
+  padding: 2rem;
+}
+
+.foto-perfil {
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  width: 120px;
+  height: 120px;
+}
+
+.btn-rounded {
+  border-radius: 0.5rem;
+}

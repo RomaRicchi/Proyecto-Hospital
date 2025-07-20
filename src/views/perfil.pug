@@ -1,32 +1,35 @@
 extends layout_modular
 
 block content
-  .container.mt-5
-    .card.shadow-lg.mx-auto(style="max-width: 600px;")
-      .card-body.text-center
-        img.rounded-circle.mb-3(src=foto, width="120", height="120")
+  .hero.position-relative
+    .hero-overlay
+    .container.text-center.position-relative
+      .card.card-perfil.shadow-lg.mx-auto
+        .card-body.perfil-body.text-center
 
-        form(action="/perfil" method="POST" class="text-start")
-          .mb-3
-            label.form-label(for="nombre") Nombre
-            input.form-control(type="text" id="nombre" name="nombre" required value=usuario.nombre)
+          img.foto-perfil.rounded-circle.mb-3(src=foto, width="120", height="120")
 
-          .mb-3
-            label.form-label(for="apellido") Apellido
-            input.form-control(type="text" id="apellido" name="apellido" required value=usuario.apellido)
-
-          .mb-3
-            label.form-label(for="username") Usuario
-            input.form-control(type="text" id="username" name="username" required value=usuario.username readonly)
-
-          if especialidad
+          form(action="/perfil" method="POST" class="text-start mt-3")
             .mb-3
-              label.form-label(for="especialidad") Especialidad
-              input.form-control(type="text" id="especialidad" readonly value=especialidad)
+              label.form-label(for="nombre") Nombre
+              input.form-control.shadow-sm(type="text" id="nombre" name="nombre" required value=usuario.nombre)
 
-          button.btn.btn-primary.w-100(type="submit") Guardar cambios
+            .mb-3
+              label.form-label(for="apellido") Apellido
+              input.form-control.shadow-sm(type="text" id="apellido" name="apellido" required value=usuario.apellido)
 
-          a.btn.btn-outline-secondary.mt-3#btnCambiarPassword
+            .mb-3
+              label.form-label(for="username") Usuario
+              input.form-control.shadow-sm(type="text" id="username" name="username" readonly value=usuario.username)
+
+            if especialidad
+              .mb-3
+                label.form-label(for="especialidad") Especialidad
+                input.form-control.shadow-sm(type="text" id="especialidad" readonly value=especialidad)
+
+            button.btn.btn-success.w-100.btn-rounded(type="submit") Guardar cambios
+
+          a.btn.btn-success.mt-3#btnCambiarPassword.btn-rounded
             i.fas.fa-key.me-1
             | Cambiar contraseña
 
