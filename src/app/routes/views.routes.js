@@ -29,8 +29,7 @@ import { vistaPanelSalud } from '../controllers/dashSalud.controller.js';
 import { vistaTurnos } from '../controllers/turno.controller.js';
 import { vistaEstadoTurno } from '../controllers/estadoTurno.controller.js';
 import { vistaAgendas } from '../controllers/agenda.controller.js';
-import { vistaDias } from '../controllers/dia.controller.js';
-import { vistaPerfil } from '../controllers/usuario.controller.js';
+import { vistaDias } from '../controllers/dia.controller.js'
 
 const router = Router();
 

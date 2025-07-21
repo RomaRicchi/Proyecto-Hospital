@@ -40,6 +40,7 @@ $(document).ready(function () {
 		title: 'Agregar Nuevo Usuario',
 		html: `
 		<input id="swal-username" class="swal2-input" placeholder="Username">
+		<input id="swal-email" class="swal2-input" placeholder="Correo electrónico">
 		<input id="swal-password" class="swal2-input" placeholder="Contraseña" type="password">
 		<input id="swal-apellido" class="swal2-input" placeholder="Apellido">
 		<input id="swal-nombre" class="swal2-input" placeholder="Nombre">
@@ -74,8 +75,9 @@ $(document).ready(function () {
 		customClass: {
 			popup: 'swal2-card-style'
 		},
-		preConfirm: () => {
+		preConfirm: async () => {
 		const username = $('#swal-username').val();
+		const email = $('#swal-email').val();
 		const password = $('#swal-password').val();
 		const apellido = $('#swal-apellido').val();
 		const nombre = $('#swal-nombre').val();
@@ -83,17 +85,35 @@ $(document).ready(function () {
 		const id_especialidad = $('#swal-especialidad').is(':visible') ? $('#swal-especialidad').val() || null : null;
 		const matricula = $('#swal-matricula').is(':visible') ? $('#swal-matricula').val() || null : null;
 
-		if (!username || !password || !apellido || !nombre || !rol) {
+		if (!username || !password || !apellido || !nombre || !rol|| !email) {
 			Swal.showValidationMessage('Todos los campos obligatorios deben completarse');
+			return false;
+		}
+		if (!email.includes('@')) {
+			Swal.showValidationMessage('Email inválido');
 			return false;
 		}
 		if (password.length < 5) {
 			Swal.showValidationMessage('La contraseña debe tener al menos 5 caracteres');
 			return false;
 		}
+		try {
+			const existe = await fetch(`/api/usuarios/validar-email/${encodeURIComponent(email)}`)
+			.then(r => r.json())
+			.then(d => d.existe);
+
+			if (existe) {
+			Swal.showValidationMessage('Este email ya está registrado');
+			return false;
+			}
+		} catch (err) {
+			Swal.showValidationMessage('Error al validar email');
+			return false;
+		}
 
 		return {
 			username,
+			email,
 			password,
 			apellido,
 			nombre,
@@ -135,6 +155,7 @@ $(document).ready(function () {
 		title: 'Editar Usuario',
 		html: `
 		<input id="swal-username" class="swal2-input" value="${usuario.username}" placeholder="Username" readonly>
+		<input id="swal-email" class="swal2-input" value="${usuario.email || ''}" placeholder="Correo electrónico">
 		<select id="swal-rol" class="swal2-input">${rolOptions}</select>
 		<select id="swal-especialidad" class="swal2-input" style="display:none;">${especOptions}</select>
 		<input id="swal-matricula" class="swal2-input" placeholder="Matrícula" value="${usuario.matricula || ''}" style="display:none;">
@@ -170,9 +191,24 @@ $(document).ready(function () {
 		customClass: {
 			popup: 'swal2-card-style'
 		},
-		preConfirm: () => {
+		preConfirm: async () => {
+			  try {
+				const existe = await fetch(`/api/usuarios/validar-email/${encodeURIComponent(email)}`)
+				.then(r => r.json())
+				.then(d => d.existe);
+
+				if (existe) {
+				Swal.showValidationMessage('Este email ya está registrado');
+				return false;
+				}
+			} catch (err) {
+				Swal.showValidationMessage('Error al validar email');
+				return false;
+			}
+
 		return {
 			username: $('#swal-username').val(),
+			email: $('#swal-email').val(),
 			id_rol_usuario: $('#swal-rol').val(),
 			id_especialidad: $('#swal-especialidad').is(':visible') ? $('#swal-especialidad').val() || null : null,
 			matricula: $('#swal-matricula').is(':visible') ? $('#swal-matricula').val() || null : null,

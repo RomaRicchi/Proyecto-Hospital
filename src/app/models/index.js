@@ -29,8 +29,11 @@ import defineAgenda from './Agenda.js';
 import defineTipoRegistro from './TipoRegistro.js';
 import defineDia from './Dia.js';
 import defineEstadoTurno from './EstadoTurno.js';
+import TokenRecuperacionModel from './TokenRecuperacion.js';
 
 // Inicializar modelos
+const DataTypes = Sequelize.DataTypes;
+const TokenRecuperacion = TokenRecuperacionModel(sequelize, DataTypes);
 const Genero = defineGenero(sequelize, Sequelize.DataTypes);
 const Localidad = defineLocalidad(sequelize, Sequelize.DataTypes);
 const Paciente = definePaciente(sequelize, Sequelize.DataTypes);
@@ -140,4 +143,5 @@ export {
 	Agenda,
 	Dia,
 	EstadoTurno,
+	TokenRecuperacion,
 };

@@ -4,9 +4,9 @@ import {
 	PersonalSalud,
 	RolUsuario,
 	Especialidad,
+	TokenRecuperacion,
 } from '../models/index.js';
 import bcrypt from 'bcrypt';
-import axios from 'axios';
 
 export const getUsuarios = async (req, res) => {
 	try {
@@ -113,6 +113,7 @@ export const getUsuarioById = async (req, res) => {
 
     res.json({
       username: usuario.username,
+	  email: usuario.email, 
       estado: usuario.estado ? 'Activo' : 'Inactivo',
       id_rol_usuario: datos.id_rol_usuario || usuario.id_rol_usuario,
       id_especialidad: datos.id_especialidad || null,
@@ -133,9 +134,10 @@ export const createUsuario = async (req, res) => {
 			id_rol_usuario,
 			id_especialidad,
 			matricula,
+			email,
 		} = req.body;
 
-		if (!username || !password || !apellido || !nombre || !id_rol_usuario) {
+		if (!username || !password || !apellido || !nombre || !id_rol_usuario|| !email) {
 			return res.status(400).json({ message: 'Faltan datos requeridos' });
 		}
 
@@ -157,6 +159,7 @@ export const createUsuario = async (req, res) => {
 			password: hashedPassword,
 			id_rol_usuario,
 			estado: true,
+			email,
 		});
 
 		let nuevoPersonal;
@@ -166,6 +169,7 @@ export const createUsuario = async (req, res) => {
 				id_usuario: nuevoUsuario.id_usuario,
 				apellido,
 				nombre,
+				email,
 				id_rol_usuario,
 				id_especialidad: id_especialidad || null,
 				matricula: matricula || null,
@@ -176,6 +180,7 @@ export const createUsuario = async (req, res) => {
 				id_usuario: nuevoUsuario.id_usuario,
 				apellido,
 				nombre,
+				email,
 				id_rol_usuario,
 				activo: true,
 			});
@@ -206,6 +211,7 @@ export const updateUsuario = async (req, res) => {
 			id_rol_usuario,
 			apellido,
 			nombre,
+			email,
 			id_especialidad,
 			matricula,
 			estado,
@@ -214,7 +220,7 @@ export const updateUsuario = async (req, res) => {
 		const usuario = await Usuario.findByPk(req.params.id);
 		if (!usuario)
 			return res.status(404).json({ message: 'Usuario no encontrado' });
-
+		if (email) usuario.email = email;
 		if (username) usuario.username = username;
 		if (password) usuario.password = await bcrypt.hash(password, 10);
 		if (id_rol_usuario) usuario.id_rol_usuario = id_rol_usuario;
@@ -411,8 +417,4 @@ export const actualizarPerfil = async (req, res) => {
     console.error('❌ Error al actualizar perfil:', error);
     return res.status(500).send('Error al actualizar perfil');
   }
-};
-
-export const vistaRecuperarPassword = (req, res) => {
-  res.render('recuperarPassword');
 };

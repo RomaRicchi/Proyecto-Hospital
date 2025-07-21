@@ -1,7 +1,5 @@
 import dotenv from 'dotenv';
 dotenv.config();
-import { iniciarEliminacionReservas } from '../jobs/eliminarReservasVencidas.js';
-import { iniciarActualizacionTurnos } from '../jobs/actualizarTurnos.js'; 
 import express from 'express';
 import morgan from 'morgan';
 import session from 'express-session';
@@ -11,6 +9,8 @@ import { dirname, join } from 'path';
 import viewsRoutes from './routes/views.routes.js';
 
 // 🛣️ Rutas importada
+import { iniciarEliminacionReservas } from '../jobs/eliminarReservasVencidas.js';
+import { iniciarActualizacionTurnos } from '../jobs/actualizarTurnos.js'; 
 import authRoutes from './routes/auth.routes.js';
 import pacientesRoutes from './routes/paciente.routes.js';
 import familiaresRoutes from './routes/familiar.routes.js';
@@ -39,7 +39,7 @@ import diaRoutes from './routes/dia.routes.js';
 import agendaRoutes from './routes/agenda.routes.js';
 import turnoRoutes from './routes/turno.routes.js';
 import estadoTurnoRoutes from './routes/estadoTurno.routes.js';
-
+import recuperacionRoutes from './routes/recuperacion.routes.js';
 // ✅ Simular __dirname en ESModules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -112,8 +112,9 @@ app.use('/api/dias-semana', diaRoutes);
 app.use('/api/turnos', turnoRoutes);
 app.use('/api/estadoTurno', estadoTurnoRoutes);
 app.use('/api/agenda', agendaRoutes);
+app.use('/api/recuperacion', recuperacionRoutes);
 app.use('/', viewsRoutes);
-app.use('/', usuariosRoutes); 
+
 iniciarActualizacionTurnos();
 iniciarEliminacionReservas();
 /* 🌐 Exportar app */
