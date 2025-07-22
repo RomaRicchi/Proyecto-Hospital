@@ -1,3 +1,5 @@
+import { validarTexto } from './utils/validacionesImput.js';
+
 $(document).ready(function () {
   const $container = $('#tablaSectorContainer');
 
@@ -67,8 +69,9 @@ $(document).ready(function () {
 					popup: 'swal2-card-style'
 				},
       preConfirm: (v) => {
-        if (!v || v.trim().length < 3) {
-          Swal.showValidationMessage('Debe ingresar al menos 3 letras');
+        const error = validarTexto(v, 'Nombre del sector');
+        if (error) {
+          Swal.showValidationMessage(error);
           return false;
         }
         return v.trim();
@@ -104,8 +107,9 @@ $(document).ready(function () {
 					  popup: 'swal2-card-style'
 				  },
           preConfirm: (v) => {
-            if (!v || v.trim().length < 3) {
-              Swal.showValidationMessage('Debe ingresar al menos 3 letras');
+            const error = validarTexto(v, 'Nombre del sector');
+            if (error) {
+              Swal.showValidationMessage(error);
               return false;
             }
             return v.trim();

@@ -1,21 +1,8 @@
+import { validarTexto } from './utils/validacionesImput.js';
+
 $(document).ready(function () {
 	const tabla = $('#tablaParentesco');
 	if (!tabla.length) return;
-
-	
-	function validarNombre(nombre) {
-		if (!nombre || !nombre.trim()) {
-			return 'El nombre del parentesco es obligatorio.';
-		}
-		const limpio = nombre.trim();
-		if (limpio.length < 3 || limpio.length > 50) {
-			return 'Debe tener entre 3 y 50 caracteres.';
-		}
-		if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(limpio)) {
-			return 'Solo se permiten letras y espacios.';
-		}
-		return null;
-	}
 
 	fetch('/api/parentescos')
 		.then(res => res.json())
@@ -37,7 +24,7 @@ $(document).ready(function () {
 				paging: true,
 				pageLength: 10,
 				searching: true,
-				ordering: true,  
+				ordering: true,
 				destroy: true,
 				responsive: true,
 				scrollX: false,
@@ -74,10 +61,10 @@ $(document).ready(function () {
 			showCancelButton: true,
 			confirmButtonText: 'Guardar',
 			customClass: {
-					popup: 'swal2-card-style'
-				},
+				popup: 'swal2-card-style'
+			},
 			preConfirm: (nombre) => {
-				const err = validarNombre(nombre);
+				const err = validarTexto(nombre, 'Nombre del parentesco', 3, 50);
 				if (err) {
 					Swal.showValidationMessage(err);
 					return false;
@@ -112,7 +99,7 @@ $(document).ready(function () {
 						popup: 'swal2-card-style'
 					},
 					preConfirm: (nombre) => {
-						const err = validarNombre(nombre);
+						const err = validarTexto(nombre, 'Nombre del parentesco', 3, 50);
 						if (err) {
 							Swal.showValidationMessage(err);
 							return false;
@@ -143,8 +130,8 @@ $(document).ready(function () {
 			confirmButtonText: 'Sí, eliminar',
 			cancelButtonText: 'Cancelar',
 			customClass: {
-					popup: 'swal2-card-style'
-				},
+				popup: 'swal2-card-style'
+			},
 		}).then(result => {
 			if (!result.isConfirmed) return;
 			fetch(`/api/parentescos/${id}`, { method: 'DELETE' })

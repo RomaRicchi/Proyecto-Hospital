@@ -1,14 +1,8 @@
+import { validarTexto } from './utils/validacionesFormularios.js';
+
 $(document).ready(function () {
   const $tabla = $('#tablaSalud');
   if (!$tabla.length) return;
-
-  function validarNombreCampo(texto, campo, min = 2, max = 50) {
-    if (!texto || !texto.trim()) return `El campo "${campo}" es obligatorio.`;
-    const val = texto.trim();
-    if (val.length < min || val.length > max) return `El campo "${campo}" debe tener entre ${min} y ${max} caracteres.`;
-    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ \-]+$/.test(val)) return `El campo "${campo}" solo puede contener letras, espacios y guiones.`;
-    return null;
-  }
 
   fetch('/api/personal-salud')
     .then(r => r.json())
@@ -77,7 +71,7 @@ $(document).ready(function () {
             const matricula = $('#matricula').val();
             const activo = $('#estado').val() === 'true';
 
-            let err = validarNombreCampo(apellido, 'Apellido') || validarNombreCampo(nombre, 'Nombre');
+            let err = validarTexto(apellido, 'Apellido') || validarTexto(nombre, 'Nombre');
             if (err) {
               Swal.showValidationMessage(err);
               return false;

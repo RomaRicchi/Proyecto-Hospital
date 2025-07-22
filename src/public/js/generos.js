@@ -1,3 +1,7 @@
+import { 
+	validarTexto
+} from './utils/validacionesImput.js'
+
 $(document).ready(function () {
   const tabla = $('#tablaGenero');
   if (!tabla.length) return;
@@ -37,15 +41,6 @@ $(document).ready(function () {
       Swal.fire('Error', 'No se pudo cargar los géneros.', 'error');
     });
 
-  // Validación
-  function validarNombreGenero(nombre) {
-    if (!nombre || !nombre.trim()) return 'El nombre es obligatorio.';
-    const t = nombre.trim();
-    if (t.length < 3 || t.length > 30) return 'El nombre debe tener entre 3 y 30 caracteres.';
-    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(t)) return 'El nombre solo puede contener letras y espacios.';
-    return null;
-  }
-
   $(document).on('click', '#btnAgregarGenero', function () {
     Swal.fire({
       title: 'Agregar Género',
@@ -58,7 +53,7 @@ $(document).ready(function () {
         popup: 'swal2-card-style'
       },
       preConfirm: (nombre) => {
-        const error = validarNombreGenero(nombre);
+        const error = validarTexto(nombre, 'Nombre del género', 3, 30);
         if (error) {
           Swal.showValidationMessage(error);
           return false;
@@ -104,7 +99,7 @@ $(document).ready(function () {
             popup: 'swal2-card-style'
           },
           preConfirm: (nombre) => {
-            const error = validarNombreGenero(nombre);
+            const error = validarTexto(nombre, 'Nombre del género', 3, 30);
             if (error) {
               Swal.showValidationMessage(error);
               return false;

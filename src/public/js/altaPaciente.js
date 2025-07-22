@@ -1,10 +1,17 @@
+import {
+  validarDNI,
+  validarTexto,
+  validarSelect
+} from './utils/validacionesImput.js';
+
 $(document).ready(function () {
   $('#buscarPacienteForm').submit(async function (e) {
     e.preventDefault();
     const dni = $('#busqueda').val().trim();
 
-    if (!dni || isNaN(dni)) {
-      Swal.fire('Error', 'Debe ingresar un DNI válido', 'warning');
+    const errorDNI = validarDNI(dni);
+    if (errorDNI) {
+      Swal.fire('Error', errorDNI, 'warning');
       return;
     }
 
@@ -90,7 +97,6 @@ $(document).ready(function () {
       return Swal.fire('Error', 'Debes indicar la fecha y hora de egreso.', 'warning');
     }
 
-    // Normalizar fechas a local (sin desfase de zona horaria)
     const fechaIngresoLocal = new Date(fechaIngreso);
     fechaIngresoLocal.setMinutes(fechaIngresoLocal.getMinutes() - fechaIngresoLocal.getTimezoneOffset());
 
@@ -101,17 +107,19 @@ $(document).ready(function () {
       return Swal.fire('Error', 'La fecha de egreso debe ser posterior a la fecha de ingreso.', 'warning');
     }
 
-    if (motivoEgreso.length < 5) {
-      return Swal.fire('Error', 'El motivo de egreso es obligatorio (mínimo 5 caracteres).', 'warning');
+    const errorMotivo = validarTexto(motivoEgreso, 'Motivo de egreso', 5, 100);
+    if (errorMotivo) {
+      return Swal.fire('Error', errorMotivo, 'warning');
     }
 
-    if (!idPersonal) {
-      return Swal.fire('Error', 'Debes seleccionar un médico responsable.', 'warning');
+    const errorMedico = validarSelect(idPersonal, 'Médico responsable');
+    if (errorMedico) {
+      return Swal.fire('Error', errorMedico, 'warning');
     }
 
     const dni = $('#busqueda').val();
     const payload = {
-      fecha_hora_egreso: fechaEgreso.toISOString(), // Enviar formato ISO coherente
+      fecha_hora_egreso: fechaEgreso.toISOString(),
       motivo_egr: motivoEgreso,
       id_personal_salud: idPersonal,
     };
@@ -135,8 +143,7 @@ $(document).ready(function () {
             customClass: {
               popup: 'swal2-card-style'
             }
-          })
-          .then(() => location.reload());
+          }).then(() => location.reload());
         } else {
           Swal.fire('Error', data.message || 'No se pudo procesar el alta', 'error');
         }

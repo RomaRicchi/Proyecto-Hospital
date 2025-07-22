@@ -1,13 +1,16 @@
-$(document).ready(function () {
+import { validarTexto } from './utils/validacionesImput.js';
+
+$(document).ready(() => {
   const $container = $('#tablaRolesContainer');
 
-  function cargarRoles() {
-    fetch('/api/roles')
-      .then(r => r.json())
-      .then(data => renderTabla(data))
-      .catch(() => {
-        $container.html('<div class="alert alert-danger">No se pudieron cargar los roles');
-      });
+  async function cargarRoles() {
+    try {
+      const res = await fetch('/api/roles');
+      const data = await res.json();
+      renderTabla(data);
+    } catch {
+      $container.html('<div class="alert alert-danger">No se pudieron cargar los roles</div>');
+    }
   }
 
   function renderTabla(data) {
@@ -28,7 +31,6 @@ $(document).ready(function () {
           <tbody>
     `;
 
-
     data.forEach(r => {
       html += `
         <tr>
@@ -43,119 +45,124 @@ $(document).ready(function () {
           </td>
         </tr>`;
     });
-    
-    html += `</tbody></table>`;
+
+    html += `</tbody></table></div>`;
     $container.html(html);
-    $('#tablaRoles').DataTable({ 
-        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' }, 
-        paging: true,
-        pageLength: 10,
-     	  searching: true,
-      	ordering: true,  
-		    destroy: true,
-      	responsive: true,
-		    scrollX: false,
-		    columns: [
-				    { title: 'Nombre' },
-				    { title: 'Acciones', orderable: false, searchable: false },
-		    ],
+
+    $('#tablaRoles').DataTable({
+      language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
+      paging: true,
+      pageLength: 10,
+      searching: true,
+      ordering: true,
+      destroy: true,
+      responsive: true,
+      scrollX: false,
+      columns: [
+        { title: 'Nombre' },
+        { title: 'Acciones', orderable: false, searchable: false },
+      ],
     });
   }
 
-  $(document).on('click', '#btnAgregar', () => {
-    Swal.fire({
+  $(document).on('click', '#btnAgregar', async () => {
+    const { isConfirmed, value } = await Swal.fire({
       title: 'Nuevo Rol',
       input: 'text',
       inputLabel: 'Nombre',
       showCancelButton: true,
       confirmButtonText: 'Guardar',
-      customClass: {
-					popup: 'swal2-card-style'
-				},
+      customClass: { popup: 'swal2-card-style' },
       preConfirm: (v) => {
-        if (!v || v.trim().length < 3) {
-          Swal.showValidationMessage('Debe ingresar al menos 3 letras');
+        const err = validarTexto(v, 'Nombre');
+        if (err) {
+          Swal.showValidationMessage(err);
           return false;
         }
         return v.trim();
       }
-    }).then(result => {
-      if (!result.isConfirmed) return;
-      fetch('/api/roles', {
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+      const res = await fetch('/api/roles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre: result.value })
-      })
-        .then(res => {
-          if (res.status === 409) throw new Error('Ya existe ese rol');
-          if (!res.ok) throw new Error();
-          return res.json();
-        })
-        .then(() => Swal.fire('Guardado', 'Rol creado correctamente', 'success').then(cargarRoles))
-        .catch(err => Swal.fire('Error', err.message || 'No se pudo crear', 'error'));
-    });
+        body: JSON.stringify({ nombre: value })
+      });
+
+      if (res.status === 409) throw new Error('Ya existe ese rol');
+      if (!res.ok) throw new Error();
+
+      await Swal.fire('Guardado', 'Rol creado correctamente', 'success');
+      cargarRoles();
+    } catch (err) {
+      Swal.fire('Error', err.message || 'No se pudo crear', 'error');
+    }
   });
 
-  $(document).on('click', '.edit-btn', function () {
+  $(document).on('click', '.edit-btn', async function () {
     const id = $(this).data('id');
     const actual = $(this).data('nombre');
 
-    Swal.fire({
+    const { isConfirmed, value } = await Swal.fire({
       title: 'Editar Rol',
       input: 'text',
       inputValue: actual,
       showCancelButton: true,
       confirmButtonText: 'Actualizar',
-      customClass: {
-					popup: 'swal2-card-style'
-				},
+      customClass: { popup: 'swal2-card-style' },
       preConfirm: (v) => {
-        if (!v || v.trim().length < 3) {
-          Swal.showValidationMessage('Debe ingresar al menos 3 letras');
+        const err = validarTexto(v, 'Nombre');
+        if (err) {
+          Swal.showValidationMessage(err);
           return false;
         }
         return v.trim();
       }
-    }).then(result => {
-      if (!result.isConfirmed) return;
-      fetch(`/api/roles/${id}`, {
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+      const res = await fetch(`/api/roles/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre: result.value })
-      })
-        .then(res => {
-          if (!res.ok) throw new Error();
-          return res.json();
-        })
-        .then(() => Swal.fire('Actualizado', 'Rol actualizado', 'success').then(cargarRoles))
-        .catch(() => Swal.fire('Error', 'No se pudo actualizar', 'error'));
-    });
+        body: JSON.stringify({ nombre: value })
+      });
+
+      if (!res.ok) throw new Error();
+
+      await Swal.fire('Actualizado', 'Rol actualizado', 'success');
+      cargarRoles();
+    } catch {
+      Swal.fire('Error', 'No se pudo actualizar', 'error');
+    }
   });
 
-  $(document).on('click', '.delete-btn', function () {
+  $(document).on('click', '.delete-btn', async function () {
     const id = $(this).data('id');
-    Swal.fire({
+
+    const { isConfirmed } = await Swal.fire({
       title: '¿Eliminar rol?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-      customClass: {
-					popup: 'swal2-card-style'
-				},
-      
-    }).then(result => {
-      if (!result.isConfirmed) return;
-      fetch(`/api/roles/${id}`, { method: 'DELETE' })
-        .then(res => {
-          if (!res.ok) throw new Error();
-          return res.json();
-        })
-        .then(() => Swal.fire('Eliminado', 'Rol eliminado', 'success').then(cargarRoles))
-        .catch(() => Swal.fire('Error', 'No se pudo eliminar', 'error'));
+      customClass: { popup: 'swal2-card-style' },
     });
+
+    if (!isConfirmed) return;
+
+    try {
+      const res = await fetch(`/api/roles/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      await Swal.fire('Eliminado', 'Rol eliminado', 'success');
+      cargarRoles();
+    } catch {
+      Swal.fire('Error', 'No se pudo eliminar', 'error');
+    }
   });
-
-
 
   cargarRoles();
 });

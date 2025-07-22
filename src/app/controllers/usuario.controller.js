@@ -4,7 +4,6 @@ import {
 	PersonalSalud,
 	RolUsuario,
 	Especialidad,
-	TokenRecuperacion,
 } from '../models/index.js';
 import bcrypt from 'bcrypt';
 
@@ -31,9 +30,13 @@ export const getUsuarios = async (req, res) => {
 		const adaptados = usuarios.map((u) => {
 			const admin = u.personal_administrativo;
 			const salud = u.datos_medico;
+			const datos = admin || salud;
+
 			return {
 				id_usuario: u.id_usuario,
 				username: u.username,
+				nombre_completo: datos ? `${datos.nombre} ${datos.apellido}` : '-',
+				email: u.email || datos?.email || '-',
 				estado: u.estado ? 'Activo' : 'Inactivo',
 				tipo: admin ? 'Administrativo' : salud ? 'Salud' : '-',
 				rol: admin?.rol?.nombre || salud?.rol?.nombre || '-',
@@ -43,6 +46,7 @@ export const getUsuarios = async (req, res) => {
 
 		res.json(adaptados);
 	} catch (error) {
+		console.error('Error al obtener usuarios:', error);
 		res.status(500).json({ message: 'Error al obtener usuarios' });
 	}
 };
@@ -70,9 +74,13 @@ export const vistaUsuarios = async (req, res) => {
 		const usuariosAdaptados = usuarios.map((u) => {
 			const admin = u.personal_administrativo;
 			const salud = u.datos_medico;
+			const datos = admin || salud;
+
 			return {
 				id_usuario: u.id_usuario,
 				username: u.username,
+				email: u.email || datos?.email || '-',
+				nombre_completo: datos ? `${datos.nombre} ${datos.apellido}` : '-',
 				estado: u.estado ? 'Activo' : 'Inactivo',
 				tipo: admin ? 'Administrativo' : salud ? 'Salud' : '-',
 				rol: admin?.rol?.nombre || salud?.rol?.nombre || '-',
@@ -80,12 +88,13 @@ export const vistaUsuarios = async (req, res) => {
 			};
 		});
 
-		res.render('usuario', { 
-			usuarios: usuariosAdaptados , 
+		res.render('usuario', {
+			usuarios: usuariosAdaptados,
 			usuario: req.session.usuario,
 			autenticado: true
 		});
 	} catch (error) {
+		console.error('❌ Error en vistaUsuarios:', error);
 		res.status(500).send('Error al mostrar usuarios');
 	}
 };
@@ -113,7 +122,9 @@ export const getUsuarioById = async (req, res) => {
 
     res.json({
       username: usuario.username,
-	  email: usuario.email, 
+      email: usuario.email,
+      nombre: datos.nombre || '',
+      apellido: datos.apellido || '',
       estado: usuario.estado ? 'Activo' : 'Inactivo',
       id_rol_usuario: datos.id_rol_usuario || usuario.id_rol_usuario,
       id_especialidad: datos.id_especialidad || null,
@@ -125,82 +136,83 @@ export const getUsuarioById = async (req, res) => {
 };
 
 export const createUsuario = async (req, res) => {
-	try {
-		const {
-			username,
-			password,
-			apellido,
-			nombre,
-			id_rol_usuario,
-			id_especialidad,
-			matricula,
-			email,
-		} = req.body;
+  try {
+    const {
+      username,
+      password,
+      apellido,
+      nombre,
+      id_rol_usuario,
+      id_especialidad,
+      matricula,
+      email,
+    } = req.body;
 
-		if (!username || !password || !apellido || !nombre || !id_rol_usuario|| !email) {
-			return res.status(400).json({ message: 'Faltan datos requeridos' });
-		}
+    if (!username || !password || !apellido || !nombre || !id_rol_usuario || !email) {
+      return res.status(400).json({ message: 'Faltan datos requeridos' });
+    }
 
-		// Validación: usuario único
-		const existente = await Usuario.findOne({ where: { username } });
-		if (existente) {
-			return res.status(409).json({ message: 'El usuario ya existe' });
-		}
+    // Validación: usuario único
+    const existente = await Usuario.findOne({ where: { username } });
+    if (existente) {
+      return res.status(409).json({ message: 'El usuario ya existe' });
+    }
 
-		// Validación: contraseña mínima
-		if (password.length < 5) {
-			return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
-		}
+    // Validación: contraseña mínima
+    if (password.length < 5) {
+      return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
+    }
 
-		const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-		const nuevoUsuario = await Usuario.create({
-			username,
-			password: hashedPassword,
-			id_rol_usuario,
-			estado: true,
-			email,
-		});
+    const nuevoUsuario = await Usuario.create({
+      username,
+      password: hashedPassword,
+      id_rol_usuario,
+      estado: true,
+      email,
+    });
 
-		let nuevoPersonal;
+    let nuevoPersonal;
 
-		if ([3, 4].includes(parseInt(id_rol_usuario))) {
-			nuevoPersonal = await PersonalSalud.create({
-				id_usuario: nuevoUsuario.id_usuario,
-				apellido,
-				nombre,
-				email,
-				id_rol_usuario,
-				id_especialidad: id_especialidad || null,
-				matricula: matricula || null,
-				activo: true,
-			});
-		} else {
-			nuevoPersonal = await PersonalAdministrativo.create({
-				id_usuario: nuevoUsuario.id_usuario,
-				apellido,
-				nombre,
-				email,
-				id_rol_usuario,
-				activo: true,
-			});
-		}
+    if ([3, 4].includes(parseInt(id_rol_usuario))) {
+      nuevoPersonal = await PersonalSalud.create({
+        id_usuario: nuevoUsuario.id_usuario,
+        apellido,
+        nombre,
+        email,
+        id_rol_usuario,
+        id_especialidad: id_especialidad || null,
+        matricula: matricula || null,
+        activo: true,
+      });
+    } else {
+      nuevoPersonal = await PersonalAdministrativo.create({
+        id_usuario: nuevoUsuario.id_usuario,
+        apellido,
+        nombre,
+        email,
+        id_rol_usuario,
+        activo: true,
+      });
+    }
 
-		res.status(201).json({
-			message: 'Usuario creado con éxito',
-			usuario: {
-				id: nuevoUsuario.id_usuario,
-				username: nuevoUsuario.username,
-			},
-			personal: {
-				id: nuevoPersonal.id_personal_salud || nuevoPersonal.id_personal_admin,
-				nombre: nuevoPersonal.nombre,
-				apellido: nuevoPersonal.apellido,
-			},
-		});
-	} catch (error) {
-		res.status(500).json({ message: 'Error al registrar el usuario' });
-	}
+    res.status(201).json({
+      message: 'Usuario creado con éxito',
+      usuario: {
+        id: nuevoUsuario.id_usuario,
+        username: nuevoUsuario.username,
+        email: nuevoUsuario.email, // 👈 agregado para que esté disponible
+      },
+      personal: {
+        id: nuevoPersonal.id_personal_salud || nuevoPersonal.id_personal_admin,
+        nombre: nuevoPersonal.nombre,
+        apellido: nuevoPersonal.apellido,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al registrar el usuario' });
+  }
 };
 
 export const updateUsuario = async (req, res) => {
@@ -220,6 +232,7 @@ export const updateUsuario = async (req, res) => {
 		const usuario = await Usuario.findByPk(req.params.id);
 		if (!usuario)
 			return res.status(404).json({ message: 'Usuario no encontrado' });
+
 		if (email) usuario.email = email;
 		if (username) usuario.username = username;
 		if (password) usuario.password = await bcrypt.hash(password, 10);
@@ -238,6 +251,7 @@ export const updateUsuario = async (req, res) => {
 					id_usuario: usuario.id_usuario,
 					apellido,
 					nombre,
+					email,
 					id_rol_usuario,
 					id_especialidad: id_especialidad || null,
 					matricula: matricula || null,
@@ -247,6 +261,7 @@ export const updateUsuario = async (req, res) => {
 				await personalSalud.update({
 					apellido,
 					nombre,
+					email,
 					id_rol_usuario,
 					id_especialidad: id_especialidad || null,
 					matricula: matricula || null,
@@ -259,6 +274,7 @@ export const updateUsuario = async (req, res) => {
 					id_usuario: usuario.id_usuario,
 					apellido,
 					nombre,
+					email,
 					id_rol_usuario,
 					activo: true,
 				});
@@ -266,6 +282,7 @@ export const updateUsuario = async (req, res) => {
 				await personalAdmin.update({
 					apellido,
 					nombre,
+					email,
 					id_rol_usuario,
 				});
 			}

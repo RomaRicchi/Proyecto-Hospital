@@ -327,18 +327,19 @@ export const updateCama = async (req, res) => {
 };
 
 export const deleteCama = async (req, res) => {
-	try {
-		const deleted = await Cama.destroy({
-			where: { id_cama: req.params.id },
-		});
-		if (deleted) {
-			res.send('Cama eliminada correctamente');
-		} else {
-			res.status(404).send('Cama no encontrada');
-		}
-	} catch (error) {
-		res.status(500).send('Error interno del servidor');
-	}
+  try {
+    const deleted = await Cama.destroy({
+      where: { id_cama: req.params.id },
+    });
+
+    if (deleted) {
+      return res.status(200).json({ message: 'Cama eliminada correctamente' });
+    } else {
+      return res.status(404).json({ message: 'Cama no encontrada' });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: 'Error interno del servidor' });
+  }
 };
 
 export const vistaCama = async (req, res) => {

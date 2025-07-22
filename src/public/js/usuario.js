@@ -1,7 +1,34 @@
-$(document).ready(function () {
+$(document).ready(async function () {
   const tabla = $('#tablaUsuarios');
+
   if (tabla.length) {
+    const usuarios = await fetch('/api/usuarios').then(r => r.json()).catch(() => []);
+
     const dt = tabla.DataTable({
+      data: usuarios,
+      columns: [
+        { title: 'Username', data: 'username' },
+        { title: 'Nombre completo', data: 'nombre_completo' },
+        { title: 'Email', data: 'email' },
+        { title: 'Tipo', data: 'tipo' },
+        { title: 'Rol', data: 'rol' },
+        { title: 'Especialidad', data: 'especialidad' },
+        { title: 'Estado', data: 'estado' },
+        {
+          title: 'Acciones',
+          data: null,
+          orderable: false,
+          searchable: false,
+          render: (data, type, row) => `
+            <button class="btn btn-sm btn-primary me-1 edit-btn" data-id="${row.id_usuario}">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="btn btn-sm btn-danger delete-btn" data-id="${row.id_usuario}">
+              <i class="fas fa-trash"></i>
+            </button>
+          `
+        }
+      ],
       language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
       paging: true,
       pageLength: 10,
@@ -10,22 +37,7 @@ $(document).ready(function () {
       destroy: true,
       responsive: true,
       scrollX: false,
-      columnDefs: [{ targets: [5], orderable: false, searchable: false }],
-    });
-
-    dt.on('draw', function () {
-      const info = dt.page.info();
-      const noResults = dt.rows({ filter: 'applied' }).data().length === 0;
-      $('#btnAgregarUsuario').remove();
-      if (noResults) {
-        $('#tablaUsuarios_wrapper').append(`
-          <div class="text-center mt-3">
-            <button id="btnAgregarUsuario" class="btn btn-success">
-              Agregar Nuevo Usuario
-            </button>
-          </div>
-        `);
-      }
+      columnDefs: [{ targets: [7], orderable: false, searchable: false }],
     });
   }
 	$(document).on('click', '#btnAgregarUsuario', async function () {

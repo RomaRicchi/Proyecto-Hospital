@@ -1,3 +1,5 @@
+import { validarTexto } from './utils/validacionesImput.js';
+
 $(document).ready(function () {
   const $container = $('#tablaEspecialidadesContainer');
 
@@ -104,8 +106,9 @@ $(document).ready(function () {
         popup: 'swal2-card-style'
       },
       preConfirm: (value) => {
-        if (!value || value.trim().length < 3) {
-          Swal.showValidationMessage('Debe ingresar al menos 3 letras');
+        const error = validarTexto(value, 'Especialidad', 3, 50);
+        if (error) {
+          Swal.showValidationMessage(error);
           return false;
         }
         return value.trim();
@@ -141,8 +144,9 @@ $(document).ready(function () {
         popup: 'swal2-card-style'
       },
       preConfirm: (value) => {
-        if (!value || value.trim().length < 3) {
-          Swal.showValidationMessage('Debe ingresar al menos 3 letras');
+        const error = validarTexto(value, 'Especialidad', 3, 50);
+        if (error) {
+          Swal.showValidationMessage(error);
           return false;
         }
         return value.trim();
@@ -178,12 +182,16 @@ $(document).ready(function () {
     }).then(result => {
       if (!result.isConfirmed) return;
       fetch(`/api/especialidades/${id}`, { method: 'DELETE' })
-        .then(res => {
-          if (!res.ok) throw new Error();
-          return res.json();
+        .then(async res => {
+          if (res.status === 409) {
+            const data = await res.json();
+            throw new Error(data.message || 'Especialidad en uso');
+          }
+          if (!res.ok) throw new Error('Error inesperado');
+          return res.status !== 204 ? res.json() : null;
         })
         .then(() => Swal.fire('Eliminado', 'Especialidad eliminada', 'success').then(cargarEspecialidades))
-        .catch(() => Swal.fire('Error', 'No se pudo eliminar', 'error'));
+        .catch(err => Swal.fire('Error', err.message || 'No se pudo eliminar', 'error'));
     });
   });
 

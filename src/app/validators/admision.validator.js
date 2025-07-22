@@ -8,26 +8,27 @@ export async function validarEstadoCama(id_cama, transaction = null) {
 }
 
 export function validarFechaNoPasada(fecha) {
-  const fechaUTC = toUTC(fecha); // convierte a UTC normalizado
-  const hoyUTC = toUTC(new Date());
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
 
-  hoyUTC.setUTCHours(0, 0, 0, 0);
+  const fechaCheck = new Date(fecha);
+  fechaCheck.setHours(0, 0, 0, 0);
 
-  if (fechaUTC < hoyUTC) {
+  if (fechaCheck < hoy) {
     throw new Error('No se permite una fecha de ingreso en el pasado');
   }
 }
 
 export async function validarAdmisionActiva(id_paciente, fecha, transaction = null) {
-  const fechaUTC = new Date(fecha); // ya viene en UTC del frontend
+  const fechaCheck = new Date(fecha);
 
   const existente = await Admision.findOne({
     where: {
       id_paciente,
-      fecha_hora_ingreso: { [Op.lte]: fechaUTC },
+      fecha_hora_ingreso: { [Op.lte]: fechaCheck },
       [Op.or]: [
         { fecha_hora_egreso: null },
-        { fecha_hora_egreso: { [Op.gt]: fechaUTC } }
+        { fecha_hora_egreso: { [Op.gt]: fechaCheck } }
       ]
     },
     transaction
@@ -37,7 +38,7 @@ export async function validarAdmisionActiva(id_paciente, fecha, transaction = nu
 }
 
 export async function validarConflictoReserva({ id_cama, fecha_hora_ingreso }, transaction = null) {
-  const fecha = new Date(fecha_hora_ingreso); // ya viene en UTC desde el front
+  const fecha = new Date(fecha_hora_ingreso);
 
   const conflicto = await MovimientoHabitacion.findOne({
     where: {
@@ -66,12 +67,12 @@ export async function validarConflictoReserva({ id_cama, fecha_hora_ingreso }, t
 }
 
 export async function validarOcupacionCamaPorAdmision(id_cama, fecha, transaction = null) {
-  const fechaConsulta = new Date(fecha); // asumimos que ya viene en UTC
+  const fechaConsulta = new Date(fecha);
 
   const conflicto = await MovimientoHabitacion.findOne({
     where: {
       id_cama,
-      id_mov: 1, // Ocupación
+      id_mov: 1,
       estado: 1,
     },
     include: [{
@@ -92,7 +93,8 @@ export async function validarOcupacionCamaPorAdmision(id_cama, fecha, transactio
 }
 
 export async function validarOcupacionCamaPorAdmisionExcepto(id_cama, fecha, id_admision_excluir, transaction = null) {
-  const fechaConsulta = new Date(fecha); 
+  const fechaConsulta = new Date(fecha);
+
   const conflicto = await MovimientoHabitacion.findOne({
     where: {
       id_cama,
@@ -121,7 +123,7 @@ export async function validarMovimientoEgresoExistente(id_admision, transaction 
   const egreso = await MovimientoHabitacion.findOne({
     where: {
       id_admision,
-      id_mov: 2, // tipo "Egreso"
+      id_mov: 2,
       estado: 1,
     },
     transaction,
@@ -159,7 +161,3 @@ export async function verificarGeneroHabitacion(id_habitacion, id_genero, transa
     throw new Error('Ya hay pacientes de otro género en la habitación.');
   }
 }
-
-
-
-

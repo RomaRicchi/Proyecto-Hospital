@@ -10,28 +10,14 @@ block content
           thead
             tr
               th Username
+              th Nombre completo
+              th Email
               th Tipo
               th Rol
               th Especialidad
               th Estado
               th Acciones
           tbody
-            if usuarios && usuarios.length
-              each usuario in usuarios
-                tr
-                  td #{usuario.username}
-                  td #{usuario.tipo} 
-                  td #{usuario.rol}
-                  td #{usuario.especialidad}
-                  td #{usuario.estado}
-                  td
-                    button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=usuario.id_usuario)
-                      i.fas.fa-pen
-                    button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=usuario.id_usuario)
-                      i.fas.fa-trash
-            else
-              tr
-                td(colspan="6").text-center Sin usuarios registrados
 
       #btnAgregarContainer.text-center.mt-3
 

@@ -1,17 +1,8 @@
+import { validarTexto } from './utils/validacionesImput.js';
 
 $(document).ready(function () {
   const $tabla = $('#tablaAdministrativo');
   if (!$tabla.length) return;
-
- 
-  const validarTexto = (txt, campo, min = 2, max = 50) => {
-    if (!txt || !txt.trim()) return `El campo "${campo}" es obligatorio.`;
-    const t = txt.trim();
-    if (t.length < min || t.length > max) return `El campo "${campo}" debe tener entre ${min} y ${max} caracteres.`;
-    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ \-]+$/.test(t))
-      return `El campo "${campo}" solo permite letras, espacios y guiones.`;
-    return null;
-  };
 
   fetch('/api/personal-administrativo')
     .then(r => r.json())
@@ -55,12 +46,19 @@ $(document).ready(function () {
         Swal.fire({
           title: 'Editar administrativo',
           html: `
-            <input id="apellido" class="swal2-input" value="${a.apellido}" placeholder="Apellido">
-            <input id="nombre" class="swal2-input" value="${a.nombre}" placeholder="Nombre">
-            <select id="estado" class="swal2-select">
-              <option value="true" ${a.activo ? 'selected' : ''}>Activo</option>
-              <option value="false" ${!a.activo ? 'selected' : ''}>Inactivo</option>
-            </select>
+            <div style="max-width: 350px; margin: 0 auto;">
+              <label class="form-label text-start d-block"><strong>Apellido:</strong></label>
+              <input id="apellido" class="form-control mb-2" value="${a.apellido}" placeholder="Apellido">
+
+              <label class="form-label text-start d-block"><strong>Nombre:</strong></label>
+              <input id="nombre" class="form-control mb-2" value="${a.nombre}" placeholder="Nombre">
+
+              <label class="form-label text-start d-block"><strong>Estado:</strong></label>
+              <select id="estado" class="form-select mb-2 text-dark">
+                <option value="true" ${a.activo ? 'selected' : ''}>Activo</option>
+                <option value="false" ${!a.activo ? 'selected' : ''}>Inactivo</option>
+              </select>
+            </div>
           `,
           showCancelButton: true,
           confirmButtonText: 'Guardar',

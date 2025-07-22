@@ -155,39 +155,30 @@ $(document).ready(function () {
       Swal.fire({
         title: 'Editar Cama',
         html: `
-          <style>
-            .swal2-popup .swal2-input,
-            .swal2-popup select {
-              max-width: 320px !important;
-              width: 100% !important;
-              margin: 0 auto !important;
-              display: block !important;
-            }
-          </style>
+          <label class="form-label text-start d-block mb-1"><strong>Nombre:</strong></label>
+          <input id="swal-nombre" class="form-control mb-2 text-center" value="${cama.nombre}" placeholder="Nombre (1 letra)">
 
-          <input id="swal-nombre" class="swal2-input" value="${cama.nombre}" placeholder="Nombre (1 letra)" style="text-align:center;">
-
-          <label class="mt-2 text-start d-block"><strong>Sector:</strong></label>
-          <select id="swal-sector" class="swal2-input">
+          <label class="form-label text-start d-block mb-1"><strong>Sector:</strong></label>
+          <select id="swal-sector" class="form-select mb-2">
             <option disabled value="">Seleccionar sector</option>
             ${Object.keys(habitacionesPorSector).map(sector => `
               <option value="${sector}" ${sector === sectorActual ? 'selected' : ''}>${sector}</option>
             `).join('')}
           </select>
 
-          <label class="mt-2 text-start d-block"><strong>Habitación:</strong></label>
-          <select id="swal-id_habitacion" class="swal2-input">
+          <label class="form-label text-start d-block mb-1"><strong>Habitación:</strong></label>
+          <select id="swal-id_habitacion" class="form-select mb-2">
             <option value="">Seleccionar una habitación</option>
           </select>
 
-          <label class="mt-2 text-start d-block"><strong>Desinfección ok:</strong></label>
-          <select id="swal-desinfeccion" class="swal2-input">
-            <option value="0" ${!cama.desinfeccion ? 'selected' : ''}>No</option>
+          <label class="form-label text-start d-block mb-1"><strong>Desinfección ok:</strong></label>
+          <select id="swal-desinfeccion" class="form-select mb-2">
             <option value="1" ${cama.desinfeccion ? 'selected' : ''}>Sí</option>
+            <option value="0" ${!cama.desinfeccion ? 'selected' : ''}>No</option>
           </select>
 
-          <label class="mt-2 text-start d-block"><strong>Estado:</strong></label>
-          <select id="swal-estado" class="swal2-input">
+          <label class="form-label text-start d-block mb-1"><strong>Estado:</strong></label>
+          <select id="swal-estado" class="form-select">
             <option value="0" ${!cama.estado ? 'selected' : ''}>Disponible</option>
             <option value="1" ${cama.estado ? 'selected' : ''}>Ocupada</option>
           </select>
@@ -199,7 +190,6 @@ $(document).ready(function () {
           const selectSector = document.getElementById('swal-sector');
           const selectHabitacion = document.getElementById('swal-id_habitacion');
 
-          // Cargar habitaciones del sector actual
           if (sectorActual) {
             const habs = habitacionesPorSector[sectorActual] || [];
             habs.forEach(h => {

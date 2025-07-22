@@ -1,3 +1,9 @@
+import { 
+	validarTexto,
+  validarDNI, 
+	validarTelefono 
+} from './utils/validacionesImput.js';
+
 $(document).ready(function () {
   const tabla = $('#tablaFamiliar');
   if (tabla.length) {
@@ -71,10 +77,9 @@ $(document).ready(function () {
         const apellido     = document.getElementById('swal-apellido').value.trim();
         const telefonoRaw  = document.getElementById('swal-telefono').value.trim();
         const id_parentesco = document.getElementById('swal-parentesco').value;
-
-        // Validaciones
-        if (!/^\d{7,}$/.test(dniRaw)) {
-          Swal.showValidationMessage('DNI inválido (mínimo 7 dígitos numéricos).');
+        const errorDNI = validarDNI(dniRaw);
+        if (errorDNI) {
+          Swal.showValidationMessage(errorDNI);
           return false;
         }
         const paciente = await buscarPacientePorDNI(dniRaw);
@@ -82,23 +87,21 @@ $(document).ready(function () {
           Swal.showValidationMessage('No existe un paciente con ese DNI.');
           return false;
         }
-        if (!nombre) {
-          Swal.showValidationMessage('El nombre del familiar es obligatorio.');
+        if (!nombre||!apellido ) {
+          Swal.showValidationMessage('El nombre completo del familiar es obligatorio.');
           return false;
         }
-        if (!apellido) {
-          Swal.showValidationMessage('El apellido del familiar es obligatorio.');
-          return false;
-        }
-        if (!/^\+?\d{6,15}$/.test(telefonoRaw)) {
-          Swal.showValidationMessage('Teléfono inválido (solo dígitos, 6–15 caracteres).');
+        const errNombre = validarTexto(nombre, 'Nombre');
+        const errApellido = validarTexto(apellido, 'Apellido');
+        const errTelefono = validarTelefono(telefonoRaw);
+        if (errNombre || errApellido || errTelefono) {
+          Swal.showValidationMessage(errNombre || errApellido || errTelefono);
           return false;
         }
         if (!id_parentesco) {
           Swal.showValidationMessage('Selecciona un parentesco.');
           return false;
         }
-
         return {
           nombre,
           apellido,
@@ -153,15 +156,15 @@ $(document).ready(function () {
             document.getElementById('swal-parentesco').value = familiar.id_parentesco;
           },
           preConfirm: async () => {
-            const dniRaw       = document.getElementById('swal-dni').value.trim();
+            const dniRaw       = document.getElementById('swal-dni')?.value?.trim();
             const nombre       = document.getElementById('swal-nombre').value.trim();
             const apellido     = document.getElementById('swal-apellido').value.trim();
             const telefonoRaw  = document.getElementById('swal-telefono').value.trim();
             const id_parentesco = document.getElementById('swal-parentesco').value;
 
-            // Validaciones 
-            if (!/^\d{7,}$/.test(dniRaw)) {
-              Swal.showValidationMessage('DNI inválido (mínimo 7 dígitos numéricos).');
+            const errorDNI = validarDNI(dniRaw);
+            if (errorDNI) {
+              Swal.showValidationMessage(errorDNI);
               return false;
             }
             const paciente = await buscarPacientePorDNI(dniRaw);
@@ -169,16 +172,11 @@ $(document).ready(function () {
               Swal.showValidationMessage('No existe un paciente con ese DNI.');
               return false;
             }
-            if (!nombre) {
-              Swal.showValidationMessage('El nombre del familiar es obligatorio.');
-              return false;
-            }
-            if (!apellido) {
-              Swal.showValidationMessage('El apellido del familiar es obligatorio.');
-              return false;
-            }
-            if (!/^\+?\d{6,15}$/.test(telefonoRaw)) {
-              Swal.showValidationMessage('Teléfono inválido (solo dígitos, 6–15 caracteres).');
+            const errNombre = validarTexto(nombre, 'Nombre');
+            const errApellido = validarTexto(apellido, 'Apellido');
+            const errTelefono = validarTelefono(telefonoRaw);
+            if (errNombre || errApellido || errTelefono) {
+              Swal.showValidationMessage(errNombre || errApellido || errTelefono);
               return false;
             }
             if (!id_parentesco) {
@@ -192,8 +190,10 @@ $(document).ready(function () {
               telefono: telefonoRaw,
               id_paciente: paciente.id_paciente,
               id_parentesco: parseInt(id_parentesco, 10),
+              estado: true
             };
           }
+
         }).then((result) => {
           if (result.isConfirmed) {
             fetch(`/api/familiares/${id}`, {
@@ -271,18 +271,20 @@ $(document).ready(function () {
       customClass: {
         popup: 'swal2-card-style'
       },
-      preConfirm: async () => {
+      preConfirm: () => {
         const nombre = document.getElementById('swal-nombre').value.trim();
         const apellido = document.getElementById('swal-apellido').value.trim();
         const telefono = document.getElementById('swal-telefono').value.trim();
         const id_parentesco = document.getElementById('swal-parentesco').value;
 
-        if (!nombre) return Swal.showValidationMessage('Nombre requerido');
-        if (!apellido) return Swal.showValidationMessage('Apellido requerido');
-        if (!/^\+?\d{6,15}$/.test(telefono))
-          return Swal.showValidationMessage('Teléfono inválido');
-        if (!id_parentesco)
-          return Swal.showValidationMessage('Selecciona un parentesco');
+        const errorNombre = validarTexto(nombre, 'Nombre');
+        const errorApellido = validarTexto(apellido, 'Apellido');
+        const errorTelefono = validarTelefono(telefono);
+
+        if (errorNombre) return Swal.showValidationMessage(errorNombre);
+        if (errorApellido) return Swal.showValidationMessage(errorApellido);
+        if (errorTelefono) return Swal.showValidationMessage(errorTelefono);
+        if (!id_parentesco) return Swal.showValidationMessage('Selecciona un parentesco.');
 
         return {
           nombre,
@@ -300,7 +302,8 @@ $(document).ready(function () {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(result.value),
         })
-          .then(() => Swal.fire('Guardado', 'Familiar creado', 'success').then(() => location.href = '/familiar'))
+          .then(() => Swal.fire('Guardado', 'Familiar creado', 'success')
+            .then(() => location.href = '/familiar'))
           .catch(() => Swal.fire('Error', 'No se pudo crear el familiar', 'error'));
       }
     });

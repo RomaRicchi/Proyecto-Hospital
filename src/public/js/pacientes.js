@@ -1,3 +1,11 @@
+import { 
+	validarTexto, 
+	validarFechaNacimiento, 
+	validarDNI, 
+	validarEmail,
+	validarTelefono 
+} from './utils/validacionesImput.js';
+
 $(document).ready(function () {
 	const tabla = $('#tablaPacientes');
 
@@ -31,7 +39,19 @@ $(document).ready(function () {
 	}
 
 	$(document).on('click', '#btnAgregarPaciente', abrirSwalAgregarPaciente);
-
+	function validarPaciente(paciente) {
+		if (!paciente.dni_paciente || !paciente.apellido_p || !paciente.nombre_p || !paciente.id_genero) {
+			return 'DNI, Apellido, Nombre y Género son obligatorios';
+		}
+		return (
+			validarDNI(paciente.dni_paciente) ||
+			validarTexto(paciente.apellido_p, 'Apellido') ||
+			validarTexto(paciente.nombre_p, 'Nombre') ||
+			(paciente.fecha_nac && validarFechaNacimiento(paciente.fecha_nac)) ||
+			(paciente.telefono && validarTelefono(paciente.telefono)) ||
+			(paciente.email && validarEmail(paciente.email))
+		);
+	}
 	function abrirSwalAgregarPaciente() {
 		Promise.all([
 			fetch('/api/pacientes/localidad').then(r => r.json()),
@@ -77,16 +97,12 @@ $(document).ready(function () {
 						id_localidad: $('#id_localidad').val(),
 						email: $('#email').val().trim(),
 					};
-
-					if (!paciente.dni_paciente || !paciente.apellido_p || !paciente.nombre_p || !paciente.id_genero) {
-						Swal.showValidationMessage('DNI, Apellido, Nombre y Género son obligatorios');
+					const error = validarPaciente(paciente);
+					if (error) {
+						Swal.showValidationMessage(error);
 						return false;
 					}
-					if (paciente.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(paciente.email)) {
-						Swal.showValidationMessage('Email no válido');
-						return false;
-					}
-
+				
 					return paciente;
 				}
 			}).then(result => {
@@ -159,13 +175,9 @@ $(document).ready(function () {
 						id_localidad: $('#id_localidad').val(),
 						email: $('#email').val().trim(),
 					};
-
-					if (!updated.dni_paciente || !updated.apellido_p || !updated.nombre_p || !updated.id_genero) {
-						Swal.showValidationMessage('DNI, Apellido, Nombre y Género son obligatorios');
-						return false;
-					}
-					if (updated.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updated.email)) {
-						Swal.showValidationMessage('Email no válido');
+					const error = validarPaciente(updated);
+					if (error) {
+						Swal.showValidationMessage(error);
 						return false;
 					}
 					return updated;
@@ -236,7 +248,6 @@ $(document).ready(function () {
 								<div style="margin-bottom: 0.5rem;">
 									<strong>${f.nombre} ${f.apellido}</strong> (${f.parentesco?.nombre || 'Sin parentesco'})<br>
 									Tel: ${f.telefono || '-'}<br>
-									Email: ${f.email || '-'}
 								</div>
 							`).join('')
 							: `<p class="text-muted">No tiene familiares registrados.</p>`}

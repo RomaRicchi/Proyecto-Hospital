@@ -198,8 +198,10 @@ export const ingresoEmergencia = async (req, res) => {
     });
   } catch (error) {
     if (t) await t.rollback();
+    console.error('❌ Error en ingreso de emergencia:', error); // <--- AGREGÁ ESTA LÍNEA
     return res.status(500).json({ error: 'Error en el ingreso de emergencia.' });
   }
+
 };
 
 export const vistaEmergencias = (req, res) => {

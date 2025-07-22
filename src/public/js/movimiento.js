@@ -1,20 +1,10 @@
+import { 
+	validarTexto
+} from './utils/validacionesImput.js'
+
 $(document).ready(function () {
   const tabla = $('#tablaMovimiento');
   if (!tabla.length) return;
-
-  function validarNombre(nombre) {
-    if (!nombre || !nombre.trim()) {
-      return 'El nombre es obligatorio.';
-    }
-    const nombreLimpio = nombre.trim();
-    if (nombreLimpio.length < 3 || nombreLimpio.length > 50) {
-      return 'Debe tener entre 3 y 50 caracteres.';
-    }
-    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(nombreLimpio)) {
-      return 'Solo se permiten letras y espacios.';
-    }
-    return null;
-  }
 
   fetch('/api/movimientos')
     .then((res) => res.json())
@@ -77,7 +67,7 @@ $(document).ready(function () {
 					popup: 'swal2-card-style'
 			},
       preConfirm: (nombre) => {
-        const err = validarNombre(nombre);
+        const err = validarTexto(nombre, 'Nombre del movimiento', 3, 50);
         if (err) {
           Swal.showValidationMessage(err);
           return false;
@@ -112,7 +102,7 @@ $(document).ready(function () {
             popup: 'swal2-card-style'
           },
           preConfirm: (nombre) => {
-            const err = validarNombre(nombre);
+            const err = validarTexto(nombre, 'Nombre del movimiento', 3, 50);
             if (err) {
               Swal.showValidationMessage(err);
               return false;

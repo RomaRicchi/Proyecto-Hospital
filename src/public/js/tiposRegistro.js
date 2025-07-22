@@ -1,8 +1,9 @@
+import { 
+	validarTexto
+} from './utils/validacionesImput.js';
+
 $(document).ready(function () {
   const $c = $('#tablaTiposContainer');
-
-  const validar = (txt) =>
-    !txt || txt.trim().length < 3 ? 'Debe ingresar al menos 3 letras' : null;
 
   function cargar() {
     fetch('/api/tipos-registro')
@@ -58,10 +59,14 @@ $(document).ready(function () {
       inputLabel: 'Nombre',
       showCancelButton: true,
       customClass: {
-					popup: 'swal2-card-style'
-				},
+        popup: 'swal2-card-style'
+      },
       preConfirm: v => {
-        const e = validar(v); if (e) { Swal.showValidationMessage(e); return false; }
+        const e = validarTexto(v, 'Nombre', 3);
+        if (e) {
+          Swal.showValidationMessage(e);
+          return false;
+        }
         return v.trim();
       }
     }).then(r => {
@@ -89,10 +94,14 @@ $(document).ready(function () {
       inputValue: desc,
       showCancelButton: true,
       customClass: {
-					popup: 'swal2-card-style'
-				},
+        popup: 'swal2-card-style'
+      },
       preConfirm: v => {
-        const e = validar(v); if (e) { Swal.showValidationMessage(e); return false; }
+        const e = validarTexto(v, 'Nombre', 3);
+        if (e) {
+          Swal.showValidationMessage(e);
+          return false;
+        }
         return v.trim();
       }
     }).then(r => {

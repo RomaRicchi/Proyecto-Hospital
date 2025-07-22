@@ -1,14 +1,10 @@
+import { validarNumeroPositivo } from './utils/validacionesImput.js';
+
 $(document).ready(function () {
   const $tabla = $('#tablaHabitacion');
   if (!$tabla.length) return;
 
-  function validarNumero(num) {
-    if (!num) return 'El número es obligatorio.';
-    if (!/^[1-9]\d{0,3}$/.test(num)) {
-      return 'El número debe ser un entero positivo (1–9999).';
-    }
-    return null;
-  }
+
   const dt = $tabla.DataTable({
     language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
     paging: true,
@@ -62,7 +58,7 @@ $(document).ready(function () {
         preConfirm: () => {
           const num = $('#swal-num').val().trim();
           const id_sector = $('#swal-sector').val();
-          const error = validarNumero(num);
+          const error = validarNumeroPositivo(num, 'Número de habitación');
           if (error) {
             Swal.showValidationMessage(error);
             return false;
@@ -130,7 +126,7 @@ $(document).ready(function () {
         preConfirm: () => {
           const num = $('#swal-num').val().trim();
           const id_sector = $('#swal-sector').val();
-          const error = validarNumero(num);
+          const error = validarNumeroPositivo(num, 'Número de habitación');
           if (error) {
             Swal.showValidationMessage(error);
             return false;
@@ -184,7 +180,8 @@ $(document).ready(function () {
         .then((res) => {
           if (res.status === 409) throw new Error('No se puede eliminar: en uso.');
           if (!res.ok) throw new Error();
-          return res.json();
+          // Si no hay contenido, no intentes parsear JSON
+          return res.status !== 204 ? res.json() : null;
         })
         .then(() =>
           Swal.fire('Eliminado', 'Habitación borrada', 'success').then(() =>
@@ -196,4 +193,5 @@ $(document).ready(function () {
         );
     });
   });
+
 });

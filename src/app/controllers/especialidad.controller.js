@@ -1,4 +1,4 @@
-import { Especialidad } from '../models/index.js';
+import { Especialidad, PersonalSalud } from '../models/index.js';
 
 export const listarEspecialidades = async (req, res) => {
   try {
@@ -39,12 +39,22 @@ export const eliminarEspecialidad = async (req, res) => {
   try {
     const esp = await Especialidad.findByPk(id);
     if (!esp) return res.status(404).json({ message: 'No encontrada' });
+
+    const enUso = await PersonalSalud.count({
+      where: { id_especialidad: id }
+    });
+
+    if (enUso > 0) {
+      return res.status(409).json({ message: 'La especialidad está asociada a profesionales' });
+    }
+
     await esp.destroy();
-    res.json({ message: 'Eliminada' });
+    res.status(204).send();
   } catch (error) {
     res.status(500).json({ message: 'Error al eliminar' });
   }
 };
+
 export const vistaEspecialidades = async (req, res) => {
   try {
     const especialidades = await Especialidad.findAll();

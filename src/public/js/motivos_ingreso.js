@@ -1,20 +1,10 @@
+import { 
+	validarTexto
+} from './utils/validacionesImput.js'
+
 $(document).ready(function () { 
   const $tabla = $('#tablaMotivoIngreso');
   if (!$tabla.length) return;
-
-  function validarTipo(tipo) {
-    if (!tipo || !tipo.trim()) {
-      return 'El tipo de motivo es obligatorio.';
-    }
-    const txt = tipo.trim();
-    if (txt.length < 3 || txt.length > 50) {
-      return 'El tipo debe tener entre 3 y 50 caracteres.';
-    }
-    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(txt)) {
-      return 'El tipo solo puede contener letras y espacios.';
-    }
-    return null;
-  }
 
   fetch('/api/motivos_ingreso')
     .then(r => r.json())
@@ -75,7 +65,7 @@ $(document).ready(function () {
         popup: 'swal2-card-style'
       },
       preConfirm: tipo => {
-        const err = validarTipo(tipo);
+        const err = validarTexto(tipo, 'Tipo de motivo', 3, 50);
         if (err) {
           Swal.showValidationMessage(err);
           return false;
@@ -115,7 +105,7 @@ $(document).ready(function () {
             popup: 'swal2-card-style'
           },
           preConfirm: tipo => {
-            const err = validarTipo(tipo);
+            const err = validarTexto(tipo, 'Tipo de motivo', 3, 50);
             if (err) {
               Swal.showValidationMessage(err);
               return false;
