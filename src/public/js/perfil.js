@@ -1,5 +1,3 @@
-// perfil.js
-
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
 
@@ -54,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!formValues) return;
 
     try {
-      const response = await fetch('/api/usuario/cambiar-password', {
+      const response = await fetch('/cambiar-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formValues)

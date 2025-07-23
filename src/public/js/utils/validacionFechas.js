@@ -80,6 +80,14 @@ export function getFechaLocalParaInput() {
   return now.toISOString().slice(0, 16);
 }
 
+function getFechaHoraLocalParaInput() {
+  const ahora = new Date();
+  ahora.setSeconds(0, 0); 
+  const offset = ahora.getTimezoneOffset();
+  ahora.setMinutes(ahora.getMinutes() - offset);
+  return ahora.toISOString().slice(0, 16);
+}
+
 export function formatDate(fechaISO) {
     const date = new Date(fechaISO);
     const dia = String(date.getDate()).padStart(2, '0');
@@ -93,4 +101,39 @@ export function formatHour(fechaISO) {
     const horas = String(date.getHours()).padStart(2, '0');
     const minutos = String(date.getMinutes()).padStart(2, '0');
     return `${horas}:${minutos}`;
+}
+
+export function validarFechaNoPasada(fechaStr) {
+  if (!fechaStr) return 'Debes seleccionar una fecha.';
+
+  const fecha = new Date(fechaStr);
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);       // hoy a las 00:00
+  fecha.setHours(0, 0, 0, 0);     // fecha ingresada a las 00:00
+
+  if (fecha < hoy) return 'No se permite una fecha en el pasado.';
+  return null;
+}
+
+export function validarFechaReservaRango(fechaStr) {
+  if (!fechaStr) return 'Debes seleccionar una fecha.';
+
+  const fecha = new Date(fechaStr);
+  const hoy = new Date();
+
+  // Mañana (sin horas)
+  const mañana = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 1);
+  
+  // Límite máximo (hoy + 1 año)
+  const limite = new Date(hoy.getFullYear() + 1, hoy.getMonth(), hoy.getDate());
+
+  if (fecha < mañana) {
+    return 'La fecha debe ser a partir de mañana.';
+  }
+
+  if (fecha > limite) {
+    return 'La fecha no puede ser mayor a 1 año desde hoy.';
+  }
+
+  return null;
 }

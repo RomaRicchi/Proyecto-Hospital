@@ -7,11 +7,13 @@ import {
 	deleteUsuario,
 	listarUsuariosMedicos,
 	vistaPerfil,
+  actualizarPerfil,
 } from '../controllers/usuario.controller.js';
 
 const router = Router();
 
 router.get('/perfil', vistaPerfil);
+router.post('/perfil', actualizarPerfil);
 router.get('/medicos', listarUsuariosMedicos);
 router.get('/validar-email/:email', async (req, res) => {
   const { email } = req.params;

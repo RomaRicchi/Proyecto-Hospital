@@ -49,12 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 🔹 Mostrar/ocultar contraseña
 function togglePassword(id, btn) {
   const input = document.getElementById(id);
   if (!input) return;
 
   const visible = input.type === 'text';
   input.type = visible ? 'password' : 'text';
-  btn.innerHTML = visible ? '👁' : '🙈';
+  btn.innerHTML = visible ? '🔓' : '🔒';
 }

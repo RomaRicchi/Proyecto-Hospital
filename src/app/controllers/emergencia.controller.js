@@ -77,7 +77,7 @@ export const ingresoEmergencia = async (req, res) => {
       return res.status(400).json({ error: 'No se encontró el motivo "emergencia".' });
     }
 
-    const sectorDestino = tipo_emergencia === 'nino' ? 'Pediatria' : 'Terapia intermedia';
+    const sectorDestino = tipo_emergencia === 'nino' ? 'Internación pediatrica' : 'Terapia intermedia';
 
     const camasLibres = await Cama.findAll({
       where: { estado: 0,  desinfeccion: true },

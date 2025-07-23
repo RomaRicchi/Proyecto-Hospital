@@ -1,8 +1,9 @@
 import {
   aplicarReservaSemanal,
-  parseFechaLocal,
   getFechaLocalParaInput,
   toUTC, 
+  validarFechaReservaRango, 
+  validarFechaNoPasada 
 } from './validacionFechas.js';
 
 export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_habitacion, fechaDashboard, edad, sector_nombre) {
@@ -24,7 +25,7 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 		).join('');
 				
 		let fechaIngresoDefault = fechaDashboard
-			? new Date(`${fechaDashboard.split('T')[0]}T09:00:00`).toISOString().slice(0, 16)
+			? new Date(fechaDashboard).toISOString().slice(0, 16)
 			: getFechaLocalParaInput();
 
 		const result = await Swal.fire({
@@ -108,16 +109,24 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 				
 		let id_mov = 1;
 
-		if (fechaSeleccionadaStr < hoyStr) {
-		await Swal.fire('Error', 'No se permite una fecha de ingreso en el pasado', 'error');
+		const errorFechaPasada = validarFechaNoPasada(fecha_hora_ingreso);
+		if (errorFechaPasada) {
+		await Swal.fire('Error', errorFechaPasada, 'error');
 		return;
 		}
 
 		if (fechaSeleccionadaStr > hoyStr) {
-			id_mov = 3;
-			aplicarReservaSemanal(inputFechaIngreso, inputFechaEgreso, inputMotivoEgr);
-			fecha_hora_egreso = inputFechaEgreso.value;
+		const error = validarFechaReservaRango(fecha_hora_ingreso);
+		if (error) {
+			await Swal.fire('Fecha inválida', error, 'warning');
+			return;
 		}
+
+		id_mov = 3;
+		aplicarReservaSemanal(inputFechaIngreso, inputFechaEgreso, inputMotivoEgr);
+		fecha_hora_egreso = inputFechaEgreso.value;
+		}
+
 
 		if (fecha_hora_egreso) {
 			const ingreso = new Date(fecha_hora_ingreso);

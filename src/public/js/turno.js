@@ -57,7 +57,8 @@ $(document).ready(function () {
         const fecha = new Date(t.fecha_hora);
         return !isNaN(fecha) && fecha >= hoy;
       })
-      .filter(t => !filtroId || t.id_agenda == filtroId)
+      .filter(t => !filtroId || t.agenda?.personal?.id_personal_salud == filtroId)
+
       .forEach(t => {
         const paciente = t.cliente ? `${t.cliente.apellido_p}, ${t.cliente.nombre_p}` : '-';
         const profesional = t.agenda?.personal
@@ -108,47 +109,54 @@ $(document).ready(function () {
   });
 
   function configurarFiltroProfesional() {
-    
-    const guardado = localStorage.getItem('filtroProfesionalTurnoId');
+    fetch('/api/agenda')
+      .then(r => r.json())
+      .then(agendas => {
+        const profesionalesUnicos = [];
+        const seen = new Set();
 
-    $('#filtroProfesionalTurno').select2({
-      placeholder: 'Filtrar por profesional o especialidad',
-      ajax: {
-        url: '/api/agenda/buscar',
-        dataType: 'json',
-        delay: 250,
-        data: params => ({ q: params.term }),
-        processResults: data => ({
-          results: data.map(d => ({
-            id: d.id,
-            text: d.text || `${d.personal?.apellido}, ${d.personal?.nombre} (${d.personal?.especialidad?.nombre || ''})`
-          }))
-        }),
-        cache: true
-      },
-      width: 'resolve',
-      allowClear: true
-    });
-
-    if (guardado) {
-      fetch(`/api/agenda/buscar?q=${guardado}`)
-        .then(r => r.json())
-        .then(data => {
-          const encontrado = data.find(p => p.id == guardado);
-          if (encontrado) {
-            const op = new Option(encontrado.text, encontrado.id, true, true);
-            $('#filtroProfesionalTurno').append(op).trigger('change.select2');
+        for (const a of agendas) {
+          const p = a.personal;
+          const key = `${p.id_personal_salud}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            profesionalesUnicos.push({
+              id: p.id_personal_salud,
+              nombre: `${p.apellido}, ${p.nombre} (${p.especialidad?.nombre || '-'})`
+            });
           }
-          cargarTurnos();
-        })
-        .catch(() => cargarTurnos());
-    } else {
-      cargarTurnos();
-    }
+        }
+        const options = profesionalesUnicos.map(p =>
+          `<option value="${p.id}">${p.nombre}</option>`
+        );
+        $('#filtroProfesionalTurno').html(`
+          <option value="">Todos los profesionales</option>
+          ${options.join('')}
+        `);
+        const guardado = localStorage.getItem('filtroProfesionalTurnoId');
+        if (guardado) {
+          $('#filtroProfesionalTurno').val(guardado).trigger('change');
+        }
+
+        $('#filtroProfesionalTurno').select2({
+          placeholder: 'Filtrar por profesional',
+          width: 'resolve',
+          allowClear: true
+        });
+
+        cargarTurnos();
+      });
 
     $('#filtroProfesionalTurno').on('change', function () {
-      localStorage.setItem('filtroProfesionalTurnoId', $(this).val());
+      const valor = $(this).val();
+      if (valor) {
+        localStorage.setItem('filtroProfesionalTurnoId', valor);
+      } else {
+        localStorage.removeItem('filtroProfesionalTurnoId');
+      }
       cargarTurnos();
     });
   }
+
+  configurarFiltroProfesional();
 });

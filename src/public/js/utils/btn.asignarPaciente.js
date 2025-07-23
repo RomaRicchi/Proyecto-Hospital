@@ -3,6 +3,9 @@ import {
 	validarCompatibilidadPacienteSector,
 	obtenerCriteriosPorSector,
 } from './validarSectorPaciente.js';
+import { 
+	validarDNI,
+} from './validacionesImput.js';
 import { mostrarFormularioYRegistrarAdmision } from './admisionCompleta.js';
 
 $(document).on('click', '.btn-asignar-paciente', async function () {
@@ -21,6 +24,11 @@ $(document).on('click', '.btn-asignar-paciente', async function () {
 			popup: 'swal2-card-style'
 		},
 		preConfirm: async (dni) => {
+			const error = validarDNI(dni);
+			if (error) {
+				Swal.showValidationMessage(error);
+				return false;
+			}
 			if (!dni) {
 				Swal.showValidationMessage('Debe ingresar un DNI');
 				return false;

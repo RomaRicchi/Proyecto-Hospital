@@ -80,36 +80,6 @@ export function validarTelefono(telefono) {
   return null;
 }
 
-export function validarFechaReservaRango(fechaStr) {
-  if (!fechaStr) return 'Debes seleccionar una fecha.';
-
-  const fecha = new Date(fechaStr);
-  const hoy = new Date();
-
-  // Mañana (sin horas)
-  const mañana = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 1);
-  
-  // Límite máximo (hoy + 1 año)
-  const limite = new Date(hoy.getFullYear() + 1, hoy.getMonth(), hoy.getDate());
-
-  if (fecha < mañana) {
-    return 'La fecha debe ser a partir de mañana.';
-  }
-
-  if (fecha > limite) {
-    return 'La fecha no puede ser mayor a 1 año desde hoy.';
-  }
-
-  return null;
-}
-
-export function validarFechaNoFutura(fechaStr) {
-  const fecha = new Date(fechaStr);
-  const hoy = new Date();
-  if (fecha > hoy) return 'La fecha no puede ser futura.';
-  return null;
-}
-
 export function validarNumeroPositivo(valor, campo = 'Número') {
   if (!valor) return `El campo "${campo}" es obligatorio.`;
   if (!/^[1-9]\d{0,3}$/.test(valor)) {
@@ -128,4 +98,11 @@ export function validarFechaSoloHoy(fechaStr) {
     return 'Solo se permite la fecha de hoy.';
   }
   return null;
+}
+function getFechaHoraLocalParaInput() {
+  const ahora = new Date();
+  ahora.setSeconds(0, 0); 
+  const offset = ahora.getTimezoneOffset();
+  ahora.setMinutes(ahora.getMinutes() - offset);
+  return ahora.toISOString().slice(0, 16);
 }

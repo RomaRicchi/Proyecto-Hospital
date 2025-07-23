@@ -16,10 +16,10 @@ export function validarCompatibilidadPacienteSector(edad, generoId, sector) {
 	switch (sector) {
 		case 'Neonatología':
 			return edad <= 1;
-		case 'Pediatría':
+		case 'Internación pediatrica':
 			return edad > 1 && edad <= 17;
 		case 'Maternidad':
-			return generoId === 2; // Femenino
+			return generoId === 2; 
 		case 'Geriatría':
 			return edad >= 80;
 		default:
@@ -31,7 +31,7 @@ export function obtenerCriteriosPorSector(sector) {
 	switch (sector) {
 		case 'Neonatología':
 			return 'Edad: hasta 1 año';
-		case 'Pediatría':
+		case 'Internación pediatrica':
 			return 'Edad: entre 1 y 17 años';
 		case 'Maternidad':
 			return 'Género: Femenino';

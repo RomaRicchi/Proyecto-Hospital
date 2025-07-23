@@ -429,7 +429,7 @@ export const actualizarPerfil = async (req, res) => {
     req.session.usuario.nombre = nombre;
     req.session.usuario.apellido = apellido;
 
-    return res.redirect('/perfil?editado=1');
+    return res.redirect('/api/usuarios/perfil?editado=1');
   } catch (error) {
     console.error('❌ Error al actualizar perfil:', error);
     return res.status(500).send('Error al actualizar perfil');

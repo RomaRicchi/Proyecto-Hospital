@@ -9,7 +9,7 @@ block content
 
           img.foto-perfil.rounded-circle.mb-3(src=foto, width="120", height="120")
 
-          form(action="/perfil" method="POST" class="text-start mt-3")
+          form(action="/api/usuarios/perfil" method="POST" class="text-start mt-3")
             .mb-3
               label.form-label(for="nombre") Nombre
               input.form-control.shadow-sm(type="text" id="nombre" name="nombre" required value=usuario.nombre)
