@@ -1,11 +1,13 @@
 import {
   Paciente,
+  Familiar,
   Admision,
   ObraSocial,
   MotivoIngreso,
   Cama,
   Habitacion,
   Sector,
+  Turno,
   Movimiento,
   MovimientoHabitacion,
   RegistroHistoriaClinica,
@@ -208,38 +210,25 @@ export const ingresoEmergencia = async (req, res) => {
 
 export const actualizarPacienteEmergencia = async (req, res) => {
   const {
-    dni, nombre, apellido, fecha_nac, id_genero,
-    telefono, direccion, id_localidad, email
+    dni_emergencia, dni, nombre, apellido, fecha_nac,
+    telefono, direccion, id_localidad, email, id_genero
   } = req.body;
 
-  if (!dni || !nombre || !apellido || !id_genero) {
-    return res.status(400).json({ error: 'Faltan datos obligatorios.' });
-  }
-
-  const sequelize = Paciente.sequelize;
-  const t = await sequelize.transaction();
-
+  const t = await Paciente.sequelize.transaction();
   try {
     const pacienteNN = await Paciente.findOne({
       where: {
+        dni_paciente: dni_emergencia,
         apellido_p: 'NN',
         nombre_p: 'No identificado',
         estado: 1
       },
-      include: [{
-        model: Admision,
-        required: true,
-        where: {
-          descripcion: { [Op.like]: '%emergencia%' },
-          fecha_hora_egreso: null
-        }
-      }],
       transaction: t
     });
 
     if (!pacienteNN) {
       await t.rollback();
-      return res.status(404).json({ error: 'No se encontró un paciente NN admitido por emergencia.' });
+      return res.status(404).json({ error: 'Paciente NN no encontrado' });
     }
 
     const pacienteReal = await Paciente.findOne({
@@ -264,28 +253,27 @@ export const actualizarPacienteEmergencia = async (req, res) => {
         transaction: t
       });
 
-      // Marcar paciente NN como inactivo
       await pacienteNN.update({ estado: 0 }, { transaction: t });
 
       await t.commit();
-      return res.status(200).json({ mensaje: 'Paciente fusionado correctamente con el registro existente.' });
+      return res.json({ mensaje: 'Paciente fusionado correctamente con el registro existente.' });
     }
 
-    // Actualizar paciente NN con nuevos datos
+    // Si no existe, actualizar NN como paciente real
     await pacienteNN.update({
       dni_paciente: dni,
       nombre_p: nombre,
       apellido_p: apellido,
       fecha_nac: fecha_nac || null,
-      id_genero,
       telefono: telefono || null,
       direccion: direccion || null,
       id_localidad: id_localidad || null,
-      email: email || null
+      email: email || null,
+      id_genero
     }, { transaction: t });
 
     await t.commit();
-    return res.status(200).json({ mensaje: 'Datos del paciente NN actualizados correctamente.' });
+    return res.json({ mensaje: 'Datos del paciente NN actualizados correctamente.' });
 
   } catch (error) {
     console.error('❌ Error al actualizar paciente NN:', error);
@@ -293,3 +281,4 @@ export const actualizarPacienteEmergencia = async (req, res) => {
     return res.status(500).json({ error: 'Error al actualizar los datos del paciente.' });
   }
 };
+

@@ -238,3 +238,94 @@ export const buscarPacientes = async (req, res) => {
     res.status(500).json({ message: 'Error en la búsqueda' });
   }
 };
+
+export const existeNNPorDNI = async (req, res) => {
+  const dni = req.params.dni;
+
+  try {
+    const paciente = await Paciente.findOne({
+      where: {
+        dni_paciente: dni,
+        apellido_p: 'NN',
+        nombre_p: 'No identificado',
+        estado: 1
+      },
+      include: [{
+        model: Admision,
+        as: 'admisiones', // 👈 esta línea es clave
+        where: {
+          descripcion: { [Op.like]: '%emergencia%' },
+          fecha_hora_egreso: null
+        }
+      }]
+    });
+
+    if (paciente) {
+      return res.json({ encontrado: true });
+    }
+
+    return res.json({ encontrado: false });
+  } catch (error) {
+    console.error('Error buscando paciente NN:', error);
+    return res.status(500).json({ error: 'Error buscando paciente NN' });
+  }
+};
+
+export const obtenerNNconAdmision = async (req, res) => {
+  const dni = req.params.dni;
+
+  try {
+    const pacienteNN = await Paciente.findOne({
+      where: {
+        dni_paciente: dni,
+        apellido_p: 'NN',
+        nombre_p: 'No identificado',
+        estado: 1
+      },
+      include: [{
+        model: Admision,
+        as: 'admisiones',
+        where: {
+          descripcion: { [Op.like]: '%emergencia%' },
+          fecha_hora_egreso: null
+        },
+        required: true
+      }]
+    });
+
+    if (!pacienteNN) {
+      return res.status(404).json({ error: 'Paciente NN no encontrado' });
+    }
+
+    res.json({
+      paciente: {
+        id: pacienteNN.id_paciente,
+        dni: pacienteNN.dni_paciente
+      }
+    });
+  } catch (error) {
+    console.error('Error al buscar NN:', error);
+    res.status(500).json({ error: 'Error interno' });
+  }
+};
+
+export const obtenerPacientePorDNI = async (req, res) => {
+  const dni = req.params.dni;
+
+  const paciente = await Paciente.findOne({ where: { dni_paciente: dni } });
+
+  if (!paciente) return res.status(404).json({ existe: false });
+
+  res.json({
+    existe: true,
+    paciente: {
+      nombre: paciente.nombre_p,
+      apellido: paciente.apellido_p,
+      fecha_nac: paciente.fecha_nac,
+      telefono: paciente.telefono,
+      direccion: paciente.direccion,
+      email: paciente.email
+    }
+  });
+};
+

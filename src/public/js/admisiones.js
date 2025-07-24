@@ -196,3 +196,104 @@ $(document).ready(function () {
       Swal.fire('Error', 'No se pudieron cargar las admisiones.', 'error');
     });
 });
+$('#btn-actualizar-emergencia').click(async () => {
+  const { value: dniForm } = await Swal.fire({
+    title: 'Fusión de paciente NN',
+    html: `
+      <input id="dni_emergencia" class="swal2-input" placeholder="DNI temporal (emergencia)">
+      <input id="dni_real" class="swal2-input" placeholder="DNI real">
+    `,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'Continuar',
+    cancelButtonText: 'Cancelar',
+    customClass: { popup: 'swal2-card-style' },
+    preConfirm: () => {
+      const dni_emergencia = $('#dni_emergencia').val().trim();
+      const dni_real = $('#dni_real').val().trim();
+
+      if (!dni_emergencia || !dni_real) {
+        Swal.showValidationMessage('Ambos DNI son obligatorios');
+        return false;
+      }
+
+      return { dni_emergencia, dni_real };
+    }
+  });
+
+  if (!dniForm) return;
+
+  const { dni_emergencia, dni_real } = dniForm;
+
+  // 1. Verificar que exista el paciente NN
+  const nnRes = await fetch(`/api/pacientes/get-nn/${dni_emergencia}`);
+  if (!nnRes.ok) {
+    return Swal.fire('Error', 'No se encontró un paciente NN con ese DNI.', 'error');
+  }
+
+  // 2. Buscar si ya existe un paciente real
+  let datosPrecargados = {};
+  const realRes = await fetch(`/api/pacientes/get-pac/${dni_real}`);
+  if (realRes.ok) {
+    const data = await realRes.json();
+    datosPrecargados = data.paciente || {};
+  }
+
+  // 3. Formulario final con datos precargados si existen
+  const { value: datosFinal } = await Swal.fire({
+    title: 'Actualizar datos del paciente',
+    html: `
+      <input id="nombre" class="swal2-input" placeholder="Nombre" value="${datosPrecargados.nombre || ''}">
+      <input id="apellido" class="swal2-input" placeholder="Apellido" value="${datosPrecargados.apellido || ''}">
+      <input id="fecha_nac" class="swal2-input" type="date" value="${datosPrecargados.fecha_nac?.split('T')[0] || ''}">
+      <input id="telefono" class="swal2-input" placeholder="Teléfono" value="${datosPrecargados.telefono || ''}">
+      <input id="direccion" class="swal2-input" placeholder="Dirección" value="${datosPrecargados.direccion || ''}">
+      <input id="email" class="swal2-input" placeholder="Email" value="${datosPrecargados.email || ''}">
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Guardar',
+    cancelButtonText: 'Cancelar',
+    customClass: { popup: 'swal2-card-style' },
+    preConfirm: () => {
+      const nombre = $('#nombre').val().trim();
+      const apellido = $('#apellido').val().trim();
+      const fecha_nac = $('#fecha_nac').val();
+      if (!nombre || !apellido) {
+        Swal.showValidationMessage('Nombre y apellido son obligatorios');
+        return false;
+      }
+
+      return {
+        dni_emergencia,
+        dni: dni_real,
+        nombre,
+        apellido,
+        fecha_nac,
+        telefono: $('#telefono').val().trim(),
+        direccion: $('#direccion').val().trim(),
+        email: $('#email').val().trim(),
+        id_genero: 1,
+        id_localidad: 1
+      };
+    }
+  });
+
+  if (!datosFinal) return;
+
+  try {
+    const res = await fetch('/api/emergencias/actualizar-emergencia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datosFinal)
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) throw new Error(json.error || 'Error desconocido');
+    Swal.fire('Éxito', json.mensaje, 'success').then(() => location.reload());
+  } catch (err) {
+    Swal.fire('Error', err.message, 'error');
+  }
+});
+
+
