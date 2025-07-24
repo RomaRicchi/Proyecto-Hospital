@@ -29,12 +29,12 @@ import { vistaPanelSalud } from '../controllers/dashSalud.controller.js';
 import { vistaTurnos } from '../controllers/turno.controller.js';
 import { vistaEstadoTurno } from '../controllers/estadoTurno.controller.js';
 import { vistaAgendas } from '../controllers/agenda.controller.js';
-import { vistaDias } from '../controllers/dia.controller.js'
+import { vistaDias } from '../controllers/dia.controller.js';
+import { vistaLogin } from '../controllers/auth.controller.js';
 
 const router = Router();
 
-router.get('/inicio', (req, res) => res.render('inicio'));
-router.get('/usuarios', isAuthenticated, (req, res) => res.render('users')); //loguin
+router.get('/login', vistaLogin); 
 // 🔸 Panel Principal
 router.get('/dashboard', isAuthenticated,soloRol([1, 2]), vistaDashboard);
 router.get('/panel-salud', isAuthenticated, soloRol([3, 4]), vistaPanelSalud);

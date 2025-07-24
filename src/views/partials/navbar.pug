@@ -28,10 +28,10 @@ nav.navbar.navbar-expand.navbar-dark.bg-primary.sb-topnav
         ul.dropdown-menu.dropdown-menu-end(aria-labelledby="navbarDropdown")
           if !autenticado
             li
-              a.dropdown-item(href="api/usuarios") Iniciar sesión
+              a.dropdown-item(href="/login") Iniciar sesión
           else
             li
-              a.dropdown-item(href="api/usuarios/perfil") Mi perfil
+              a.dropdown-item(href="/api/usuarios/perfil") Mi perfil
             li
               hr.dropdown-divider
             li

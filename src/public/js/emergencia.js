@@ -8,7 +8,7 @@ $(document).ready(function () {
     <select id="tipo_emergencia" class="form-control" required>
       <option value="" disabled selected>Seleccione tipo</option>
       <option value="adulto">Adulto</option>
-      <option value="nino">Niño</option>
+      <option value="niño">Niño</option>
     </select>
   `;
   $('#formEmergencia .form-group').first().before(tipoSelectHtml);

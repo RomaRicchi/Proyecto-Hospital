@@ -134,30 +134,32 @@ export async function validarMovimientoEgresoExistente(id_admision, transaction 
   }
 }
 
-export async function verificarGeneroHabitacion(id_habitacion, id_genero, transaction = null) {
+export async function verificarGeneroHabitacion(idHabitacion, generoNuevo, transaction) {
   const movimientos = await MovimientoHabitacion.findAll({
     where: {
-      id_habitacion,
-      fecha_hora_egreso: null,
-      estado: 1,
+      id_habitacion: idHabitacion,
+      estado: 1
     },
     include: [
       {
         model: Admision,
         as: 'admision',
-        include: [
-          { model: Paciente, as: 'paciente' }
-        ]
+        include: [{ model: Paciente, as: 'paciente', include: ['genero'] }]
       }
     ],
     transaction
   });
-
-  const conflicto = movimientos.find(
-    (mov) => mov.admision?.paciente?.id_genero !== parseInt(id_genero)
-  );
-
-  if (conflicto) {
-    throw new Error('Ya hay pacientes de otro género en la habitación.');
+  console.log('📦 Revisando habitación:', idHabitacion);
+  for (const mov of movimientos) {
+  const generoExistente = mov?.admision?.paciente?.genero?.id_genero;
+  const nombrePac = mov?.admision?.paciente?.nombre_p || 'Desconocido';
+  console.log(`🛏️ Movimiento con paciente ${nombrePac} - género: ${generoExistente}`);
+  }
+  for (const mov of movimientos) {
+    const generoExistente = mov?.admision?.paciente?.genero?.id_genero;
+    if (generoExistente && generoExistente !== generoNuevo) {
+      throw new Error('Ya hay pacientes de otro género en esta habitación');
+    }
   }
 }
+

@@ -108,16 +108,16 @@ export const createAdmision = async (req, res) => {
       return res.status(400).json({ message: 'Cama no encontrada' });
     }
 
-    if (cama) {
-      const habitacionId = cama.id_habitacion;
-      await verificarGeneroHabitacion(habitacionId, genero, t);
-      const sector = cama.habitacion?.sector?.nombre || '';
-      const edad = calcularEdad(fecha_nac);
-      const compatible = validarCompatibilidadPacienteSector(edad, genero, sector);
-      if (!compatible) {
-        throw new Error(`El paciente no cumple los requisitos para el sector "${sector}".`);
-      }
+  if (cama) {
+    const habitacionId = cama.id_habitacion;
+    await verificarGeneroHabitacion(habitacionId, genero, t);
+    const sector = cama.habitacion?.sector?.nombre || '';
+    const edad = calcularEdad(fecha_nac);
+    const compatible = validarCompatibilidadPacienteSector(edad, genero, sector);
+    if (!compatible) {
+      throw new Error(`El paciente no cumple los requisitos para el sector "${sector}".`);
     }
+  }
 
     if (id_mov === 1 && cama && Number(cama.desinfeccion) !== 1) {
       return res.status(400).json({ message: 'La cama aún no está desinfectada' });

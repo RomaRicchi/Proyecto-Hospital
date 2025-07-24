@@ -20,6 +20,16 @@ import {
   validarConflictoReserva,
 } from '../validators/admision.validator.js';
 
+export const vistaEmergencias = (req, res) => {
+  try {
+    res.render('emergencia', {
+      usuario: req.session.usuario,
+      autenticado: true
+    });
+  } catch (error) {
+    res.status(500).send('Error al cargar la vista de emergencias');
+  }
+};
 
 export const ingresoEmergencia = async (req, res) => {
   const sequelize = Admision.sequelize;
@@ -76,11 +86,19 @@ export const ingresoEmergencia = async (req, res) => {
       await t.rollback();
       return res.status(400).json({ error: 'No se encontró el motivo "emergencia".' });
     }
+    const tipoEmergenciaLower = tipo_emergencia.toLowerCase();
 
-    const sectorDestino = tipo_emergencia === 'nino' ? 'Internación pediatrica' : 'Terapia intermedia';
+    if (!['niño', 'adulto'].includes(tipoEmergenciaLower)) {
+      await t.rollback();
+      return res.status(400).json({ error: 'Tipo de emergencia no válido.' });
+    }
+
+    const sectorDestino = tipoEmergenciaLower === 'niño'
+      ? 'Internación pediatrica'
+      : 'Terapia intermedia';
 
     const camasLibres = await Cama.findAll({
-      where: { estado: 0,  desinfeccion: true },
+      where: { estado: 0, desinfeccion: true },
       include: [
         {
           model: Habitacion,
@@ -103,26 +121,12 @@ export const ingresoEmergencia = async (req, res) => {
     let camaAsignada = null;
 
     for (const cama of camasLibres) {
-      const movimientosActivos = await MovimientoHabitacion.findAll({
-        where: {
-          id_habitacion: cama.id_habitacion,
-          fecha_hora_egreso: null,
-          estado: 1,
-        },
-        include: [{
-          model: Admision,
-          as: 'admision',
-          include: [{ model: Paciente, as: 'paciente' }],
-        }],
-        transaction: t,
-      });
-
-      if (
-        movimientosActivos.length === 0 ||
-        movimientosActivos.every((mov) => mov.admision?.paciente?.id_genero === parseInt(sexo))
-      ) {
+      try {
+        await verificarGeneroHabitacion(cama.id_habitacion, sexo, t);
         camaAsignada = cama;
         break;
+      } catch (err) {
+        // cama incompatible, seguir buscando
       }
     }
 
@@ -135,8 +139,7 @@ export const ingresoEmergencia = async (req, res) => {
 
     await validarEstadoCama(camaAsignada.id_cama, t);
     await validarConflictoReserva({ id_cama: camaAsignada.id_cama, fecha_hora_ingreso: fechaLocal }, t);
-    await verificarGeneroHabitacion(camaAsignada.id_habitacion, sexo, t); 
-    
+
     const admision = await Admision.create({
       id_paciente: paciente.id_paciente,
       id_obra_social: obraSocial.id_obra_social,
@@ -198,19 +201,95 @@ export const ingresoEmergencia = async (req, res) => {
     });
   } catch (error) {
     if (t) await t.rollback();
-    console.error('❌ Error en ingreso de emergencia:', error); // <--- AGREGÁ ESTA LÍNEA
+    console.error('❌ Error en ingreso de emergencia:', error);
     return res.status(500).json({ error: 'Error en el ingreso de emergencia.' });
   }
-
 };
 
-export const vistaEmergencias = (req, res) => {
+export const actualizarPacienteEmergencia = async (req, res) => {
+  const {
+    dni, nombre, apellido, fecha_nac, id_genero,
+    telefono, direccion, id_localidad, email
+  } = req.body;
+
+  if (!dni || !nombre || !apellido || !id_genero) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios.' });
+  }
+
+  const sequelize = Paciente.sequelize;
+  const t = await sequelize.transaction();
+
   try {
-    res.render('emergencia', {
-    usuario: req.session.usuario,
-    autenticado: true
-  });
+    const pacienteNN = await Paciente.findOne({
+      where: {
+        apellido_p: 'NN',
+        nombre_p: 'No identificado',
+        estado: 1
+      },
+      include: [{
+        model: Admision,
+        required: true,
+        where: {
+          descripcion: { [Op.like]: '%emergencia%' },
+          fecha_hora_egreso: null
+        }
+      }],
+      transaction: t
+    });
+
+    if (!pacienteNN) {
+      await t.rollback();
+      return res.status(404).json({ error: 'No se encontró un paciente NN admitido por emergencia.' });
+    }
+
+    const pacienteReal = await Paciente.findOne({
+      where: { dni_paciente: dni },
+      transaction: t
+    });
+
+    if (pacienteReal) {
+      // Fusionar referencias
+      await Admision.update({ id_paciente: pacienteReal.id_paciente }, {
+        where: { id_paciente: pacienteNN.id_paciente },
+        transaction: t
+      });
+
+      await Turno.update({ id_paciente: pacienteReal.id_paciente }, {
+        where: { id_paciente: pacienteNN.id_paciente },
+        transaction: t
+      });
+
+      await Familiar.update({ id_paciente: pacienteReal.id_paciente }, {
+        where: { id_paciente: pacienteNN.id_paciente },
+        transaction: t
+      });
+
+      // Marcar paciente NN como inactivo
+      await pacienteNN.update({ estado: 0 }, { transaction: t });
+
+      await t.commit();
+      return res.status(200).json({ mensaje: 'Paciente fusionado correctamente con el registro existente.' });
+    }
+
+    // Actualizar paciente NN con nuevos datos
+    await pacienteNN.update({
+      dni_paciente: dni,
+      nombre_p: nombre,
+      apellido_p: apellido,
+      fecha_nac: fecha_nac || null,
+      id_genero,
+      telefono: telefono || null,
+      direccion: direccion || null,
+      id_localidad: id_localidad || null,
+      email: email || null
+    }, { transaction: t });
+
+    await t.commit();
+    return res.status(200).json({ mensaje: 'Datos del paciente NN actualizados correctamente.' });
+
   } catch (error) {
-    res.status(500).send('Error al cargar la vista de emergencias');
+    console.error('❌ Error al actualizar paciente NN:', error);
+    await t.rollback();
+    return res.status(500).json({ error: 'Error al actualizar los datos del paciente.' });
   }
 };

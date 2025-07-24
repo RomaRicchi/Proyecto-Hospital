@@ -51,9 +51,9 @@ router.get('/home', async (req, res) => {
 	}
 });
 
-/* 🔐 Login y Logout */
-router.get('/usuarios', vistaLogin); // Vista del formulario de login
-router.post('/login', login); // Procesa login
-router.get('/logout', logout); // Cierra sesión
+router.get('/login', vistaLogin);    // ✅ Muestra el formulario de login
+router.post('/login', login);        // ✅ Procesa el login
+router.get('/logout', logout);       // ✅ Cierra sesión
+
 
 export default router;

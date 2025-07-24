@@ -31,25 +31,26 @@ export function obtenerFechaBusquedaFormateada() {
 }
 
 export function aplicarReservaSemanal(inputIngreso, inputEgreso, inputMotivoEgr) {
-	if (!inputIngreso || !inputEgreso) return;
+  if (!inputIngreso || !inputEgreso) return;
 
-	const ingreso = new Date(inputIngreso.value);
-	if (isNaN(ingreso)) return;
+  const ingreso = new Date(inputIngreso.value);
+  if (isNaN(ingreso)) return;
 
-	const egreso = new Date(ingreso);
-	egreso.setDate(egreso.getDate() + 7);
+  const egreso = new Date(ingreso);
+  egreso.setDate(egreso.getDate() + 5);         
+  egreso.setHours(23, 59, 0, 0);                
 
-	// Convertir a UTC ISO para backend
-	const isoUTC = toUTC(egreso);
-	inputEgreso.value = isoUTC;
-	inputEgreso.disabled = true;
-	inputEgreso.title = 'El egreso se fija automáticamente a 7 días en reservas.';
+  // Convertir a UTC ISO para backend
+  const isoUTC = toUTC(egreso);
+  inputEgreso.value = isoUTC;
+  inputEgreso.disabled = true;
+  inputEgreso.title = 'El egreso se fija automáticamente a 7 días en reservas.';
 
-	if (inputMotivoEgr) {
-		inputMotivoEgr.disabled = true;
-		inputMotivoEgr.placeholder = '(No editable en reservas)';
-		inputMotivoEgr.title = 'Deshabilitado hasta que se confirme la reserva.';
-	}
+  if (inputMotivoEgr) {
+    inputMotivoEgr.disabled = true;
+    inputMotivoEgr.placeholder = '(No editable en reservas)';
+    inputMotivoEgr.title = 'Deshabilitado hasta que se confirme la reserva.';
+  }
 }
 
 export function parseFechaLocal(fechaStr) {
@@ -78,14 +79,6 @@ export function getFechaLocalParaInput() {
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
   return now.toISOString().slice(0, 16);
-}
-
-function getFechaHoraLocalParaInput() {
-  const ahora = new Date();
-  ahora.setSeconds(0, 0); 
-  const offset = ahora.getTimezoneOffset();
-  ahora.setMinutes(ahora.getMinutes() - offset);
-  return ahora.toISOString().slice(0, 16);
 }
 
 export function formatDate(fechaISO) {

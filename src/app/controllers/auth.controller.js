@@ -1,12 +1,19 @@
 import {
 	Usuario,
 	PersonalAdministrativo,
+	PersonalSalud,
 	RolUsuario,
 } from '../models/index.js';
 import bcrypt from 'bcrypt';
 
 export const vistaLogin = (req, res) => {
-	res.render('users', { error: null });
+  if (req.session.usuario) {
+    const rol = req.session.usuario.rol;
+    if ([3, 4].includes(rol)) return res.redirect('/panel-salud');
+    return res.redirect('/dashboard');
+  }
+
+  res.render('users', { error: null });
 };
 
 export const login = async (req, res) => {

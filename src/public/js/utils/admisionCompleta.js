@@ -127,7 +127,6 @@ export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_
 		fecha_hora_egreso = inputFechaEgreso.value;
 		}
 
-
 		if (fecha_hora_egreso) {
 			const ingreso = new Date(fecha_hora_ingreso);
 			const egreso = new Date(fecha_hora_egreso);

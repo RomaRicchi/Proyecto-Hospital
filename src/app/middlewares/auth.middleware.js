@@ -2,7 +2,7 @@ export function isAuthenticated(req, res, next) {
 	if (req.session.usuario) {
 		next();
 	} else {
-		res.redirect('/usuarios');
+		res.redirect('/login');
 	}
 }
 export function soloRol(rolesPermitidos = [1,2,3,4]) {
