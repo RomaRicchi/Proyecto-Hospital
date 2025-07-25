@@ -40,6 +40,7 @@ import agendaRoutes from './routes/agenda.routes.js';
 import turnoRoutes from './routes/turno.routes.js';
 import estadoTurnoRoutes from './routes/estadoTurno.routes.js';
 import recuperacionRoutes from './routes/recuperacion.routes.js';
+import calendarioRoutes from './routes/calendario.routes.js';
 // ✅ Simular __dirname en ESModules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -81,9 +82,6 @@ app.use((req, res, next) => {
 	next();
 });
 
-/* 🛣️ Rutas principales */
-app.use('/', authRoutes);
-
 /* 🛣️ Rutas API REST */
 app.use('/api/pacientes', pacientesRoutes);
 app.use('/api/familiares', familiaresRoutes);
@@ -113,6 +111,9 @@ app.use('/api/turnos', turnoRoutes);
 app.use('/api/estadoTurno', estadoTurnoRoutes);
 app.use('/api/agenda', agendaRoutes);
 app.use('/api/recuperacion', recuperacionRoutes);
+app.use('/api/calendario', calendarioRoutes);
+/* 🛣️ Rutas principales */
+app.use('/', authRoutes);
 app.use('/', viewsRoutes);
 
 iniciarActualizacionTurnos();

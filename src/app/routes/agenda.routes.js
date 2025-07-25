@@ -7,7 +7,6 @@ import {
   deleteAgenda,
   buscarPersonal,
   getAgendasRecurrentes,
-  getCalendarioCompleto,
   getAgendasByProfesional,
 } from '../controllers/agenda.controller.js';
 
@@ -16,7 +15,6 @@ router.get('/profesional/:id', getAgendasByProfesional);
 router.get('/', getAgendas);
 router.get('/buscar', buscarPersonal);
 router.get('/semana', getAgendasRecurrentes);
-router.get('/calendario/turnos', getCalendarioCompleto);
 router.get('/:id', getAgendaById);
 router.post('/', createAgenda);
 router.put('/:id', updateAgenda);

@@ -1,5 +1,4 @@
 import { mostrarFormulario } from './utils/formAgenda.js';
-import { crearCalendario } from './utils/calendarManager.js';
 
 $(document).ready(function () {
   const isMedico = window.usuario?.rol === 4;
@@ -14,8 +13,6 @@ $(document).ready(function () {
     language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
     columns: [null, null, null, null, null, { orderable: false }]
   });
-
-  let calendar = null;
 
   function cargarAgendas() {
     const idProfesional = isMedico ? null : $('#filtroProfesional').val();
@@ -43,10 +40,12 @@ $(document).ready(function () {
             a.hora_inicio,
             a.hora_fin,
             a.duracion + ' min',
-            `
-            <button class="btn btn-sm btn-primary editar" data-id="${a.id_agenda}">Editar</button>
-            <button class="btn btn-sm btn-danger eliminar" data-id="${a.id_agenda}">Eliminar</button>
-            `
+            `<button class="btn btn-sm btn-primary editar" data-id="${a.id_agenda}" title="Editar">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="btn btn-sm btn-danger eliminar" data-id="${a.id_agenda}" title="Eliminar">
+              <i class="fas fa-trash"></i>
+            </button>`
           ]);
         });
 
@@ -126,36 +125,6 @@ $(document).ready(function () {
       const valor = $(this).val();
       localStorage.setItem('filtroProfesionalId', valor);
       cargarAgendas();
-      if (calendar) calendar.refetchEvents();
     });
-  }
-
-  $('#toggleVista').on('click', function () {
-    const tabla = $('#vistaTabla');
-    const calendario = $('#calendar');
-    const mostrandoTabla = tabla.is(':visible');
-
-    if (mostrandoTabla) {
-      tabla.hide();
-      calendario.show();
-      $(this).text('Ver como tabla');
-      localStorage.setItem('vistaActiva', 'calendario');
-
-      if (!calendar) {
-        calendar = crearCalendario();
-      } else {
-        calendar.refetchEvents();
-      }
-    } else {
-      calendario.hide();
-      tabla.show();
-      $(this).text('Ver como calendario');
-      localStorage.setItem('vistaActiva', 'tabla');
-    }
-  });
-
-  const vista = localStorage.getItem('vistaActiva') || 'tabla';
-  if (vista === 'calendario') {
-    $('#toggleVista').click();
   }
 });

@@ -31,7 +31,7 @@ import { vistaEstadoTurno } from '../controllers/estadoTurno.controller.js';
 import { vistaAgendas } from '../controllers/agenda.controller.js';
 import { vistaDias } from '../controllers/dia.controller.js';
 import { vistaLogin } from '../controllers/auth.controller.js';
-
+import { vistaCalendario } from '../controllers/calendario.controller.js';
 const router = Router();
 
 router.get('/login', vistaLogin); 
@@ -75,5 +75,6 @@ router.get('/turnos', isAuthenticated, soloRol([1, 2, 4]), vistaTurnos);
 router.get('/agenda', isAuthenticated, soloRol([1, 2, 4]), vistaAgendas);
 router.get('/dias-semana', isAuthenticated, soloRol([1]), vistaDias);
 router.get('/estado-turno', isAuthenticated, soloRol([1]), vistaEstadoTurno);
+router.get('/calendario', isAuthenticated, soloRol([1, 2, 4]), vistaCalendario);
 
 export default router;

@@ -91,17 +91,22 @@ export const vistaPacienteNuevo = async (req, res) => {
 };
 
 export const getPacientes = async (req, res) => {
-	try {
-		const pacientes = await Paciente.findAll({
-			where: { estado: true },
-			include: [
-				{ model: Genero, as: 'genero', attributes: ['id_genero', 'nombre'] },
-			],
-		});
-		res.json(pacientes);
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+  try {
+    const pacientes = await Paciente.findAll({
+      where: { estado: true },
+      attributes: ['id_paciente', 'nombre_p', 'apellido_p', 'dni_paciente'],
+      include: [
+        {
+          model: Genero,
+          as: 'genero',
+          attributes: ['id_genero', 'nombre']
+        }
+      ]
+    });
+    res.json(pacientes);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const getPacienteById = async (req, res) => {

@@ -1,0 +1,25 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      .container.mt-4
+        .row
+          .col-md-12.text-center
+            h1 Calendario de Turnos
+
+        .row.mt-3.justify-content-center
+          .d-flex.flex-column.align-items-center
+            label(for="filtroProfesional").fw-bold.mb-2 Filtro por profesional:
+            select#filtroProfesional.select-estilizado.form-select
+
+        .row.mt-4
+          .col
+            #calendar(style="max-width: 100%; min-height: 600px;")
+
+        link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css")
+        link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css")
+        script(src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js")
+        script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+        script(src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js")
+        script(type="module", src="/js/calendarManager.js")

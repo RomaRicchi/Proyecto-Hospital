@@ -1,105 +1,12 @@
 import { 
   Agenda, 
-  Turno, 
-  EstadoTurno,
   Dia, 
   PersonalSalud, 
   Usuario, 
-  Paciente, 
   Especialidad 
 } from '../models/index.js';
 import { Op } from 'sequelize';
-import { parseFechaUTC, validarHoraRango } from '../helper/timeZone.js';
-
-export const getCalendarioCompleto = async (req, res) => {
-  try {
-    const { profesionalId } = req.query;
-    const usuario = req.session.usuario;
-    let agendaWhere = {};
-
-    if (usuario.rol === 4) {
-      const profesional = await PersonalSalud.findOne({ where: { id_usuario: usuario.id } });
-      if (!profesional) return res.status(403).json({ message: 'Profesional no encontrado' });
-      agendaWhere.id_personal_salud = profesional.id_personal_salud;
-    } else if (profesionalId) {
-      agendaWhere.id_personal_salud = profesionalId;
-    }
-
-    const agendas = await Agenda.findAll({
-      where: agendaWhere,
-      include: [
-        { model: Dia, as: 'dia' },
-        {
-          model: PersonalSalud,
-          as: 'personal',
-          include: [{ model: Especialidad, as: 'especialidad', attributes: ['nombre'] }]
-        }
-      ]
-    });
-
-    const eventosAgendas = agendas.map(a => ({
-      title: `${a.personal.apellido}, ${a.personal.nombre} (${a.personal.especialidad?.nombre || ''})`,
-      daysOfWeek: [a.id_dia % 7],
-      startTime: a.hora_inicio,
-      endTime: a.hora_fin,
-      display: 'background',
-      color: '#d0e7ff'
-    }));
-
-    let turnoWhere = {};
-
-    if (usuario.rol === 4) {
-      const profesional = await PersonalSalud.findOne({ where: { id_usuario: usuario.id } });
-      if (!profesional) return res.status(403).json({ message: 'Profesional no encontrado' });
-      turnoWhere['$agenda.id_personal_salud$'] = profesional.id_personal_salud;
-    } else if (profesionalId) {
-      turnoWhere['$agenda.id_personal_salud$'] = profesionalId;
-    }
-
-    const turnos = await Turno.findAll({
-      where: turnoWhere,
-      include: [
-        {
-          model: Agenda,
-          as: 'agenda',
-          include: [{ model: PersonalSalud, as: 'personal', attributes: ['apellido', 'nombre'] }]
-        },
-        { model: Paciente, as: 'cliente', attributes: ['nombre_p', 'apellido_p'] },
-        { model: EstadoTurno, as: 'estado_turno', attributes: ['nombre'] }
-      ]
-    });
-
-    const eventosTurnos = turnos.map(t => {
-      const duracion = t.agenda?.duracion || 30;
-      const startUTC = parseFechaUTC(t.fecha_hora);
-      const fin = new Date(startUTC.getTime() + duracion * 60000);
-
-      return {
-        id: t.id_turno,
-        title: t.cliente
-          ? `${t.cliente.apellido_p}, ${t.cliente.nombre_p}`
-          : 'Paciente no asignado',
-        start: startUTC.toISOString(),
-        end: fin.toISOString(),
-        extendedProps: {
-          paciente: t.cliente
-            ? `${t.cliente.apellido_p}, ${t.cliente.nombre_p}`
-            : 'Sin asignar',
-          estado: t.estado_turno?.nombre || '---',
-          profesional: t.agenda?.personal
-            ? `${t.agenda.personal.apellido}, ${t.agenda.personal.nombre}`
-            : ''
-        },
-        color: '#ffe0b3'
-      };
-    });
-
-    res.json([...eventosAgendas, ...eventosTurnos]);
-  } catch (error) {
-    console.error('❌ Error al cargar el calendario combinado:', error);
-    res.status(500).json({ message: 'Error al cargar el calendario' });
-  }
-};
+import { validarHoraRango } from '../helper/timeZone.js';
 
 export const buscarPersonal = async (req, res) => {
   try {
@@ -157,7 +64,7 @@ export const getAgendasRecurrentes = async (req, res) => {
 
     const eventos = agendas.map(a => ({
       title: `${a.personal.apellido}, ${a.personal.nombre} - ${a.personal.especialidad?.nombre || ''}`,
-      daysOfWeek: [a.id_dia % 7], // FullCalendar: 0=domingo
+      daysOfWeek: [a.id_dia === 7 ? 0 : a.id_dia],
       startTime: a.hora_inicio,
       endTime: a.hora_fin
     }));
@@ -192,7 +99,7 @@ export const getAgendas = async (req, res) => {
         {
           model: Dia,
           as: 'dia',
-          attributes: ['nombre']
+          attributes: ['id_dia', 'nombre']
         }
       ]
     });

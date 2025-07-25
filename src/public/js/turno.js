@@ -80,8 +80,12 @@ $(document).ready(function () {
             ? `<button class="btn btn-sm btn-success btn-atender-turno" data-id="${t.id_turno}" data-dni="${t.cliente?.dni_paciente}">
                   Atender
               </button>`
-            : `<button class="btn btn-sm btn-primary editar" data-id="${t.id_turno}">Editar</button>
-              <button class="btn btn-sm btn-danger eliminar" data-id="${t.id_turno}">Eliminar</button>`
+            : `<button class="btn btn-sm btn-primary editar" title="Editar" data-id="${t.id_turno}">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-danger eliminar" title="Eliminar" data-id="${t.id_turno}">
+                <i class="fas fa-trash-alt"></i>
+              </button>`
         ]);
       });
 
@@ -133,6 +137,7 @@ $(document).ready(function () {
           <option value="">Todos los profesionales</option>
           ${options.join('')}
         `);
+
         const guardado = localStorage.getItem('filtroProfesionalTurnoId');
         if (guardado) {
           $('#filtroProfesionalTurno').val(guardado).trigger('change');

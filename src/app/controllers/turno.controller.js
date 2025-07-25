@@ -9,7 +9,6 @@ import {
   MotivoIngreso
 } from '../models/index.js';
 import { Op } from 'sequelize';
-import { parseFechaUTC } from '../helper/timeZone.js';
 
 function calcularHoraFin(fechaHoraInicio, duracionMinutos) {
   const inicio = new Date(fechaHoraInicio);
@@ -52,10 +51,13 @@ export const getTurnos = async (req, res) => {
     const eventos = turnos.map(t => {
       const profesional = t.agenda?.personal;
       const paciente = t.paciente;
+      const inicioUTC = new Date(t.fecha_hora).toISOString(); // aseguro ISO para FullCalendar
+      const finUTC = calcularHoraFin(inicioUTC, t.agenda?.duracion || 30);
+
       return {
         title: `${profesional?.apellido}, ${profesional?.nombre} (${profesional?.especialidad?.nombre || ''})`,
-        start: t.fecha_hora,
-        end: calcularHoraFin(t.fecha_hora, t.agenda?.duracion || 30),
+        start: inicioUTC,
+        end: finUTC,
         extendedProps: {
           paciente: `${paciente?.apellido_p || ''}, ${paciente?.nombre_p || ''}`,
           estado: t.estado_turno?.nombre
@@ -111,7 +113,22 @@ export const getTurnosListado = async (req, res) => {
       ]
     });
 
-    res.json(turnos);
+    // Convertimos a hora local para mostrar en tabla
+    const turnosConvertidos = turnos.map(t => {
+      const json = t.toJSON();
+      const fecha = new Date(json.fecha_hora); // viene en UTC
+
+      json.fecha_turno = fecha.toLocaleDateString('sv-SE'); // YYYY-MM-DD
+      json.hora_turno = fecha.toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+
+      return json;
+    });
+
+    res.json(turnosConvertidos);
   } catch (error) {
     console.error('Error al obtener turnos para listado:', error);
     res.status(500).json({ message: 'Error al cargar turnos' });
@@ -126,7 +143,7 @@ export const createTurno = async (req, res) => {
       return res.status(400).json({ message: 'Campos obligatorios faltantes' });
     }
 
-    const fechaHora = parseFechaUTC(fecha_hora);
+    const fechaHora = new Date(fecha_hora);
     if (isNaN(fechaHora.getTime()) || fechaHora < new Date()) {
       return res.status(400).json({ message: 'La fecha y hora del turno deben ser futuras' });
     }
@@ -135,7 +152,8 @@ export const createTurno = async (req, res) => {
     if (!agendaBase) return res.status(404).json({ message: 'Agenda no encontrada' });
 
     const jsToSqlDias = [7, 1, 2, 3, 4, 5, 6];
-    const diaSemana = jsToSqlDias[fechaHora.getDay()];
+    const fechaLocal = new Date(fechaHora.getTime() - fechaHora.getTimezoneOffset() * 60000);
+    const diaSemana = jsToSqlDias[fechaLocal.getDay()];
 
     const agendaDia = await Agenda.findOne({
       where: {
@@ -152,22 +170,46 @@ export const createTurno = async (req, res) => {
     const [hFin, mFin] = agendaDia.hora_fin.split(':').map(Number);
     const minutosInicio = hInicio * 60 + mInicio;
     const minutosFin = hFin * 60 + mFin;
-    const minutosTurno = fechaHora.getHours() * 60 + fechaHora.getMinutes(); // hora local
-
+    const minutosTurno = fechaHora.getHours() * 60 + fechaHora.getMinutes();
 
     if (minutosTurno < minutosInicio || minutosTurno >= minutosFin) {
       return res.status(400).json({ message: 'La hora del turno está fuera del horario permitido ese día' });
     }
 
-    const existe = await Turno.findOne({
+    const duracionNueva = agendaDia.duracion;
+    const fechaInicio = new Date(fechaHora);
+    const fechaFin = new Date(fechaInicio.getTime() + duracionNueva * 60000);
+
+    const turnosExistentes = await Turno.findAll({
       where: {
-        id_agenda: agendaDia.id_agenda,
-        fecha_hora: fechaHora
-      }
+        id_agenda: agendaDia.id_agenda
+      },
+      include: [{
+        model: Agenda,
+        as: 'agenda',
+        attributes: ['duracion']
+      }]
     });
 
-    if (existe) {
-      return res.status(400).json({ message: 'Ya existe un turno en esa fecha y hora' });
+    let seSolapa = false;
+    for (const t of turnosExistentes) {
+      if (!t.agenda || typeof t.agenda.duracion !== 'number') {
+        console.warn(`⚠️ Turno ID ${t.id_turno} sin duración válida en agenda.`);
+        continue;
+      }
+
+      const inicioExistente = new Date(t.fecha_hora);
+      const finExistente = new Date(inicioExistente.getTime() + t.agenda.duracion * 60000);
+
+      if (fechaInicio < finExistente && fechaFin > inicioExistente) {
+        console.warn(`❌ Solapamiento detectado con turno ID ${t.id_turno}`);
+        seSolapa = true;
+        break;
+      }
+    }
+
+    if (seSolapa) {
+      return res.status(400).json({ message: 'Ya existe un turno que se superpone en ese horario' });
     }
 
     const nuevo = await Turno.create({
@@ -175,12 +217,17 @@ export const createTurno = async (req, res) => {
       id_agenda: agendaDia.id_agenda,
       fecha_hora: fechaHora,
       id_estado: id_estado || 1,
-      id_motivo
+      id_motivo: id_motivo || 12
     });
 
     res.status(201).json(nuevo);
   } catch (error) {
     console.error('❌ Error en createTurno:', error);
+
+    if (error?.original?.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ message: 'Ya existe un turno en ese horario para esta agenda' });
+    }
+
     res.status(500).json({ message: 'Error al crear turno' });
   }
 };
@@ -189,7 +236,11 @@ export const getTurnoById = async (req, res) => {
   try {
     const turno = await Turno.findByPk(req.params.id, {
       include: [
-        { model: Agenda, as: 'agenda', include: [{ model: PersonalSalud, as: 'personal' }] },
+        {
+          model: Agenda,
+          as: 'agenda',
+          include: [{ model: PersonalSalud, as: 'personal' }]
+        },
         { model: EstadoTurno, as: 'estado_turno' },
         { model: Paciente, as: 'cliente' },
         { model: MotivoIngreso, as: 'motivo_turno' }
@@ -200,11 +251,15 @@ export const getTurnoById = async (req, res) => {
 
     const json = turno.toJSON();
 
-    // Agregamos fecha_turno y hora_turno desde fecha_hora
     if (json.fecha_hora) {
-      const iso = new Date(json.fecha_hora).toISOString();
-      json.fecha_turno = iso.split('T')[0];
-      json.hora_turno = iso.split('T')[1].slice(0, 5); // HH:MM
+      const fecha = new Date(json.fecha_hora); // UTC almacenado en DB
+
+      json.fecha_turno = fecha.toLocaleDateString('sv-SE'); // YYYY-MM-DD
+      json.hora_turno = fecha.toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
     }
 
     res.json(json);
@@ -220,12 +275,11 @@ export const updateTurno = async (req, res) => {
     if (!turno) return res.status(404).json({ message: 'Turno no encontrado' });
 
     const { fecha_hora, id_estado, id_motivo } = req.body;
-
     if (!fecha_hora || !id_estado || !id_motivo) {
       return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
 
-    const nuevaFechaHora = parseFechaUTC(fecha_hora);
+    const nuevaFechaHora = new Date(fecha_hora);
     if (isNaN(nuevaFechaHora.getTime()) || nuevaFechaHora < new Date()) {
       return res.status(400).json({ message: 'La fecha y hora deben ser válidas y futuras' });
     }
@@ -234,7 +288,8 @@ export const updateTurno = async (req, res) => {
     if (!agendaActual) return res.status(404).json({ message: 'Agenda asociada no encontrada' });
 
     const jsToSqlDias = [7, 1, 2, 3, 4, 5, 6];
-    const diaSemana = jsToSqlDias[nuevaFechaHora.getDay()];
+    const fechaLocal = new Date(nuevaFechaHora.getTime() - nuevaFechaHora.getTimezoneOffset() * 60000);
+    const diaSemana = jsToSqlDias[fechaLocal.getDay()];
 
     const agendaActiva = await Agenda.findOne({
       where: {
@@ -251,22 +306,47 @@ export const updateTurno = async (req, res) => {
     const [hFin, mFin] = agendaActiva.hora_fin.split(':').map(Number);
     const minutosInicio = hInicio * 60 + mInicio;
     const minutosFin = hFin * 60 + mFin;
-    const minutosTurno = nuevaFechaHora.getHours() * 60 + nuevaFechaHora.getMinutes(); // hora local
+    const minutosTurno = nuevaFechaHora.getHours() * 60 + nuevaFechaHora.getMinutes();
 
     if (minutosTurno < minutosInicio || minutosTurno >= minutosFin) {
       return res.status(400).json({ message: 'La hora del turno está fuera del horario permitido ese día' });
     }
 
-    const solapado = await Turno.findOne({
+    const duracionNueva = agendaActiva.duracion;
+    const fechaInicio = new Date(nuevaFechaHora);
+    const fechaFin = new Date(fechaInicio.getTime() + duracionNueva * 60000);
+
+    const turnosExistentes = await Turno.findAll({
       where: {
         id_agenda: agendaActiva.id_agenda,
-        fecha_hora: nuevaFechaHora,
         id_turno: { [Op.ne]: turno.id_turno }
-      }
+      },
+      include: [{
+        model: Agenda,
+        as: 'agenda',
+        attributes: ['duracion']
+      }]
     });
 
-    if (solapado) {
-      return res.status(400).json({ message: 'Ya existe un turno en esa fecha y hora' });
+    let seSolapa = false;
+    for (const t of turnosExistentes) {
+      if (!t.agenda || typeof t.agenda.duracion !== 'number') {
+        console.warn(`⚠️ Turno ID ${t.id_turno} sin duración válida en agenda.`);
+        continue;
+      }
+
+      const inicioExistente = new Date(t.fecha_hora);
+      const finExistente = new Date(inicioExistente.getTime() + t.agenda.duracion * 60000);
+
+      if (fechaInicio < finExistente && fechaFin > inicioExistente) {
+        console.warn(`❌ Solapamiento detectado con turno ID ${t.id_turno}`);
+        seSolapa = true;
+        break;
+      }
+    }
+
+    if (seSolapa) {
+      return res.status(400).json({ message: 'Ya existe un turno que se superpone en ese horario' });
     }
 
     await turno.update({
@@ -277,9 +357,13 @@ export const updateTurno = async (req, res) => {
     });
 
     res.json(turno);
-
   } catch (error) {
-    console.error(error);
+    console.error('❌ Error en updateTurno:', error);
+
+    if (error?.original?.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ message: 'Ya existe un turno en ese horario para esta agenda' });
+    }
+
     res.status(500).json({ message: 'Error al actualizar turno' });
   }
 };

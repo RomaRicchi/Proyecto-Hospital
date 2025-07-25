@@ -69,10 +69,12 @@ export function parseFechaLocal(fechaStr) {
 	return new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60000); // convierte a UTC
 }
 
-export function toUTC(inputDate) {
-  const date = new Date(inputDate); // acepta tanto string como Date
-  const iso = date.toISOString();   // ej: '2025-07-17T16:00:00.000Z'
-  return iso.slice(0, 19).replace("T", " "); // '2025-07-17 16:00:00'
+export function toUTC(inputDate, formato = 'iso') {
+  const date = new Date(inputDate);
+  const iso = date.toISOString();
+  if (formato === 'sql') return iso.slice(0, 19).replace("T", " "); // para MySQL crudo
+  if (formato === 'compact') return iso.slice(0, 19) + 'Z'; // sin milisegundos
+  return iso; // ISO completo con ms y Z
 }
 
 export function getFechaLocalParaInput() {
@@ -81,19 +83,28 @@ export function getFechaLocalParaInput() {
   return now.toISOString().slice(0, 16);
 }
 
-export function formatDate(fechaISO) {
-    const date = new Date(fechaISO);
-    const dia = String(date.getDate()).padStart(2, '0');
-    const mes = String(date.getMonth() + 1).padStart(2, '0');
-    const anio = date.getFullYear();
-    return `${dia}/${mes}/${anio}`;
+export function formatDate(isoString) {
+  const fecha = new Date(isoString);
+  const offset = fecha.getTimezoneOffset(); // minutos
+  fecha.setMinutes(fecha.getMinutes() - offset); // Ajustamos a local (Argentina)
+
+  return fecha.toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
 }
 
-export function formatHour(fechaISO) {
-    const date = new Date(fechaISO);
-    const horas = String(date.getHours()).padStart(2, '0');
-    const minutos = String(date.getMinutes()).padStart(2, '0');
-    return `${horas}:${minutos}`;
+export function formatHour(isoString) {
+  const fecha = new Date(isoString);
+  const offset = fecha.getTimezoneOffset(); // minutos
+  fecha.setMinutes(fecha.getMinutes() - offset); // Ajustamos a local (Argentina)
+
+  return fecha.toLocaleTimeString('es-AR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
 }
 
 export function validarFechaNoPasada(fechaStr) {

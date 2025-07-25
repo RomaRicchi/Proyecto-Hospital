@@ -1,6 +1,7 @@
 import { toUTC } from './validacionFechas.js';
 
 export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
+
   const [pacientes, estados, motivos] = await Promise.all([
     fetch('/api/pacientes').then(r => r.json()),
     fetch('/api/estadoTurno').then(r => r.json()),
@@ -11,7 +12,7 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
 
   const pacienteOptions = pacientes.map(p =>
     `<option value="${p.id_paciente}" ${turno?.id_paciente === p.id_paciente ? 'selected' : ''}>
-      ${p.apellido_p}, ${p.nombre_p}
+      ${p.apellido_p}, ${p.nombre_p} (${p.dni_paciente})
     </option>`
   ).join('');
 
@@ -54,13 +55,13 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
       <div class="form-group mb-3 text-start">
         <label for="fecha_turno" class="form-label">Fecha</label>
         <input id="fecha_turno" type="date" class="form-control"
-          value="${turno?.fecha_hora ? new Date(turno.fecha_hora).toISOString().split('T')[0] : ''}">
+          value="${turno?.fecha_hora ? new Date(turno.fecha_hora).toLocaleDateString('sv-SE') : ''}">
       </div>
 
       <div class="form-group mb-3 text-start">
         <label for="hora_turno" class="form-label">Hora</label>
         <input id="hora_turno" type="time" class="form-control"
-          value="${turno?.fecha_hora ? new Date(turno.fecha_hora).toISOString().substring(11, 16) : ''}">
+          value="${turno?.fecha_hora ? new Date(turno.fecha_hora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }) : ''}">
       </div>
 
       ${turno?.id_turno ? `
@@ -144,8 +145,8 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
     },
     preConfirm: () => {
       const id_paciente = parseInt($('#id_paciente').val());
-      const fecha_turno = $('#fecha_turno').val();
-      const hora_turno = $('#hora_turno').val();
+      const fecha_turno = $('#fecha_turno').val(); // "2025-07-29"
+      const hora_turno = $('#hora_turno').val();   // "10:00"
       const id_motivo = parseInt($('#id_motivo').val());
       const id_estado = turno?.id_turno ? parseInt($('#id_estado').val()) : 1;
       const id_agenda = parseInt($('#id_agenda').val());
@@ -156,15 +157,16 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
         return false;
       }
 
-      const fechaHora = new Date(`${fecha_turno}T${hora_turno}`);
-      if (isNaN(fechaHora.getTime()) || fechaHora < new Date()) {
+      const fechaHoraStr = toUTC(`${fecha_turno}T${hora_turno}`, 'compact'); // → '2025-07-31T12:00:00Z'
+      const fechaLocal = new Date(fechaHoraStr); 
+      if (isNaN(fechaLocal.getTime()) || fechaLocal < new Date()) {
         Swal.showValidationMessage('La fecha y hora del turno deben ser futuras');
         return false;
       }
 
       if (agendaSeleccionada) {
         const diaAgenda = agendaSeleccionada.dia?.nombre?.toLowerCase();
-        const diaTurno = fechaHora.toLocaleDateString('es-ES', { weekday: 'long' }).toLowerCase();
+        const diaTurno = fechaLocal.toLocaleDateString('es-ES', { weekday: 'long' }).toLowerCase();
         if (diaAgenda !== diaTurno) {
           Swal.showValidationMessage(`Este profesional atiende solo los días ${agendaSeleccionada.dia.nombre}`);
           return false;
@@ -185,28 +187,36 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
           );
           return false;
         }
-      }
+        const minutosDesdeInicio = toMinutes(hora_turno) - toMinutes(agendaSeleccionada.hora_inicio);
+        if (minutosDesdeInicio % agendaSeleccionada.duracion !== 0) {
+          Swal.showValidationMessage(`El turno debe comenzar en un múltiplo de ${agendaSeleccionada.duracion} minutos desde ${agendaSeleccionada.hora_inicio}`);
+          return false;
+        }
 
-      const fechaUTC = toUTC(fechaHora);
+      }
 
       return {
         id_paciente,
         id_agenda,
-        fecha_hora: fechaUTC,
+        fecha_hora: fechaHoraStr, 
         id_estado,
         id_motivo
       };
     }
   })
   .then(result => {
-    if (!result.isConfirmed) return;
-    const metodo = turno?.id_turno ? 'PUT' : 'POST';
-    const url = turno?.id_turno ? `/api/turnos/${turno.id_turno}` : '/api/turnos';
-    fetch(url, {
-      method: metodo,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(result.value)
-    })
+  if (!result.isConfirmed) return;
+
+  console.log('🟨 Turno a enviar:', result.value); 
+
+  const metodo = turno?.id_turno ? 'PUT' : 'POST';
+  const url = turno?.id_turno ? `/api/turnos/${turno.id_turno}` : '/api/turnos';
+
+  fetch(url, {
+    method: metodo,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(result.value)
+  })
       .then(async res => {
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
