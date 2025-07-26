@@ -58,4 +58,18 @@ $(document).ready(function () {
       window.location.href = '/registroClinico';
     }
   });
+  
+  const idMedico = $('#usuarioData').data('id_personal_salud');
+
+  if (idMedico) {
+    $('a[href="/turnos"]').on('click', function (e) {
+      e.preventDefault();
+      window.location.href = `/turnos?medico=${idMedico}`;
+    });
+
+    $('a[href="/calendario"]').on('click', function (e) {
+      e.preventDefault();
+      window.location.href = `/calendario?medico=${idMedico}`;
+    });
+  }
 });

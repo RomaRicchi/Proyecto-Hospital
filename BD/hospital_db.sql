@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 18-07-2025 a las 17:51:32
+-- Tiempo de generación: 21-07-2025 a las 21:59:44
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -65,7 +65,8 @@ INSERT INTO `agenda` (`id_agenda`, `id_personal_salud`, `id_dia`, `duracion`, `h
 (40, 3, 3, 30, '09:00:00', '13:00:00'),
 (41, 4, 4, 30, '10:00:00', '14:00:00'),
 (42, 5, 5, 30, '15:00:00', '19:00:00'),
-(44, 12, 2, 45, '08:00:00', '14:00:00');
+(44, 12, 2, 45, '08:00:00', '14:00:00'),
+(45, 12, 1, 30, '08:00:00', '15:00:00');
 
 -- --------------------------------------------------------
 
@@ -86,8 +87,8 @@ CREATE TABLE `cama` (
 --
 
 INSERT INTO `cama` (`id_cama`, `nombre`, `id_habitacion`, `desinfeccion`, `estado`) VALUES
-(41, 'A', 270, 1, 0),
-(42, 'B', 272, 1, 0),
+(41, 'A', 270, 1, 1),
+(42, 'B', 272, 0, 0),
 (43, 'B', 270, 1, 0),
 (44, 'A', 271, 1, 0),
 (45, 'B', 271, 1, 0),
@@ -95,9 +96,8 @@ INSERT INTO `cama` (`id_cama`, `nombre`, `id_habitacion`, `desinfeccion`, `estad
 (47, 'A', 273, 1, 0),
 (48, 'A', 235, 1, 0),
 (49, 'A', 231, 1, 0),
-(50, 'A', 214, 1, 0),
 (51, 'B', 214, 1, 0),
-(52, 'A', 216, 1, 0);
+(52, 'A', 216, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -219,7 +219,8 @@ INSERT INTO `familiar` (`id_familiar`, `id_paciente`, `apellido`, `nombre`, `id_
 (8, 8, 'Sánchez', 'Verónica', 8, '2664000018', 1),
 (9, 9, 'Romero', 'Carlos', 9, '2664000019', 1),
 (10, 10, 'Torres', 'Paula', 10, '2664000020', 1),
-(11, 8, 'Soria', 'Laura', 18, '2664000010', 1);
+(11, 8, 'Soria', 'Laura', 18, '2664000010', 1),
+(12, 57, 'Peña', 'Laura', 14, '7349674666', 1);
 
 -- --------------------------------------------------------
 
@@ -553,13 +554,15 @@ INSERT INTO `paciente` (`id_paciente`, `dni_paciente`, `apellido_p`, `nombre_p`,
 (8, 82345678, 'Sánchez', 'Jorge', '1975-04-10', 1, '2664000008', 'Calle Sarmiento 987', 8, 'jorge.sanchez@mail.com', 1),
 (9, 92345678, 'Romero', 'Sofía', '2000-06-05', 2, '2664000009', 'Calle 25 de Mayo 112', 9, 'sofia.romero@mail.com', 1),
 (10, 102345678, 'Torres Pacheco', 'Martín', '1999-08-25', 1, '2664000010', 'Calle España 334', 17, 'martin.torres@mail.com', 1),
-(15, 34587895, 'Richiardi', 'Romanela', '1992-12-30', 2, '2664010208', 'Barrio 123 viviendas manzana 430 casa 22', 1, 'roma@gmail.com', 0),
 (21, 11111111, 'Pérez', 'Juan', '1980-01-01', 1, '2664000101', 'Calle Uno 123', 1, 'juan.perez@demo.com', 1),
 (22, 22222222, 'Gómez', 'Ana', '1990-02-02', 2, '2664000102', 'Calle Dos 456', 2, 'ana.gomez@demo.com', 1),
 (23, 33333333, 'Fernández', 'Laura', '1985-03-03', 2, '2664000103', 'Calle Tres 789', 3, 'laura.fernandez@demo.com', 1),
 (24, 35842052, 'Ricchiardi', 'Romanela', '1991-12-30', 2, '2664750247', 'los olivos', 1, 'roma.ricchiardi@gmail.com', 1),
 (39, 45361293, 'Ricchiardi', 'Carla', '2004-07-11', 2, '5646546546', 'la pampeana', 16, 'carli@gmail.com', 1),
-(46, 32, 'NN', 'No identificado', NULL, 1, NULL, NULL, NULL, NULL, 1);
+(46, 32, 'NN', 'No identificado', NULL, 1, NULL, NULL, NULL, NULL, 1),
+(57, 52006237, 'Rodriguez', 'Carla', '2005-03-05', 2, '634734646', '55 Roque Saenz Peña', 124, '1236jdkfasd@jmail.com', 1),
+(58, -64356346, 'jm', '-754', '2007-07-22', 2, '-65647376756', '308 Julio a Roca', 17, 'sinv7785@gmail.com', 1),
+(61, 84654, 'NN', 'No identificado', NULL, 1, NULL, NULL, NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -618,7 +621,7 @@ CREATE TABLE `personal_administrativo` (
 --
 
 INSERT INTO `personal_administrativo` (`id_personal_admin`, `id_usuario`, `apellido`, `nombre`, `id_rol_usuario`, `activo`) VALUES
-(1, 1, 'Admin', 'General', 1, 1),
+(1, 1, 'General', 'Administracion', 1, 1),
 (2, 4, 'Gómez', 'Lucía', 2, 1),
 (6, 25, 'Diaz', 'Gustavo', 2, 1);
 
@@ -770,6 +773,45 @@ INSERT INTO `tipo_registro` (`id_tipo`, `nombre`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `token_recuperacion`
+--
+
+CREATE TABLE `token_recuperacion` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_usuario` int(10) UNSIGNED NOT NULL,
+  `token` varchar(100) NOT NULL,
+  `expiracion` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `token_recuperacion`
+--
+
+INSERT INTO `token_recuperacion` (`id`, `id_usuario`, `token`, `expiracion`) VALUES
+(1, 1, '56cb1ed43d12d8c96a6430596139448f042c952ee2c6dc5ab246f2bbe621a586', '2025-07-21 15:49:03'),
+(2, 1, '998d2adda7abc94d976009835986c4a09a302ff38e568704cc17b196154302ac', '2025-07-21 15:49:04'),
+(3, 1, '625b1a87b687d1a753c17d3c7ae106283d2084cef51729d4ef0abf50567491d1', '2025-07-21 15:49:36'),
+(4, 1, 'add3000df230abac25ff3b50db72a95101bfb0320c3b8bb65619d4aeefe361c6', '2025-07-21 15:55:01'),
+(5, 1, '3801a0f9a5dc4f3644f9b5f2726dec47c35499a3eadf022cac8932c0270687d1', '2025-07-21 15:56:56'),
+(6, 1, '0c7e300076d8d604bef090e46cf18a0eaa8cb712c0ce7126c6d694964607b66a', '2025-07-21 15:56:57'),
+(7, 1, '8e339bcccb1634f764e2c58893c74465a19d9ef78d970d8b625466673910f998', '2025-07-21 15:56:58'),
+(8, 1, '63d7dbf673c0bfba06ccc2ed3480a610e2ea4fb7c9dc48a094de8b472da1a1be', '2025-07-21 15:56:58'),
+(9, 1, '5c1d5b46a20c88409068f89024257b9e94e611180c4e627b1a621b6fe3edb03f', '2025-07-21 15:56:58'),
+(10, 1, 'd3af014d92d19d6ba0b04526ec222dbe2cce27a76a962c3cc15facea29a46de5', '2025-07-21 15:56:59'),
+(11, 1, '9fa6042a9c7e554903d7295e4c8d0604a0bc117eb7e7ad538d64bdae01198d16', '2025-07-21 15:57:01'),
+(12, 1, 'db2cbef0b1c04a3d0f1750c4a2c68cbd9c87d1838c72ceb1539365f4d9efcf9d', '2025-07-21 15:57:02'),
+(13, 1, '5dfdf97e8a7d0d09fa363ba200b110cd04bcaa95f9bb021d145e1393011814c4', '2025-07-21 15:57:02'),
+(14, 1, 'd0786c82d9fbd1059f9405e076d7a2cc5a0c95fd7caea7187748c49e44a29f94', '2025-07-21 15:57:02'),
+(15, 1, '38d8a7c1de5dd4cea8727edb2c4e73dee3e7e2b9880a7e7661b90d18d1f9b832', '2025-07-21 15:57:03'),
+(16, 1, '08bd43cac00220b735b6209ec2508395af7591f13bcb0e81e217a5c6d10b936a', '2025-07-21 15:57:03'),
+(17, 1, 'ad0a1e01d32a3fa902ecc657e0c06f9ef3da8d8d24576d4659d53732f39da5f1', '2025-07-21 15:57:05'),
+(18, 1, '1a0358d8bd0c0945d7281d0391aedc5195b94067561f3ef3ea5df5dc0f0d03c4', '2025-07-21 15:57:06'),
+(19, 1, '328d0072714ab8f984641985a15fcd454be7346c62e266a91611814ff2bb49d3', '2025-07-21 16:10:46'),
+(20, 1, '96dea653042de8fa3d570921ee2da43dc27a059b68137fe5ef1f33c9b90d320a', '2025-07-21 16:11:15');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `turno`
 --
 
@@ -779,7 +821,8 @@ CREATE TABLE `turno` (
   `fecha_hora` datetime DEFAULT NULL,
   `id_estado` int(11) DEFAULT NULL,
   `id_motivo` int(11) DEFAULT NULL,
-  `id_agenda` int(11) NOT NULL
+  `id_agenda` int(11) NOT NULL,
+  `id_obra_social` smallint(5) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -791,6 +834,7 @@ CREATE TABLE `turno` (
 CREATE TABLE `usuario` (
   `id_usuario` int(10) UNSIGNED NOT NULL,
   `username` varchar(50) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
   `estado` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -799,24 +843,24 @@ CREATE TABLE `usuario` (
 -- Volcado de datos para la tabla `usuario`
 --
 
-INSERT INTO `usuario` (`id_usuario`, `username`, `password`, `estado`) VALUES
-(1, 'admin', '$2b$10$TXLGnPIXH3XdeAsl6dqXM.w0u71y0bByHSmW1Zxmr1NfBIOaT2Dme', 1),
-(3, 'drcarlos', '$2b$10$eEjB7RUQmVECGToMyN99FOd5KQONHUtPUm6xEJG93wJmEf8zvYxGu', 1),
-(4, 'recepcion1', '$2b$10$zbtqzBzyzYXeRfOAmH69V.nosw0PRHt1hprU7kZW7VvONvHFLXKmy', 1),
-(5, 'enfermera1', '$2b$10$xOK0M25ehv6hPTpEYiIYIOuA2R0HqciXeQsA4WzvFTqafDB35AAY6', 1),
-(12, 'clinica1', '$2b$12$0XhZnBpxC8mkgHWHSuidcOy5yKECPb9T0TEUtqgoHDfFntZPQgd7G', 1),
-(13, 'cardio1', '$2b$12$KELc024SMNhGA7mmehqmf.IVH2On5oQlxnTH0iQ6f6BRwHralLsCq', 1),
-(14, 'pedia1', '$2b$12$jHCzaXvF5SIQ.bCHoa9LpuxYgEJMuQS36PIBA4TWF0UMooqmeMS/O', 1),
-(15, 'gine1', '$2b$12$1Nl5UINw1Q4GeNI4XXO0JeoloeHhWXL1KwM2fM3MJjASUcJalO1N6', 1),
-(16, 'derma1', '$2b$12$jVhZk06s0Tv66/73XcOheeVJWJkJlsFyWygOnRIzi/MpPGYBB6mAG', 1),
-(17, 'neuro1', '$2b$12$Za9/dX7dVRI8VVErUl99AulScI4soJ3nf2lAKgxMzBWkAnRndTVZ6', 1),
-(18, 'psiqui1', '$2b$12$Tj0OukxZp/wxtlPu8DwIAef.C57X6h4hTM2hnPrS8PtJfJNE0tcfy', 1),
-(19, 'trauma1', '$2b$12$/.AaK/94aLWLup66TfeQvu7IzVGtaN0BIN3/VCIXFQIdSwjRY9pWu', 1),
-(20, 'infecto1', '$2b$12$H.f8NxgXVFmAw3uV37XHdONqplCzpz6651zL/eQrik3078mrNoryu', 1),
-(22, 'pedros', '$2b$10$Qg9NlCioUcNNXEq82.66WOG4u74x/cwrWgflD.RD1esXAWcwHJlqS', 1),
-(23, 'RamonC', '$2b$10$gq4Zr17MuJffttfnqtrl6OvzN/jKh1yJRw7NI6MQ1uxELX/o7gdLa', 1),
-(24, 'VivianaC', '$2b$10$0T43FY3IMFROxklrS1rJmupYnUj2QE5Wq.jGVaTOianlrLw6thnXe', 1),
-(25, 'GDiaz', '$2b$10$hvcTO0Mm7p6Gy6uYSd0Dx.ck6f6QsornRjqs4kRJq7lhSD5FvgX7K', 1);
+INSERT INTO `usuario` (`id_usuario`, `username`, `email`, `password`, `estado`) VALUES
+(1, 'admin', 'roma.ricchiardi@gmail.com', '$2b$10$pnc/k.q/5kWgjJXhYwrjqeK48MpGnVx52ALwMgDVXAtmsfvHbjW8K', 1),
+(3, 'drcarlos', 'drcarlos@testmail.com', '$2b$10$eEjB7RUQmVECGToMyN99FOd5KQONHUtPUm6xEJG93wJmEf8zvYxGu', 1),
+(4, 'recepcion1', 'recepcion1@testmail.com', '$2b$10$zbtqzBzyzYXeRfOAmH69V.nosw0PRHt1hprU7kZW7VvONvHFLXKmy', 1),
+(5, 'enfermera1', 'enfermera1@testmail.com', '$2b$10$xOK0M25ehv6hPTpEYiIYIOuA2R0HqciXeQsA4WzvFTqafDB35AAY6', 1),
+(12, 'clinica1', 'clinica1@testmail.com', '$2b$12$0XhZnBpxC8mkgHWHSuidcOy5yKECPb9T0TEUtqgoHDfFntZPQgd7G', 1),
+(13, 'cardio1', 'cardio1@testmail.com', '$2b$12$KELc024SMNhGA7mmehqmf.IVH2On5oQlxnTH0iQ6f6BRwHralLsCq', 1),
+(14, 'pedia1', 'pedia1@testmail.com', '$2b$12$jHCzaXvF5SIQ.bCHoa9LpuxYgEJMuQS36PIBA4TWF0UMooqmeMS/O', 1),
+(15, 'gine1', 'gine1@testmail.com', '$2b$12$1Nl5UINw1Q4GeNI4XXO0JeoloeHhWXL1KwM2fM3MJjASUcJalO1N6', 1),
+(16, 'derma1', 'derma1@testmail.com', '$2b$12$jVhZk06s0Tv66/73XcOheeVJWJkJlsFyWygOnRIzi/MpPGYBB6mAG', 1),
+(17, 'neuro1', 'neuro1@testmail.com', '$2b$12$Za9/dX7dVRI8VVErUl99AulScI4soJ3nf2lAKgxMzBWkAnRndTVZ6', 1),
+(18, 'psiqui1', 'psiqui1@testmail.com', '$2b$12$Tj0OukxZp/wxtlPu8DwIAef.C57X6h4hTM2hnPrS8PtJfJNE0tcfy', 1),
+(19, 'trauma1', 'trauma1@testmail.com', '$2b$12$/.AaK/94aLWLup66TfeQvu7IzVGtaN0BIN3/VCIXFQIdSwjRY9pWu', 1),
+(20, 'infecto1', 'infecto1@testmail.com', '$2b$12$H.f8NxgXVFmAw3uV37XHdONqplCzpz6651zL/eQrik3078mrNoryu', 1),
+(22, 'pedros', 'pedros@testmail.com', '$2b$10$Qg9NlCioUcNNXEq82.66WOG4u74x/cwrWgflD.RD1esXAWcwHJlqS', 1),
+(23, 'RamonC', 'RamonC@testmail.com', '$2b$10$gq4Zr17MuJffttfnqtrl6OvzN/jKh1yJRw7NI6MQ1uxELX/o7gdLa', 1),
+(24, 'VivianaC', 'VivianaC@testmail.com', '$2b$10$0T43FY3IMFROxklrS1rJmupYnUj2QE5Wq.jGVaTOianlrLw6thnXe', 1),
+(25, 'GDiaz', 'GDiaz@testmail.com', '$2b$10$hvcTO0Mm7p6Gy6uYSd0Dx.ck6f6QsornRjqs4kRJq7lhSD5FvgX7K', 1);
 
 --
 -- Índices para tablas volcadas
@@ -926,60 +970,7 @@ ALTER TABLE `obra_social`
 --
 ALTER TABLE `paciente`
   ADD PRIMARY KEY (`id_paciente`),
-  ADD UNIQUE KEY `dni_paciente` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_2` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_3` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_4` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_5` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_6` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_7` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_8` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_9` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_10` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_11` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_12` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_13` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_14` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_15` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_16` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_17` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_18` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_19` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_20` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_21` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_22` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_23` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_24` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_25` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_26` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_27` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_28` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_29` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_30` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_31` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_32` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_33` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_34` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_35` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_36` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_37` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_38` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_39` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_40` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_41` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_42` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_43` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_44` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_45` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_46` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_47` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_48` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_49` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_50` (`dni_paciente`),
-  ADD UNIQUE KEY `dni_paciente_51` (`dni_paciente`),
-  ADD UNIQUE KEY `email` (`email`),
-  ADD KEY `id_genero` (`id_genero`),
-  ADD KEY `id_localidad` (`id_localidad`);
+  ADD UNIQUE KEY `dni_paciente` (`dni_paciente`,`telefono`,`email`);
 
 --
 -- Indices de la tabla `parentesco`
@@ -1032,6 +1023,13 @@ ALTER TABLE `tipo_registro`
   ADD PRIMARY KEY (`id_tipo`);
 
 --
+-- Indices de la tabla `token_recuperacion`
+--
+ALTER TABLE `token_recuperacion`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+--
 -- Indices de la tabla `turno`
 --
 ALTER TABLE `turno`
@@ -1039,7 +1037,8 @@ ALTER TABLE `turno`
   ADD KEY `id_agenda` (`id_agenda`),
   ADD KEY `id_estado` (`id_estado`),
   ADD KEY `id_paciente` (`id_paciente`),
-  ADD KEY `id_motivo` (`id_motivo`);
+  ADD KEY `id_motivo` (`id_motivo`),
+  ADD KEY `fk_turno_obra_social` (`id_obra_social`);
 
 --
 -- Indices de la tabla `usuario`
@@ -1047,52 +1046,7 @@ ALTER TABLE `turno`
 ALTER TABLE `usuario`
   ADD PRIMARY KEY (`id_usuario`),
   ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `username_2` (`username`),
-  ADD UNIQUE KEY `username_3` (`username`),
-  ADD UNIQUE KEY `username_4` (`username`),
-  ADD UNIQUE KEY `username_5` (`username`),
-  ADD UNIQUE KEY `username_6` (`username`),
-  ADD UNIQUE KEY `username_7` (`username`),
-  ADD UNIQUE KEY `username_8` (`username`),
-  ADD UNIQUE KEY `username_9` (`username`),
-  ADD UNIQUE KEY `username_10` (`username`),
-  ADD UNIQUE KEY `username_11` (`username`),
-  ADD UNIQUE KEY `username_12` (`username`),
-  ADD UNIQUE KEY `username_13` (`username`),
-  ADD UNIQUE KEY `username_14` (`username`),
-  ADD UNIQUE KEY `username_15` (`username`),
-  ADD UNIQUE KEY `username_16` (`username`),
-  ADD UNIQUE KEY `username_17` (`username`),
-  ADD UNIQUE KEY `username_18` (`username`),
-  ADD UNIQUE KEY `username_19` (`username`),
-  ADD UNIQUE KEY `username_20` (`username`),
-  ADD UNIQUE KEY `username_21` (`username`),
-  ADD UNIQUE KEY `username_22` (`username`),
-  ADD UNIQUE KEY `username_23` (`username`),
-  ADD UNIQUE KEY `username_24` (`username`),
-  ADD UNIQUE KEY `username_25` (`username`),
-  ADD UNIQUE KEY `username_26` (`username`),
-  ADD UNIQUE KEY `username_27` (`username`),
-  ADD UNIQUE KEY `username_28` (`username`),
-  ADD UNIQUE KEY `username_29` (`username`),
-  ADD UNIQUE KEY `username_30` (`username`),
-  ADD UNIQUE KEY `username_31` (`username`),
-  ADD UNIQUE KEY `username_32` (`username`),
-  ADD UNIQUE KEY `username_33` (`username`),
-  ADD UNIQUE KEY `username_34` (`username`),
-  ADD UNIQUE KEY `username_35` (`username`),
-  ADD UNIQUE KEY `username_36` (`username`),
-  ADD UNIQUE KEY `username_37` (`username`),
-  ADD UNIQUE KEY `username_38` (`username`),
-  ADD UNIQUE KEY `username_39` (`username`),
-  ADD UNIQUE KEY `username_40` (`username`),
-  ADD UNIQUE KEY `username_41` (`username`),
-  ADD UNIQUE KEY `username_42` (`username`),
-  ADD UNIQUE KEY `username_43` (`username`),
-  ADD UNIQUE KEY `username_44` (`username`),
-  ADD UNIQUE KEY `username_45` (`username`),
-  ADD UNIQUE KEY `username_46` (`username`),
-  ADD UNIQUE KEY `username_47` (`username`);
+  ADD UNIQUE KEY `email` (`email`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -1102,13 +1056,13 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `admision`
 --
 ALTER TABLE `admision`
-  MODIFY `id_admision` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=235;
+  MODIFY `id_admision` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=248;
 
 --
 -- AUTO_INCREMENT de la tabla `agenda`
 --
 ALTER TABLE `agenda`
-  MODIFY `id_agenda` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id_agenda` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT de la tabla `cama`
@@ -1126,7 +1080,7 @@ ALTER TABLE `especialidad`
 -- AUTO_INCREMENT de la tabla `familiar`
 --
 ALTER TABLE `familiar`
-  MODIFY `id_familiar` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_familiar` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `genero`
@@ -1162,19 +1116,19 @@ ALTER TABLE `movimiento`
 -- AUTO_INCREMENT de la tabla `movimiento_habitacion`
 --
 ALTER TABLE `movimiento_habitacion`
-  MODIFY `id_movimiento` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=311;
+  MODIFY `id_movimiento` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=322;
 
 --
 -- AUTO_INCREMENT de la tabla `obra_social`
 --
 ALTER TABLE `obra_social`
-  MODIFY `id_obra_social` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id_obra_social` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `paciente`
 --
 ALTER TABLE `paciente`
-  MODIFY `id_paciente` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `id_paciente` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
 -- AUTO_INCREMENT de la tabla `parentesco`
@@ -1198,7 +1152,7 @@ ALTER TABLE `personal_salud`
 -- AUTO_INCREMENT de la tabla `registro_historia_clinica`
 --
 ALTER TABLE `registro_historia_clinica`
-  MODIFY `id_registro` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
+  MODIFY `id_registro` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=147;
 
 --
 -- AUTO_INCREMENT de la tabla `rol_usuario`
@@ -1210,7 +1164,7 @@ ALTER TABLE `rol_usuario`
 -- AUTO_INCREMENT de la tabla `sector`
 --
 ALTER TABLE `sector`
-  MODIFY `id_sector` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id_sector` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT de la tabla `tipo_registro`
@@ -1219,10 +1173,16 @@ ALTER TABLE `tipo_registro`
   MODIFY `id_tipo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
+-- AUTO_INCREMENT de la tabla `token_recuperacion`
+--
+ALTER TABLE `token_recuperacion`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
 -- AUTO_INCREMENT de la tabla `turno`
 --
 ALTER TABLE `turno`
-  MODIFY `id_turno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
+  MODIFY `id_turno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
@@ -1309,9 +1269,16 @@ ALTER TABLE `registro_historia_clinica`
   ADD CONSTRAINT `registro_historia_clinica_ibfk_113` FOREIGN KEY (`id_tipo`) REFERENCES `tipo_registro` (`id_tipo`);
 
 --
+-- Filtros para la tabla `token_recuperacion`
+--
+ALTER TABLE `token_recuperacion`
+  ADD CONSTRAINT `token_recuperacion_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`);
+
+--
 -- Filtros para la tabla `turno`
 --
 ALTER TABLE `turno`
+  ADD CONSTRAINT `fk_turno_obra_social` FOREIGN KEY (`id_obra_social`) REFERENCES `obra_social` (`id_obra_social`),
   ADD CONSTRAINT `turno_ibfk_1` FOREIGN KEY (`id_agenda`) REFERENCES `agenda` (`id_agenda`) ON UPDATE CASCADE,
   ADD CONSTRAINT `turno_ibfk_2` FOREIGN KEY (`id_estado`) REFERENCES `estado_turno` (`id_estado`),
   ADD CONSTRAINT `turno_ibfk_3` FOREIGN KEY (`id_paciente`) REFERENCES `paciente` (`id_paciente`),

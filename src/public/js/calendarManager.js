@@ -19,7 +19,11 @@ if (calendarEl) {
     events: function (fetchInfo, successCallback, failureCallback) {
       const isMedico = window.usuario?.rol === 4;
       const profesionalId = isMedico ? null : $('#filtroProfesional').val();
-
+      
+      if (isMedico) {
+        $('#filtroProfesional').hide();
+        $('label[for="filtroProfesional"]').hide(); 
+      }
       const url = profesionalId
         ? `/api/calendario/eventos?profesionalId=${profesionalId}`
         : `/api/calendario/eventos`;

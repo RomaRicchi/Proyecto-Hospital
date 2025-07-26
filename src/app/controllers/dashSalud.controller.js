@@ -3,6 +3,7 @@ import {
   Admision,
   MotivoIngreso,
   Paciente,
+  PersonalSalud,
   Cama,
   Habitacion,
   Sector
@@ -12,8 +13,18 @@ import { Op } from 'sequelize';
 export const vistaPanelSalud = async (req, res) => {
   try {
     const usuario = req.session.usuario;
+    let idRol = null;
+
+    const medico = await PersonalSalud.findOne({ where: { id_usuario: usuario.id } });
+    if (medico) {
+      idRol = medico.id_rol_usuario;
+    }
+
     res.render('panelSalud', {
-      usuario
+      usuario: {
+        ...usuario,
+        id_rol_usuario: idRol
+      }
     });
   } catch (error) {
     console.error('❌ Error en vistaPanelSalud:', error);
