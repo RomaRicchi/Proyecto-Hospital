@@ -71,7 +71,6 @@ export const createHabitacion = async (req, res) => {
       return res.status(409).json({ message: 'Ya existe una habitación con ese número en este sector' });
     }
 
-    // ✅ Crear la nueva habitación
     const nueva = await Habitacion.create({ num, id_sector });
     res.status(201).json(nueva);
 
@@ -94,7 +93,6 @@ export const updateHabitacion = async (req, res) => {
       return res.status(400).json({ message: 'El número es obligatorio' });
     }
 
-    // 🔍 Validar que no exista otra habitación con el mismo número y sector
     const existente = await Habitacion.findOne({
       where: {
         num,

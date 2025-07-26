@@ -51,7 +51,7 @@ export const getTurnos = async (req, res) => {
     const eventos = turnos.map(t => {
       const profesional = t.agenda?.personal;
       const paciente = t.paciente;
-      const inicioUTC = new Date(t.fecha_hora).toISOString(); // aseguro ISO para FullCalendar
+      const inicioUTC = new Date(t.fecha_hora).toISOString();
       const finUTC = calcularHoraFin(inicioUTC, t.agenda?.duracion || 30);
 
       return {
@@ -113,12 +113,11 @@ export const getTurnosListado = async (req, res) => {
       ]
     });
 
-    // Convertimos a hora local para mostrar en tabla
     const turnosConvertidos = turnos.map(t => {
       const json = t.toJSON();
-      const fecha = new Date(json.fecha_hora); // viene en UTC
+      const fecha = new Date(json.fecha_hora); 
 
-      json.fecha_turno = fecha.toLocaleDateString('sv-SE'); // YYYY-MM-DD
+      json.fecha_turno = fecha.toLocaleDateString('sv-SE'); 
       json.hora_turno = fecha.toLocaleTimeString('es-AR', {
         hour: '2-digit',
         minute: '2-digit',
@@ -252,9 +251,9 @@ export const getTurnoById = async (req, res) => {
     const json = turno.toJSON();
 
     if (json.fecha_hora) {
-      const fecha = new Date(json.fecha_hora); // UTC almacenado en DB
+      const fecha = new Date(json.fecha_hora); 
 
-      json.fecha_turno = fecha.toLocaleDateString('sv-SE'); // YYYY-MM-DD
+      json.fecha_turno = fecha.toLocaleDateString('sv-SE'); 
       json.hora_turno = fecha.toLocaleTimeString('es-AR', {
         hour: '2-digit',
         minute: '2-digit',
@@ -373,7 +372,7 @@ export const deleteTurno = async (req, res) => {
     const turno = await Turno.findByPk(req.params.id);
     if (!turno) return res.status(404).json({ message: 'Turno no encontrado' });
 
-    await turno.destroy(); // o marcarlo como cancelado si preferís
+    await turno.destroy(); 
     res.sendStatus(204);
   } catch (error) {
     res.status(500).json({ message: 'Error al cancelar turno' });

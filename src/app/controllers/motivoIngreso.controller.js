@@ -71,7 +71,7 @@ export const deleteMotivoIngreso = async (req, res) => {
 		}
 
 		await motivo.destroy();
-		res.status(204).send(); // No Content
+		res.status(204).send(); 
 	} catch (error) {
 		res.status(500).json({ message: 'Error al eliminar motivo de ingreso' });
 	}

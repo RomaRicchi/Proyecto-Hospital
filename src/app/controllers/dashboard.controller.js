@@ -78,9 +78,9 @@ export const vistaDashboard = async (req, res) => {
 
     camas.forEach((cama) => {
       cama.descripcionHabitacion =
-        cama.habitacion && cama.habitacion.sector
+				cama.habitacion && cama.habitacion.sector
           ? `Habitación ${cama.habitacion.num} - ${cama.habitacion.sector.nombre}`
-          : '-';
+					: '-';
 
       cama.dataValues.desinfeccion = cama.desinfeccion;
     });

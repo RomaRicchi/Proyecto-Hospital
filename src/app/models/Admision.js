@@ -71,10 +71,12 @@ export default (sequelize, DataTypes) => {
 		Admision.hasMany(models.MovimientoHabitacion, {
 			foreignKey: 'id_admision',
 			as: 'movimientos_habitacion',
+			onDelete: 'CASCADE'
 		});
 		Admision.hasMany(models.RegistroHistoriaClinica, {
 			foreignKey: 'id_admision',
 			as: 'registros_clinicos',
+			onDelete: 'CASCADE'
 		});
 	};
 

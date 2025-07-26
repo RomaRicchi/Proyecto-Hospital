@@ -207,8 +207,6 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
   .then(result => {
   if (!result.isConfirmed) return;
 
-  console.log('🟨 Turno a enviar:', result.value); 
-
   const metodo = turno?.id_turno ? 'PUT' : 'POST';
   const url = turno?.id_turno ? `/api/turnos/${turno.id_turno}` : '/api/turnos';
 

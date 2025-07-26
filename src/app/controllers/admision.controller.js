@@ -199,7 +199,7 @@ export const createAdmision = async (req, res) => {
 
   } catch (error) {
     if (t) await t.rollback();
-    // Manejo de errores de validación esperados
+    
     if (
       error.message && (
         error.message.includes('género') ||
@@ -218,13 +218,13 @@ export const getOpcionesAdmision = async (req, res) => {
   try {
     const [pacientes, obrasSociales, motivos, personal] = await Promise.all([
       Paciente.findAll({
-        attributes: ['id_paciente', 'apellido_p', 'nombre_p'],
+        attributes: ['id_paciente', 'apellido_p', 'nombre_p', 'dni_paciente', 'fecha_nac'],
       }),
       ObraSocial.findAll({ attributes: ['id_obra_social', 'nombre'] }),
       MotivoIngreso.findAll({ attributes: ['id_motivo', 'tipo'] }),
       Usuario.findAll({
         where: {
-          '$datos_medico.id_rol_usuario$': 4 // solo médicos
+          '$datos_medico.id_rol_usuario$': 4 
         },
         attributes: ['id_usuario'],
         include: [
@@ -291,7 +291,7 @@ export const getAdmisiones = async (req, res) => {
           model: MovimientoHabitacion,
           as: 'movimientos_habitacion',
           attributes: ['id_mov', 'fecha_hora_egreso', 'estado'],
-          required: false, // 🔧 permite incluir admisiones sin movimientos aún
+          required: false, 
         },
       ],
     });

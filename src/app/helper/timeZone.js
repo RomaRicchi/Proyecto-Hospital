@@ -1,5 +1,3 @@
-// src/app/helper/timeZone.js
-
 export function parseFechaUTC(fechaStr) {
   if (typeof fechaStr === 'string' && !fechaStr.endsWith('Z')) {
     return new Date(fechaStr.replace(' ', 'T') + 'Z');

@@ -56,7 +56,7 @@ export const confirmarReserva = async (req, res) => {
     }
 
     const ahora = new Date();
-    const hoyLocal = ahora.toLocaleDateString('sv-SE'); // "YYYY-MM-DD"
+    const hoyLocal = ahora.toLocaleDateString('sv-SE');
     const fechaReserva = new Date(movimiento.fecha_hora_ingreso).toLocaleDateString('sv-SE');
 
     if (fechaReserva !== hoyLocal) {
@@ -81,7 +81,7 @@ export const confirmarReserva = async (req, res) => {
       });
     }
 
-    movimiento.id_mov = 1; // cambio a "ingreso"
+    movimiento.id_mov = 1;
     movimiento.fecha_hora_ingreso = movimiento.fecha_hora_ingreso;
     movimiento.estado = 1;
     await movimiento.save({ transaction: t });
@@ -154,7 +154,6 @@ export const updateReserva = async (req, res) => {
       return res.status(400).json({ message: 'La nueva fecha debe ser futura' });
     }
 
-    // Validar compatibilidad de habitación y sector
     const paciente = movimiento.admision.paciente;
     const habitacion = movimiento.habitacion;
     const sector = habitacion?.sector?.nombre || '';
@@ -201,15 +200,12 @@ export const cancelarReserva = async (req, res) => {
 
     const idAdmision = movimiento.id_admision;
 
-    // Eliminar la reserva
     await movimiento.destroy();
 
-    // Buscar si quedan más movimientos para esa admisión
     const movimientosRestantes = await MovimientoHabitacion.count({
       where: { id_admision: idAdmision }
     });
 
-    // Si no hay ninguno más, eliminar la admisión
     if (movimientosRestantes === 0) {
       await Admision.destroy({ where: { id_admision: idAdmision } });
     }
@@ -225,12 +221,10 @@ export const cancelarReserva = async (req, res) => {
 export const eliminarReservasVencidas = async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    // Calcular la fecha de ayer en formato YYYY-MM-DD
     const ayer = new Date();
     ayer.setDate(ayer.getDate() - 1);
     const fechaAyer = ayer.toISOString().split('T')[0];
 
-    // Obtener todas las reservas cuya fecha de ingreso fue AYER (hora local)
     const reservasVencidas = await MovimientoHabitacion.findAll({
       where: {
         id_mov: 3, // tipo reserva

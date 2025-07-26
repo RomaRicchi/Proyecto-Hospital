@@ -1,18 +1,13 @@
 import { 
   RegistroHistoriaClinica, 
   Admision, 
-  Paciente, 
-  Familiar,
-  Parentesco,
+  Paciente,
   TipoRegistro,
   Usuario, 
   PersonalSalud,
-  MovimientoHabitacion,
+  PersonalAdministrativo,
   Turno,
   Agenda,
-  Cama,             
-  Habitacion,        
-  Sector, 
 } from '../models/index.js';
 import { obtenerCamaActual } from './pacientesCamas.controller.js';
 import { Op } from 'sequelize';
@@ -116,51 +111,27 @@ export const eliminarRegistro = async (req, res) => {
 };
 
 export const buscarPorDNI = async (req, res) => {
-  const { dni } = req.params;
-
   try {
+    const { dni } = req.params;
+
+    if (!dni) {
+      return res.status(400).json({ message: 'Debe enviar un DNI' });
+    }
+
     const paciente = await Paciente.findOne({
-      where: { dni_paciente: dni },
-      attributes: ['id_paciente', 'nombre_p', 'apellido_p', 'fecha_nac', 'dni_paciente'],
-      include: [
-        {
-          model: Familiar,
-          as: 'familiares',
-          where: { estado: true },
-          required: false,
-          include: [
-            {
-              model: Parentesco,
-              as: 'parentesco',
-              attributes: ['nombre']
-            }
-          ]
-        }
-      ]
+      where: { dni_paciente: dni }
     });
 
     if (!paciente) {
       return res.status(404).json({ message: 'Paciente no encontrado' });
     }
 
-    const admisiones = await Admision.findAll({
+    const ultimaAdmision = await Admision.findOne({
       where: { id_paciente: paciente.id_paciente },
-      attributes: ['id_admision', 'fecha_hora_ingreso', 'fecha_hora_egreso']
+      order: [['fecha_hora_ingreso', 'DESC']]
     });
 
-    let ultimaAdmisionVigente = null;
-    const ahora = new Date();
-
-    const admisionesOrdenadas = admisiones.sort(
-      (a, b) => new Date(b.fecha_hora_ingreso) - new Date(a.fecha_hora_ingreso)
-    );
-
-    for (const adm of admisionesOrdenadas) {
-      if (!adm.fecha_hora_egreso || new Date(adm.fecha_hora_egreso) > ahora) {
-        ultimaAdmisionVigente = adm;
-        break;
-      }
-    }
+    const cama = await obtenerCamaActual(ultimaAdmision?.id_admision);
 
     const registros = await RegistroHistoriaClinica.findAll({
       include: [
@@ -184,143 +155,68 @@ export const buscarPorDNI = async (req, res) => {
       order: [['fecha_hora_reg', 'DESC']]
     });
 
-    const movimiento = await MovimientoHabitacion.findOne({
-      where: {
-        estado: 1,
-        id_mov: 1,
-      },
-      include: [
-        {
-          model: Admision,
-          as: 'admision',
-          where: { id_paciente: paciente.id_paciente }
-        },
-        {
-          model: Cama,
-          as: 'cama',
-          include: [
-            {
-              model: Habitacion,
-              as: 'habitacion',
-              include: [{ model: Sector, as: 'sector' }]
-            }
-          ]
-        }
-      ]
-    });
-
-    let camaAsignada = null;
-
-    if (ultimaAdmisionVigente) {
-      camaAsignada = await obtenerCamaActual(ultimaAdmisionVigente.id_admision);
-    }
-
     const adaptados = registros.map(r => ({
       id: r.id_registro,
       fecha: r.fecha_hora_reg,
       tipo: r.tipo_registro?.nombre || '-',
       id_tipo: r.tipo_registro?.id_tipo || null,
       detalle: r.detalle || '-',
-      usuario: r.usuario?.username || '-'
+      usuario: r.usuario?.username || '-',
+      id_admision: r.id_admision || null
     }));
-    const esInternado = !!movimiento;
-    res.json({
+
+    return res.json({
       paciente,
-      registros: adaptados,
-      ultimaAdmision: ultimaAdmisionVigente
-        ? { id_admision: ultimaAdmisionVigente.id_admision }
-        : null,
-      cama: movimiento
-        ? {
-            nombre: movimiento.cama?.nombre || '',
-            habitacion: movimiento.cama?.habitacion?.num || '',
-            sector: movimiento.cama?.habitacion?.sector?.nombre || ''
-          }
-        : null,
-      esInternado
+      cama,
+      ultimaAdmision,
+      registros: adaptados
     });
 
   } catch (err) {
-    console.error('Error en buscarPorDNI:', err);
-    res.status(500).json({ message: 'Error interno' });
+    console.error('❌ Error en buscarPorDNI:', err);
+    return res.status(500).json({
+      message: 'Error interno en el servidor',
+      error: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
   }
 };
 
 export const vistaRegistroClinico = async (req, res) => {
   try {
-    const { dni } = req.query;
+    const idUsuario = req.session.usuario?.id_usuario || req.session.usuario?.id;
 
-    // Cargar solo la vista base si no se envió el DNI
-    if (!dni) {
-      return res.render('registroClinico', {
-        usuario: req.session.usuario,
-        registros: [],
-        dni: null,
-        username: req.session.usuario.username,
-        idUsuario: req.session.usuario.id
-      });
-    }
-
-    const paciente = await Paciente.findOne({
-      where: { dni_paciente: dni },
-      attributes: ['id_paciente', 'nombre_p', 'apellido_p']
-    });
-
-    if (!paciente) {
-      return res.status(404).send('Paciente no encontrado');
-    }
-
-    const registros = await RegistroHistoriaClinica.findAll({
+    const usuarioCompleto = await Usuario.findByPk(idUsuario, {
       include: [
         {
-          model: TipoRegistro,
-          as: 'tipo_registro',
-          attributes: ['nombre']
+          model: PersonalSalud,
+          as: 'datos_medico',
         },
         {
-          model: Usuario,
-          as: 'usuario',
-          attributes: ['username']
-        },
-        {
-          model: Admision,
-          as: 'admision_historia',
-          where: { id_paciente: paciente.id_paciente },
-          required: true,
-          include: [
-            {
-              model: Paciente,
-              as: 'paciente_admision',
-              attributes: ['nombre_p', 'apellido_p']
-            }
-          ]
+          model: PersonalAdministrativo,
+          as: 'personal_administrativo', 
         }
-      ],
-      order: [['fecha_hora_reg', 'DESC']]
+      ]
     });
 
-    const adaptados = registros.map(r => ({
-      id: r.id_registro,
-      tipo: r.tipo_registro?.nombre || '-',
-      detalle: r.detalle || '-',
-      fecha: r.fecha_hora_reg,
-      paciente: r.admision_historia?.paciente_admision
-        ? `${r.admision_historia.paciente_admision.nombre_p} ${r.admision_historia.paciente_admision.apellido_p}`
-        : '-',
-      usuario: r.usuario?.username || '-'
-    }));
+    let idRol = null;
+
+    if (usuarioCompleto.datos_medico) {
+      idRol = usuarioCompleto.datos_medico.id_rol_usuario;
+    } else if (usuarioCompleto.personal_administrativo) {
+      idRol = usuarioCompleto.personal_administrativo.id_rol_usuario;
+    }
 
     res.render('registroClinico', {
-      usuario: req.session.usuario,
-      registros: adaptados,
-      dni,
-      username: req.session.usuario.username,
-      idUsuario: req.session.usuario.id
+      usuario: {
+        ...req.session.usuario,
+        id_rol_usuario: idRol
+      },
+      autenticado: true
     });
-
-  } catch (error) {
-    console.error('Error al mostrar registros clínicos:', error);
-    res.status(500).send(`Error al mostrar registros clínicos: ${error.message}`);
+  } catch (err) {
+    console.error('❌ Error en vistaRegistroClinico:', err);
+    res.status(500).send('Error cargando la vista de registros clínicos');
   }
 };
 

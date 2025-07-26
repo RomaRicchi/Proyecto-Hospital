@@ -22,7 +22,7 @@ export const enviarCorreoRecuperacion = async (req, res) => {
       expiracion,
     });
 
-    const enlace = `http://localhost:3000/api/recuperacion/restablecer-password/${token}`; // cambiar dominio si hace falta
+    const enlace = `http://localhost:3000/api/recuperacion/restablecer-password/${token}`;
 
     await transporter.sendMail({
       to: email,

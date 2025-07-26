@@ -104,7 +104,6 @@ Admision.belongsTo(Paciente, { as: 'paciente_admision', foreignKey: 'id_paciente
 Admision.belongsTo(Usuario, { as: 'usuario_medico', foreignKey: 'id_usuario' });
 
 PersonalSalud.belongsTo(Usuario, {  foreignKey: 'id_usuario',  as: 'datos_usuario'});
-Usuario.hasOne(PersonalSalud, { foreignKey: 'id_usuario',  as: 'dato_doctor'});
 
 Turno.belongsTo(Paciente, { foreignKey: 'id_paciente', as: 'cliente'});
 Turno.belongsTo(Agenda, { foreignKey: 'id_agenda', as: 'agenda' });

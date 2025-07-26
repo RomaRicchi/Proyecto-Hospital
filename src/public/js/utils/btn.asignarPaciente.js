@@ -122,6 +122,7 @@ $(document).on('click', '.btn-asignar-paciente', async function () {
 
 	const fechaBase = $('#fecha_busqueda').val();
 	const fechaDashboard = fechaBase || null;
+	
 	const edad = calcularEdad(pacienteSeleccionado.fecha_nac);
 	const sectorNombre = camaSeleccionada?.habitacion?.sector?.nombre?.trim() || 'el sector';
 

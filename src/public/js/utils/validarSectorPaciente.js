@@ -1,15 +1,18 @@
-export function calcularEdad(fechaNac) {
-  if (!fechaNac) return 'x';
+export function calcularEdad(fechaNacStr) {
   const hoy = new Date();
-  const nacimiento = new Date(fechaNac);
-  if (isNaN(nacimiento)) return 'x'; // por si la fecha no es válida
-  let edad = hoy.getFullYear() - nacimiento.getFullYear();
-  const m = hoy.getMonth() - nacimiento.getMonth();
-  if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+  const fechaNac = new Date(fechaNacStr);
+
+  if (!fechaNacStr || isNaN(fechaNac.getTime())) return null;
+
+  let edad = hoy.getFullYear() - fechaNac.getFullYear();
+  const mes = hoy.getMonth() - fechaNac.getMonth();
+
+  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
     edad--;
   }
   return edad;
 }
+
 
 export function validarCompatibilidadPacienteSector(edad, generoId, sector) {
 	const nombre = sector?.trim().toLowerCase();
@@ -29,13 +32,13 @@ export function validarCompatibilidadPacienteSector(edad, generoId, sector) {
 
 export function obtenerCriteriosPorSector(sector) {
 	switch (sector) {
-		case 'Neonatología':
+		case 'neonatología':
 			return 'Edad: hasta 1 año';
-		case 'Internación pediatrica':
+		case 'internación pediatrica':
 			return 'Edad: entre 1 y 17 años';
-		case 'Maternidad':
+		case 'maternidad':
 			return 'Género: Femenino';
-		case 'Geriatría':
+		case 'geriatría':
 			return 'Edad: 80 años o más';	
 		default:
 			return 'Edad: 18 años o más';

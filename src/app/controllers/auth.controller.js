@@ -60,6 +60,7 @@ export const login = async (req, res) => {
 			apellido: personal?.apellido || '',
 			rol: personal?.id_rol_usuario || 1,
 			username: user.username,
+			id_personal_salud: personal?.id_personal_salud || null 
 		};
 
 		if ([3, 4].includes(personal?.id_rol_usuario)) {

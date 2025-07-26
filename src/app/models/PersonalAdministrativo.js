@@ -34,7 +34,6 @@ export default (sequelize, DataTypes) => {
 		}
 	);
 
-	// 🧩 Asociaciones
 	PersonalAdministrativo.associate = (models) => {
 		PersonalAdministrativo.belongsTo(models.Usuario, {
 			foreignKey: 'id_usuario',
@@ -43,7 +42,7 @@ export default (sequelize, DataTypes) => {
 
 		PersonalAdministrativo.belongsTo(models.RolUsuario, {
 			foreignKey: 'id_rol_usuario',
-			as: 'rol', // ⚠️ Este alias es requerido para el login
+			as: 'rol', 
 		});
 	};
 

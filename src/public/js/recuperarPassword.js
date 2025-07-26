@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // 🔹 SweetAlert - Recuperar contraseña
+ 
   const btn = document.getElementById('btnRecuperarPassword');
   if (btn) {
     btn.addEventListener('click', (e) => {

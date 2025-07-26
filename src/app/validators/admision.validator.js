@@ -149,11 +149,9 @@ export async function verificarGeneroHabitacion(idHabitacion, generoNuevo, trans
     ],
     transaction
   });
-  console.log('📦 Revisando habitación:', idHabitacion);
   for (const mov of movimientos) {
   const generoExistente = mov?.admision?.paciente?.genero?.id_genero;
   const nombrePac = mov?.admision?.paciente?.nombre_p || 'Desconocido';
-  console.log(`🛏️ Movimiento con paciente ${nombrePac} - género: ${generoExistente}`);
   }
   for (const mov of movimientos) {
     const generoExistente = mov?.admision?.paciente?.genero?.id_genero;

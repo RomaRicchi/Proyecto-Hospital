@@ -38,7 +38,7 @@ export const vistaPacientes = async (req, res) => {
 
 		const pacientesAdaptados = pacientes.map((p) => {
 			const ultimaAdmision = p.admisiones?.[0];
-			const familiar = p.familiares?.[0]; // Tomar un familiar (podrías adaptar para múltiples)
+			const familiar = p.familiares?.[0];
 			return {
 				id_paciente: p.id_paciente,
 				dni_paciente: p.dni_paciente,
@@ -51,7 +51,6 @@ export const vistaPacientes = async (req, res) => {
 				email: p.email,
 				direccion: p.direccion,
 				localidad: p.localidad?.nombre || '-',
-				// Familiar relacionado (opcional)
 				familiar: familiar
 					? `${familiar.nombre} ${familiar.apellido} (${
 							familiar.parentesco?.nombre || 'Sin parentesco'
@@ -94,7 +93,7 @@ export const getPacientes = async (req, res) => {
   try {
     const pacientes = await Paciente.findAll({
       where: { estado: true },
-      attributes: ['id_paciente', 'nombre_p', 'apellido_p', 'dni_paciente'],
+      attributes: ['id_paciente', 'nombre_p', 'apellido_p', 'dni_paciente', 'fecha_nac'],
       include: [
         {
           model: Genero,
@@ -257,7 +256,7 @@ export const existeNNPorDNI = async (req, res) => {
       },
       include: [{
         model: Admision,
-        as: 'admisiones', // 👈 esta línea es clave
+        as: 'admisiones', 
         where: {
           descripcion: { [Op.like]: '%emergencia%' },
           fecha_hora_egreso: null

@@ -18,7 +18,6 @@ export const verificarGenero = async (req, res) => {
   }
 
   try {
-    // Buscar movimiento activo en esa cama
     const movimiento = await MovimientoHabitacion.findOne({
       where: {
         id_cama,
@@ -38,7 +37,6 @@ export const verificarGenero = async (req, res) => {
     });
 
     if (!movimiento) {
-      // No hay nadie en la cama, permitir
       return res.json({ success: true });
     }
     const generoOcupante = Number(movimiento.admision?.paciente?.genero?.id_genero);

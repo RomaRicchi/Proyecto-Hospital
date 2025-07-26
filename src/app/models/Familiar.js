@@ -38,7 +38,6 @@ export default (sequelize, DataTypes) => {
 		}
 	);
 
-	// 🔗 Relaciones (estas debes incluirlas)
 	Familiar.associate = (models) => {
 		Familiar.belongsTo(models.Parentesco, {
 			foreignKey: 'id_parentesco',

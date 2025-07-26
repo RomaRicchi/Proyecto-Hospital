@@ -5,6 +5,17 @@ import {
 } from './utils/validacionesImput.js';
 
 $(document).ready(function () {
+
+  const dniGuardado = localStorage.getItem('dniParaBuscar');
+  if (dniGuardado) {
+    $('#busqueda').val(dniGuardado);
+    localStorage.removeItem('dniParaBuscar');
+
+    setTimeout(() => {
+      $('#buscarPacienteForm').submit();
+    }, 100);
+  }
+
   $('#buscarPacienteForm').submit(async function (e) {
     e.preventDefault();
     const dni = $('#busqueda').val().trim();
@@ -31,15 +42,21 @@ $(document).ready(function () {
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit'
     });
+    const rawId = $('#usuarioData').data('id');
+    const medicoLogueadoId = rawId ? parseInt(rawId) : null;
 
     const medicos = await fetch('/api/personal-salud').then((r) => r.json());
     const medicosOptions = medicos
-      .map(m => `<option value="${m.id_personal_salud}">${m.apellido}, ${m.nombre} — Matrícula: ${m.matricula}</option>`)
+      .map(m => {
+        const selected = m.id_personal_salud === medicoLogueadoId ? 'selected' : '';
+        return `<option value="${m.id_personal_salud}" ${selected}>${m.apellido}, ${m.nombre} — Matrícula: ${m.matricula}</option>`;
+      })
       .join('');
 
-    $('#resultadoBusqueda').html(`
-      <h5>Datos del Paciente</h5>
-      <table class="table table-bordered">
+  $('#resultadoBusqueda').html(`
+    <div class="p-4 rounded bg-primary text-white">
+      <h5 class="fw-bold">Datos del Paciente</h5>
+      <table class="table table-bordered table-light table-sm">
         <thead>
           <tr>
             <th>Apellido</th>
@@ -54,35 +71,37 @@ $(document).ready(function () {
             <td>${paciente.apellido_p}</td>
             <td>${paciente.nombre_p}</td>
             <td>${paciente.dni_paciente}</td>
-            <td>${admision.descripcion}</td>
+            <td>${admision.descripcion || '-'}</td>
             <td>${fechaIngresoStr}</td>
           </tr>
         </tbody>
       </table>
 
-      <h5 class="mt-4">Completar Alta Médica</h5>
+      <h5 class="mt-4 fw-bold">Completar Alta Médica</h5>
       <form id="formEgreso" data-fecha-ingreso="${admision.fecha_hora_ingreso}">
         <div class="mb-3">
-          <label for="fechaEgreso" class="form-label">Fecha y hora de egreso</label>
+          <label for="fechaEgreso" class="form-label fw-bold">Fecha y hora de egreso</label>
           <input type="datetime-local" id="fechaEgreso" class="form-control" required>
         </div>
 
         <div class="mb-3">
-          <label for="motivoEgreso" class="form-label">Motivo del egreso</label>
+          <label for="motivoEgreso" class="form-label fw-bold">Motivo del egreso</label>
           <input type="text" id="motivoEgreso" class="form-control" required>
         </div>
 
         <div class="mb-3">
-          <label for="idUsuario" class="form-label">Médico Responsable</label>
+          <label for="idUsuario" class="form-label fw-bold">Médico Responsable</label>
           <select id="idUsuario" class="form-control" required>
             <option value="">Seleccione médico</option>
             ${medicosOptions}
           </select>
         </div>
 
-        <button type="submit" class="btn btn-success">Dar de Alta</button>
+        <button type="submit" class="btn btn-success fw-bold">Dar de Alta</button>
       </form>
-    `);
+    </div>
+  `);
+
   });
 
   $(document).on('submit', '#formEgreso', function (e) {
@@ -134,6 +153,7 @@ $(document).ready(function () {
           const text = await res.text();
           return Swal.fire('Error', text || 'Error inesperado del servidor', 'error');
         }
+
         const data = await res.json();
         if (data.success) {
           Swal.fire({
@@ -142,8 +162,12 @@ $(document).ready(function () {
             icon: 'success',
             customClass: {
               popup: 'swal2-card-style'
-            }
-          }).then(() => location.reload());
+            },
+            confirmButtonText: 'Ir a Registros Clínicos'
+          }).then(() => {
+            localStorage.setItem('dniParaBuscar', dni);
+            window.location.href = '/registroClinico';
+          });
         } else {
           Swal.fire('Error', data.message || 'No se pudo procesar el alta', 'error');
         }

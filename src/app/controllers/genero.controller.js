@@ -65,7 +65,7 @@ export const deleteGenero = async (req, res) => {
 		}
 
 		await genero.destroy();
-		res.status(204).send(); // Respuesta sin contenido
+		res.status(204).send(); 
 	} catch (error) {
 		res.status(500).json({ message: 'Error al eliminar género' });
 	}

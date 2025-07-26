@@ -63,16 +63,21 @@ export const deleteSector = async (req, res) => {
       return res.status(400).json({ message: 'ID inválido' });
     }
 
-    // 🔍 Buscar por id_sector explícitamente
     const sector = await Sector.findOne({ where: { id_sector: id } });
 
     if (!sector) {
       return res.status(404).json({ message: 'Sector no encontrado' });
     }
 
+    const habitaciones = await Habitacion.count({ where: { id_sector: id } });
+    if (habitaciones > 0) {
+      return res.status(400).json({
+        message: 'No se puede eliminar un sector que tiene habitaciones asociadas'
+      });
+    }
+
     await sector.destroy();
     res.status(204).send();
-
   } catch (error) {
     console.error('❌ Error al eliminar sector:', error);
     res.status(500).json({ message: 'Error al eliminar sector' });

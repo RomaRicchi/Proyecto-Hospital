@@ -47,7 +47,6 @@ export const getCamasApi = async (req, res) => {
 				cama.habitacion && cama.habitacion.sector
 					? `Habitación ${cama.habitacion.num} - ${cama.habitacion.sector.nombre}`
 					: '-';
-
 			cama.dataValues.desinfeccion = cama.desinfeccion;
 		});
 
@@ -187,15 +186,12 @@ export const createCama = async (req, res) => {
   try {
     let { nombre, id_habitacion, desinfeccion, estado } = req.body;
 
-    // Normalizar
     nombre = nombre.trim().toUpperCase();
 
-    // Validaciones
     if (!nombre || !id_habitacion) {
       return res.status(400).json({ message: 'Nombre e id_habitacion son obligatorios' });
     }
 
-    // Verificar duplicado
     const existente = await Cama.findOne({
       where: {
         nombre,
@@ -284,7 +280,6 @@ export const updateCama = async (req, res) => {
     const { id } = req.params;
     let { nombre, id_habitacion, desinfeccion, estado } = req.body;
 
-    // Normalizar
     nombre = nombre.trim().toUpperCase();
 
     if (!nombre || !id_habitacion) {
@@ -296,7 +291,6 @@ export const updateCama = async (req, res) => {
       return res.status(404).json({ message: 'Cama no encontrada' });
     }
 
-    // Verificar duplicado (excepto la actual)
     const duplicada = await Cama.findOne({
       where: {
         nombre,
@@ -359,11 +353,11 @@ export const vistaCama = async (req, res) => {
 			const numero = cama.habitacion?.num;
 			const sector = cama.habitacion?.sector?.nombre;
 			cama.descripcionHabitacion =
-				numero && sector
-					? `Habitación ${numero} - ${sector}`
-					: numero
-					? `Habitación ${numero}`
-					: '—';
+        numero && sector
+          ? `${sector} - Habitación ${numero}`
+          : numero
+          ? `Hab. ${numero}`
+          : '—';
 		});
 
 		res.render('cama', {

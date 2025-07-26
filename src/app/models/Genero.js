@@ -5,7 +5,7 @@ export default (sequelize, DataTypes) => {
       id_genero: {
         type: DataTypes.TINYINT.UNSIGNED,
         primaryKey: true,
-        autoIncrement: true,   // ✅ Confirmado que es autoincremental
+        autoIncrement: true,  
         allowNull: false,
       },
       nombre: {

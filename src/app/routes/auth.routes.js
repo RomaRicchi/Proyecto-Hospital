@@ -11,7 +11,6 @@ import { login, logout, vistaLogin } from '../controllers/auth.controller.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-/* 🌐 Página pública principal: /home */
 router.get('/home', async (req, res) => {
 	try {
 		const obrasPath = join(__dirname, '../../data/obras_sociales.dat');
@@ -51,9 +50,9 @@ router.get('/home', async (req, res) => {
 	}
 });
 
-router.get('/login', vistaLogin);    // ✅ Muestra el formulario de login
-router.post('/login', login);        // ✅ Procesa el login
-router.get('/logout', logout);       // ✅ Cierra sesión
+router.get('/login', vistaLogin);    
+router.post('/login', login);        
+router.get('/logout', logout);       
 
 
 export default router;

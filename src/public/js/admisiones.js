@@ -1,3 +1,5 @@
+import { toUTC } from "./utils/validacionFechas";
+
 $(document).ready(function () {
   const tabla = $('#tablaAdmisiones');
   let dt;
@@ -121,9 +123,9 @@ $(document).ready(function () {
         if (result.isConfirmed) {
           const datos = {
             ...result.value,
-            fecha_hora_ingreso: new Date(result.value.fecha_hora_ingreso).toISOString(),
+            fecha_hora_ingreso: toUTC(result.value.fecha_hora_ingreso),
             fecha_hora_egreso: result.value.fecha_hora_egreso
-              ? new Date(result.value.fecha_hora_egreso).toISOString()
+              ? toUTC(result.value.fecha_hora_egreso)
               : null,
           };
 

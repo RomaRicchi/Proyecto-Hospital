@@ -39,7 +39,6 @@ export const vistaFamiliares = async (req, res) => {
 			],
 		});
 
-		// Adaptar datos igual que en paciente
 		const familiaresAdaptados = familiares.map((f) => ({
 			id_familiar: f.id_familiar,
 			nombre: f.nombre,
@@ -51,7 +50,7 @@ export const vistaFamiliares = async (req, res) => {
 			dni_paciente: f.paciente?.dni_paciente || '-',
 			email_paciente: f.paciente?.email || '-',
 			telefono_paciente: f.paciente?.telefono || '-',
-			parentesco: f.parentesco?.nombre || '-', // Aquí ya adaptado
+			parentesco: f.parentesco?.nombre || '-', 
 		}));
 
 		res.render('familiar', { 

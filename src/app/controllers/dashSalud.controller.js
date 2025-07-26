@@ -27,30 +27,35 @@ export const getPacientesAsignadosPorMedico = async (req, res) => {
     if (!usuario || !usuario.id) {
       return res.status(401).json({ message: 'Usuario no autenticado' });
     }
-    const id_usuario = usuario.id;
 
     const ahora = new Date();
+    const whereMovimiento = {
+      id_mov: 1,
+      estado: 1,
+      fecha_hora_ingreso: { [Op.lte]: ahora },
+      [Op.or]: [
+        { fecha_hora_egreso: null },
+        { fecha_hora_egreso: { [Op.gte]: ahora } }
+      ]
+    };
+
+    const includeAdmision = {
+      model: Admision,
+      as: 'admision',
+      include: [
+        { model: Paciente, as: 'paciente' },
+        { model: MotivoIngreso, as: 'motivo_ingreso' }
+      ]
+    };
+
+    if (usuario.rol === 4) {
+      includeAdmision.where = { id_usuario: usuario.id };
+    }
 
     const movimientos = await MovimientoHabitacion.findAll({
-      where: {
-        id_mov: 1,
-        estado: 1,
-        fecha_hora_ingreso: { [Op.lte]: ahora },
-        [Op.or]: [
-          { fecha_hora_egreso: null },
-          { fecha_hora_egreso: { [Op.gte]: ahora } }
-        ]
-      },
+      where: whereMovimiento,
       include: [
-        {
-          model: Admision,
-          as: 'admision',
-          where: { id_usuario },
-          include: [
-            { model: Paciente, as: 'paciente' },
-            { model: MotivoIngreso, as: 'motivo_ingreso' }
-          ]
-        },
+        includeAdmision,
         {
           model: Cama,
           as: 'cama',
@@ -69,13 +74,15 @@ export const getPacientesAsignadosPorMedico = async (req, res) => {
     });
 
     const datos = movimientos.map(m => ({
-      dni: m.admision.paciente.dni_paciente,
-      nombre: `${m.admision.paciente.apellido_p}, ${m.admision.paciente.nombre_p}`,
+      dni: m.admision.paciente?.dni_paciente || '—',
+      nombre: m.admision.paciente
+        ? `${m.admision.paciente.apellido_p}, ${m.admision.paciente.nombre_p}`
+        : '—',
       cama: m.cama
         ? `${m.cama.nombre} - Hab ${m.cama.habitacion?.num || '?'} / ${m.cama.habitacion?.sector?.nombre || '?'}`
         : '-',
       fecha_ingreso: m.fecha_hora_ingreso,
-      motivo: m.admision.motivo_ingreso?.tipo || '-'
+      motivo: m.admision.motivo_ingreso?.tipo || '—'
     }));
 
     res.json(datos);
@@ -84,3 +91,4 @@ export const getPacientesAsignadosPorMedico = async (req, res) => {
     res.status(500).json({ message: 'Error al obtener pacientes asignados' });
   }
 };
+

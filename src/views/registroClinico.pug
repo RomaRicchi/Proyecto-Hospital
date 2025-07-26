@@ -14,8 +14,12 @@ block content
       // 👤 Info del paciente
       #infoPaciente.mt-4.text-start
       #accionesRegistro.mt-3
-      div#usuarioData(data-username=usuario.username data-id=usuario.id style="display: none")
-
+      div#usuarioData(
+        data-username=usuario.username
+        data-id=usuario.id
+        data-rol=usuario.id_rol_usuario
+        style="display: none"
+      )
       // 🧾 Contenedor para la tabla
       .table-responsive.mt-3
         #tablaRegistrosContainer

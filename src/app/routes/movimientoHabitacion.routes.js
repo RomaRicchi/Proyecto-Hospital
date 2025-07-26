@@ -25,8 +25,6 @@ router.post('/', createMovimientoHabitacion);
 router.put('/:id', updateMovimientoHabitacion);
 router.delete('/:id', deleteMovimientoHabitacion);
 
-// 🔸 Rutas especiales con autenticación
-
 router.post('/confirmar-reserva', isAuthenticated, confirmarReserva);
 router.put('/cancelar-reserva/:id_movimiento', isAuthenticated, cancelarReserva); 
 

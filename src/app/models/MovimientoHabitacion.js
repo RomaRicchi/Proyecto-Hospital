@@ -16,7 +16,6 @@ export default (sequelize, DataTypes) => {
 				allowNull: false,
 			},
 			id_cama: {
-				// 👈 NUEVO CAMPO
 				type: DataTypes.TINYINT.UNSIGNED,
 				allowNull: false,
 			},

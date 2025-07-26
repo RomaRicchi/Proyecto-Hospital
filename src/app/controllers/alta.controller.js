@@ -58,13 +58,11 @@ export const darAltaPaciente = async (req, res) => {
 				.json({ success: false, message: 'No hay admisión vigente' });
 		}
 
-		// 🔄 Actualizar admisión con egreso
 		admision.fecha_hora_egreso = fecha_hora_egreso;
 		admision.motivo_egr = motivo_egr;
 		admision.id_personal_salud = id_personal_salud;
 		await admision.save();
 
-		// 🔍 Buscar último movimiento activo
 		const ultimoMov = await MovimientoHabitacion.findOne({
 			where: {
 				id_admision: admision.id_admision,
@@ -79,11 +77,8 @@ export const darAltaPaciente = async (req, res) => {
 			return res.status(400).json({ success: false, message: 'No se encontró movimiento activo' });
 		}
 
-		// ✅ Marcar fecha egreso del movimiento anterior
 		ultimoMov.fecha_hora_egreso = fecha_hora_egreso;
 		await ultimoMov.save();
-
-		// 🆕 Registrar nuevo movimiento tipo egreso
 		await MovimientoHabitacion.create({
 			id_admision: admision.id_admision,
 			id_habitacion: ultimoMov.id_habitacion,
@@ -93,7 +88,6 @@ export const darAltaPaciente = async (req, res) => {
 			estado: 1,
 		});
 
-		// 🛏️ Liberar cama
 		const cama = await Cama.findByPk(ultimoMov.id_cama);
 		if (cama) {
 			cama.estado = 0;
@@ -101,7 +95,6 @@ export const darAltaPaciente = async (req, res) => {
 			await cama.save();
 		}
 
-		// 📝 Historia clínica
 		let id_usuario = null;
 		if (id_personal_salud) {
 			const medico = await Usuario.findOne({
@@ -145,3 +138,5 @@ export const vistaAltaPaciente = (req, res) => {
     res.status(500).send('Error al cargar el formulario de alta de paciente');
   }
 };
+
+

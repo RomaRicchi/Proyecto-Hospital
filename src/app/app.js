@@ -8,7 +8,6 @@ import { dirname, join } from 'path';
 
 import viewsRoutes from './routes/views.routes.js';
 
-// 🛣️ Rutas importada
 import { iniciarEliminacionReservas } from '../jobs/eliminarReservasVencidas.js';
 import { iniciarActualizacionTurnos } from '../jobs/actualizarTurnos.js'; 
 import authRoutes from './routes/auth.routes.js';
@@ -41,7 +40,7 @@ import turnoRoutes from './routes/turno.routes.js';
 import estadoTurnoRoutes from './routes/estadoTurno.routes.js';
 import recuperacionRoutes from './routes/recuperacion.routes.js';
 import calendarioRoutes from './routes/calendario.routes.js';
-// ✅ Simular __dirname en ESModules
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 

@@ -237,7 +237,6 @@ export const actualizarPacienteEmergencia = async (req, res) => {
     });
 
     if (pacienteReal) {
-      // Fusionar referencias
       await Admision.update({ id_paciente: pacienteReal.id_paciente }, {
         where: { id_paciente: pacienteNN.id_paciente },
         transaction: t
@@ -259,7 +258,6 @@ export const actualizarPacienteEmergencia = async (req, res) => {
       return res.json({ mensaje: 'Paciente fusionado correctamente con el registro existente.' });
     }
 
-    // Si no existe, actualizar NN como paciente real
     await pacienteNN.update({
       dni_paciente: dni,
       nombre_p: nombre,

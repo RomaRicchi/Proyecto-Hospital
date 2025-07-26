@@ -20,7 +20,7 @@ $(document).ready(function () {
 
   async function cargarPacientesAsignados() {
     try {
-      const res = await fetch('/api/personal-salud/asignados',{
+      const res = await fetch('/api/personal-salud/asignados', {
         credentials: 'include'
       });
       if (!res.ok) throw new Error('Error al cargar pacientes');
@@ -37,11 +37,12 @@ $(document).ready(function () {
           m.cama,
           fecha,
           m.motivo,
-          `<a class="btn btn-sm btn-primary" href="/registroClinico?dni=${m.dni}">
+          `<button class="btn btn-sm btn-primary btn-ver-registro" data-dni="${m.dni}">
             <i class="fas fa-notes-medical me-1"></i> Registro
-          </a>`
+          </button>`
         ]);
       });
+
       tabla.draw();
     } catch (error) {
       console.error('❌ Error al cargar pacientes:', error);
@@ -50,4 +51,11 @@ $(document).ready(function () {
   }
 
   cargarPacientesAsignados();
+  $(document).on('click', '.btn-ver-registro', function () {
+    const dni = $(this).data('dni');
+    if (dni) {
+      localStorage.setItem('dniParaBuscar', dni);
+      window.location.href = '/registroClinico';
+    }
+  });
 });

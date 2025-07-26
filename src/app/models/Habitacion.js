@@ -31,6 +31,7 @@ export default (sequelize, DataTypes) => {
 		Habitacion.belongsTo(models.Sector, {
 			foreignKey: 'id_sector',
 			as: 'sector',
+			onDelete: 'RESTRICT'
 		});
 
 		Habitacion.hasMany(models.MovimientoHabitacion, {

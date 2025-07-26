@@ -1,15 +1,22 @@
-import {  toUTC, 
-          getFechaLocalParaInput
-} from './utils/validacionFechas.js';
-import { calcularEdad } from './utils/validarSectorPaciente.js';
+import { mostrarBotonesAccion } from './utils/btnRegistro.js';
+import { 
+  mostrarInfoPaciente, 
+  tieneInternacionActiva 
+} from './utils/pctRegistro.js';
+import {
+  mostrarEpisodios,
+  agruparPorEpisodios
+} from './utils/episodiosRegistro.js';
+import { toUTC } from './utils/validacionFechas.js';
 
 $(document).ready(function () {
   const $tabla = $('#tablaRegistrosContainer');
   const $info = $('#infoPaciente');
-  let registrosPaciente = [];
+  const idUsuarioLogueado = $('#usuarioData').data('id') || 1;
   let ultimaAdmisionPaciente = null;
   let esInternacionActiva = false;
-  const idUsuarioLogueado = $('#usuarioData').data('id') || 1;
+  let registrosPaciente = [];
+
   const dniGuardado = localStorage.getItem('dniParaBuscar');
   if (dniGuardado) {
     $('#dniBuscar').val(dniGuardado);
@@ -17,412 +24,137 @@ $(document).ready(function () {
     $('#btnBuscar').click();
   }
 
-  function determinarEstadoAdmision(fechaIngreso, fechaEgreso) {
-    const ahora = new Date();
-    const ingreso = new Date(fechaIngreso);
-    const egreso = fechaEgreso ? new Date(fechaEgreso) : null;
-
-    if (ingreso > ahora) return 'Reservada';
-    if (!egreso || egreso > ahora) return 'Vigente';
-    return 'Finalizada';
-  }
-
-  const ID_INGRESO = 30;
-  const ID_EGRESO = 31;
-
-  function agruparPorEpisodios(registros) {
-    const grupos = [];
-    let episodio = [];
-
-    const ordenados = [...registros].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-
-    ordenados.forEach(r => {
-      if (r.id_tipo === ID_INGRESO) {
-        if (episodio.length) grupos.push(episodio);
-        episodio = [r];
-      } else {
-        episodio.push(r);
-        if (r.id_tipo === ID_EGRESO) {
-          grupos.push(episodio);
-          episodio = [];
-        }
-      }
-    });
-
-    if (episodio.length > 0) grupos.push(episodio);
-
-    return grupos;
-  }
-
   $('#btnBuscar').click(() => {
-  const dni = $('#dniBuscar').val().trim();
-  if (!dni) {
-    Swal.fire('Ingrese un DNI válido');
-    return;
-  }
-
-  fetch(`/api/registro-clinico/dni/${dni}`)
-    .then(res => {
-      if (!res.ok) throw new Error('No encontrado');
-      return res.json();
-    })
-    .then(data => {
-      ultimaAdmisionPaciente = data.ultimaAdmision?.id_admision || null;
-      esInternacionActiva = data.esInternado || false;
-      if (!data || !Array.isArray(data.registros) || data.registros.length === 0) {
-        if (data?.paciente) {
-          mostrarInfoPaciente(data.paciente, data.cama);
-          mostrarBotonesAccion(data.paciente.id_paciente);
-        } else {
-          $info.html('');
-          $('#accionesRegistro').empty();
-        }
-
-        $tabla.html('<div class="alert alert-warning">Este paciente no posee registros clínicos aún</div>');
-        return;
-      }
-      
-      registrosPaciente = data.registros.map(r => ({
-        ...r,
-        fecha: new Date(r.fecha),
-        id: r.id  
-      }));
-
-      mostrarInfoPaciente(data.paciente, data.cama);
-      mostrarBotonesAccion(data.paciente.id_paciente);
-
-      const episodios = agruparPorEpisodios(registrosPaciente);
-      mostrarEpisodios(episodios);
-    })
-    .catch((err) => {
-      Swal.fire('Error', err.message || 'No se pudo cargar el formulario', 'error');
-    });
-  });
-
-function mostrarInfoPaciente(p, cama = null) {
-  if (!p) {
-    $info.html('');
-    return;
-  }
-
-  const edad = calcularEdad(p.fecha_nac);
-  let html = `
-    <div class="alert alert-info">
-      <strong>Paciente:</strong> ${p.apellido_p}, ${p.nombre_p} &nbsp; | &nbsp;
-      <strong>Edad:</strong> ${edad} años
-  `;
-
-  if (cama) {
-    html += ` &nbsp; | &nbsp; <strong>Cama:</strong> ${cama.nombre} - Hab ${cama.habitacion} (${cama.sector})`;
-  }
-
-  if (Array.isArray(p.familiares) && p.familiares.length > 0) {
-    const f = p.familiares[0];
-    html += ` &nbsp; | &nbsp; <strong>Familiar:</strong> ${f.nombre} ${f.apellido} (${f.parentesco?.nombre || '-'}) – Tel: ${f.telefono || '-'}`;
-  }
-
-  html += `</div>`;
-  $info.html(html);
-}
-
-
-  function mostrarEpisodios(grupos) {
-    let html = '';
-    grupos.reverse();
-    grupos.forEach((episodio, index) => {
-      const ingreso = episodio.find(r => r.id_tipo === ID_INGRESO);
-      const egreso = episodio.find(r => r.id_tipo === ID_EGRESO);
-
-      const fechaIngreso = ingreso ? new Date(ingreso.fecha) : null;
-      const fechaEgreso = egreso ? new Date(egreso.fecha) : null;
-
-      const estado = ingreso
-        ? determinarEstadoAdmision(fechaIngreso, fechaEgreso)
-        : 'Ambulatorio';
-
-      const textoFecha = ingreso
-        ? `Ingreso: ${fechaIngreso.toLocaleDateString('es-AR')}`
-        : 'Episodio ambulatorio o abierto';
-
-      const colorEstado = {
-        'Reservada': 'warning',
-        'Vigente': 'success',
-        'Finalizada': 'secondary',
-        'Ambulatorio': 'info'
-      }[estado] || 'dark';
-
-      html += `
-        <div class="card mb-4 shadow">
-          <div class="card-header bg-${colorEstado} text-white">
-            Episodio ${index + 1} – ${textoFecha} – <strong>Estado:</strong> ${estado}
-          </div>
-          <div class="card-body table-responsive">
-            <table class="table table-sm table-bordered table-striped">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Tipo</th>
-                  <th>Detalle</th>
-                  <th>Usuario</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-      `;
-
-      episodio.forEach((r, i) => {
-        html += `
-          <tr>
-            <td>${
-              r.fecha && !isNaN(new Date(r.fecha))
-                ? new Date(r.fecha).toLocaleString('es-AR', {hour12:false})
-                : '—'
-            }</td>
-            <td>${r.tipo}</td>
-            <td>${r.detalle}</td>
-            <td>${r.usuario}</td>
-            <td>
-              <button class="btn btn-sm btn-outline-primary btn-editar-registro" 
-                      data-id="${r.id}"
-                      data-index="${i}" 
-                      data-tipo="${r.id_tipo}" 
-                      data-fecha="${r.fecha}" 
-                      data-detalle="${r.detalle}">
-                <i class="fas fa-edit"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-      html += '</tbody></table></div></div>';
-    });
-
-    $('#tablaRegistrosContainer').html(html);
-  }
-
-  function mostrarBotonesAccion(idPaciente) {
-    const dniActual = $('#dniBuscar').val().trim(); 
-    if (localStorage.getItem('dniFueRecargado')) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Paciente cargado automáticamente',
-        text: `DNI: ${dniActual}`,
-        timer: 2500,
-        showConfirmButton: false
-      });
-      localStorage.removeItem('dniFueRecargado');
+    const dni = $('#dniBuscar').val().trim();
+    if (!dni) {
+      Swal.fire('Ingrese un DNI válido');
+      return;
     }
 
-    $('#accionesRegistro').html(`
-      <div class="d-flex gap-2 flex-wrap justify-content-center mt-4 mb-4 p-3">
-        <button id="btnNuevoRegistro" class="btn btn-success px-4">
-          <i class="fas fa-notes-medical me-1"></i> Nuevo evento clínico
-        </button>
-        <button id="btnDarAlta" class="btn btn-danger px-4" ${!(ultimaAdmisionPaciente && esInternacionActiva) ? 'disabled' : ''}>
-          <i class="fas fa-sign-out-alt me-1"></i> Dar de alta
-        </button>
-        <button id="btnLimpiarBusqueda" class="btn btn-secondary px-4">
-          <i class="fas fa-times me-1"></i> Limpiar búsqueda
-        </button>
-      </div>
-    `);
+    fetch(`/api/registro-clinico/dni/${dni}`)
+      .then(res => {
+        if (!res.ok) throw new Error('No encontrado');
+        return res.json();
+      })
+      .then(data => {
+        const admision = data.ultimaAdmision;
+        ultimaAdmisionPaciente = admision?.id_admision || null;
+        esInternacionActiva = tieneInternacionActiva(data.registros, admision?.id_admision);
 
-    $('#btnDarAlta').click(() => {
-      const dni = $('#dniBuscar').val().trim();
-      if (!dni) {
-        Swal.fire('Error', 'No hay DNI cargado para alta', 'warning');
-        return;
-      }
-      localStorage.setItem('dniParaBuscar', dni);
-      localStorage.setItem('dniFueRecargado', 'true'); 
-      window.location.href = `/paciente/alta?dni=${dni}`;
-    });
-
-    $('#btnNuevoRegistro').click(async () => {
-      try {
-        const tipos = await fetch('/api/tipos-registro').then(res => res.json());
-
-        const opciones = tipos.map(
-          t => `<option value="${t.id_tipo}">${t.nombre}</option>`
-        ).join('');
-
-        const fechaActual = getFechaLocalParaInput();
-        const ambulatorio = !ultimaAdmisionPaciente;
-        const dniActual = $('#dniBuscar').val().trim(); // ← lo usamos luego
-
-        Swal.fire({
-          title: 'Nuevo Registro Clínico',
-          html: `
-            ${ambulatorio
-              ? `<div class="alert alert-warning text-start" style="font-size: 0.9rem;">
-                  <i class="fas fa-info-circle me-1"></i>
-                  Este registro se asociará como <strong>ambulatorio</strong>, ya que el paciente no tiene una admisión activa.
-                </div>`
-              : ''}
-            <div style="overflow-x: auto; max-width: 100%;">
-              <select id="swal-tipo" class="swal2-input" style="width: 100%; font-size: 0.9rem;">
-                <option disabled selected value="">Tipo de registro</option>
-                ${opciones}
-              </select>
-            </div>
-            <textarea id="swal-detalle" class="swal2-textarea" placeholder="Detalle clínico..."></textarea>
-            <input id="swal-fecha" type="datetime-local" class="swal2-input" value="${fechaActual}">
-          `,
-          showCancelButton: true,
-          confirmButtonText: 'Guardar',
-          customClass: {
-            popup: 'swal2-card-style'
-          },
-          preConfirm: () => {
-            const id_tipo = $('#swal-tipo').val();
-            const detalle = $('#swal-detalle').val().trim();
-            const fecha_hora_reg = $('#swal-fecha').val();
-
-            if (!id_tipo) {
-              Swal.showValidationMessage('Debe seleccionar un tipo de registro');
-              return false;
-            }
-            if (!detalle) {
-              Swal.showValidationMessage('Debe completar el detalle');
-              return false;
-            }
-            return { id_tipo, detalle, fecha_hora_reg };
+        if (!data || !Array.isArray(data.registros) || data.registros.length === 0) {
+          if (data?.paciente) {
+            mostrarInfoPaciente(data.paciente, data.cama);
+            
+            mostrarBotonesAccion(
+              data.paciente.id_paciente,
+              ultimaAdmisionPaciente,
+              idUsuarioLogueado,
+              esInternacionActiva
+            );
+          } else {
+            $info.html('');
+            $('#accionesRegistro').empty();
           }
-        }).then(async (result) => {
-          if (!result.isConfirmed) return;
 
-          const payload = {
-            id_paciente: idPaciente,
-            id_tipo: result.value.id_tipo,
-            detalle: result.value.detalle,
-            fecha_hora_reg: toUTC(result.value.fecha_hora_reg),
-            id_usuario: idUsuarioLogueado,
-            id_admision: ultimaAdmisionPaciente
-          };
-
-          try {
-            const resp = await fetch('/api/registro-clinico', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            });
-
-            if (!resp.ok) {
-              const err = await resp.json();
-              throw new Error(err.message || 'Error al registrar');
-            }
-
-            Swal.fire('Éxito', 'Registro clínico guardado', 'success');
-
-            fetch(`/api/registro-clinico/dni/${dniActual}`)
-              .then(res => res.json())
-              .then(data => {
-                registrosPaciente = data.registros.map(r => ({
-                  ...r,
-                  fecha: new Date(r.fecha),
-                  id: r.id
-                }));
-
-                mostrarInfoPaciente(data.paciente, data.cama);
-                mostrarBotonesAccion(data.paciente.id_paciente);
-                const episodios = agruparPorEpisodios(registrosPaciente);
-                mostrarEpisodios(episodios);
-              })
-              .catch(() => {
-                Swal.fire('Advertencia', 'El registro fue guardado, pero hubo un error al refrescar los datos.', 'warning');
-              });
-
-          } catch (e) {
-            Swal.fire('Error', e.message || 'No se pudo guardar el registro', 'error');
-          }
-        });
-      } catch (e) {
-        Swal.fire('Error', 'No se pudo cargar el formulario', 'error');
-      }
-    });
- 
-    $('#btnLimpiarBusqueda').click(() => {
-      $('#dniBuscar').val('');
-      $('#infoPaciente').empty();
-      $('#tablaRegistrosContainer').empty();
-      $('#accionesRegistro').empty();
-    });
-  }
-
-  $(document).on('click', '.btn-editar-registro', async function () {
-    const $btn = $(this);
-    const id = $btn.data('id');
-    const tipo = $btn.data('tipo');
-    const detalle = $btn.data('detalle');
-    const fecha = $btn.data('fecha');
-
-    const fechaFormateada = fecha
-      ? new Date(fecha).toISOString().slice(0, 16)
-      : getFechaLocalParaInput();
-
-    const tipos = await fetch('/api/tipos-registro').then(res => res.json());
-
-    const opciones = tipos.map(
-      t => `<option value="${t.id_tipo}" ${t.id_tipo == tipo ? 'selected' : ''}>${t.nombre}</option>`
-    ).join('');
-
-    Swal.fire({
-      title: 'Editar Registro Clínico',
-      html: `
-        <select id="swal-tipo" class="swal2-input">
-          <option disabled value="">Tipo de registro</option>
-          ${opciones}
-        </select>
-        <textarea id="swal-detalle" class="swal2-textarea">${detalle}</textarea>
-        <input id="swal-fecha" type="datetime-local" class="swal2-input" value="${fechaFormateada}">
-      `,
-      showCancelButton: true,
-      confirmButtonText: 'Guardar cambios',
-      customClass: {
-					popup: 'swal2-card-style'
-				},
-      preConfirm: () => {
-        const id_tipo = $('#swal-tipo').val();
-        const detalle = $('#swal-detalle').val().trim();
-        const fecha_hora_reg = $('#swal-fecha').val();
-
-        if (!id_tipo || !detalle || !fecha_hora_reg) {
-          Swal.showValidationMessage('Todos los campos son obligatorios');
-          return false;
+          $tabla.html('<div class="alert alert-warning">Este paciente no posee registros clínicos aún</div>');
+          return;
         }
 
-        return { id_tipo, detalle, fecha_hora_reg };
+        registrosPaciente = data.registros.map(r => ({
+          ...r,
+          fecha: new Date(r.fecha),
+          id: r.id
+        }));
+        window.registrosPaciente = registrosPaciente; 
+        mostrarInfoPaciente(data.paciente, data.cama)
+
+        const resultadoInternacion = tieneInternacionActiva(data.registros, admision?.id_admision);
+        
+        esInternacionActiva = resultadoInternacion;
+
+        mostrarBotonesAccion(
+          data.paciente.id_paciente,
+          ultimaAdmisionPaciente,
+          idUsuarioLogueado,
+          esInternacionActiva
+        );
+        
+      
+        const episodios = agruparPorEpisodios(registrosPaciente);
+        mostrarEpisodios(episodios);
+      })
+      .catch(err => {
+        Swal.fire('Error', err.message || 'No se pudo cargar el formulario', 'error');
+      });
+  });
+});
+$(document).on('click', '.btn-editar-registro', async function () {
+  const $btn = $(this);
+  const id = $btn.data('id');
+  const tipo = $btn.data('tipo');
+  const detalle = $btn.data('detalle');
+  const fecha = $btn.data('fecha');
+
+  const fechaFormateada = fecha
+    ? new Date(fecha).toISOString().slice(0, 16)
+    : new Date().toISOString().slice(0, 16);
+
+  const tipos = await fetch('/api/tipos-registro').then(res => res.json());
+
+  const opciones = tipos.map(
+    t => `<option value="${t.id_tipo}" ${t.id_tipo == tipo ? 'selected' : ''}>${t.nombre}</option>`
+  ).join('');
+
+  Swal.fire({
+    title: 'Editar Registro Clínico',
+    html: `
+      <select id="swal-tipo" class="swal2-input">
+        <option disabled value="">Tipo de registro</option>
+        ${opciones}
+      </select>
+      <textarea id="swal-detalle" class="swal2-textarea">${detalle}</textarea>
+      <input id="swal-fecha" type="datetime-local" class="swal2-input" value="${fechaFormateada}">
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Guardar cambios',
+    customClass: {
+      popup: 'swal2-card-style'
+    },
+    preConfirm: () => {
+      const id_tipo = $('#swal-tipo').val();
+      const detalle = $('#swal-detalle').val().trim();
+      const fecha_hora_reg = $('#swal-fecha').val();
+
+      if (!id_tipo || !detalle || !fecha_hora_reg) {
+        Swal.showValidationMessage('Todos los campos son obligatorios');
+        return false;
       }
-    }).then(async result => {
-      if (!result.isConfirmed) return;
 
-      const payload = {
-        id_tipo: result.value.id_tipo,
-        detalle: result.value.detalle,
-        fecha_hora_reg: toUTC(result.value.fecha_hora_reg),
-        id_usuario: idUsuarioLogueado
-      };
+      return { id_tipo, detalle, fecha_hora_reg };
+    }
+  }).then(async result => {
+    if (!result.isConfirmed) return;
 
-      try {
-        const idRegistro = id;
-        const resp = await fetch(`/api/registro-clinico/${idRegistro}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+    const payload = {
+      id_tipo: result.value.id_tipo,
+      detalle: result.value.detalle,
+      fecha_hora_reg: toUTC(result.value.fecha_hora_reg),
+      id_usuario: $('#usuarioData').data('id')
+    };
 
-        if (!resp.ok) {
-          const error = await resp.json();
-          throw new Error(error.message || 'Error al actualizar');
-        }
+    try {
+      const resp = await fetch(`/api/registro-clinico/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-        Swal.fire('Actualizado', 'El registro fue editado correctamente', 'success');
+      if (!resp.ok) throw new Error('Error al guardar');
 
-        $('#btnBuscar').click(); 
-
-      } catch (e) {
-        Swal.fire('Error', e.message || 'No se pudo actualizar el registro', 'error');
-      }
-    });
+      Swal.fire('Actualizado', 'El registro fue editado correctamente', 'success');
+      $('#btnBuscar').click();
+    } catch (e) {
+      Swal.fire('Error', e.message || 'No se pudo actualizar el registro', 'error');
+    }
   });
 });
