@@ -60,7 +60,9 @@ $(document).ready(function () {
       .filter(t => !filtroId || t.agenda?.personal?.id_personal_salud == filtroId)
 
       .forEach(t => {
-        const paciente = t.cliente ? `${t.cliente.apellido_p}, ${t.cliente.nombre_p}` : '-';
+        const paciente = t.cliente
+          ? `${t.cliente.apellido_p}, ${t.cliente.nombre_p} (${t.cliente.dni_paciente || '-'})`
+          : '-';
         const profesional = t.agenda?.personal
           ? `${t.agenda.personal.apellido}, ${t.agenda.personal.nombre} (${t.agenda.personal?.especialidad?.nombre || '-'})`
           : '-';

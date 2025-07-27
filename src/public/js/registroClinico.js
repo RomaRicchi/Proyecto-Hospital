@@ -12,6 +12,12 @@ import { toUTC } from './utils/validacionFechas.js';
 $(document).ready(function () {
   const $tabla = $('#tablaRegistrosContainer');
   const $info = $('#infoPaciente');
+  const urlParams = new URLSearchParams(window.location.search);
+  const dniParam = urlParams.get('dni');
+  if (dniParam) {
+    $('#dniBuscar').val(dniParam);
+    $('#btnBuscar').click();
+  }
   const idUsuarioLogueado = $('#usuarioData').data('id') || 1;
   let ultimaAdmisionPaciente = null;
   let esInternacionActiva = false;
@@ -113,7 +119,8 @@ $(document).on('click', '.btn-editar-registro', async function () {
         ${opciones}
       </select>
       <textarea id="swal-detalle" class="swal2-textarea">${detalle}</textarea>
-      <input id="swal-fecha" type="datetime-local" class="swal2-input" value="${fechaFormateada}">
+      <input id="swal-fecha" type="datetime-local" class="swal2-input" value="${fechaFormateada}" readonly disabled
+      title="La fecha no se puede modificar">
     `,
     showCancelButton: true,
     confirmButtonText: 'Guardar cambios',

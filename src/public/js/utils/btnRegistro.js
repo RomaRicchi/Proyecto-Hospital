@@ -70,6 +70,27 @@ export function mostrarBotonesAccion(idPaciente, ultimaAdmisionPaciente, idUsuar
           const id_tipo = $('#swal-tipo').val();
           const detalle = $('#swal-detalle').val().trim();
           const fecha_hora_reg = $('#swal-fecha').val();
+          const fechaSeleccionadaUTC = new Date(fecha_hora_reg); // ya en ISO, UTC
+          const ahoraUTC = new Date();
+
+          const inicioHoyUTC = new Date(Date.UTC(
+            ahoraUTC.getUTCFullYear(),
+            ahoraUTC.getUTCMonth(),
+            ahoraUTC.getUTCDate(),
+            0, 0, 0
+          ));
+
+          const finHoyUTC = new Date(Date.UTC(
+            ahoraUTC.getUTCFullYear(),
+            ahoraUTC.getUTCMonth(),
+            ahoraUTC.getUTCDate(),
+            23, 59, 59, 999
+          ));
+
+          if (fechaSeleccionadaUTC < inicioHoyUTC || fechaSeleccionadaUTC > finHoyUTC) {
+            Swal.showValidationMessage('Solo se permiten registros con fecha del día actual');
+            return false;
+          }
 
           if (!id_tipo) return Swal.showValidationMessage('Seleccione un tipo de registro');
           if (!detalle) return Swal.showValidationMessage('Debe completar el detalle');

@@ -29,7 +29,6 @@ export const getTurnos = async (req, res) => {
 
     const turnos = await Turno.findAll({
       include: [
-        { model: Paciente, as: 'cliente' },
         { model: EstadoTurno, as: 'estado_turno' },
         { model: MotivoIngreso, as: 'motivo_turno' },
         {
@@ -44,6 +43,9 @@ export const getTurnos = async (req, res) => {
               { model: Especialidad, as: 'especialidad' }
             ]
           }]
+        },
+        { model: Paciente, as: 'cliente', 
+          attributes: ['nombre_p', 'apellido_p', 'dni_paciente'] 
         }
       ]
     });
@@ -93,7 +95,6 @@ export const getTurnosListado = async (req, res) => {
 
     const turnos = await Turno.findAll({
       include: [
-        { model: Paciente, as: 'cliente' },
         { model: EstadoTurno, as: 'estado_turno' },
         { model: MotivoIngreso, as: 'motivo_turno' },
         {
@@ -109,6 +110,9 @@ export const getTurnosListado = async (req, res) => {
               ]
             }
           ]
+        },
+        { model: Paciente, as: 'cliente', 
+          attributes: ['nombre_p', 'apellido_p', 'dni_paciente'] 
         }
       ]
     });
