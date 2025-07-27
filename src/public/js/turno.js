@@ -63,6 +63,7 @@ $(document).ready(function () {
         const paciente = t.cliente
           ? `${t.cliente.apellido_p}, ${t.cliente.nombre_p} (${t.cliente.dni_paciente || '-'})`
           : '-';
+        const obraSocial = t.obra_social?.nombre || 'Sin OS'
         const profesional = t.agenda?.personal
           ? `${t.agenda.personal.apellido}, ${t.agenda.personal.nombre} (${t.agenda.personal?.especialidad?.nombre || '-'})`
           : '-';
@@ -73,6 +74,7 @@ $(document).ready(function () {
 
         tabla.row.add([
           paciente,
+          obraSocial, 
           profesional,
           fecha,
           hora,

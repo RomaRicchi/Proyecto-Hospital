@@ -50,7 +50,7 @@ export default (sequelize, DataTypes) => {
       as: 'motivo_turno'
     });
 
-    Turno.belongsTo(ObraSocial, {
+    Turno.belongsTo(models.ObraSocial, {
       foreignKey: 'id_obra_social',
       as: 'obra_social'
     });

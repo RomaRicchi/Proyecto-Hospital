@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-07-2025 a las 21:59:44
+-- Tiempo de generación: 27-07-2025 a las 06:21:24
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -40,6 +40,18 @@ CREATE TABLE `admision` (
   `id_usuario` int(10) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `admision`
+--
+
+INSERT INTO `admision` (`id_admision`, `id_paciente`, `id_obra_social`, `num_asociado`, `fecha_hora_ingreso`, `id_motivo`, `descripcion`, `fecha_hora_egreso`, `motivo_egr`, `id_usuario`) VALUES
+(281, 24, 7, 123546, '2025-07-26 03:00:00', 4, NULL, '2025-07-26 19:06:20', 'se curo', 23),
+(282, 10, 4, 12354696, '2025-07-26 03:00:00', 5, NULL, '2025-07-26 16:59:07', 'se curo', 23),
+(283, 103, 10, 5648, '2025-07-26 19:06:00', 11, 'Ingreso por emergencia', '2025-07-27 01:12:31', 'se curo', 23),
+(284, 104, 10, 22222222, '2025-07-26 19:41:00', 11, 'Ingreso por emergencia', NULL, NULL, 20),
+(285, 3, 2, 52165455, '2025-07-26 03:00:00', 11, NULL, '2025-07-26 19:52:17', 'se curo', 23),
+(286, 105, 10, 87, '2025-07-26 22:24:00', 11, 'Ingreso por emergencia', NULL, NULL, 16);
+
 -- --------------------------------------------------------
 
 --
@@ -60,13 +72,16 @@ CREATE TABLE `agenda` (
 --
 
 INSERT INTO `agenda` (`id_agenda`, `id_personal_salud`, `id_dia`, `duracion`, `hora_inicio`, `hora_fin`) VALUES
-(38, 1, 1, 30, '08:00:00', '12:00:00'),
-(39, 2, 2, 30, '14:00:00', '18:00:00'),
-(40, 3, 3, 30, '09:00:00', '13:00:00'),
-(41, 4, 4, 30, '10:00:00', '14:00:00'),
-(42, 5, 5, 30, '15:00:00', '19:00:00'),
-(44, 12, 2, 45, '08:00:00', '14:00:00'),
-(45, 12, 1, 30, '08:00:00', '15:00:00');
+(46, 1, 1, 30, '08:00:00', '13:00:00'),
+(47, 3, 3, 30, '08:00:00', '15:00:00'),
+(48, 12, 4, 30, '08:00:00', '14:00:00'),
+(49, 2, 3, 45, '15:00:00', '19:00:00'),
+(50, 9, 4, 45, '15:00:00', '21:00:00'),
+(51, 9, 2, 45, '08:00:00', '16:00:00'),
+(52, 8, 5, 30, '08:00:00', '15:00:00'),
+(53, 4, 4, 30, '16:00:00', '18:00:00'),
+(54, 7, 2, 15, '15:00:00', '20:00:00'),
+(55, 12, 6, 60, '01:00:00', '23:00:00');
 
 -- --------------------------------------------------------
 
@@ -87,17 +102,20 @@ CREATE TABLE `cama` (
 --
 
 INSERT INTO `cama` (`id_cama`, `nombre`, `id_habitacion`, `desinfeccion`, `estado`) VALUES
-(41, 'A', 270, 1, 1),
+(41, 'A', 270, 0, 0),
 (42, 'B', 272, 0, 0),
 (43, 'B', 270, 1, 0),
 (44, 'A', 271, 1, 0),
-(45, 'B', 271, 1, 0),
+(45, 'B', 271, 0, 0),
 (46, 'A', 272, 1, 0),
 (47, 'A', 273, 1, 0),
-(48, 'A', 235, 1, 0),
-(49, 'A', 231, 1, 0),
+(48, 'A', 235, 1, 1),
+(49, 'A', 231, 1, 1),
 (51, 'B', 214, 1, 0),
-(52, 'A', 216, 0, 0);
+(54, 'A', 217, 1, 0),
+(55, 'B', 217, 1, 0),
+(58, 'A', 216, 0, 0),
+(59, 'C', 274, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -145,27 +163,20 @@ INSERT INTO `especialidad` (`id_especialidad`, `nombre`) VALUES
 (4, 'Ginecología'),
 (5, 'Dermatología'),
 (6, 'Neurología'),
-(7, 'Psiquiatría'),
+(7, 'Psicologia'),
 (8, 'Traumatología'),
 (9, 'Infectología'),
 (10, 'Sin especialidad'),
 (11, 'Cuidados generales'),
-(12, 'Pediatría'),
 (13, 'Neonatología'),
 (14, 'Terapia intensiva'),
 (15, 'Geriatría'),
 (16, 'Psiquiatría'),
 (17, 'Quirúrgica'),
 (18, 'Oncología'),
-(19, 'Salud mental'),
 (20, 'Enfermería comunitaria'),
-(21, 'Clínica médica'),
-(22, 'Cardiología'),
 (23, 'Cirugía'),
-(24, 'Pediatría médica'),
-(25, 'Ginecología'),
-(26, 'Neurología'),
-(27, 'Traumatología');
+(24, 'Pediatría médica');
 
 -- --------------------------------------------------------
 
@@ -210,17 +221,13 @@ CREATE TABLE `familiar` (
 
 INSERT INTO `familiar` (`id_familiar`, `id_paciente`, `apellido`, `nombre`, `id_parentesco`, `telefono`, `estado`) VALUES
 (1, 1, 'Pérez', 'María', 1, '2664000011', 1),
-(2, 2, 'Gómez', 'Pedro', 2, '2664000012', 1),
 (3, 3, 'Rodríguez', 'Ana', 3, '2664000013', 1),
-(4, 4, 'Fernández', 'Luis', 4, '2664000014', 1),
-(5, 5, 'López', 'Jorge', 5, '2664000015', 1),
-(6, 6, 'Martínez', 'Laura', 19, '2664000016', 1),
-(7, 7, 'García', 'Miguel', 7, '2664000017', 1),
 (8, 8, 'Sánchez', 'Verónica', 8, '2664000018', 1),
 (9, 9, 'Romero', 'Carlos', 9, '2664000019', 1),
 (10, 10, 'Torres', 'Paula', 10, '2664000020', 1),
 (11, 8, 'Soria', 'Laura', 18, '2664000010', 1),
-(12, 57, 'Peña', 'Laura', 14, '7349674666', 1);
+(12, 57, 'Peña', 'Laura', 14, '7349674666', 1),
+(13, 3, 'Soria', 'Laura', 19, '2664000001', 1);
 
 -- --------------------------------------------------------
 
@@ -264,9 +271,9 @@ INSERT INTO `habitacion` (`id_habitacion`, `id_sector`, `num`) VALUES
 (210, 4, 1),
 (216, 5, 1),
 (218, 6, 1),
-(220, 7, 1),
 (271, 1, 2),
 (209, 2, 2),
+(276, 3, 2),
 (211, 4, 2),
 (217, 5, 2),
 (219, 6, 2),
@@ -275,12 +282,12 @@ INSERT INTO `habitacion` (`id_habitacion`, `id_sector`, `num`) VALUES
 (222, 5, 3),
 (273, 1, 4),
 (232, 2, 4),
+(274, 6, 4),
 (235, 1, 5),
 (234, 2, 5),
 (231, 1, 6),
 (230, 6, 6),
 (229, 1, 7),
-(228, 6, 7),
 (224, 1, 8),
 (223, 3, 8);
 
@@ -494,6 +501,22 @@ CREATE TABLE `movimiento_habitacion` (
   `estado` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `movimiento_habitacion`
+--
+
+INSERT INTO `movimiento_habitacion` (`id_movimiento`, `id_admision`, `id_habitacion`, `id_cama`, `fecha_hora_ingreso`, `fecha_hora_egreso`, `id_mov`, `estado`) VALUES
+(351, 281, 272, 42, '2025-07-26 03:00:00', '2025-07-26 19:06:20', 1, 1),
+(352, 282, 271, 45, '2025-07-26 03:00:00', '2025-07-26 16:59:07', 1, 1),
+(353, 282, 271, 45, '2025-07-26 16:59:07', NULL, 2, 1),
+(354, 281, 272, 42, '2025-07-26 19:06:20', NULL, 2, 1),
+(355, 283, 216, 58, '2025-07-26 19:06:00', '2025-07-27 01:12:31', 1, 1),
+(356, 284, 231, 49, '2025-07-26 19:41:00', NULL, 1, 1),
+(357, 285, 270, 41, '2025-07-26 03:00:00', '2025-07-26 19:52:17', 1, 1),
+(358, 285, 270, 41, '2025-07-26 19:52:17', NULL, 2, 1),
+(359, 286, 235, 48, '2025-07-26 22:24:00', NULL, 1, 1),
+(360, 283, 216, 58, '2025-07-27 01:12:31', NULL, 2, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -545,24 +568,20 @@ CREATE TABLE `paciente` (
 
 INSERT INTO `paciente` (`id_paciente`, `dni_paciente`, `apellido_p`, `nombre_p`, `fecha_nac`, `id_genero`, `telefono`, `direccion`, `id_localidad`, `email`, `estado`) VALUES
 (1, 12345678, 'Pérez', 'Juan', '1985-05-15', 1, '2664000001', 'Calle Falsa 123', 1, 'juan.perez@mail.com', 1),
-(2, 22345678, 'Gómez', 'Ana', '1990-07-20', 2, '2664000002', 'Avenida Siempreviva 742', 2, 'ana.gomez@mail.com', 1),
 (3, 32345678, 'Rodríguez', 'Carlos', '1978-12-01', 1, '2664000003', 'Calle Mitre 456', 3, 'carlos.rodriguez@mail.com', 1),
-(4, 42345678, 'Fernández', 'Laura', '1992-09-12', 2, '2664000004', 'Calle Belgrano 789', 4, 'laura.fernandez@mail.com', 1),
-(5, 52345678, 'López', 'María', '1988-03-18', 2, '2664000005', 'Calle San Martín 321', 5, 'maria.lopez@mail.com', 1),
-(6, 62345678, 'Martínez', 'Pedro', '1995-11-30', 1, '2664000006', 'Avenida Rivadavia 555', 6, 'pedro.martinez@mail.com', 1),
-(7, 72345678, 'García', 'Lucía', '1983-02-22', 2, '2664000007', 'Calle Pueyrredón 654', 7, 'lucia.garcia@mail.com', 1),
 (8, 82345678, 'Sánchez', 'Jorge', '1975-04-10', 1, '2664000008', 'Calle Sarmiento 987', 8, 'jorge.sanchez@mail.com', 1),
 (9, 92345678, 'Romero', 'Sofía', '2000-06-05', 2, '2664000009', 'Calle 25 de Mayo 112', 9, 'sofia.romero@mail.com', 1),
-(10, 102345678, 'Torres Pacheco', 'Martín', '1999-08-25', 1, '2664000010', 'Calle España 334', 17, 'martin.torres@mail.com', 1),
+(10, 10234567, 'Torres Pacheco', 'Martín', '1999-08-25', 1, '2664000010', 'Calle España 334', 17, 'martin.torres@mail.com', 1),
 (21, 11111111, 'Pérez', 'Juan', '1980-01-01', 1, '2664000101', 'Calle Uno 123', 1, 'juan.perez@demo.com', 1),
-(22, 22222222, 'Gómez', 'Ana', '1990-02-02', 2, '2664000102', 'Calle Dos 456', 2, 'ana.gomez@demo.com', 1),
-(23, 33333333, 'Fernández', 'Laura', '1985-03-03', 2, '2664000103', 'Calle Tres 789', 3, 'laura.fernandez@demo.com', 1),
 (24, 35842052, 'Ricchiardi', 'Romanela', '1991-12-30', 2, '2664750247', 'los olivos', 1, 'roma.ricchiardi@gmail.com', 1),
 (39, 45361293, 'Ricchiardi', 'Carla', '2004-07-11', 2, '5646546546', 'la pampeana', 16, 'carli@gmail.com', 1),
-(46, 32, 'NN', 'No identificado', NULL, 1, NULL, NULL, NULL, NULL, 1),
 (57, 52006237, 'Rodriguez', 'Carla', '2005-03-05', 2, '634734646', '55 Roque Saenz Peña', 124, '1236jdkfasd@jmail.com', 1),
-(58, -64356346, 'jm', '-754', '2007-07-22', 2, '-65647376756', '308 Julio a Roca', 17, 'sinv7785@gmail.com', 1),
-(61, 84654, 'NN', 'No identificado', NULL, 1, NULL, NULL, NULL, NULL, 1);
+(97, 64356348, 'Gutierrez', 'Jorge', '2000-11-11', 1, '-65647376756', '308 Julio a Roca', 18, 'jkl@gmail.com', 0),
+(101, 86, 'NN', 'No identificado', NULL, 1, NULL, NULL, NULL, NULL, 0),
+(102, 846, 'NN', 'No identificado', NULL, 2, NULL, NULL, NULL, NULL, 1),
+(103, 56487898, 'Franco', 'Marin', '1998-06-15', 1, '6666666666', 'los cipreces 123', 4, '123@gmail.com', 1),
+(104, 22222222, 'NN', 'No identificado', NULL, 1, NULL, NULL, NULL, NULL, 1),
+(105, 47555646, 'Ramirez', 'Jorge', '2001-04-21', 1, '7765447555', '308 Julio a Roca', 16, 'rami.jorge@hotmail.com', 1);
 
 -- --------------------------------------------------------
 
@@ -621,9 +640,10 @@ CREATE TABLE `personal_administrativo` (
 --
 
 INSERT INTO `personal_administrativo` (`id_personal_admin`, `id_usuario`, `apellido`, `nombre`, `id_rol_usuario`, `activo`) VALUES
-(1, 1, 'General', 'Administracion', 1, 1),
-(2, 4, 'Gómez', 'Lucía', 2, 1),
-(6, 25, 'Diaz', 'Gustavo', 2, 1);
+(1, 1, 'General', 'Admin', 1, 1),
+(2, 4, 'Gómez', 'Lucía', 2, 0),
+(6, 25, 'Diaz', 'Gustavo', 2, 1),
+(7, 26, 'Pérez', 'Juan', 2, 1);
 
 -- --------------------------------------------------------
 
@@ -652,7 +672,7 @@ INSERT INTO `personal_salud` (`id_personal_salud`, `id_usuario`, `apellido`, `no
 (3, 12, 'Lopez', 'Ana', 4, 1, 'MCL001', 0),
 (4, 13, 'Garcia', 'Luis', 4, 2, 'MCD002', 1),
 (5, 14, 'Martinez', 'Sofia', 4, 3, 'MCP003', 1),
-(6, 15, 'Gomez', 'Laura', 4, 4, 'MCG004', 1),
+(6, 15, 'Gomez', 'Laura', 4, 4, 'MCG0047', 0),
 (7, 16, 'Diaz', 'Raul', 4, 5, 'MCD005', 1),
 (8, 17, 'Suarez', 'Elena', 4, 6, 'MCN006', 1),
 (9, 18, 'Romero', 'Mario', 4, 7, 'MCP007', 1),
@@ -676,6 +696,26 @@ CREATE TABLE `registro_historia_clinica` (
   `detalle` varchar(500) NOT NULL,
   `estado` tinyint(4) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `registro_historia_clinica`
+--
+
+INSERT INTO `registro_historia_clinica` (`id_registro`, `id_admision`, `id_usuario`, `fecha_hora_reg`, `id_tipo`, `detalle`, `estado`) VALUES
+(183, 281, 23, '2025-07-26 03:00:00', 30, 'Ingreso hospitalario: ', 1),
+(184, 282, 23, '2025-07-26 03:00:00', 30, 'Ingreso hospitalario: ', 1),
+(185, 282, 23, '2025-07-26 16:59:07', 24, 'Alta médica: se curo', 1),
+(186, 281, 23, '2025-07-26 19:06:20', 24, 'Alta médica: se curo', 1),
+(187, 283, 23, '2025-07-26 19:06:00', 30, 'Ingreso por emergencia.', 1),
+(188, 283, 24, '2025-07-26 19:07:00', 4, 'hgfygcjy', 1),
+(189, 283, 24, '2025-07-26 19:25:00', 7, 'jj4+4', 1),
+(190, 284, 20, '2025-07-26 19:41:00', 30, 'Ingreso por emergencia.', 1),
+(191, 285, 23, '2025-07-26 03:00:00', 30, 'Ingreso hospitalario: ', 1),
+(192, 285, 23, '2025-07-26 19:51:00', 2, 'igjhvhjvjhv', 1),
+(193, 285, 23, '2025-07-26 19:52:17', 24, 'Alta médica: se curo', 1),
+(194, 286, 16, '2025-07-26 22:24:00', 30, 'Ingreso por emergencia.', 1),
+(196, 283, 23, '2025-07-27 01:08:00', 1, 'sdfgdfg', 1),
+(197, 283, 23, '2025-07-27 01:12:31', 24, 'Alta médica: se curo', 1);
 
 -- --------------------------------------------------------
 
@@ -817,13 +857,29 @@ INSERT INTO `token_recuperacion` (`id`, `id_usuario`, `token`, `expiracion`) VAL
 
 CREATE TABLE `turno` (
   `id_turno` int(11) NOT NULL,
+  `id_agenda` int(11) NOT NULL,
   `id_paciente` int(10) UNSIGNED DEFAULT NULL,
   `fecha_hora` datetime DEFAULT NULL,
+  `id_obra_social` smallint(5) UNSIGNED DEFAULT NULL,
   `id_estado` int(11) DEFAULT NULL,
-  `id_motivo` int(11) DEFAULT NULL,
-  `id_agenda` int(11) NOT NULL,
-  `id_obra_social` smallint(5) UNSIGNED DEFAULT NULL
+  `id_motivo` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `turno`
+--
+
+INSERT INTO `turno` (`id_turno`, `id_agenda`, `id_paciente`, `fecha_hora`, `id_obra_social`, `id_estado`, `id_motivo`) VALUES
+(110, 48, 1, '2025-07-31 11:00:00', NULL, 1, 12),
+(111, 47, 1, '2025-07-30 11:00:00', NULL, 1, 12),
+(112, 52, 24, '2025-08-01 11:00:00', NULL, 1, 12),
+(113, 50, 10, '2025-07-31 18:00:00', NULL, 1, 12),
+(115, 48, 57, '2025-07-31 11:30:00', NULL, 1, 12),
+(117, 49, 1, '2025-07-30 18:45:00', NULL, 1, 11),
+(119, 49, 1, '2025-07-30 19:30:00', NULL, 1, 12),
+(120, 49, 1, '2025-07-30 20:15:00', NULL, 1, 12),
+(121, 49, 39, '2025-07-30 21:00:00', NULL, 1, 12),
+(122, 49, 57, '2025-07-30 18:00:00', NULL, 1, 12);
 
 -- --------------------------------------------------------
 
@@ -844,7 +900,7 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id_usuario`, `username`, `email`, `password`, `estado`) VALUES
-(1, 'admin', 'roma.ricchiardi@gmail.com', '$2b$10$pnc/k.q/5kWgjJXhYwrjqeK48MpGnVx52ALwMgDVXAtmsfvHbjW8K', 1),
+(1, 'admin', 'roma.ricchiardi@gmail.com', '$2b$10$pflqPaq9wNzklsngHOhxSOmVbsba3dGPyxj7sg4so5UkMuoNn/PQy', 1),
 (3, 'drcarlos', 'drcarlos@testmail.com', '$2b$10$eEjB7RUQmVECGToMyN99FOd5KQONHUtPUm6xEJG93wJmEf8zvYxGu', 1),
 (4, 'recepcion1', 'recepcion1@testmail.com', '$2b$10$zbtqzBzyzYXeRfOAmH69V.nosw0PRHt1hprU7kZW7VvONvHFLXKmy', 1),
 (5, 'enfermera1', 'enfermera1@testmail.com', '$2b$10$xOK0M25ehv6hPTpEYiIYIOuA2R0HqciXeQsA4WzvFTqafDB35AAY6', 1),
@@ -860,7 +916,8 @@ INSERT INTO `usuario` (`id_usuario`, `username`, `email`, `password`, `estado`) 
 (22, 'pedros', 'pedros@testmail.com', '$2b$10$Qg9NlCioUcNNXEq82.66WOG4u74x/cwrWgflD.RD1esXAWcwHJlqS', 1),
 (23, 'RamonC', 'RamonC@testmail.com', '$2b$10$gq4Zr17MuJffttfnqtrl6OvzN/jKh1yJRw7NI6MQ1uxELX/o7gdLa', 1),
 (24, 'VivianaC', 'VivianaC@testmail.com', '$2b$10$0T43FY3IMFROxklrS1rJmupYnUj2QE5Wq.jGVaTOianlrLw6thnXe', 1),
-(25, 'GDiaz', 'GDiaz@testmail.com', '$2b$10$hvcTO0Mm7p6Gy6uYSd0Dx.ck6f6QsornRjqs4kRJq7lhSD5FvgX7K', 1);
+(25, 'GDiaz', 'GDiaz@testmail.com', '$2b$10$hvcTO0Mm7p6Gy6uYSd0Dx.ck6f6QsornRjqs4kRJq7lhSD5FvgX7K', 1),
+(26, 'juan.perez', 'juan.perez@mail.com', '$2b$10$Hv2L8NVleex77e5bU1QZAOlImVTsxyxKFVyb56dYv/QCI9XAH21gS', 1);
 
 --
 -- Índices para tablas volcadas
@@ -1034,7 +1091,7 @@ ALTER TABLE `token_recuperacion`
 --
 ALTER TABLE `turno`
   ADD PRIMARY KEY (`id_turno`),
-  ADD KEY `id_agenda` (`id_agenda`),
+  ADD UNIQUE KEY `uniq_turno_por_fecha` (`id_agenda`,`fecha_hora`),
   ADD KEY `id_estado` (`id_estado`),
   ADD KEY `id_paciente` (`id_paciente`),
   ADD KEY `id_motivo` (`id_motivo`),
@@ -1056,19 +1113,19 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `admision`
 --
 ALTER TABLE `admision`
-  MODIFY `id_admision` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=248;
+  MODIFY `id_admision` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=287;
 
 --
 -- AUTO_INCREMENT de la tabla `agenda`
 --
 ALTER TABLE `agenda`
-  MODIFY `id_agenda` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+  MODIFY `id_agenda` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT de la tabla `cama`
 --
 ALTER TABLE `cama`
-  MODIFY `id_cama` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `id_cama` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
 
 --
 -- AUTO_INCREMENT de la tabla `especialidad`
@@ -1080,7 +1137,7 @@ ALTER TABLE `especialidad`
 -- AUTO_INCREMENT de la tabla `familiar`
 --
 ALTER TABLE `familiar`
-  MODIFY `id_familiar` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_familiar` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `genero`
@@ -1092,7 +1149,7 @@ ALTER TABLE `genero`
 -- AUTO_INCREMENT de la tabla `habitacion`
 --
 ALTER TABLE `habitacion`
-  MODIFY `id_habitacion` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=274;
+  MODIFY `id_habitacion` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=278;
 
 --
 -- AUTO_INCREMENT de la tabla `localidad`
@@ -1110,13 +1167,13 @@ ALTER TABLE `motivo_ingreso`
 -- AUTO_INCREMENT de la tabla `movimiento`
 --
 ALTER TABLE `movimiento`
-  MODIFY `id_mov` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_mov` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `movimiento_habitacion`
 --
 ALTER TABLE `movimiento_habitacion`
-  MODIFY `id_movimiento` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=322;
+  MODIFY `id_movimiento` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=361;
 
 --
 -- AUTO_INCREMENT de la tabla `obra_social`
@@ -1128,7 +1185,7 @@ ALTER TABLE `obra_social`
 -- AUTO_INCREMENT de la tabla `paciente`
 --
 ALTER TABLE `paciente`
-  MODIFY `id_paciente` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
+  MODIFY `id_paciente` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
 
 --
 -- AUTO_INCREMENT de la tabla `parentesco`
@@ -1140,7 +1197,7 @@ ALTER TABLE `parentesco`
 -- AUTO_INCREMENT de la tabla `personal_administrativo`
 --
 ALTER TABLE `personal_administrativo`
-  MODIFY `id_personal_admin` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_personal_admin` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `personal_salud`
@@ -1152,7 +1209,7 @@ ALTER TABLE `personal_salud`
 -- AUTO_INCREMENT de la tabla `registro_historia_clinica`
 --
 ALTER TABLE `registro_historia_clinica`
-  MODIFY `id_registro` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=147;
+  MODIFY `id_registro` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=198;
 
 --
 -- AUTO_INCREMENT de la tabla `rol_usuario`
@@ -1164,7 +1221,7 @@ ALTER TABLE `rol_usuario`
 -- AUTO_INCREMENT de la tabla `sector`
 --
 ALTER TABLE `sector`
-  MODIFY `id_sector` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id_sector` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT de la tabla `tipo_registro`
@@ -1182,13 +1239,13 @@ ALTER TABLE `token_recuperacion`
 -- AUTO_INCREMENT de la tabla `turno`
 --
 ALTER TABLE `turno`
-  MODIFY `id_turno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+  MODIFY `id_turno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=123;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id_usuario` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id_usuario` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- Restricciones para tablas volcadas

@@ -52,18 +52,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!formValues) return;
 
     try {
-      const response = await fetch('/cambiar-password', {
+      const response = await fetch('/api/usuarios/cambiar-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formValues)
       });
 
       if (response.ok) {
-        Swal.fire('¡Éxito!', 'Contraseña actualizada correctamente.', 'success');
+        const data = await response.json();
+        Swal.fire('¡Éxito!', data.message || 'Contraseña actualizada correctamente.', 'success');
       } else {
-        const errorText = await response.text();
-        Swal.fire('Error', errorText || 'No se pudo cambiar la contraseña.', 'error');
+        const data = await response.json().catch(() => null);
+        Swal.fire('Error', data?.message || 'No se pudo cambiar la contraseña.', 'error');
       }
+
     } catch (err) {
       Swal.fire('Error', 'Error de conexión o del servidor.', 'error');
     }

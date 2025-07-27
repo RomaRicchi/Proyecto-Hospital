@@ -373,38 +373,34 @@ export const vistaPerfil = async (req, res) => {
   }
 };
 
-export const vistaCambiarPassword = async (req, res) => {
+export const cambiarPassword = async (req, res) => {
   const { actual, nueva, confirmar } = req.body;
   const id = req.session.usuario?.id;
 
   if (!id || !actual || !nueva || !confirmar) {
-    return res.status(400).send('Faltan campos obligatorios');
+    return res.status(400).json({ message: 'Faltan campos obligatorios' });
   }
 
   if (nueva !== confirmar) {
-    return res.status(400).send('Las contraseñas no coinciden');
+    return res.status(400).json({ message: 'Las contraseñas no coinciden' });
   }
 
   try {
     const user = await Usuario.findByPk(id);
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+
     const esValida = await bcrypt.compare(actual, user.password);
     if (!esValida) {
-      return res.status(400).send('Contraseña actual incorrecta');
+      return res.status(401).json({ message: 'Contraseña actual incorrecta' });
     }
 
     const hashNueva = await bcrypt.hash(nueva, 10);
     await user.update({ password: hashNueva });
-	if (!esValida) {
-	return res.redirect('/perfil?error=1'); // contraseña incorrecta
-	}
 
-	if (nueva !== confirmar) {
-	return res.redirect('/perfil?error=2'); // no coinciden
-	}
-
+    return res.status(200).json({ message: 'Contraseña actualizada correctamente' });
   } catch (error) {
-    console.error('Error al cambiar contraseña:', error);
-    res.status(500).send('Error interno');
+    console.error('❌ Error al cambiar contraseña:', error);
+    return res.status(500).json({ message: 'Error interno al cambiar contraseña' });
   }
 };
 

@@ -37,7 +37,7 @@ export function agruparPorEpisodios(registros) {
 export function mostrarEpisodios(grupos) {
   let html = '';
 
-  const gruposOrdenados = [...grupos].reverse(); // Mostrar los más recientes primero
+  const gruposOrdenados = [...grupos].reverse(); 
 
   gruposOrdenados.forEach((episodio, index) => {
     const ingreso = episodio.find(r => r.id_tipo === 30);
@@ -52,7 +52,7 @@ export function mostrarEpisodios(grupos) {
 
     const textoFecha = ingreso
       ? `Ingreso: ${fechaIngreso.toLocaleDateString('es-AR')}`
-      : 'Episodio ambulatorio o abierto';
+      : 'Episodio ambulatorio';
 
     const colorEstado = {
       'Reservada': 'warning',

@@ -37,6 +37,13 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
         <label for="id_paciente" class="form-label" style="display:block; margin-bottom: 4px;">Paciente</label>
         <select id="id_paciente" class="form-select">${pacienteOptions}</select>
       </div>
+      <div class="form-group mb-3 text-start">
+        <label for="id_obra_social" class="form-label">Obra Social</label>
+        <select id="id_obra_social" class="form-select">
+          <option value="">Seleccione obra social</option>
+          ${obraSocialOptions}
+        </select>
+      </div>
 
       <div class="form-group mb-3 text-start">
         <label for="id_profesional" class="form-label">Profesional</label>
@@ -55,13 +62,17 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
       <div class="form-group mb-3 text-start">
         <label for="fecha_turno" class="form-label">Fecha</label>
         <input id="fecha_turno" type="date" class="form-control"
-          value="${turno?.fecha_hora ? new Date(turno.fecha_hora).toLocaleDateString('sv-SE') : ''}">
+          value="${turno?.fecha_hora 
+            ? new Date(turno.fecha_hora).toISOString().slice(0, 10) 
+            : ''}"
       </div>
 
       <div class="form-group mb-3 text-start">
         <label for="hora_turno" class="form-label">Hora</label>
         <input id="hora_turno" type="time" class="form-control"
-          value="${turno?.fecha_hora ? new Date(turno.fecha_hora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }) : ''}">
+          value="${turno?.fecha_hora 
+            ? new Date(turno.fecha_hora).toISOString().slice(11, 16) 
+            : ''}"
       </div>
 
       ${turno?.id_turno ? `
@@ -145,6 +156,7 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
     },
     preConfirm: () => {
       const id_paciente = parseInt($('#id_paciente').val());
+      const id_obra_social = parseInt($('#id_obra_social').val()) || null;
       const fecha_turno = $('#fecha_turno').val(); // "2025-07-29"
       const hora_turno = $('#hora_turno').val();   // "10:00"
       const id_motivo = parseInt($('#id_motivo').val());
@@ -197,6 +209,7 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
 
       return {
         id_paciente,
+        id_obra_social,
         id_agenda,
         fecha_hora: fechaHoraStr, 
         id_estado,

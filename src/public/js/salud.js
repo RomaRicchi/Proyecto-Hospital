@@ -1,4 +1,4 @@
-import { validarTexto } from './utils/validacionesFormularios.js';
+import { validarTexto } from './utils/validacionesImput.js';
 
 $(document).ready(function () {
   const $tabla = $('#tablaSalud');
