@@ -8,10 +8,11 @@ import {
 	listarUsuariosMedicos,
 	vistaPerfil,
   actualizarPerfil,
+  cambiarPassword,
 } from '../controllers/usuario.controller.js';
 
 const router = Router();
-
+router.post('/cambiar-password', cambiarPassword);
 router.get('/perfil', vistaPerfil);
 router.post('/perfil', actualizarPerfil);
 router.get('/medicos', listarUsuariosMedicos);

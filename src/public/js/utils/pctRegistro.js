@@ -28,10 +28,7 @@ export function mostrarInfoPaciente(p, cama = null) {
 }
 
 export function tieneInternacionActiva(registros, idAdmision) {
-  if (!idAdmision) {
-    console.warn('❌ idAdmision es inválido:', idAdmision);
-    return false;
-  }
+  if (!idAdmision) return false;
 
   const ingresos = registros.filter(r =>
     r.id_tipo === 30 &&
@@ -53,6 +50,7 @@ export function tieneInternacionActiva(registros, idAdmision) {
 
   return egresos.length === 0;
 }
+
 
 
 

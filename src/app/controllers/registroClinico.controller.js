@@ -131,7 +131,10 @@ export const buscarPorDNI = async (req, res) => {
       order: [['fecha_hora_ingreso', 'DESC']]
     });
 
-    const cama = await obtenerCamaActual(ultimaAdmision?.id_admision);
+    let cama = null;
+    if (ultimaAdmision?.id_admision) {
+      cama = await obtenerCamaActual(ultimaAdmision.id_admision);
+    }
 
     const registros = await RegistroHistoriaClinica.findAll({
       include: [
@@ -148,8 +151,9 @@ export const buscarPorDNI = async (req, res) => {
         {
           model: Admision,
           as: 'admision_historia',
-          where: { id_paciente: paciente.id_paciente },
-          attributes: []
+          where: paciente?.id_paciente ? { id_paciente: paciente.id_paciente } : undefined,
+          attributes: [],
+          required: false 
         }
       ],
       order: [['fecha_hora_reg', 'DESC']]

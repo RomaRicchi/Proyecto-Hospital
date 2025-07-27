@@ -55,13 +55,17 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
       <div class="form-group mb-3 text-start">
         <label for="fecha_turno" class="form-label">Fecha</label>
         <input id="fecha_turno" type="date" class="form-control"
-          value="${turno?.fecha_hora ? new Date(turno.fecha_hora).toLocaleDateString('sv-SE') : ''}">
+          value="${turno?.fecha_hora 
+            ? new Date(turno.fecha_hora).toISOString().slice(0, 10) 
+            : ''}"
       </div>
 
       <div class="form-group mb-3 text-start">
         <label for="hora_turno" class="form-label">Hora</label>
         <input id="hora_turno" type="time" class="form-control"
-          value="${turno?.fecha_hora ? new Date(turno.fecha_hora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }) : ''}">
+          value="${turno?.fecha_hora 
+            ? new Date(turno.fecha_hora).toISOString().slice(11, 16) 
+            : ''}"
       </div>
 
       ${turno?.id_turno ? `
