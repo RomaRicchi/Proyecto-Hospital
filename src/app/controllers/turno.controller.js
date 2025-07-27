@@ -3,6 +3,7 @@ import {
   Agenda, 
   EstadoTurno, 
   Paciente, 
+  ObraSocial,
   PersonalSalud, 
   Usuario, 
   Especialidad,
@@ -97,6 +98,7 @@ export const getTurnosListado = async (req, res) => {
       include: [
         { model: EstadoTurno, as: 'estado_turno' },
         { model: MotivoIngreso, as: 'motivo_turno' },
+        { model: ObraSocial, as: 'obra_social', attributes: ['nombre'] },
         {
           model: Agenda,
           as: 'agenda',
@@ -204,12 +206,18 @@ export const createTurno = async (req, res) => {
       const inicioExistente = new Date(t.fecha_hora);
       const finExistente = new Date(inicioExistente.getTime() + t.agenda.duracion * 60000);
 
-      if (fechaInicio < finExistente && fechaFin > inicioExistente) {
+     const haySolapamiento = fechaInicio < finExistente && fechaFin > inicioExistente;
+
+      const contiguoPorInicio = fechaInicio.getTime() === finExistente.getTime();
+      const contiguoPorFin = fechaFin.getTime() === inicioExistente.getTime();
+
+      if (haySolapamiento && !contiguoPorInicio && !contiguoPorFin) {
         console.warn(`❌ Solapamiento detectado con turno ID ${t.id_turno}`);
         seSolapa = true;
         break;
       }
     }
+
 
     if (seSolapa) {
       return res.status(400).json({ message: 'Ya existe un turno que se superpone en ese horario' });

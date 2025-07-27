@@ -36,19 +36,18 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
     if [1, 2].includes(usuario.rol)
       li
         a.nav-link.text-white(href="/familiar")
-          i.fas.fa-list.me-1
+          i.fas.fa-users.me-1
           | Lista de Familiares
     if usuario.rol === 1
       li
-        a.nav-link.text-white.collapsed(href="#auxiliaresPacientesSubmenu", data-bs-toggle="collapse", aria-expanded="false")
+        a.nav-link.text-white.collapsed(href="#auxPacientes", data-bs-toggle="collapse", aria-expanded="false")
           i.fas.fa-tools.me-1
           | Auxiliares
-      ul.collapse#auxiliaresPacientesSubmenu(style="list-style-type: none; padding-left: 1rem;")
-        if [1, 2].includes(usuario.rol) 
-          li
-            a.nav-link.text-white(href="/paciente/localidad")
-              i.fas.fa-map-marker-alt.me-1
-              | Localidad
+      ul.collapse#auxPacientes(style="list-style-type: none; padding-left: 1rem;")
+        li
+          a.nav-link.text-white(href="/paciente/localidad")
+            i.fas.fa-map-marker-alt.me-1
+            | Localidad
         li
           a.nav-link.text-white(href="/paciente/genero")
             i.fas.fa-venus-mars.me-1
@@ -92,10 +91,10 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
           | Emergencias
     if usuario.rol === 1
       li
-        a.nav-link.text-white.collapsed(href="#auxiliaresSubmenu", data-bs-toggle="collapse", aria-expanded="false")
+        a.nav-link.text-white.collapsed(href="#auxAdmisiones", data-bs-toggle="collapse", aria-expanded="false")
           i.fas.fa-tools.me-1
           | Auxiliares
-      ul.collapse#auxiliaresSubmenu(style="list-style-type: none; padding-left: 1rem;")
+      ul.collapse#auxAdmisiones(style="list-style-type: none; padding-left: 1rem;")
         li
           a.nav-link.text-white(href="/obraSocial")
             i.fas.fa-briefcase-medical.me-1
@@ -113,7 +112,7 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
             i.fas.fa-exchange-alt.me-1
             | Tipos de Movimientos
 
-  // 🔹 Usuarios
+  // 🔹 Usuarios y Staff
   if usuario.rol === 1
     a.nav-link.text-white.collapsed(href="#usuariosSubmenu", data-bs-toggle="collapse", aria-expanded="false")
       i.fas.fa-user-cog.me-2
@@ -136,10 +135,10 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
           i.fas.fa-user-tie.me-1
           | Staff Administrativo
       li
-        a.nav-link.text-white.collapsed(href="#auxiliaresSubmenu2", data-bs-toggle="collapse", aria-expanded="false")
+        a.nav-link.text-white.collapsed(href="#auxUsuarios", data-bs-toggle="collapse", aria-expanded="false")
           i.fas.fa-tools.me-1
           | Auxiliares
-      ul.collapse#auxiliaresSubmenu2(style="list-style-type: none; padding-left: 1rem;")
+      ul.collapse#auxUsuarios(style="list-style-type: none; padding-left: 1rem;")
         li
           a.nav-link.text-white(href="/especialidad")
             i.fas.fa-notes-medical.me-1

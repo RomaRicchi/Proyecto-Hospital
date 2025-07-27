@@ -17,20 +17,6 @@ block content
               th Estado
               th Acciones
           tbody
-            if personal.length > 0
-              each p in personal
-                tr
-                  td= p.apellido
-                  td= p.nombre
-                  td= p.rol ? p.rol.nombre : ''
-                  td= p.especialidad ? p.especialidad.nombre : ''
-                  td= p.matricula
-                  td= p.activo ? 'Activo' : 'Inactivo'
-                  td
-                    button.btn.btn-sm.btn-warning.edit-btn(data-id=p.id_personal_salud) Editar
-                    button.btn.btn-sm.btn-danger.delete-btn(data-id=p.id_personal_salud) Baja
-            else
-              h1 No hay camas registradas.
 
         // Librerías necesarias
         script(src="https://code.jquery.com/jquery-3.6.0.min.js")

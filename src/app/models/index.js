@@ -84,6 +84,13 @@ Admision.associate?.({
 	MovimientoHabitacion,
 	RegistroHistoriaClinica,
 });
+Turno.associate?.({
+  Agenda,
+  Paciente,
+  EstadoTurno,
+  MotivoIngreso,
+  ObraSocial   
+});
 MotivoIngreso.associate?.({ Admision });
 Paciente.associate?.({ Admision });
 
@@ -104,11 +111,6 @@ Admision.belongsTo(Paciente, { as: 'paciente_admision', foreignKey: 'id_paciente
 Admision.belongsTo(Usuario, { as: 'usuario_medico', foreignKey: 'id_usuario' });
 
 PersonalSalud.belongsTo(Usuario, {  foreignKey: 'id_usuario',  as: 'datos_usuario'});
-
-Turno.belongsTo(Paciente, { foreignKey: 'id_paciente', as: 'cliente'});
-Turno.belongsTo(Agenda, { foreignKey: 'id_agenda', as: 'agenda' });
-Turno.belongsTo(EstadoTurno, { foreignKey: 'id_estado', as: 'estado_turno' });
-Turno.belongsTo(MotivoIngreso, { foreignKey: 'id_motivo', as: 'motivo_turno' });
 EstadoTurno.hasMany(Turno, { foreignKey: 'id_estado' });
 
 Agenda.belongsTo(Dia, { foreignKey: 'id_dia', as: 'dia' });

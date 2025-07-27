@@ -57,13 +57,13 @@ router.get('/camas', isAuthenticated, soloRol([1, 2]), vistaCama);
 // 🔸 Admisiones
 router.get('/admisiones', isAuthenticated, soloRol([1, 2]), vistaAdmisiones);
 router.get('/motivoIngreso', isAuthenticated, soloRol([1]), vistaMotivosIngreso);
-router.get('/movimientoHabitacion', isAuthenticated, soloRol([1]), vistaMovimientosHabitacion);
+router.get('/movimientoHabitacion', isAuthenticated, soloRol([1, 2]), vistaMovimientosHabitacion);
 router.get('/movimiento', isAuthenticated, soloRol([1]), vistaMovimientos);
 router.get('/paciente/alta', isAuthenticated, soloRol([1, 4]), vistaAltaPaciente);
 router.get('/obraSocial', isAuthenticated, soloRol([1, 2]), vistaObrasSociales);
 router.get('/reserva-cama', isAuthenticated, soloRol([1, 2]), vistaReservarCama);
 // 🔸 Emergencias
-router.get('/emergencias', isAuthenticated, soloRol([1, 2, 3]), vistaEmergencias);
+router.get('/emergencias', isAuthenticated, soloRol([1, 2]), vistaEmergencias);
 // 🔸 Usuarios
 router.get('/usuario', isAuthenticated, soloRol([1]), vistaUsuarios);
 router.get('/personal/salud', isAuthenticated,soloRol([1]), vistaPersonalSalud);

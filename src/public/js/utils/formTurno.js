@@ -37,6 +37,13 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
         <label for="id_paciente" class="form-label" style="display:block; margin-bottom: 4px;">Paciente</label>
         <select id="id_paciente" class="form-select">${pacienteOptions}</select>
       </div>
+      <div class="form-group mb-3 text-start">
+        <label for="id_obra_social" class="form-label">Obra Social</label>
+        <select id="id_obra_social" class="form-select">
+          <option value="">Seleccione obra social</option>
+          ${obraSocialOptions}
+        </select>
+      </div>
 
       <div class="form-group mb-3 text-start">
         <label for="id_profesional" class="form-label">Profesional</label>
@@ -149,6 +156,7 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
     },
     preConfirm: () => {
       const id_paciente = parseInt($('#id_paciente').val());
+      const id_obra_social = parseInt($('#id_obra_social').val()) || null;
       const fecha_turno = $('#fecha_turno').val(); // "2025-07-29"
       const hora_turno = $('#hora_turno').val();   // "10:00"
       const id_motivo = parseInt($('#id_motivo').val());
@@ -201,6 +209,7 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
 
       return {
         id_paciente,
+        id_obra_social,
         id_agenda,
         fecha_hora: fechaHoraStr, 
         id_estado,

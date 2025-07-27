@@ -99,10 +99,3 @@ export function validarFechaSoloHoy(fechaStr) {
   }
   return null;
 }
-function getFechaHoraLocalParaInput() {
-  const ahora = new Date();
-  ahora.setSeconds(0, 0); 
-  const offset = ahora.getTimezoneOffset();
-  ahora.setMinutes(ahora.getMinutes() - offset);
-  return ahora.toISOString().slice(0, 16);
-}
