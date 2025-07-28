@@ -9,6 +9,10 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    id_obra_social: {
+      type: DataTypes.SMALLINT,
+      allowNull: true
+    },
     id_agenda: {
       type: DataTypes.INTEGER,
       allowNull: false

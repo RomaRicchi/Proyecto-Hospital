@@ -75,8 +75,8 @@ export function mostrarFormulario(agenda = {}) {
     preConfirm: () => {
       const id_personal_salud = parseInt(document.getElementById('profesional').value);
       const id_dia = parseInt(document.getElementById('dia').value);
-      const hora_inicio = document.getElementById('hora_inicio').value;
-      const hora_fin = document.getElementById('hora_fin').value;
+      const hora_inicio = document.getElementById('hora_inicio').value.trim().slice(0, 5);
+      const hora_fin = document.getElementById('hora_fin').value.trim().slice(0, 5);
       const duracion = parseInt(document.getElementById('duracion_turno').value);
 
       if (!id_personal_salud || !id_dia || !hora_inicio || !hora_fin || !duracion) {

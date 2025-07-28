@@ -2,10 +2,11 @@ import { toUTC } from './validacionFechas.js';
 
 export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
 
-  const [pacientes, estados, motivos] = await Promise.all([
+  const [pacientes, estados, motivos, obrasSociales] = await Promise.all([
     fetch('/api/pacientes').then(r => r.json()),
     fetch('/api/estadoTurno').then(r => r.json()),
-    fetch('/api/motivos_ingreso').then(r => r.json())
+    fetch('/api/motivos_ingreso').then(r => r.json()),
+    fetch('/api/obras-sociales').then(r => r.json())
   ]);
 
   let agendas = [];
@@ -15,6 +16,12 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
       ${p.apellido_p}, ${p.nombre_p} (${p.dni_paciente})
     </option>`
   ).join('');
+
+  const obraSocialOptions = obrasSociales.map(o => {
+    const selected = turno?.id_obra_social === o.id_obra_social ? 'selected' : '';
+    return `<option value="${o.id_obra_social}" ${selected}>${o.nombre}</option>`;
+  }).join('');
+
 
   const estadoOptions = estados.map(e =>
     `<option value="${e.id_estado}" ${turno?.id_estado === e.id_estado ? 'selected' : ''}>
@@ -29,6 +36,10 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
         : '';
     return `<option value="${m.id_motivo}" ${seleccionado}>${m.tipo}</option>`;
   }).join('');
+  const fechaUTC = new Date(turno.fecha_hora); // viene en UTC
+  const local = new Date(fechaUTC.getTime() - fechaUTC.getTimezoneOffset() * 60000);
+  const horaLocal = local.toTimeString().slice(0, 5);
+  const fechaLocal = local.toISOString().slice(0, 10);
 
   Swal.fire({
     title: turno?.id_turno ? 'Editar Turno' : 'Nuevo Turno',
@@ -70,9 +81,7 @@ export async function mostrarFormulario(turno = {}, onSuccess = () => {}) {
       <div class="form-group mb-3 text-start">
         <label for="hora_turno" class="form-label">Hora</label>
         <input id="hora_turno" type="time" class="form-control"
-          value="${turno?.fecha_hora 
-            ? new Date(turno.fecha_hora).toISOString().slice(11, 16) 
-            : ''}"
+          value="${horaLocal}">
       </div>
 
       ${turno?.id_turno ? `

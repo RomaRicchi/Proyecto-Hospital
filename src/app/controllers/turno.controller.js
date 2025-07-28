@@ -142,7 +142,7 @@ export const getTurnosListado = async (req, res) => {
 
 export const createTurno = async (req, res) => {
   try {
-    const { id_paciente, id_agenda, fecha_hora, id_estado, id_motivo } = req.body;
+    const { id_paciente, id_agenda, fecha_hora, id_estado, id_motivo, id_obra_social } = req.body;
 
     if (!id_paciente || !id_agenda || !fecha_hora || !id_motivo) {
       return res.status(400).json({ message: 'Campos obligatorios faltantes' });
@@ -228,7 +228,8 @@ export const createTurno = async (req, res) => {
       id_agenda: agendaDia.id_agenda,
       fecha_hora: fechaHora,
       id_estado: id_estado || 1,
-      id_motivo: id_motivo || 12
+      id_motivo: id_motivo || 12,
+      id_obra_social: id_obra_social 
     });
 
     res.status(201).json(nuevo);
@@ -285,13 +286,15 @@ export const updateTurno = async (req, res) => {
     const turno = await Turno.findByPk(req.params.id);
     if (!turno) return res.status(404).json({ message: 'Turno no encontrado' });
 
-    const { fecha_hora, id_estado, id_motivo } = req.body;
+    const { fecha_hora, id_estado, id_motivo, id_obra_social } = req.body;
     if (!fecha_hora || !id_estado || !id_motivo) {
       return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
 
-    const nuevaFechaHora = new Date(fecha_hora);
-    if (isNaN(nuevaFechaHora.getTime()) || nuevaFechaHora < new Date()) {
+    const fechaStr = fecha_hora;              
+    const fechaObj = new Date(fechaStr);       
+
+    if (isNaN(fechaObj.getTime()) || fechaObj < new Date()) {
       return res.status(400).json({ message: 'La fecha y hora deben ser válidas y futuras' });
     }
 
@@ -299,7 +302,7 @@ export const updateTurno = async (req, res) => {
     if (!agendaActual) return res.status(404).json({ message: 'Agenda asociada no encontrada' });
 
     const jsToSqlDias = [7, 1, 2, 3, 4, 5, 6];
-    const fechaLocal = new Date(nuevaFechaHora.getTime() - nuevaFechaHora.getTimezoneOffset() * 60000);
+    const fechaLocal = new Date(fechaObj.getTime() - fechaObj.getTimezoneOffset() * 60000);
     const diaSemana = jsToSqlDias[fechaLocal.getDay()];
 
     const agendaActiva = await Agenda.findOne({
@@ -317,14 +320,14 @@ export const updateTurno = async (req, res) => {
     const [hFin, mFin] = agendaActiva.hora_fin.split(':').map(Number);
     const minutosInicio = hInicio * 60 + mInicio;
     const minutosFin = hFin * 60 + mFin;
-    const minutosTurno = nuevaFechaHora.getHours() * 60 + nuevaFechaHora.getMinutes();
+    const minutosTurno = fechaObj.getHours() * 60 + fechaObj.getMinutes();
 
     if (minutosTurno < minutosInicio || minutosTurno >= minutosFin) {
       return res.status(400).json({ message: 'La hora del turno está fuera del horario permitido ese día' });
     }
 
     const duracionNueva = agendaActiva.duracion;
-    const fechaInicio = new Date(nuevaFechaHora);
+    const fechaInicio = new Date(fechaObj);
     const fechaFin = new Date(fechaInicio.getTime() + duracionNueva * 60000);
 
     const turnosExistentes = await Turno.findAll({
@@ -361,10 +364,11 @@ export const updateTurno = async (req, res) => {
     }
 
     await turno.update({
-      fecha_hora: nuevaFechaHora,
+      fecha_hora: fechaStr,  // 🟢 se guarda como llegó, sin modificar
       id_agenda: agendaActiva.id_agenda,
       id_estado,
-      id_motivo
+      id_motivo,
+      id_obra_social
     });
 
     res.json(turno);
