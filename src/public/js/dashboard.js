@@ -21,8 +21,6 @@ function buscarCamasDisponibles(fechaSeleccionada) {
 function renderTablaCamas(camas) {
   const fechaSeleccionada = $('#fecha_busqueda').val();
 
-  console.log('🛏️ Camas recibidas:', camas);
-
   let html = `
     <table id="tablaCamas" class="table table-bordered table-hover">
       <thead class="table-light">

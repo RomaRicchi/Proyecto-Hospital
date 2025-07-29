@@ -6,9 +6,9 @@ block content
       h1 Registros Clínicos
 
       // 🔍 Campo para buscar por DNI
-      .mb-4
-        label(for="dniBuscar") DNI del paciente:
-        input#dniBuscar.form-control(type="text", placeholder="Ingrese DNI", value=dni)
+      .mb-4.text-center
+        label.fw-bold(for="dniBuscar") DNI del paciente:
+        input#dniBuscar.form-control.mx-auto(style="width: 40%;" type="text", placeholder="Ingrese DNI", value=dni)
         button#btnBuscar.btn.btn-primary.mt-2 Buscar
 
       // 👤 Info del paciente

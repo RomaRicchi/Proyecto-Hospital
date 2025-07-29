@@ -1,184 +1,185 @@
 import {
   aplicarReservaSemanal,
   getFechaLocalParaInput,
-  toUTC, 
-  validarFechaReservaRango, 
-  validarFechaNoPasada 
+  toUTC,
+  validarFechaReservaRango,
+  validarFechaNoPasada
 } from './validacionFechas.js';
 
-export async function mostrarFormularioYRegistrarAdmision(paciente, id_cama, id_habitacion, fechaDashboard, edad, sector_nombre) {
-	try {
-		const [motivos, obras, medicos] = await Promise.all([
-			fetch('/api/motivos_ingreso').then(r => r.json()),
-			fetch('/api/obras-sociales').then(r => r.json()),
-			fetch('/api/usuarios/medicos').then(r => r.json()),
-		]);
+export async function mostrarFormularioYRegistrarAdmision(
+  paciente,
+  id_cama,
+  id_habitacion,
+  fechaDashboard,
+  edad,
+  sector_nombre
+) {
+  const responseMotivos = await fetch('/api/motivos_ingreso');
+  const motivos = await responseMotivos.json();
 
-		const motivosOptions = motivos.map(m =>
-			`<option value="${m.id_motivo}">${m.tipo}</option>`).join('');
-		const obrasOptions = obras.map(o =>
-			`<option value="${o.id_obra_social}">${o.nombre}</option>`).join('');
-		const medicosOptions = medicos.map(m =>
-			`<option value="${m.id_usuario}">
-				${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula} - ${m.especialidad}
-			</option>`
-		).join('');
-				
-		let fechaIngresoDefault = fechaDashboard
-			? new Date(fechaDashboard).toISOString().slice(0, 16)
-			: getFechaLocalParaInput();
+  const responseObras = await fetch('/api/obras-sociales');
+  const obras = await responseObras.json();
 
-		const result = await Swal.fire({
-			title: 'Registrar Admisión',
-			html: `
-                <select id="id_obra_social" class="swal2-input" required>
-                    <option value="">Seleccione obra social</option>
-                    ${obrasOptions}
-                </select>
-                <input type="text" id="num_asociado" class="swal2-input" placeholder="N° Asociado" required>
-                
-                <label for="fecha_hora_ingreso" style="display:block;text-align:left;margin-top:8px;">Fecha y hora de ingreso</label>
-                <input type="datetime-local" id="fecha_hora_ingreso" class="swal2-input" required>
+  const responseMedicos = await fetch('/api/usuarios/medicos');
+  const medicos = await responseMedicos.json();
 
-                <select id="id_motivo" class="swal2-input" required>
-                    <option value="">Seleccione motivo de ingreso</option>
-                    ${motivosOptions}
-                </select>
+  const motivosOptions = motivos
+    .map(
+      (m) =>
+        `<option value="${m.id_motivo}" ${
+          m.tipo === 'Internación' ? 'selected' : ''
+        }>${m.tipo}</option>`
+    )
+    .join('');
 
-                <input type="text" id="descripcion" class="swal2-input" placeholder="Descripción sintomatológica">
-                
-                <label for="fecha_hora_egreso" style="display:block;text-align:left;margin-top:8px;">Fecha y hora de egreso (opcional)</label>
-                <input type="datetime-local" id="fecha_hora_egreso" class="swal2-input">
+  const obrasOptions = obras
+    .map(
+      (o) =>
+        `<option value="${o.id_obra_social}" ${
+          o.nombre === 'Sin obra social' ? 'selected' : ''
+        }>${o.nombre}</option>`
+    )
+    .join('');
 
-				<input type="text" id="motivo_egr" class="swal2-input" placeholder="Motivo egreso (opcional)">
+	const medicosOptions = medicos.map(m =>
+      `<option value="${m.id_usuario}">
+        ${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula} - ${m.especialidad}
+      </option>`
+    ).join('');
 
-                <select id="id_usuario" class="swal2-input" style="max-width: 100%; overflow: hidden;">
-                    <option value="">Seleccione médico</option>
-                    ${medicosOptions}
-                </select>
-            `,
-			customClass: {
-				popup: 'swal2-card-style'
-			},
-			showCancelButton: true,
-			confirmButtonText: 'Guardar',
-			focusConfirm: false,
-			didOpen: () => {
-				const inputFechaIngreso = Swal.getPopup().querySelector('#fecha_hora_ingreso');
-				if (inputFechaIngreso && fechaIngresoDefault) {
-					inputFechaIngreso.value = fechaIngresoDefault;
-				}
-			},
-			preConfirm: () => {
-				const getVal = id => Swal.getPopup().querySelector(id)?.value;
+  const fechaIngresoDefault = getFechaLocalParaInput();
 
-				const fecha_ingreso = getVal('#fecha_hora_ingreso');
-				const id_obra_social = getVal('#id_obra_social');
-				const id_motivo = getVal('#id_motivo');
-				const num_asociado = getVal('#num_asociado');
+  const { value: result } = await Swal.fire({
+    title: 'Nueva Admisión',
+    html: `
+      <div class="text-start">
+        <p><strong>Paciente:</strong> ${paciente.apellido_p}, ${paciente.nombre_p} - ${edad} años</p>
+        <p><strong>Habitación:</strong> ${id_habitacion} | <strong>Cama:</strong> ${id_cama} | <strong>Sector:</strong> ${sector_nombre}</p>
+      </div>
+      <form id="formAdmision" class="text-start">
+        <label>Motivo ingreso</label>
+        <select id="motivo" class="swal2-input" required>${motivosOptions}</select>
 
-				if (!id_obra_social || !id_motivo || !fecha_ingreso || !num_asociado) {
-					Swal.showValidationMessage('Completa todos los campos obligatorios');
-					return false;
-				}
-				
-				return {
-					id_obra_social,
-					num_asociado,
-					fecha_hora_ingreso: fecha_ingreso,
-					id_motivo,
-					descripcion: getVal('#descripcion') || null,
-					fecha_hora_egreso: getVal('#fecha_hora_egreso') || null,
-					motivo_egr: getVal('#motivo_egr') || null,
-					id_usuario: getVal('#id_usuario') || null,
-				};
-			}
-		});
+        <label>Obra social</label>
+        <select id="obra_social" class="swal2-input">${obrasOptions}</select>
 
-		if (!result.isConfirmed) return;
+        <input id="num_asociado" class="swal2-input" placeholder="Número asociado">
 
-		const inputFechaIngreso = document.querySelector('#fecha_hora_ingreso');
-		const inputFechaEgreso = document.querySelector('#fecha_hora_egreso');
-		const inputMotivoEgr = document.querySelector('#motivo_egr');
+        <label>Fecha ingreso</label>
+        <input id="fecha_hora_ingreso" type="datetime-local" class="swal2-input" value="${fechaIngresoDefault}">
 
-		const { fecha_hora_ingreso } = result.value;
-		let { fecha_hora_egreso } = result.value;
-		const fechaIngresoUTC = toUTC(fecha_hora_ingreso);
-		const fechaSeleccionadaStr = fechaIngresoUTC.slice(0, 10);
-		const hoyStr = new Date().toISOString().slice(0, 10);
-				
-		let id_mov = 1;
+        <label>Descripción</label>
+        <input id="descripcion" class="swal2-input" placeholder="Descripción (opcional)">
 
-		const errorFechaPasada = validarFechaNoPasada(fecha_hora_ingreso);
-		if (errorFechaPasada) {
-		await Swal.fire('Error', errorFechaPasada, 'error');
-		return;
+        <label>Fecha egreso (auto)</label>
+        <input id="fecha_hora_egreso" type="datetime-local" class="swal2-input">
+
+        <label>Motivo egreso</label>
+        <input id="motivo_egr" class="swal2-input" placeholder="Motivo de egreso (opcional)">
+
+        <label>Médico responsable</label>
+        <select id="id_usuario" class="swal2-input">
+          <option value="">-</option>
+          ${medicosOptions}
+        </select>
+      </form>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Registrar',
+    cancelButtonText: 'Cancelar',
+    customClass: {
+      popup: 'swal2-card-style'
+    },
+    didOpen: () => {
+		const inputIngreso = document.getElementById('fecha_hora_ingreso');
+		const inputEgreso = document.getElementById('fecha_hora_egreso');
+		const inputMotivoEgr = document.getElementById('motivo_egr');
+
+		const ingresoFecha = new Date(inputIngreso.value);
+		ingresoFecha.setHours(0, 0, 0, 0); // 🔧 quitar horas para comparar solo día
+
+		const hoy = new Date();
+		hoy.setHours(0, 0, 0, 0);
+
+		if (ingresoFecha > hoy) {
+			aplicarReservaSemanal(inputIngreso, inputEgreso, inputMotivoEgr);
+		} else {
+			// ✅ habilitar edición de egreso y motivo si es ingreso actual
+			inputEgreso.disabled = false;
+			inputEgreso.removeAttribute('title');
+			inputMotivoEgr.disabled = false;
+			inputMotivoEgr.placeholder = 'Motivo de egreso (opcional)';
+			inputMotivoEgr.removeAttribute('title');
 		}
+	},
 
-		if (fechaSeleccionadaStr > hoyStr) {
-		const error = validarFechaReservaRango(fecha_hora_ingreso);
-		if (error) {
-			await Swal.fire('Fecha inválida', error, 'warning');
-			return;
+    preConfirm: () => {
+      const motivo = document.getElementById('motivo').value;
+      const obra_social = document.getElementById('obra_social').value;
+      const num_asociado = document.getElementById('num_asociado').value;
+      const fechaIngreso = document.getElementById('fecha_hora_ingreso').value;
+      const fechaEgreso = document.getElementById('fecha_hora_egreso').value;
+      const descripcion = document.getElementById('descripcion').value;
+      const motivo_egr = document.getElementById('motivo_egr').value;
+      const id_usuario = document.getElementById('id_usuario').value;
+
+      const error = validarFechaNoPasada(fechaIngreso);
+      if (error) {
+        Swal.showValidationMessage(error);
+        return false;
+      }
+
+      const ingreso = new Date(fechaIngreso);
+	  ingreso.setHours(0, 0, 0, 0); // normalizamos a medianoche
+
+	  const hoy = new Date();
+	  hoy.setHours(0, 0, 0, 0); 
+
+      let id_mov = 1;
+      if (ingreso > hoy) {
+		const errorReserva = validarFechaReservaRango(fechaIngreso);
+		if (errorReserva) {
+			Swal.showValidationMessage(errorReserva);
+			return false;
 		}
+		id_mov = 3; // reserva
+		} else {
+		id_mov = 1; // ingreso hoy
+	  }
 
-		id_mov = 3;
-		aplicarReservaSemanal(inputFechaIngreso, inputFechaEgreso, inputMotivoEgr);
-		fecha_hora_egreso = inputFechaEgreso.value;
-		}
+      return {
+        id_paciente: paciente.id_paciente,
+        id_cama,
+        id_habitacion,
+        id_motivo: motivo,
+        id_obra_social: obra_social,
+        num_asociado,
+        fecha_hora_ingreso: toUTC(fechaIngreso),
+        fecha_hora_egreso: fechaEgreso ? toUTC(fechaEgreso) : null,
+        descripcion,
+        motivo_egr,
+        id_usuario: id_usuario || null,
+        id_mov
+      };
+    }
+  });
 
-		if (fecha_hora_egreso) {
-			const ingreso = new Date(fecha_hora_ingreso);
-			const egreso = new Date(fecha_hora_egreso);
-			if (egreso < ingreso) {
-				await Swal.fire('Error', 'La fecha de egreso debe ser posterior a la de ingreso', 'error');
-				return;
-			}
-		}
+  if (!result) return;
 
-		Swal.showLoading();
-		const admResp = await fetch('/api/admisiones', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				...result.value,
-				fecha_hora_ingreso: toUTC(result.value.fecha_hora_ingreso),
-				fecha_hora_egreso: fecha_hora_egreso ? toUTC(fecha_hora_egreso) : null,
-				id_paciente: paciente.id_paciente,
-				id_cama,
-				id_mov,
-			})
-		});
+  try {
+    const res = await fetch('/api/admisiones', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(result)
+    });
 
-		if (!admResp.ok) {
-			let errMsg = 'No se pudo registrar la admisión';
-			try {
-				const err = await admResp.json();
-				errMsg = err.message || errMsg;
-			} catch (e) {
-				console.error('❌ Error al parsear respuesta de error:', e);
-			}
-			await Swal.fire('Error', errMsg, 'error');
-			return;
-		}
+    const json = await res.json();
 
-		const admision = await admResp.json();
-		if (!admision?.id_admision) {
-			await Swal.fire('Error', 'No se pudo obtener el ID de la admisión creada.', 'error');
-			return;
-		}
-
-		const mensaje = id_mov === 3 
-			? 'Reserva registrada correctamente'
-			: 'Paciente ingresado correctamente';
-
-		await Swal.fire('Listo', mensaje, 'success');
-		location.reload();
-
-
-	} catch (error) {
-		console.error('❌ Error inesperado en mostrarFormularioYRegistrarAdmision:', error);
-		await Swal.fire('Error', 'Ocurrió un error inesperado', 'error');
-	}
-
+    if (!res.ok) throw new Error(json.error || 'Error inesperado');
+	
+    await Swal.fire('Éxito', 'Admisión registrada correctamente', 'success');
+    location.reload();
+  } catch (err) {
+    Swal.fire('Error', err.message, 'error');
+  }
 }

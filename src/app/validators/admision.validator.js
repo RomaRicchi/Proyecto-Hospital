@@ -38,24 +38,21 @@ export async function validarAdmisionActiva(id_paciente, fecha, transaction = nu
 }
 
 export async function validarConflictoReserva({ id_cama, fecha_hora_ingreso }, transaction = null) {
-  const fecha = new Date(fecha_hora_ingreso);
+  const fechaInicio = new Date(fecha_hora_ingreso);
+  const fechaFin = new Date(fechaInicio);
+  fechaFin.setDate(fechaFin.getDate() + 1);
 
   const conflicto = await MovimientoHabitacion.findOne({
     where: {
       id_cama,
-      id_mov: 3, // Reserva
+      id_mov: 3, // solo reservas
       estado: 1,
-      [Op.or]: [
-        { fecha_hora_ingreso: fecha },
+      [Op.and]: [
+        { fecha_hora_ingreso: { [Op.lt]: fechaFin } },
         {
-          [Op.and]: [
-            { fecha_hora_ingreso: { [Op.lte]: fecha } },
-            {
-              [Op.or]: [
-                { fecha_hora_egreso: null },
-                { fecha_hora_egreso: { [Op.gt]: fecha } }
-              ]
-            }
+          [Op.or]: [
+            { fecha_hora_egreso: null },
+            { fecha_hora_egreso: { [Op.gt]: fechaInicio } }
           ]
         }
       ]
@@ -63,7 +60,9 @@ export async function validarConflictoReserva({ id_cama, fecha_hora_ingreso }, t
     transaction
   });
 
-  if (conflicto) throw new Error('La cama ya está reservada en esa fecha y hora.');
+  if (conflicto) {
+    throw new Error('La cama ya está reservada en ese período.');
+  }
 }
 
 export async function validarOcupacionCamaPorAdmision(id_cama, fecha, transaction = null) {
@@ -161,3 +160,30 @@ export async function verificarGeneroHabitacion(idHabitacion, generoNuevo, trans
   }
 }
 
+export async function validarConflictoConReservaExistente(id_cama, fechaIngreso, transaction = null) {
+  const inicio = new Date(fechaIngreso);
+  const fin = new Date(inicio);
+  fin.setDate(fin.getDate() + 1);
+
+  const conflicto = await MovimientoHabitacion.findOne({
+    where: {
+      id_cama,
+      id_mov: 3, // Reserva
+      estado: 1,
+      [Op.and]: [
+        { fecha_hora_ingreso: { [Op.lt]: fin } },
+        {
+          [Op.or]: [
+            { fecha_hora_egreso: null },
+            { fecha_hora_egreso: { [Op.gt]: inicio } }
+          ]
+        }
+      ]
+    },
+    transaction
+  });
+
+  if (conflicto) {
+    throw new Error('Ya existe una reserva en esta cama para esa fecha.');
+  }
+}

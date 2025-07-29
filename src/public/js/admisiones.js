@@ -3,9 +3,6 @@ import { toUTC } from "./utils/validacionFechas.js";
 $(document).ready(function () {
   const tabla = $('#tablaAdmisiones');
   let dt;
-  console.log('🧪 Script admisiones.js cargado');
-  console.log('Tabla encontrada:', $('#tablaAdmisiones').length);
-
   if (tabla.length) {
     dt = tabla.DataTable({
       language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
@@ -162,7 +159,6 @@ $(document).ready(function () {
       }
     });
   });
-  console.log('🔁 Ejecutando fetch /api/admisiones');
 
   fetch('/api/admisiones')
     .then(res => res.json())

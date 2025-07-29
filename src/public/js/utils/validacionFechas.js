@@ -37,14 +37,13 @@ export function aplicarReservaSemanal(inputIngreso, inputEgreso, inputMotivoEgr)
   if (isNaN(ingreso)) return;
 
   const egreso = new Date(ingreso);
-  egreso.setDate(egreso.getDate() + 5);         
-  egreso.setHours(23, 59, 0, 0);                
+  egreso.setDate(egreso.getDate() + 1);         // ✅ solo 1 día
+  egreso.setHours(23, 59, 0, 0);                // hasta fin de ese día
 
-  // Convertir a UTC ISO para backend
   const isoUTC = toUTC(egreso);
   inputEgreso.value = isoUTC;
   inputEgreso.disabled = true;
-  inputEgreso.title = 'El egreso se fija automáticamente a 7 días en reservas.';
+  inputEgreso.title = 'El egreso se fija automáticamente a 24 horas en reservas.';
 
   if (inputMotivoEgr) {
     inputMotivoEgr.disabled = true;

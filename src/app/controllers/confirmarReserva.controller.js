@@ -239,16 +239,14 @@ export const cancelarReserva = async (req, res) => {
 export const eliminarReservasVencidas = async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    const ayer = new Date();
-    ayer.setDate(ayer.getDate() - 1);
-    const fechaAyer = ayer.toISOString().split('T')[0];
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // hoy a las 00:00
 
     const reservasVencidas = await MovimientoHabitacion.findAll({
       where: {
         id_mov: 3, // tipo reserva
         fecha_hora_ingreso: {
-          [Op.gte]: new Date(`${fechaAyer}T00:00:00`),
-          [Op.lt]: new Date(`${fechaAyer}T23:59:59`)
+          [Op.lt]: hoy
         }
       },
       transaction: t
@@ -256,14 +254,18 @@ export const eliminarReservasVencidas = async (req, res) => {
 
     for (const mov of reservasVencidas) {
       const idAdmision = mov.id_admision;
+
+      // Eliminar el movimiento de reserva
       await mov.destroy({ transaction: t });
 
-      const otrosMov = await MovimientoHabitacion.findAll({
+      // Verificar si hay otros movimientos ligados a la misma admisión
+      const otrosMov = await MovimientoHabitacion.count({
         where: { id_admision: idAdmision },
         transaction: t
       });
 
-      if (otrosMov.length === 0) {
+      // Si no hay más movimientos, eliminar la admisión también
+      if (otrosMov === 0) {
         await Admision.destroy({ where: { id_admision: idAdmision }, transaction: t });
       }
     }
@@ -276,3 +278,4 @@ export const eliminarReservasVencidas = async (req, res) => {
     res.status(500).json({ message: 'Error al eliminar reservas vencidas' });
   }
 };
+
