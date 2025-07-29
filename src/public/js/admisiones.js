@@ -1,8 +1,10 @@
-import { toUTC } from "./utils/validacionFechas";
+import { toUTC } from "./utils/validacionFechas.js";
 
 $(document).ready(function () {
   const tabla = $('#tablaAdmisiones');
   let dt;
+  console.log('🧪 Script admisiones.js cargado');
+  console.log('Tabla encontrada:', $('#tablaAdmisiones').length);
 
   if (tabla.length) {
     dt = tabla.DataTable({
@@ -160,6 +162,7 @@ $(document).ready(function () {
       }
     });
   });
+  console.log('🔁 Ejecutando fetch /api/admisiones');
 
   fetch('/api/admisiones')
     .then(res => res.json())

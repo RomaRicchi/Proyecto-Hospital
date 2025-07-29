@@ -81,8 +81,17 @@ export const confirmarReserva = async (req, res) => {
       });
     }
 
+    // Convertir reserva en ingreso
     movimiento.id_mov = 1;
     movimiento.fecha_hora_ingreso = movimiento.fecha_hora_ingreso;
+
+    // ✅ Asignar fecha de egreso una semana después si no estaba definida
+    if (!movimiento.fecha_hora_egreso) {
+      const ingreso = new Date(movimiento.fecha_hora_ingreso);
+      ingreso.setDate(ingreso.getDate() + 7);
+      movimiento.fecha_hora_egreso = ingreso;
+    }
+
     movimiento.estado = 1;
     await movimiento.save({ transaction: t });
 
@@ -199,6 +208,15 @@ export const cancelarReserva = async (req, res) => {
     }
 
     const idAdmision = movimiento.id_admision;
+
+    // ✅ Liberar cama si corresponde
+    if (movimiento.id_cama) {
+      const cama = await Cama.findByPk(movimiento.id_cama);
+      if (cama) {
+        cama.estado = 0;
+        await cama.save();
+      }
+    }
 
     await movimiento.destroy();
 

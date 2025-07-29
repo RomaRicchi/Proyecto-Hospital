@@ -1,4 +1,4 @@
-import { Admision, Paciente, MovimientoHabitacion, Cama, Habitacion, Sector } from '../models/index.js';
+import { Admision, Paciente, Genero, MovimientoHabitacion, Cama, Habitacion, Sector } from '../models/index.js';
 import { Op } from 'sequelize';
 
 export const verificarPacienteConMovimientoActivo = async (req, res) => {
@@ -44,6 +44,9 @@ export const verificarPacienteConMovimientoActivo = async (req, res) => {
 
 export const vistaDashboard = async (req, res) => {
   try {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); 
+
     const camas = await Cama.findAll({
       include: [
         {
@@ -55,18 +58,41 @@ export const vistaDashboard = async (req, res) => {
           model: MovimientoHabitacion,
           as: 'movimientos',
           where: {
-            fecha_hora_egreso: null,
-            estado: 1
+            [Op.or]: [
+              {
+                id_mov: 1, // internación activa
+                estado: 1,
+                fecha_hora_egreso: null
+              },
+              {
+                id_mov: 3, // reserva vigente 
+                fecha_hora_ingreso: { [Op.lte]: hoy },
+                fecha_hora_egreso: {
+                  [Op.and]: [
+                    { [Op.not]: null },
+                    { [Op.gt]: hoy } 
+                  ]
+                }
+              }
+            ]
           },
           required: false,
           include: [
             {
               model: Admision,
               as: 'admision',
+              required: true,
               include: [
                 {
                   model: Paciente,
-                  as: 'paciente'
+                  as: 'paciente_admision',
+                  required: true,
+                  include: [
+                    {
+                      model: Genero,
+                      as: 'genero'
+                    }
+                  ]
                 }
               ]
             }
@@ -78,20 +104,20 @@ export const vistaDashboard = async (req, res) => {
 
     camas.forEach((cama) => {
       cama.descripcionHabitacion =
-				cama.habitacion && cama.habitacion.sector
+        cama.habitacion && cama.habitacion.sector
           ? `Habitación ${cama.habitacion.num} - ${cama.habitacion.sector.nombre}`
-					: '-';
+          : '-';
 
       cama.dataValues.desinfeccion = cama.desinfeccion;
     });
 
-    res.render('dashboard', { 
-      camas ,
+    res.render('dashboard', {
+      camas,
       usuario: req.session.usuario,
       autenticado: true
     });
   } catch (error) {
+    console.error('❌ Error en vistaDashboard:', error);
     res.status(500).send('Error al cargar el panel principal');
   }
 };
-

@@ -83,6 +83,14 @@ export const createAdmision = async (req, res) => {
 
     const fechaIngreso = fecha_hora_ingreso;
     const fechaEgreso = fecha_hora_egreso ? fecha_hora_egreso : null;
+
+    // ✅ Si no se definió fecha de egreso y es un ingreso, asumir 7 días
+    if (id_mov === 1 && !fecha_hora_egreso) {
+      const egreso = new Date(fechaIngreso);
+      egreso.setDate(egreso.getDate() + 7);
+      req.body.fecha_hora_egreso = egreso;
+    }
+
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
 
     if (fechaIngreso < hoy) {
@@ -108,16 +116,16 @@ export const createAdmision = async (req, res) => {
       return res.status(400).json({ message: 'Cama no encontrada' });
     }
 
-  if (cama) {
-    const habitacionId = cama.id_habitacion;
-    await verificarGeneroHabitacion(habitacionId, genero, t);
-    const sector = cama.habitacion?.sector?.nombre || '';
-    const edad = calcularEdad(fecha_nac);
-    const compatible = validarCompatibilidadPacienteSector(edad, genero, sector);
-    if (!compatible) {
-      throw new Error(`El paciente no cumple los requisitos para el sector "${sector}".`);
+    if (cama) {
+      const habitacionId = cama.id_habitacion;
+      await verificarGeneroHabitacion(habitacionId, genero, t);
+      const sector = cama.habitacion?.sector?.nombre || '';
+      const edad = calcularEdad(fecha_nac);
+      const compatible = validarCompatibilidadPacienteSector(edad, genero, sector);
+      if (!compatible) {
+        throw new Error(`El paciente no cumple los requisitos para el sector "${sector}".`);
+      }
     }
-  }
 
     if (id_mov === 1 && cama && Number(cama.desinfeccion) !== 1) {
       return res.status(400).json({ message: 'La cama aún no está desinfectada' });
@@ -159,6 +167,7 @@ export const createAdmision = async (req, res) => {
     if (id_cama && id_mov === 1) {
       await validarOcupacionCamaPorAdmision(id_cama, fecha_hora_ingreso);
     }
+
     const nueva = await Admision.create(req.body, { transaction: t });
 
     await MovimientoHabitacion.create({
@@ -166,7 +175,7 @@ export const createAdmision = async (req, res) => {
       id_habitacion: cama?.id_habitacion,
       id_cama,
       fecha_hora_ingreso: nueva.fecha_hora_ingreso,
-      fecha_hora_egreso: fecha_hora_egreso || null,
+      fecha_hora_egreso: req.body.fecha_hora_egreso || null,
       id_mov,
       estado: 1
     }, { transaction: t });
@@ -199,7 +208,7 @@ export const createAdmision = async (req, res) => {
 
   } catch (error) {
     if (t) await t.rollback();
-    
+
     if (
       error.message && (
         error.message.includes('género') ||
@@ -210,6 +219,7 @@ export const createAdmision = async (req, res) => {
     ) {
       return res.status(409).json({ message: error.message });
     }
+
     res.status(500).json({ message: error.message });
   }
 };
@@ -410,18 +420,26 @@ export const updateAdmision = async (req, res) => {
 		const { id_cama, id_mov, fecha_hora_ingreso, fecha_hora_egreso } = req.body;
 
 		if (id_cama && id_mov === 1 && fecha_hora_ingreso) {
-		await validarOcupacionCamaPorAdmisionExcepto(
-			id_cama,
-			fecha_hora_ingreso,
-			admision.id_admision
-		);
+			await validarOcupacionCamaPorAdmisionExcepto(
+				id_cama,
+				fecha_hora_ingreso,
+				admision.id_admision
+			);
 		}
 
 		if (fecha_hora_ingreso) {
 			req.body.fecha_hora_ingreso = new Date(fecha_hora_ingreso);
 		}
+
 		if (fecha_hora_egreso) {
 			req.body.fecha_hora_egreso = new Date(fecha_hora_egreso);
+		}
+
+		// ✅ Si es ingreso y no se definió fecha_hora_egreso, asumir una semana
+		if (req.body.id_mov === 1 && !req.body.fecha_hora_egreso) {
+			const ingreso = new Date(req.body.fecha_hora_ingreso);
+			ingreso.setDate(ingreso.getDate() + 7);
+			req.body.fecha_hora_egreso = ingreso;
 		}
 
 		await admision.update(req.body);

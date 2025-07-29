@@ -1,9 +1,10 @@
 import { configurarBusquedaDeCamas } from './utils/validacionFechas.js';
 
 function buscarCamasDisponibles(fechaSeleccionada) {
-	$('#tablaCamasContainer').html(
-		'<div class="text-center my-4"><div class="spinner-border"></div> Cargando...</div>'
-	);
+  $('#tablaCamasContainer').html(
+    '<div class="text-center my-4"><div class="spinner-border"></div> Cargando...</div>'
+  );
+
   fetch(`/api/camas/disponibles?fecha=${fechaSeleccionada}`)
     .then((res) => res.json())
     .then((camas) => {
@@ -15,12 +16,12 @@ function buscarCamasDisponibles(fechaSeleccionada) {
         '<div class="alert alert-danger">Error al cargar las camas.</div>'
       );
     });
+}
 
-  }
-	
 function renderTablaCamas(camas) {
-  const inputFecha = $('#fecha_busqueda').val();
-  const fechaSeleccionada = inputFecha; 
+  const fechaSeleccionada = $('#fecha_busqueda').val();
+
+  console.log('🛏️ Camas recibidas:', camas);
 
   let html = `
     <table id="tablaCamas" class="table table-bordered table-hover">
@@ -47,32 +48,31 @@ function renderTablaCamas(camas) {
         ? '<span class="badge bg-success">Sí</span>'
         : '<span class="badge bg-secondary">No</span>';
 
-      let esReservaEnFecha = false;
+      const fechaSeleccionadaStr = fechaSeleccionada;
+      let estado = 'Disponible';
+      let paciente = cama.paciente || '-';
+      let genero = cama.genero || '-';
 
       if (Array.isArray(cama.movimientos)) {
-        const fechaSeleccionadaStr = fechaSeleccionada;
-        esReservaEnFecha = cama.movimientos.some(mov => {
-          if (mov.id_mov === 3 && mov.fecha_hora_ingreso) {
-            const ingresoStr = mov.fecha_hora_ingreso.slice(0, 10);
-            const egresoStr = mov.fecha_hora_egreso ? mov.fecha_hora_egreso.slice(0, 10) : null;
-            return ingresoStr <= fechaSeleccionadaStr && (!egresoStr || egresoStr >= fechaSeleccionadaStr);
+        cama.movimientos.forEach((mov, i) => {
+          const ingresoStr = mov.fecha_hora_ingreso.slice(0, 10);
+          const egresoStr = mov.fecha_hora_egreso ? mov.fecha_hora_egreso.slice(0, 10) : null;
+          const enFecha = ingresoStr <= fechaSeleccionadaStr && (!egresoStr || egresoStr >= fechaSeleccionadaStr);
+
+          if (enFecha) {
+            if (mov.id_mov === 1) estado = 'Ocupada';
+            else if (mov.id_mov === 3 && estado !== 'Ocupada') estado = 'Reservada';
           }
-          return false;
         });
       }
 
-      let estadoBadge = '';
-      if (esReservaEnFecha) {
-        estadoBadge = '<span class="badge bg-warning text-dark">Reservada</span>';
-      } else if (cama.estado === 1 || cama.estado === true || cama.estado === 'Ocupada') {
-        estadoBadge = '<span class="badge bg-danger">Ocupada</span>';
-      } else {
-        estadoBadge = '<span class="badge bg-success">Disponible</span>';
-      }
+      const estadoBadge = {
+        'Ocupada': '<span class="badge bg-danger">Ocupada</span>',
+        'Reservada': '<span class="badge bg-warning text-dark">Reservada</span>',
+        'Disponible': '<span class="badge bg-success">Disponible</span>'
+      }[estado];
 
-      const deshabilitada = (
-        cama.estado === 1 || cama.estado === true || cama.estado === 'Ocupada'
-      ) || Number(cama.desinfeccion) !== 1 || esReservaEnFecha;
+      const deshabilitada = estado !== 'Disponible' || Number(cama.desinfeccion) !== 1;
 
       html += `
         <tr>
@@ -81,8 +81,8 @@ function renderTablaCamas(camas) {
           <td>${cama.nombre_cama || '-'}</td>
           <td>${estadoBadge}</td>
           <td>${desinfeccionBadge}</td>
-          <td>${cama.paciente || '-'}</td>
-          <td>${cama.genero || '-'}</td>
+          <td>${paciente}</td>
+          <td>${genero}</td>
           <td>
             <button class="btn btn-sm btn-primary btn-asignar-paciente"
               ${deshabilitada ? 'disabled' : ''}
@@ -108,9 +108,7 @@ function renderTablaCamas(camas) {
   });
 }
 
+
 $(document).ready(function () {
-	configurarBusquedaDeCamas(buscarCamasDisponibles);
+  configurarBusquedaDeCamas(buscarCamasDisponibles);
 });
-
-
-
