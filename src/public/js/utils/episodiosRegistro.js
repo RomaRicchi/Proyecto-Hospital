@@ -26,7 +26,7 @@ export function agruparPorEpisodios(registros) {
 export function mostrarEpisodios(grupos) {
   let html = '';
 
-  const gruposOrdenados = [...grupos].reverse(); 
+  const gruposOrdenados = [...grupos].reverse();
 
   gruposOrdenados.forEach((episodio, index) => {
     const ingreso = episodio.find(r => r.id_tipo === 30);
@@ -36,8 +36,13 @@ export function mostrarEpisodios(grupos) {
     const fechaEgreso = egreso ? new Date(egreso.fecha) : null;
 
     let estado = 'Ambulatorio';
+
     if (ingreso) {
-      estado = fechaEgreso ? 'Finalizada' : 'Vigente';
+      if (!fechaEgreso || fechaEgreso > new Date()) {
+        estado = 'Vigente';
+      } else {
+        estado = 'Finalizada';
+      }
     }
 
     const textoFecha = ingreso
@@ -98,3 +103,4 @@ export function mostrarEpisodios(grupos) {
 
   $('#tablaRegistrosContainer').html(html);
 }
+

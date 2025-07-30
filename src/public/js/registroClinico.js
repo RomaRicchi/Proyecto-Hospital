@@ -1,7 +1,7 @@
 import { mostrarBotonesAccion } from './utils/btnRegistro.js';
-import { 
-  mostrarInfoPaciente, 
-  tieneInternacionActiva 
+import {
+  mostrarInfoPaciente,
+  tieneInternacionActiva
 } from './utils/pctRegistro.js';
 import {
   mostrarEpisodios,
@@ -10,14 +10,17 @@ import {
 import { toUTC } from './utils/validacionFechas.js';
 
 $(document).ready(function () {
+
   const $tabla = $('#tablaRegistrosContainer');
   const $info = $('#infoPaciente');
+  const $select = $('#selectTipo');
   const urlParams = new URLSearchParams(window.location.search);
   const dniParam = urlParams.get('dni');
   if (dniParam) {
     $('#dniBuscar').val(dniParam);
     $('#btnBuscar').click();
   }
+
   const idUsuarioLogueado = $('#usuarioData').data('id') || 1;
   let ultimaAdmisionPaciente = null;
   let esInternacionActiva = false;
@@ -48,9 +51,10 @@ $(document).ready(function () {
         esInternacionActiva = tieneInternacionActiva(data.registros, admision?.id_admision);
 
         if (!data || !Array.isArray(data.registros) || data.registros.length === 0) {
+          $('#filtroTipoRegistro').hide(); 
           if (data?.paciente) {
             mostrarInfoPaciente(data.paciente, data.cama);
-            
+
             mostrarBotonesAccion(
               data.paciente.id_paciente,
               ultimaAdmisionPaciente,
@@ -71,12 +75,10 @@ $(document).ready(function () {
           fecha: new Date(r.fecha),
           id: r.id
         }));
-        window.registrosPaciente = registrosPaciente; 
-        mostrarInfoPaciente(data.paciente, data.cama)
+        window.registrosPaciente = registrosPaciente;
+        mostrarInfoPaciente(data.paciente, data.cama);
 
-        const resultadoInternacion = tieneInternacionActiva(data.registros, admision?.id_admision);
-        
-        esInternacionActiva = resultadoInternacion;
+        esInternacionActiva = tieneInternacionActiva(data.registros, admision?.id_admision);
 
         mostrarBotonesAccion(
           data.paciente.id_paciente,
@@ -84,16 +86,37 @@ $(document).ready(function () {
           idUsuarioLogueado,
           esInternacionActiva
         );
-        
-      
-        const episodios = agruparPorEpisodios(registrosPaciente);
-        mostrarEpisodios(episodios);
+
+        // Cargar tipos de registro desde la base
+        fetch('/api/tipos-registro')
+          .then(res => res.json())
+          .then(tipos => {
+            $select.html(`<option value="Todos">Todos</option>`);
+            tipos.forEach(t => {
+              $select.append(`<option value="${t.nombre}">${t.nombre}</option>`);
+            });
+          });
+
+        // Evento de cambio del filtro
+        $select.off('change').on('change', function () {
+          const tipo = $(this).val();
+          if (tipo === 'Todos') {
+            mostrarEpisodios(agruparPorEpisodios(registrosPaciente));
+          } else {
+            const filtrados = registrosPaciente.filter(r => r.tipo === tipo);
+            mostrarEpisodios(agruparPorEpisodios(filtrados));
+          }
+        });
+
+        $('#filtroTipoRegistro').removeClass('d-none');
+        mostrarEpisodios(agruparPorEpisodios(registrosPaciente));
       })
       .catch(err => {
         Swal.fire('Error', err.message || 'No se pudo cargar el formulario', 'error');
       });
   });
 });
+
 $(document).on('click', '.btn-editar-registro', async function () {
   const $btn = $(this);
   const id = $btn.data('id');
