@@ -16,14 +16,14 @@ export function calcularEdad(fechaNacStr) {
 
 export function validarCompatibilidadPacienteSector(edad, generoId, sector) {
 	const nombre = sector?.trim().toLowerCase();
-	switch (sector) {
-		case 'Neonatología':
+	switch (nombre) {
+		case 'neonatología':
 			return edad <= 1;
-		case 'Internación pediatrica':
+		case 'internación pediatrica':
 			return edad > 1 && edad <= 17;
-		case 'Maternidad':
+		case 'maternidad':
 			return generoId === 2; 
-		case 'Geriatría':
+		case 'geriatría':
 			return edad >= 80;
 		default:
 			return edad >= 18;

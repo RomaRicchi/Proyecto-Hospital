@@ -54,11 +54,11 @@ $(document).ready(function () {
 								data-id="${id}"
 								data-paciente="${pacienteObj?.id_paciente || ''}"
 								data-fecha="${fechaRaw || ''}">
-								Confirmar
+								<i class="fas fa-check"></i>
 							</button>
 							<button class="btn btn-sm btn-danger btn-cancelar-reserva ms-1"
 								data-id="${id}">
-								Cancelar
+								<i class="fas fa-times"></i>
 							</button>
 						</td>
 					</tr>

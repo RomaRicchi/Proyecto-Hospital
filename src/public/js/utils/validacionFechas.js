@@ -40,8 +40,12 @@ export function aplicarReservaSemanal(inputIngreso, inputEgreso, inputMotivoEgr)
   egreso.setDate(egreso.getDate() + 1);         // ✅ solo 1 día
   egreso.setHours(23, 59, 0, 0);                // hasta fin de ese día
 
-  const isoUTC = toUTC(egreso);
-  inputEgreso.value = isoUTC;
+  // 🔧 Formato compatible con input datetime-local: yyyy-MM-ddTHH:mm
+  const egresoLocal = new Date(egreso.getTime() - egreso.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+
+  inputEgreso.value = egresoLocal;
   inputEgreso.disabled = true;
   inputEgreso.title = 'El egreso se fija automáticamente a 24 horas en reservas.';
 
