@@ -3,7 +3,7 @@ import {
   getFechaLocalParaInput,
   toUTC,
   validarFechaReservaRango,
-  validarFechaNoPasada
+  validarFechaNoPasada,
 } from './validacionFechas.js';
 
 export async function mostrarFormularioYRegistrarAdmision(
@@ -41,13 +41,18 @@ export async function mostrarFormularioYRegistrarAdmision(
     )
     .join('');
 
-	const medicosOptions = medicos.map(m =>
-      `<option value="${m.id_usuario}">
-        ${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula} - ${m.especialidad}
-      </option>`
-    ).join('');
+  const medicosOptions = medicos
+    .map(
+      (m) =>
+        `<option value="${m.id_usuario}">
+          ${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula} - ${m.especialidad}
+        </option>`
+    )
+    .join('');
 
-  const fechaIngresoDefault = getFechaLocalParaInput();
+  const fechaIngresoDefault = fechaDashboard
+    ? new Date(fechaDashboard).toISOString().slice(0, 16)
+    : getFechaLocalParaInput();
 
   const { value: result } = await Swal.fire({
     title: 'Nueva Admisión',
@@ -91,28 +96,26 @@ export async function mostrarFormularioYRegistrarAdmision(
       popup: 'swal2-card-style'
     },
     didOpen: () => {
-		const inputIngreso = document.getElementById('fecha_hora_ingreso');
-		const inputEgreso = document.getElementById('fecha_hora_egreso');
-		const inputMotivoEgr = document.getElementById('motivo_egr');
+      const inputIngreso = document.getElementById('fecha_hora_ingreso');
+      const inputEgreso = document.getElementById('fecha_hora_egreso');
+      const inputMotivoEgr = document.getElementById('motivo_egr');
 
-		const ingresoFecha = new Date(inputIngreso.value);
-		ingresoFecha.setHours(0, 0, 0, 0); // 🔧 quitar horas para comparar solo día
+      const ingresoFecha = new Date(inputIngreso.value);
+      ingresoFecha.setHours(0, 0, 0, 0);
 
-		const hoy = new Date();
-		hoy.setHours(0, 0, 0, 0);
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
 
-		if (ingresoFecha > hoy) {
-			aplicarReservaSemanal(inputIngreso, inputEgreso, inputMotivoEgr);
-		} else {
-			// ✅ habilitar edición de egreso y motivo si es ingreso actual
-			inputEgreso.disabled = false;
-			inputEgreso.removeAttribute('title');
-			inputMotivoEgr.disabled = false;
-			inputMotivoEgr.placeholder = 'Motivo de egreso (opcional)';
-			inputMotivoEgr.removeAttribute('title');
-		}
-	},
-
+      if (ingresoFecha > hoy) {
+        aplicarReservaSemanal(inputIngreso, inputEgreso, inputMotivoEgr);
+      } else {
+        inputEgreso.disabled = false;
+        inputEgreso.removeAttribute('title');
+        inputMotivoEgr.disabled = false;
+        inputMotivoEgr.placeholder = 'Motivo de egreso (opcional)';
+        inputMotivoEgr.removeAttribute('title');
+      }
+    },
     preConfirm: () => {
       const motivo = document.getElementById('motivo').value;
       const obra_social = document.getElementById('obra_social').value;
@@ -130,22 +133,20 @@ export async function mostrarFormularioYRegistrarAdmision(
       }
 
       const ingreso = new Date(fechaIngreso);
-	  ingreso.setHours(0, 0, 0, 0); // normalizamos a medianoche
+      ingreso.setHours(0, 0, 0, 0);
 
-	  const hoy = new Date();
-	  hoy.setHours(0, 0, 0, 0); 
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
 
       let id_mov = 1;
       if (ingreso > hoy) {
-		const errorReserva = validarFechaReservaRango(fechaIngreso);
-		if (errorReserva) {
-			Swal.showValidationMessage(errorReserva);
-			return false;
-		}
-		id_mov = 3; // reserva
-		} else {
-		id_mov = 1; // ingreso hoy
-	  }
+        const errorReserva = validarFechaReservaRango(fechaIngreso);
+        if (errorReserva) {
+          Swal.showValidationMessage(errorReserva);
+          return false;
+        }
+        id_mov = 3;
+      }
 
       return {
         id_paciente: paciente.id_paciente,
@@ -176,7 +177,7 @@ export async function mostrarFormularioYRegistrarAdmision(
     const json = await res.json();
 
     if (!res.ok) throw new Error(json.error || 'Error inesperado');
-	
+
     await Swal.fire('Éxito', 'Admisión registrada correctamente', 'success');
     location.reload();
   } catch (err) {

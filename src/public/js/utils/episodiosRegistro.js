@@ -1,16 +1,5 @@
 import { formatDate, formatHour } from './validacionFechas.js';
 
-
-export function determinarEstadoAdmision(fechaIngreso, fechaEgreso) {
-  const ahora = new Date();
-  const ingreso = new Date(fechaIngreso);
-  const egreso = fechaEgreso ? new Date(fechaEgreso) : null;
-
-  if (ingreso > ahora) return 'Reservada';
-  if (!egreso || egreso > ahora) return 'Vigente';
-  return 'Finalizada';
-}
-
 export function agruparPorEpisodios(registros) {
   const grupos = [];
   let episodio = [];
@@ -46,16 +35,16 @@ export function mostrarEpisodios(grupos) {
     const fechaIngreso = ingreso ? new Date(ingreso.fecha) : null;
     const fechaEgreso = egreso ? new Date(egreso.fecha) : null;
 
-    const estado = ingreso
-      ? determinarEstadoAdmision(fechaIngreso, fechaEgreso)
-      : 'Ambulatorio';
+    let estado = 'Ambulatorio';
+    if (ingreso) {
+      estado = fechaEgreso ? 'Finalizada' : 'Vigente';
+    }
 
     const textoFecha = ingreso
       ? `Ingreso: ${fechaIngreso.toLocaleDateString('es-AR')}`
       : 'Episodio ambulatorio';
 
     const colorEstado = {
-      'Reservada': 'warning',
       'Vigente': 'success',
       'Finalizada': 'secondary',
       'Ambulatorio': 'info'

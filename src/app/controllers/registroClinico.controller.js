@@ -1,6 +1,7 @@
 import { 
   RegistroHistoriaClinica, 
   Admision, 
+  MovimientoHabitacion,
   Paciente,
   TipoRegistro,
   Usuario, 
@@ -35,7 +36,25 @@ export const crearRegistro = async (req, res) => {
 
     let admisionId = id_admision;
 
+    // Si no hay admisión explícita (registro ambulatorio), validar que no haya otra activa
     if (!admisionId) {
+      const admisionesActivas = await Admision.findAll({
+        where: {
+          id_paciente,
+          fecha_hora_ingreso: { [Op.lte]: fecha_hora_reg },
+          [Op.or]: [
+            { fecha_hora_egreso: null },
+            { fecha_hora_egreso: { [Op.gt]: fecha_hora_reg } }
+          ]
+        }
+      });
+
+      if (admisionesActivas.length > 0) {
+        return res.status(400).json({
+          message: 'Ya existe una admisión activa. No se puede crear otra hasta que se finalice la actual.'
+        });
+      }
+
       const turno = await Turno.findOne({
         where: {
           id_paciente,
@@ -118,10 +137,7 @@ export const buscarPorDNI = async (req, res) => {
       return res.status(400).json({ message: 'Debe enviar un DNI' });
     }
 
-    const paciente = await Paciente.findOne({
-      where: { dni_paciente: dni }
-    });
-
+    const paciente = await Paciente.findOne({ where: { dni_paciente: dni } });
     if (!paciente) {
       return res.status(404).json({ message: 'Paciente no encontrado' });
     }
@@ -136,6 +152,7 @@ export const buscarPorDNI = async (req, res) => {
       cama = await obtenerCamaActual(ultimaAdmision.id_admision);
     }
 
+    // Obtener todos los registros clínicos del paciente
     const registros = await RegistroHistoriaClinica.findAll({
       include: [
         {
@@ -151,29 +168,42 @@ export const buscarPorDNI = async (req, res) => {
         {
           model: Admision,
           as: 'admision_historia',
-          where: paciente?.id_paciente ? { id_paciente: paciente.id_paciente } : undefined,
-          attributes: [],
-          required: false 
+          attributes: ['id_admision', 'fecha_hora_ingreso'],
+          where: { id_paciente: paciente.id_paciente },
+          required: true
         }
       ],
       order: [['fecha_hora_reg', 'DESC']]
     });
 
-    const adaptados = registros.map(r => ({
-      id: r.id_registro,
-      fecha: r.fecha_hora_reg,
-      tipo: r.tipo_registro?.nombre || '-',
-      id_tipo: r.tipo_registro?.id_tipo || null,
-      detalle: r.detalle || '-',
-      usuario: r.usuario?.username || '-',
-      id_admision: r.id_admision || null
-    }));
+    const registrosFiltrados = [];
+
+    for (const r of registros) {
+      const tieneMovimiento1 = await MovimientoHabitacion.findOne({
+        where: {
+          id_admision: r.admision_historia.id_admision,
+          id_mov: 1
+        }
+      });
+
+      if (tieneMovimiento1) {
+        registrosFiltrados.push({
+          id: r.id_registro,
+          fecha: r.fecha_hora_reg,
+          tipo: r.tipo_registro?.nombre || '-',
+          id_tipo: r.tipo_registro?.id_tipo || null,
+          detalle: r.detalle || '-',
+          usuario: r.usuario?.username || '-',
+          id_admision: r.id_admision || null
+        });
+      }
+    }
 
     return res.json({
       paciente,
       cama,
       ultimaAdmision,
-      registros: adaptados
+      registros: registrosFiltrados
     });
 
   } catch (err) {
@@ -185,6 +215,7 @@ export const buscarPorDNI = async (req, res) => {
     });
   }
 };
+
 
 export const vistaRegistroClinico = async (req, res) => {
   try {

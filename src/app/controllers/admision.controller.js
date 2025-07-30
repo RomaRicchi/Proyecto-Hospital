@@ -20,6 +20,7 @@ import {
   validarOcupacionCamaPorAdmisionExcepto,
   validarMovimientoEgresoExistente,
   verificarGeneroHabitacion,
+  validarConflictoConReservaExistente,
 } from '../validators/admision.validator.js';
 import {
   calcularEdad,

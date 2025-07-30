@@ -29,97 +29,81 @@ export const vistaReservarCama = (req, res) => {
 };
 
 export const confirmarReserva = async (req, res) => {
-  const { id_movimiento } = req.params;
   const t = await sequelize.transaction();
-
   try {
-    const movimiento = await MovimientoHabitacion.findByPk(id_movimiento, {
-      include: [
-        {
-          model: Admision,
-          as: 'admision',
-          include: [{ model: Paciente, as: 'paciente' }]
-        },
-        {
-          model: Habitacion,
-          as: 'habitacion',
-          include: [{ model: Sector, as: 'sector' }]
-        },
-        { model: Cama, as: 'cama' }
-      ],
-      transaction: t
+    const { id_admision } = req.params;
+
+    const admision = await Admision.findByPk(id_admision, { transaction: t });
+    if (!admision) return res.status(404).json({ message: 'Admisión no encontrada' });
+
+    // Buscar movimiento de reserva activo
+    const movReserva = await MovimientoHabitacion.findOne({
+      where: {
+        id_admision,
+        id_mov: 3,
+        estado: 1,
+      },
+      transaction: t,
     });
 
-    if (!movimiento) {
-      await t.rollback();
-      return res.status(404).json({ message: 'Movimiento no encontrado' });
+    if (!movReserva) return res.status(400).json({ message: 'No hay reserva activa para confirmar.' });
+
+    // Desactivar reserva
+    movReserva.estado = 0;
+    await movReserva.save({ transaction: t });
+
+    // Actualizar admisión: nueva fecha de ingreso = ahora, nuevo egreso = +7 días
+    const nuevaFechaIngreso = new Date(); // ahora
+    const nuevaFechaEgreso = new Date(nuevaFechaIngreso.getTime() + 7 * 24 * 60 * 60 * 1000); // +7 días
+
+    await admision.update({
+      fecha_hora_ingreso: nuevaFechaIngreso,
+      fecha_hora_egreso: nuevaFechaEgreso,
+      motivo_egr: null,
+    }, { transaction: t });
+
+    // Crear nuevo movimiento de tipo ingreso (1)
+    await MovimientoHabitacion.create({
+      id_admision,
+      id_cama: movReserva.id_cama,
+      id_habitacion: movReserva.id_habitacion,
+      id_mov: 1,
+      fecha_hora_ingreso: nuevaFechaIngreso,
+      fecha_hora_egreso: nuevaFechaEgreso,
+      estado: 1,
+    }, { transaction: t });
+
+    // Actualizar estado de la cama (por seguridad ya estaba ocupada, pero se asegura)
+    const cama = await Cama.findByPk(movReserva.id_cama, { transaction: t });
+    if (cama) {
+      cama.estado = 1;
+      await cama.save({ transaction: t });
     }
 
-    const ahora = new Date();
-    const hoyLocal = ahora.toLocaleDateString('sv-SE');
-    const fechaReserva = new Date(movimiento.fecha_hora_ingreso).toLocaleDateString('sv-SE');
-
-    if (fechaReserva !== hoyLocal) {
-      await t.rollback();
-      return res.status(400).json({ message: 'Solo se puede confirmar la reserva el día de inicio.' });
-    }
-
-    const paciente = movimiento.admision.paciente;
-    const cama = movimiento.cama;
-    const habitacion = movimiento.habitacion;
-    const sector = habitacion?.sector?.nombre || '';
-    const genero = paciente.id_genero;
-    const edad = calcularEdad(paciente.fecha_nac);
-
-    await verificarGeneroHabitacion(habitacion.id_habitacion, genero, t);
-
-    const compatible = validarCompatibilidadPacienteSector(edad, genero, sector);
-    if (!compatible) {
-      await t.rollback();
-      return res.status(409).json({
-        message: `El paciente no cumple los requisitos del sector "${sector}".`
-      });
-    }
-
-    // Convertir reserva en ingreso
-    movimiento.id_mov = 1;
-    movimiento.fecha_hora_ingreso = movimiento.fecha_hora_ingreso;
-
-    // ✅ Asignar fecha de egreso una semana después si no estaba definida
-    if (!movimiento.fecha_hora_egreso) {
-      const ingreso = new Date(movimiento.fecha_hora_ingreso);
-      ingreso.setDate(ingreso.getDate() + 7);
-      movimiento.fecha_hora_egreso = ingreso;
-    }
-
-    movimiento.estado = 1;
-    await movimiento.save({ transaction: t });
-
-    cama.estado = 1;
-    await cama.save({ transaction: t });
-
+    // Agregar registro en historia clínica
     const tipoIngreso = await TipoRegistro.findOne({
-      where: { nombre: { [Op.like]: '%ingreso%' } }
+      where: { nombre: { [sequelize.Op.like]: '%ingreso%' } },
+      transaction: t,
     });
 
     if (tipoIngreso) {
       await RegistroHistoriaClinica.create({
-        id_admision: movimiento.id_admision,
-        id_usuario: movimiento.admision.id_usuario || null,
-        fecha_hora_reg: movimiento.fecha_hora_ingreso,
+        id_admision,
         id_tipo: tipoIngreso.id_tipo,
-        detalle: 'Confirmación de ingreso por reserva',
-        estado: 1
+        fecha_hora_reg: nuevaFechaIngreso,
+        id_usuario: admision.id_usuario || null,
+        detalle: 'Confirmación de reserva. Ingreso hospitalario.',
+        estado: 1,
       }, { transaction: t });
     }
 
     await t.commit();
-    res.status(200).json({ message: 'Reserva confirmada como ingreso' });
+    res.json({ message: 'Reserva confirmada como ingreso' });
 
   } catch (error) {
-    console.error('❌ Error en confirmarReserva:', error);
-    if (t) await t.rollback();
-    res.status(500).json({ message: error.message || 'Error interno' });
+    await t.rollback();
+    console.error('Error al confirmar reserva:', error);
+    res.status(500).json({ message: 'Error al confirmar reserva' });
   }
 };
 
