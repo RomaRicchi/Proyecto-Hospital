@@ -19,7 +19,11 @@ $(document).ready(function () {
     scrollX: false,
     columnDefs: [{ targets: [6], orderable: false, searchable: false }],
   });
-
+  
+  if (isMedico) {
+    $('#filtroProfesionalTurno').closest('.row').hide();
+    $('#btnNuevoTurno').hide(); 
+  }
   $('#btnNuevoTurno').on('click', () => mostrarFormulario(null, cargarTurnos));
 
   $(document).on('click', '.editar', async function () {
@@ -101,9 +105,13 @@ $(document).ready(function () {
 
     tabla.draw();
   }
+  let url = '/api/turnos/listado';
+  if (window.usuario?.rol === 4) {
+    url += `?medico=${window.usuario.id_personal_salud}`;
+  }
 
   function cargarTurnos() {
-    fetch('/api/turnos/listado')
+    fetch(url)
       .then(res => res.json())
       .then(turnos => {
         renderTurnos(tabla, turnos);
@@ -122,8 +130,18 @@ $(document).ready(function () {
   });
 
   function configurarFiltroProfesional() {
-    if (isMedico) return;
+    const select = $('#filtroProfesionalTurno');
 
+    if (isMedico) {
+      // Mostrar el select solo con el médico logueado
+      const nombreCompleto = `${window.usuario.apellido}, ${window.usuario.nombre}`;
+      select.html(`<option value="${idMedico}" selected>${nombreCompleto}</option>`);
+      select.prop('disabled', true);
+      cargarTurnos();
+      return;
+    }
+
+    // Resto de la lógica para admins
     fetch('/api/agenda')
       .then(r => r.json())
       .then(agendas => {
@@ -145,23 +163,20 @@ $(document).ready(function () {
         const options = profesionalesUnicos.map(p =>
           `<option value="${p.id}">${p.nombre}</option>`
         );
-        $('#filtroProfesionalTurno').html(`
-          <option value="">Todos los profesionales</option>
-          ${options.join('')}
-        `);
+        select.html(`<option value="">Todos los profesionales</option>${options.join('')}`);
 
         const guardado = localStorage.getItem('filtroProfesionalTurnoId');
         if (guardado) {
-          $('#filtroProfesionalTurno').val(guardado).trigger('change');
+          select.val(guardado).trigger('change');
         }
 
-        $('#filtroProfesionalTurno').select2({
+        select.select2({
           placeholder: 'Filtrar por profesional',
           width: 'resolve',
           allowClear: true
         });
 
-        $('#filtroProfesionalTurno').on('change', function () {
+        select.on('change', function () {
           const valor = $(this).val();
           if (valor) {
             localStorage.setItem('filtroProfesionalTurnoId', valor);
@@ -174,6 +189,7 @@ $(document).ready(function () {
         cargarTurnos();
       });
   }
+
 
   configurarFiltroProfesional();
 });

@@ -77,24 +77,30 @@ export const getTurnos = async (req, res) => {
 
 export const getTurnosListado = async (req, res) => {
   try {
-    const usuario = req.session.usuario;
-    const esMedico = usuario && usuario.rol === 4;
+    let idProfesional = req.session?.usuario?.id_personal_salud;
+    const esMedico = req.session?.usuario?.rol === 4;
 
-    const whereAgenda = {};
-
-    if (esMedico) {
-      const profesional = await PersonalSalud.findOne({
-        where: { id_usuario: usuario.id }
-      });
-
-      if (!profesional) {
-        return res.status(403).json({ message: 'Profesional no encontrado' });
-      }
-
-      whereAgenda.id_personal_salud = profesional.id_personal_salud;
+    // Si viene por query (como en ?medico=12), usalo como fallback
+    if (!idProfesional && req.query.medico) {
+      idProfesional = parseInt(req.query.medico);
     }
 
+    const whereTurno = {};
+
+    if (esMedico && idProfesional) {
+      const agendas = await Agenda.findAll({
+        where: { id_personal_salud: idProfesional },
+        attributes: ['id_agenda']
+      });
+
+      const ids = agendas.map(a => a.id_agenda);
+      if (ids.length === 0) return res.json([]);
+      whereTurno.id_agenda = ids;
+    }
+
+
     const turnos = await Turno.findAll({
+      where: whereTurno,
       include: [
         { model: EstadoTurno, as: 'estado_turno' },
         { model: MotivoIngreso, as: 'motivo_turno' },
@@ -102,7 +108,6 @@ export const getTurnosListado = async (req, res) => {
         {
           model: Agenda,
           as: 'agenda',
-          where: whereAgenda,
           include: [
             {
               model: PersonalSalud,
@@ -113,17 +118,15 @@ export const getTurnosListado = async (req, res) => {
             }
           ]
         },
-        { model: Paciente, as: 'cliente', 
-          attributes: ['nombre_p', 'apellido_p', 'dni_paciente'] 
-        }
+        { model: Paciente, as: 'cliente', attributes: ['nombre_p', 'apellido_p', 'dni_paciente'] }
       ]
     });
 
     const turnosConvertidos = turnos.map(t => {
       const json = t.toJSON();
-      const fecha = new Date(json.fecha_hora); 
+      const fecha = new Date(json.fecha_hora);
 
-      json.fecha_turno = fecha.toLocaleDateString('sv-SE'); 
+      json.fecha_turno = fecha.toLocaleDateString('sv-SE'); // yyyy-mm-dd
       json.hora_turno = fecha.toLocaleTimeString('es-AR', {
         hour: '2-digit',
         minute: '2-digit',
@@ -135,7 +138,7 @@ export const getTurnosListado = async (req, res) => {
 
     res.json(turnosConvertidos);
   } catch (error) {
-    console.error('Error al obtener turnos para listado:', error);
+    console.error('❌ Error al obtener turnos para listado:', error);
     res.status(500).json({ message: 'Error al cargar turnos' });
   }
 };

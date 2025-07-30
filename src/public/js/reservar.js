@@ -119,6 +119,7 @@ $(document).ready(function () {
 			}
 
 			Swal.fire('Éxito', data.message, 'success');
+			await cargarReservas();
 			$(`#egreso-${id}`).prop('disabled', false);
 			$(`#motivoEgr-${id}`).prop('disabled', false);
 		} catch (err) {
