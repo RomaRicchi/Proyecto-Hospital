@@ -84,7 +84,6 @@ export const createAdmision = async (req, res) => {
     const fechaIngreso = fecha_hora_ingreso;
     const fechaEgreso = fecha_hora_egreso ? fecha_hora_egreso : null;
 
-    // ✅ Si no se definió fecha de egreso y es un ingreso, asumir 7 días
     if (id_mov === 1 && !fecha_hora_egreso) {
       const egreso = new Date(fechaIngreso);
       egreso.setDate(egreso.getDate() + 7);
@@ -183,23 +182,26 @@ export const createAdmision = async (req, res) => {
       estado: 1
     }, { transaction: t });
 
-    const tipoIngreso = await TipoRegistro.findOne({
-      where: { nombre: { [Op.like]: '%ingreso%' } },
-      transaction: t
-    });
+    if (id_mov === 1) {
+      const tipoIngreso = await TipoRegistro.findOne({
+        where: { nombre: { [Op.like]: '%ingreso%' } },
+        transaction: t
+      });
 
-    if (!tipoIngreso) {
-      return res.status(400).json({ message: 'No existe un tipo de registro "ingreso" en la base de datos. Debe crearlo en la tabla tipo_registro.' });
+      if (!tipoIngreso) {
+        return res.status(400).json({ message: 'No existe un tipo de registro "ingreso"...' });
+      }
+
+      await RegistroHistoriaClinica.create({
+        id_admision: nueva.id_admision,
+        id_usuario: id_usuario || null,
+        fecha_hora_reg: nueva.fecha_hora_ingreso,
+        id_tipo: tipoIngreso.id_tipo,
+        detalle: `Ingreso hospitalario: ${nueva.descripcion || ''}`,
+        estado: 1
+      }, { transaction: t });
     }
 
-    await RegistroHistoriaClinica.create({
-      id_admision: nueva.id_admision,
-      id_usuario: id_usuario || null,
-      fecha_hora_reg: nueva.fecha_hora_ingreso,
-      id_tipo: tipoIngreso.id_tipo,
-      detalle: `Ingreso hospitalario: ${nueva.descripcion || ''}`,
-      estado: 1
-    }, { transaction: t });
 
     if (id_cama && id_mov === 1 && fechaIngreso <= new Date()) {
       cama.estado = 1;

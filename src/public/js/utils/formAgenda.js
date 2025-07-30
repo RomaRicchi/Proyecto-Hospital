@@ -44,19 +44,36 @@ export function mostrarFormulario(agenda = {}) {
     showCancelButton: true,
     confirmButtonText: 'Guardar',
     didOpen: async () => {
+      const usuarioDataEl = document.getElementById('usuarioData');
+      const usuario = {
+        rol: Number(usuarioDataEl.dataset.rol),
+        id_personal_salud: Number(usuarioDataEl.dataset.idPersonalSalud),
+        nombre: usuarioDataEl.dataset.nombre,
+        apellido: usuarioDataEl.dataset.apellido
+      };
+
       const [profesionales, dias] = await Promise.all([
         fetch('/api/personal-salud').then(r => r.json()),
         fetch('/api/dias-semana').then(r => r.json())
       ]);
 
       const profSelect = document.getElementById('profesional');
-      profesionales.forEach(p => {
+      if (usuario.rol === 4) {
         const opt = document.createElement('option');
-        opt.value = p.id_personal_salud;
-        opt.textContent = `${p.apellido}, ${p.nombre} (${p.especialidad?.nombre || '-'})`;
-        if (agenda.id_personal_salud === p.id_personal_salud) opt.selected = true;
+        opt.value = usuario.id_personal_salud;
+        opt.textContent = `${usuario.apellido}, ${usuario.nombre}`;
+        opt.selected = true;
         profSelect.appendChild(opt);
-      });
+        profSelect.disabled = true;
+      } else {
+        profesionales.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.id_personal_salud;
+          opt.textContent = `${p.apellido}, ${p.nombre} (${p.especialidad?.nombre || '-'})`;
+          if (agenda.id_personal_salud === p.id_personal_salud) opt.selected = true;
+          profSelect.appendChild(opt);
+        });
+      }
 
       const diaSelect = document.getElementById('dia');
       dias.forEach(d => {

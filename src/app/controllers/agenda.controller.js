@@ -77,7 +77,15 @@ export const getAgendasRecurrentes = async (req, res) => {
 
 export const getAgendas = async (req, res) => {
   try {
+    const usuario = req.session.usuario;
+
+    const where = {};
+    if (usuario.rol === 4 && usuario.id_personal_salud) {
+      where.id_personal_salud = usuario.id_personal_salud;
+    }
+
     const agendas = await Agenda.findAll({
+      where,
       include: [
         {
           model: PersonalSalud,
@@ -104,12 +112,13 @@ export const getAgendas = async (req, res) => {
       ]
     });
 
-    res.json(agendas); 
+    res.json(agendas);
   } catch (error) {
     console.error('Error en getAgendas:', error);
     res.status(500).json({ message: 'Error al obtener agendas' });
   }
 };
+
 
 export const createAgenda = async (req, res) => {
   try {

@@ -3,10 +3,11 @@ import { mostrarFormulario } from './utils/formTurno.js';
 
 $(document).ready(function () {
   const isMedico = window.usuario?.rol === 4;
+  const idMedico = window.usuario?.id_personal_salud;
+
   if (isMedico) {
     $('#filtroProfesionalTurno').closest('.row').hide();
-    cargarTurnos();
-  } 
+  }
 
   const tabla = $('#tablaTurnos').DataTable({
     language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
@@ -34,8 +35,8 @@ $(document).ready(function () {
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
       customClass: {
-					popup: 'swal2-card-style'
-				},
+        popup: 'swal2-card-style'
+      },
     }).then(result => {
       if (result.isConfirmed) {
         fetch(`/api/turnos/${id}`, { method: 'DELETE' })
@@ -47,23 +48,28 @@ $(document).ready(function () {
     });
   });
 
-  function renderTurnos(tabla, turnos, filtroId) {
+  function renderTurnos(tabla, turnos) {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
-    const isMedico = window.usuario?.rol === 4;
     tabla.clear();
+
     turnos
       .filter(t => {
         const fecha = new Date(t.fecha_hora);
         return !isNaN(fecha) && fecha >= hoy;
       })
-      .filter(t => !filtroId || t.agenda?.personal?.id_personal_salud == filtroId)
-
+      .filter(t => {
+        if (isMedico) {
+          return t.agenda?.personal?.id_personal_salud == idMedico;
+        }
+        const filtroId = $('#filtroProfesionalTurno').val();
+        return !filtroId || t.agenda?.personal?.id_personal_salud == filtroId;
+      })
       .forEach(t => {
         const paciente = t.cliente
           ? `${t.cliente.apellido_p}, ${t.cliente.nombre_p} (${t.cliente.dni_paciente || '-'})`
           : '-';
-        const obraSocial = t.obra_social?.nombre || 'Sin OS'
+        const obraSocial = t.obra_social?.nombre || 'Sin OS';
         const profesional = t.agenda?.personal
           ? `${t.agenda.personal.apellido}, ${t.agenda.personal.nombre} (${t.agenda.personal?.especialidad?.nombre || '-'})`
           : '-';
@@ -74,7 +80,7 @@ $(document).ready(function () {
 
         tabla.row.add([
           paciente,
-          obraSocial, 
+          obraSocial,
           profesional,
           fecha,
           hora,
@@ -82,7 +88,7 @@ $(document).ready(function () {
           motivo,
           isMedico
             ? `<button class="btn btn-sm btn-success btn-atender-turno" data-id="${t.id_turno}" data-dni="${t.cliente?.dni_paciente}">
-                  Atender
+                Atender
               </button>`
             : `<button class="btn btn-sm btn-primary editar" title="Editar" data-id="${t.id_turno}">
                 <i class="fas fa-edit"></i>
@@ -100,8 +106,7 @@ $(document).ready(function () {
     fetch('/api/turnos/listado')
       .then(res => res.json())
       .then(turnos => {
-        const filtro = $('#filtroProfesionalTurno').val();
-        renderTurnos(tabla, turnos, filtro);
+        renderTurnos(tabla, turnos);
       })
       .catch(err => {
         console.error('❌ Error al cargar los turnos:', err.message);
@@ -117,6 +122,8 @@ $(document).ready(function () {
   });
 
   function configurarFiltroProfesional() {
+    if (isMedico) return;
+
     fetch('/api/agenda')
       .then(r => r.json())
       .then(agendas => {
@@ -134,6 +141,7 @@ $(document).ready(function () {
             });
           }
         }
+
         const options = profesionalesUnicos.map(p =>
           `<option value="${p.id}">${p.nombre}</option>`
         );
@@ -153,18 +161,18 @@ $(document).ready(function () {
           allowClear: true
         });
 
+        $('#filtroProfesionalTurno').on('change', function () {
+          const valor = $(this).val();
+          if (valor) {
+            localStorage.setItem('filtroProfesionalTurnoId', valor);
+          } else {
+            localStorage.removeItem('filtroProfesionalTurnoId');
+          }
+          cargarTurnos();
+        });
+
         cargarTurnos();
       });
-
-    $('#filtroProfesionalTurno').on('change', function () {
-      const valor = $(this).val();
-      if (valor) {
-        localStorage.setItem('filtroProfesionalTurnoId', valor);
-      } else {
-        localStorage.removeItem('filtroProfesionalTurnoId');
-      }
-      cargarTurnos();
-    });
   }
 
   configurarFiltroProfesional();

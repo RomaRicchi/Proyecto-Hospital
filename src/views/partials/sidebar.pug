@@ -78,7 +78,7 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
       li
         a.nav-link.text-white(href="/reserva-cama")
           i.fas.fa-procedures.me-1
-          | Reservas del día
+          | Reservas
     if [1, 4].includes(usuario.rol)
       li
         a.nav-link.text-white(href="/paciente/alta")
@@ -127,10 +127,6 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
           i.fas.fa-stethoscope.me-1
           | Staff de Salud
       li
-        a.nav-link.text-white(href="/agenda")
-          i.fas.fa-clock.me-1
-          | Agendas
-      li
         a.nav-link.text-white(href="/personal/administrativo")
           i.fas.fa-user-tie.me-1
           | Staff Administrativo
@@ -151,6 +147,12 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
           a.nav-link.text-white(href="/dias-semana")
             i.fas.fa-calendar-week.me-1
             | Días de la Semana
+  if [1, 4].includes(usuario.rol)
+    ul(style="list-style: none; padding-left: 0;")
+      li
+        a.nav-link.text-white(href="/agenda")
+          i.fas.fa-clock.me-1
+          | Agendas
 
   // 🔹 Ubicación
   if usuario.rol === 1

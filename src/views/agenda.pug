@@ -5,6 +5,13 @@ block content
     .gral-hero-cont
       h1 Agenda de Profesionales
       button.btn.btn-success#btnNuevaAgenda Nueva Agenda
+      // 👇 Esto debe estar en la vista Pug que renderiza el frontend
+      div#usuarioData(
+        data-rol=usuario.rol
+        data-id-personal-salud=usuario.id_personal_salud
+        data-nombre=usuario.nombre
+        data-apellido=usuario.apellido
+      )
 
       label#filtroProfesionalLabel(for="filtroProfesional") Filtrar por profesional
       select#filtroProfesional.select-estilizado

@@ -28,7 +28,10 @@ $(document).ready(function () {
         const filtradas = idProfesional
           ? agendas.filter(a => a.id_personal_salud == idProfesional)
           : agendas;
-
+        if (!Array.isArray(filtradas)) {
+          console.error('Respuesta inesperada:', filtradas);
+          return;
+        }
         filtradas.forEach(a => {
           const profesional = a.personal
             ? `${a.personal.apellido}, ${a.personal.nombre} (${a.personal.especialidad?.nombre || '-'})`
