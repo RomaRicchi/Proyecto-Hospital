@@ -45,17 +45,32 @@ Todas las fechas almacenadas en la base se guardan en UTC y son convertidas a ho
 
 ## 🚀 Características
 
-✅ **Gestión de Pacientes y Familiares**  
-✅ **Admisiones y Egresos** con lógica de validación  
-✅ **Manejo de Camas y Habitaciones**  
-✅ **Historial Clínico Registrado** por tipo y motivo. Evaluaciones médicas y de enfermería. Historial clínico por paciente. Filtro por tipo y fecha.
-✅ **Sistema de Usuarios con Roles (admin, salud, etc.)**
-✅ **Turnos médicos** Calendario interactivo (FullCalendar). Validación de agenda y horarios. Asignación de paciente, motivo y estado.
-✅ **Interfaz web con Bootstrap + Pug**  
-✅ **Autenticación y Sesiones**  Alta, baja, edición de usuarios. Control de acceso según rol.
-✅ **Conexión a base de datos MySQL usando Sequelize**  
-✅ **Recuperación de contraseña** Formulario SweetAlert2 + envío de token por correo (Nodemailer).
-✅ **Automatización** Limpieza diaria de reservas vencidas (node-cron).
+- ✅ **Gestión de Pacientes y Familiares**
+
+- ✅ **Admisiones y Egresos** con lógica de validación
+
+- ✅ **Manejo de Camas y Habitaciones**
+
+- ✅ **Historial Clínico** registrado por tipo y motivo (evaluaciones médicas y de enfermería).  
+  Filtro por paciente, tipo y fecha.
+
+- ✅ **Sistema de Usuarios con Roles** (admin, salud, recepcionista, etc.)
+
+- ✅ **Turnos médicos** con calendario interactivo (FullCalendar).  
+  Validación de agenda y horarios. Asignación de paciente, motivo y estado.
+
+- ✅ **Interfaz Web con Bootstrap + Pug**
+
+- ✅ **Autenticación y Sesiones**: alta, baja, edición de usuarios.  
+  Control de acceso según rol.
+
+- ✅ **Base de Datos MySQL** usando Sequelize
+
+- ✅ **Recuperación de contraseña** con formulario SweetAlert2  
+  + envío de token por correo (Nodemailer)
+
+- ✅ **Automatización de limpieza** de reservas vencidas (node-cron)
+
 ---
 
 ## 🏗️ Arquitectura
