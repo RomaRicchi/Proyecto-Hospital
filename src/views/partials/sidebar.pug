@@ -29,6 +29,11 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
         a.nav-link.text-white(href="/registroClinico")
           i.fas.fa-file-alt.me-1
           | Registros clínicos
+    if [1, 3].includes(usuario.rol)
+      li
+        a.nav-link.text-white(href="/movimientoHabitacion")
+          i.fas.fa-exchange-alt.me-1
+          | Movimientos de Habitación
     li
       a.nav-link.text-white(href="/pacientes/camas")
         i.fas.fa-procedures.me-1
@@ -38,6 +43,11 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
         a.nav-link.text-white(href="/familiar")
           i.fas.fa-users.me-1
           | Lista de Familiares
+    if [ 3 ].includes(usuario.rol)      
+      li
+        a.nav-link.text-white(href="/camas")
+          i.fas.fa-procedures.me-1
+          | Lista de Camas
     if usuario.rol === 1
       li
         a.nav-link.text-white.collapsed(href="#auxPacientes", data-bs-toggle="collapse", aria-expanded="false")
@@ -103,10 +113,6 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
           a.nav-link.text-white(href="/motivoIngreso")
             i.fas.fa-clipboard-list.me-1
             | Motivos de Ingreso
-        li
-          a.nav-link.text-white(href="/movimientoHabitacion")
-            i.fas.fa-exchange-alt.me-1
-            | Movimientos de Habitación
         li
           a.nav-link.text-white(href="/movimiento")
             i.fas.fa-exchange-alt.me-1

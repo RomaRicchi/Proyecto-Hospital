@@ -8,6 +8,10 @@ import {
 	Genero,
 	Cama,
 } from '../models/index.js';
+import { 
+	verificarGeneroHabitacion,
+	validarEstadoCama,
+} from '../validators/admision.validator.js';
 import { Op } from 'sequelize';
 
 export const verificarGenero = async (req, res) => {
@@ -86,12 +90,18 @@ export const getMovimientosHabitacion = async (req, res) => {
 				{
 					model: Habitacion,
 					as: 'habitacion',
-					include: [{ model: Sector, as: 'sector' }],
+					include: ['sector']
 				},
-				{ model: Movimiento, as: 'tipo_movimiento' },
-				{ model: Cama, as: 'cama' },
-			],
-		});
+				{
+					model: Cama,
+					as: 'cama'
+				},
+				{
+					model: Movimiento,
+					as: 'tipo_movimiento'
+				}
+				],
+						});
 		res.json(movimientos);
 	} catch (error) {
 		res.status(500).json({ message: 'Error al obtener movimientos habitación' });
@@ -99,28 +109,36 @@ export const getMovimientosHabitacion = async (req, res) => {
 };
 
 export const getMovimientoHabitacionById = async (req, res) => {
-	try {
-		const movimiento = await MovimientoHabitacion.findByPk(req.params.id, {
-			include: [
-				{
-					model: Admision,
-					as: 'admision',
-					include: [{ model: Paciente, as: 'paciente' }],
-				},
-				{
-					model: Habitacion,
-					as: 'habitacion',
-					include: [{ model: Sector, as: 'sector' }],
-				},
-				{ model: Movimiento, as: 'tipo_movimiento' }, 
-			],
-		});
-		if (!movimiento)
-			return res.status(404).json({ message: 'Movimiento no encontrado' });
-		res.json(movimiento);
-	} catch (error) {
-		res.status(500).json({ message: 'Error al obtener movimiento habitación' });
-	}
+  try {
+    const movimiento = await MovimientoHabitacion.findByPk(req.params.id, {
+      include: [
+        {
+          model: Admision,
+          as: 'admision',
+          include: [{
+            model: Paciente,
+            as: 'paciente',
+            include: [{ model: Genero, as: 'genero' }] // 👈 agregado
+          }]
+        },
+        {
+          model: Habitacion,
+          as: 'habitacion',
+          include: [{ model: Sector, as: 'sector' }],
+        },
+        { model: Movimiento, as: 'tipo_movimiento' },
+        { model: Cama, as: 'cama' },
+      ],
+    });
+
+    if (!movimiento) {
+      return res.status(404).json({ message: 'Movimiento no encontrado' });
+    }
+
+    res.json(movimiento);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener movimiento habitación' });
+  }
 };
 
 export const createMovimientoHabitacion = async (req, res) => {
@@ -267,15 +285,20 @@ export const vistaMovimientosHabitacion = async (req, res) => {
 			],
 		});
 
-		const adaptados = movimientos.map(m => ({
-			...m.toJSON(),
-			fecha_hora_ingreso: m.fecha_hora_ingreso
+		const adaptados = movimientos.map(m => {
+			const json = m.toJSON();
+			return {
+				...json,
+				estado: m.estado, // aseguramos que se mantenga como número
+				id_mov: m.id_mov,
+				fecha_hora_ingreso: m.fecha_hora_ingreso
 				? new Date(m.fecha_hora_ingreso).toLocaleString('es-AR')
 				: '-',
-			fecha_hora_egreso: m.fecha_hora_egreso
+				fecha_hora_egreso: m.fecha_hora_egreso
 				? new Date(m.fecha_hora_egreso).toLocaleString('es-AR')
 				: '-',
-		}));
+			};
+		});
 
 		res.render('movHabitacion', { 
 			movimientos: adaptados , 
@@ -323,3 +346,69 @@ export const getMovimientosActivosPorHabitacion = async (req, res) => {
   }
 };
 
+export const trasladarMovimiento = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { id_cama } = req.body;
+
+    const camaNueva = await Cama.findByPk(id_cama);
+    if (!camaNueva) return res.status(400).json({ message: 'Cama no encontrada' });
+
+    const id_habitacion = camaNueva.id_habitacion;
+
+    const movimientoAnterior = await MovimientoHabitacion.findByPk(id, {
+      include: [
+        {
+          model: Admision,
+          as: 'admision',
+          include: [{
+            model: Paciente,
+            as: 'paciente',
+            include: ['genero']
+          }]
+        },
+        {
+          model: Cama,
+          as: 'cama'
+        }
+      ]
+    });
+
+    if (!movimientoAnterior) return res.status(404).json({ message: 'Movimiento no encontrado' });
+
+    const generoPaciente = movimientoAnterior.admision?.paciente?.genero?.id_genero;
+    if (!generoPaciente) {
+      return res.status(400).json({ message: 'No se pudo determinar el género del paciente' });
+    }
+
+    // Validaciones
+    await verificarGeneroHabitacion(id_habitacion, generoPaciente);
+    await validarEstadoCama(id_cama);
+
+    // Liberar cama anterior y marcarla como pendiente de desinfección
+    await movimientoAnterior.update({
+      estado: 0,
+      fecha_hora_egreso: new Date()
+    });
+
+    await movimientoAnterior.cama.update({ desinfeccion: 1 });
+
+    // Ocupar nueva cama y limpiarle la desinfección
+    await camaNueva.update({ desinfeccion: 0 });
+
+    // Crear nuevo movimiento
+    const traslado = await MovimientoHabitacion.create({
+      id_admision: movimientoAnterior.id_admision,
+      id_habitacion,
+      id_cama,
+      fecha_hora_ingreso: new Date(),
+      id_mov: 1, // ingreso
+      estado: 1
+    });
+
+    res.json(traslado);
+  } catch (error) {
+    console.error('Error en traslado:', error);
+    res.status(500).json({ message: error.message || 'Error al trasladar paciente' });
+  }
+};

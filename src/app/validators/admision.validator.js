@@ -187,3 +187,4 @@ export async function validarConflictoConReservaExistente(id_cama, fechaIngreso,
     throw new Error('Ya existe una reserva en esta cama para esa fecha.');
   }
 }
+

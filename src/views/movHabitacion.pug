@@ -31,6 +31,9 @@ block content
                   td= m.fecha_hora_egreso ? m.fecha_hora_egreso : ''
                   td= m.estado === 1 ? 'Activo' : 'Inactivo'
                   td
+                    if usuario.rol === 3
+                      button.btn.btn-sm.btn-warning.trasladar-btn(data-id=m.id_movimiento)
+                        i.fas.fa-exchange-alt
                     button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=m.id_movimiento)
                       i.fas.fa-pen
                     button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=m.id_movimiento)
@@ -42,4 +45,10 @@ block content
         script(src="https://code.jquery.com/jquery-3.6.0.min.js")
         script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
         link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+        script.
+          window.usuario = {
+            rol: !{usuario.rol},
+            id_personal_salud: !{usuario.id_personal_salud || 'null'}
+          };
         script(type="module", src="/js/movimiento_habitacion.js")
+        
