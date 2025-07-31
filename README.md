@@ -66,8 +66,7 @@ Todas las fechas almacenadas en la base se guardan en UTC y son convertidas a ho
 
 - ✅ **Base de Datos MySQL** usando Sequelize
 
-- ✅ **Recuperación de contraseña** con formulario SweetAlert2  
-  + envío de token por correo (Nodemailer)
+- ✅ **Recuperación de contraseña** con formulario SweetAlert2. Envío de token por correo (Nodemailer)
 
 - ✅ **Automatización de limpieza** de reservas vencidas (node-cron)
 
