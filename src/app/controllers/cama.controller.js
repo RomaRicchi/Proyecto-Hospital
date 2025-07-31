@@ -369,3 +369,42 @@ export const vistaCama = async (req, res) => {
 		res.status(500).send('Error al cargar camas');
 	}
 };
+
+export const getCamasOcupadas = async (req, res) => {
+  try {
+    const camas = await Cama.findAll({
+      include: [
+        {
+          model: Habitacion,
+          as: 'habitacion',
+          include: [{ model: Sector, as: 'sector' }],
+        },
+        {
+          model: MovimientoHabitacion,
+          as: 'movimientos',
+          required: true,
+          where: {
+            estado: 1,
+           
+           
+          },
+          include: [
+            {
+              model: Admision,
+              as: 'admision',
+              include: [{ model: Paciente, as: 'paciente',
+                include: [{ model: Genero, as: 'genero' }]
+               }],
+            },
+            { model: Movimiento, as: 'tipo_movimiento' },
+          ],
+        },
+      ],
+    });
+
+    res.json(camas);
+  } catch (error) {
+    console.error('Error al obtener camas ocupadas:', error);
+    res.status(500).json({ message: 'Error al obtener camas ocupadas' });
+  }
+};
