@@ -204,6 +204,7 @@ Materia: Desarrollo Web II (2025)
 
 <img width="1878" height="871" alt="image" src="https://github.com/user-attachments/assets/456ce647-1f74-43bc-b77d-fa3787953444" />
 
+<img width="853" height="187" alt="web" src="https://github.com/user-attachments/assets/9e4fda63-d3eb-4d08-bd57-bb63578e594d" />
 
 ## 📜 Licencia
 
