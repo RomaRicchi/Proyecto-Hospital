@@ -20,6 +20,7 @@ function buscarCamasDisponibles(fechaSeleccionada) {
 
 function renderTablaCamas(camas) {
   const fechaSeleccionada = $('#fecha_busqueda').val();
+  const fechaSel = new Date(fechaSeleccionada);
 
   let html = `
     <table id="tablaCamas" class="table table-bordered table-hover">
@@ -46,16 +47,18 @@ function renderTablaCamas(camas) {
         ? '<span class="badge bg-success">Sí</span>'
         : '<span class="badge bg-secondary">No</span>';
 
-      const fechaSeleccionadaStr = fechaSeleccionada;
       let estado = 'Disponible';
       let paciente = cama.paciente || '-';
       let genero = cama.genero || '-';
 
       if (Array.isArray(cama.movimientos)) {
-        cama.movimientos.forEach((mov, i) => {
-          const ingresoStr = mov.fecha_hora_ingreso.slice(0, 10);
-          const egresoStr = mov.fecha_hora_egreso ? mov.fecha_hora_egreso.slice(0, 10) : null;
-          const enFecha = ingresoStr <= fechaSeleccionadaStr && (!egresoStr || egresoStr >= fechaSeleccionadaStr);
+        cama.movimientos.forEach((mov) => {
+          const ingreso = new Date(mov.fecha_hora_ingreso);
+          const egreso = mov.fecha_hora_egreso ? new Date(mov.fecha_hora_egreso) : null;
+
+          const enFecha =
+            ingreso <= fechaSel &&
+            (!egreso || egreso >= fechaSel); // ← FIX REAL: comparar Date, no strings
 
           if (enFecha) {
             if (mov.id_mov === 1) estado = 'Ocupada';
@@ -105,7 +108,6 @@ function renderTablaCamas(camas) {
     destroy: true,
   });
 }
-
 
 $(document).ready(function () {
   configurarBusquedaDeCamas(buscarCamasDisponibles);

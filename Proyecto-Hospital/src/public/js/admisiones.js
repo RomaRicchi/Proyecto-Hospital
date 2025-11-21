@@ -29,11 +29,18 @@ $(document).ready(function () {
 
     /* ⭐ NUEVO: Obtener información real de cama */
     let camaInfo = null;
-    if (admision.id_cama) {
-      camaInfo = await fetch(`/api/admisiones/cama/${admision.id_cama}`)
-        .then(r => r.json())
-        .catch(() => null);
+    const mov = Array.isArray(admision.movimientos_habitacion)
+      ? admision.movimientos_habitacion.find(m =>
+          (m.id_mov === 1 || m.id_mov === 3) && Number(m.estado) === 1
+        )
+      : null;
+
+    const idCama = mov?.id_cama;
+
+    if (idCama) {
+      camaInfo = await fetch(`/api/admisiones/cama/${idCama}`).then(r => r.json());
     }
+
 
     const selectPacientes = `
       <select id="swal-id_paciente" class="swal2-input">

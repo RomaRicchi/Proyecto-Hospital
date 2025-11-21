@@ -85,10 +85,12 @@ export const createAdmision = async (req, res) => {
     const fechaIngreso = fecha_hora_ingreso;
     const fechaEgreso = fecha_hora_egreso ? fecha_hora_egreso : null;
 
-    if (id_mov === 1 && !fecha_hora_egreso) {
+    if (id_mov === 3) {
       const egreso = new Date(fechaIngreso);
-      egreso.setDate(egreso.getDate() + 7);
+      egreso.setDate(egreso.getDate() + 1);
       req.body.fecha_hora_egreso = egreso;
+    } else if (id_mov === 1) {
+      req.body.fecha_hora_egreso = null;
     }
 
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
@@ -404,6 +406,12 @@ export const getAdmisionById = async (req, res) => {
         {
           model: Paciente,
           as: 'paciente',
+        },
+        {
+          model: MovimientoHabitacion,
+          as: 'movimientos_habitacion',
+          attributes: ['id_cama', 'id_habitacion', 'id_mov', 'fecha_hora_ingreso', 'fecha_hora_egreso', 'estado'],
+          required: false
         },
       ]
     });

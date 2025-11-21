@@ -80,7 +80,7 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
     i.fas.fa-hospital-user.me-2
     | Admisiones
   ul.collapse#admisionesSubmenu(style="list-style-type: none; padding-left: 1rem;")
-    if [1, 2].includes(usuario.rol)
+    if [1, 2, 3].includes(usuario.rol)
       li
         a.nav-link.text-white(href="/admisiones")
           i.fas.fa-list.me-1
@@ -94,7 +94,7 @@ nav.d-flex.flex-column.bg-primary.p-3(style="min-height: 100vh; width: 350px;" i
         a.nav-link.text-white(href="/paciente/alta")
           i.fas.fa-sign-out-alt.me-1
           | Alta de Paciente
-    if [1, 2, 3].includes(usuario.rol)
+    if [1, 2 ].includes(usuario.rol)
       li
         a.nav-link.text-white(href="/emergencias")
           i.fas.fa-ambulance.me-1

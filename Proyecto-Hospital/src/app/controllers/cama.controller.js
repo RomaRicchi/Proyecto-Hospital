@@ -131,15 +131,19 @@ export const getCamasDisponiblesPorFecha = async (req, res) => {
       let genero = null;
 
 
-      const movimientosEnFecha = cama.movimientos?.filter((mov) => {
+    const movimientosEnFecha = cama.movimientos?.filter((mov) => {
         if (!mov.fecha_hora_ingreso) return false;
 
-        const fechaSel = fecha; 
-        const ingresoStr = mov.fecha_hora_ingreso.slice(0, 10);
-        const egresoStr = mov.fecha_hora_egreso ? mov.fecha_hora_egreso.slice(0, 10) : null;
+        // EXCLUIR egresos/liberaciones
+        if (mov.id_mov === 2) return false;
 
-        return ingresoStr <= fechaSel && (!egresoStr || egresoStr >= fechaSel);
-      }) || [];
+        const ingreso = new Date(mov.fecha_hora_ingreso);
+        const egreso = mov.fecha_hora_egreso ? new Date(mov.fecha_hora_egreso) : null;
+        const fechaSelDate = new Date(fecha);
+
+        return ingreso <= fechaSelDate && (!egreso || egreso >= fechaSelDate);
+    }) || [];
+
 
       const reserva = movimientosEnFecha.find(m => m.tipo_movimiento?.id_mov === 3);
       let movimientoEnFecha = null;

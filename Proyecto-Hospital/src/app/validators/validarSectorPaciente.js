@@ -1,3 +1,18 @@
+// -------------------------
+// Normaliza nombres
+// -------------------------
+function normalizar(str) {
+    return str
+        ?.trim()
+        .toLowerCase()
+        .normalize("NFD")       // separa tildes
+        .replace(/[\u0300-\u036f]/g, ""); // borra tildes
+}
+
+
+// -------------------------
+// Cálculo de edad
+// -------------------------
 export function calcularEdad(fechaNacStr) {
   const hoy = new Date();
   const fechaNac = new Date(fechaNacStr);
@@ -14,32 +29,50 @@ export function calcularEdad(fechaNacStr) {
 }
 
 
-export function validarCompatibilidadPacienteSector(edad, generoId, sector) {
-	const nombre = sector?.trim().toLowerCase();
+// -------------------------
+// Validación por nombre de sector
+// -------------------------
+export function validarCompatibilidadPacienteSector(edad, generoId, sectorNombre) {
+	const nombre = normalizar(sectorNombre);
+
 	switch (nombre) {
-		case 'neonatología':
+		case 'neonatologia':
 			return edad <= 1;
-		case 'internación pediatrica':
+
+		case 'internacion pediatrica':
 			return edad > 1 && edad <= 17;
+
 		case 'maternidad':
-			return generoId === 2; 
-		case 'geriatría':
+			return generoId === 2;
+
+		case 'geriatria':
 			return edad >= 80;
+
 		default:
 			return edad >= 18;
 	}
 }
 
-export function obtenerCriteriosPorSector(sector) {
-	switch (sector) {
-		case 'neonatología':
+
+// -------------------------
+// Criterios por nombre
+// -------------------------
+export function obtenerCriteriosPorSector(sectorNombre) {
+	const nombre = normalizar(sectorNombre);
+
+	switch (nombre) {
+		case 'neonatologia':
 			return 'Edad: hasta 1 año';
-		case 'internación pediatrica':
+
+		case 'internacion pediatrica':
 			return 'Edad: entre 1 y 17 años';
+
 		case 'maternidad':
 			return 'Género: Femenino';
-		case 'geriatría':
-			return 'Edad: 80 años o más';	
+
+		case 'geriatria':
+			return 'Edad: 80 años o más';
+
 		default:
 			return 'Edad: 18 años o más';
 	}
