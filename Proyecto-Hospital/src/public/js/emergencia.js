@@ -1,4 +1,4 @@
-import { toUTC, getFechaLocalParaInput } from './utils/validacionFechas.js';
+import { getFechaLocalParaInput } from './utils/validacionFechas.js';
 
 $(document).ready(function () {
   $('#fecha_hora_ingreso').val(getFechaLocalParaInput());
@@ -68,7 +68,7 @@ $(document).ready(function () {
     }
 
     const payload = {
-      fecha_hora_ingreso: toUTC(fecha),
+      fecha_hora_ingreso: fecha,
       sexo,
       identificador,
       id_usuario: idUsuario || null,

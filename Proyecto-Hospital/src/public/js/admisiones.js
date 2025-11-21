@@ -27,6 +27,14 @@ $(document).ready(function () {
     const admision = await fetch(`/api/admisiones/${id}`).then((r) => r.json());
     const opciones = await getOpcionesAdmision();
 
+    /* ⭐ NUEVO: Obtener información real de cama */
+    let camaInfo = null;
+    if (admision.id_cama) {
+      camaInfo = await fetch(`/api/admisiones/cama/${admision.id_cama}`)
+        .then(r => r.json())
+        .catch(() => null);
+    }
+
     const selectPacientes = `
       <select id="swal-id_paciente" class="swal2-input">
         ${opciones.pacientes.map((p) => `
@@ -67,6 +75,13 @@ $(document).ready(function () {
     Swal.fire({
       title: 'Editar Admisión',
       html: `
+        <!-- ⭐ MUESTRA LA HABITACIÓN | CAMA | SECTOR -->
+        <div style="font-size:14px;margin-bottom:10px;">
+          Habitación: <b>${camaInfo?.habitacion || '-'}</b> |
+          Cama: <b>${camaInfo?.cama || '-'}</b> |
+          Sector: <b>${camaInfo?.sector || '-'}</b>
+        </div>
+
         ${selectPacientes}
         ${selectObraSocial}
         <input id="swal-num_asociado" class="swal2-input" value="${admision.num_asociado || ''}" placeholder="N° Asociado">
@@ -226,13 +241,11 @@ $('#btn-actualizar-emergencia').click(async () => {
 
   const { dni_emergencia, dni_real } = dniForm;
 
-  // 1. Verificar que exista el paciente NN
   const nnRes = await fetch(`/api/pacientes/get-nn/${dni_emergencia}`);
   if (!nnRes.ok) {
     return Swal.fire('Error', 'No se encontró un paciente NN con ese DNI.', 'error');
   }
 
-  // 2. Buscar si ya existe un paciente real
   let datosPrecargados = {};
   const realRes = await fetch(`/api/pacientes/get-pac/${dni_real}`);
   if (realRes.ok) {
@@ -240,7 +253,6 @@ $('#btn-actualizar-emergencia').click(async () => {
     datosPrecargados = data.paciente || {};
   }
 
-  // 3. Formulario final con datos precargados si existen
   const { value: datosFinal } = await Swal.fire({
     title: 'Actualizar datos del paciente',
     html: `
@@ -296,5 +308,3 @@ $('#btn-actualizar-emergencia').click(async () => {
     Swal.fire('Error', err.message, 'error');
   }
 });
-
-

@@ -17,7 +17,8 @@ export default (sequelize, DataTypes) => {
 			},
 			num_asociado: {
 				type: DataTypes.INTEGER,
-				allowNull: false,
+				allowNull: true,
+				defaultValue: null,
 			},
 			fecha_hora_ingreso: {
 				type: DataTypes.DATE,

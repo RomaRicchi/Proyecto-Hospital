@@ -163,9 +163,20 @@ export const createAdmision = async (req, res) => {
       });
     }
 
-    if (!req.body.num_asociado || req.body.num_asociado.trim() === '') {
-      return res.status(400).json({ message: 'El número de asociado es obligatorio' });
+    // Validación inteligente para número de asociado
+    if (Number(req.body.id_obra_social) === 10) {
+      // OS 10 = Sin obra social → forzar null
+      req.body.num_asociado = null;
+    } else {
+      // Otras OS → obligatorio
+      if (!req.body.num_asociado || req.body.num_asociado.trim() === '') {
+        return res.status(400).json({
+          message: 'Debe ingresar un número de asociado para esta obra social.'
+        });
+      }
+      req.body.num_asociado = req.body.num_asociado.trim();
     }
+
 
     if (id_cama && id_mov === 1) {
       await validarOcupacionCamaPorAdmision(id_cama, fecha_hora_ingreso);
@@ -479,6 +490,35 @@ export const deleteAdmision = async (req, res) => {
 		res.status(500).json({ message: error.message });
 	}
 };
+
+export const getInfoCama = async (req, res) => {
+  try {
+    const cama = await Cama.findByPk(req.params.id, {
+      include: [
+        {
+          model: Habitacion,
+          as: 'habitacion',
+          include: [{ model: Sector, as: 'sector' }]
+        }
+      ]
+    });
+
+    if (!cama) {
+      return res.status(404).json({ error: "Cama no encontrada" });
+    }
+
+    res.json({
+      cama: cama.nombre, 
+      habitacion: cama.habitacion?.num, 
+      sector: cama.habitacion?.sector?.nombre 
+    });
+
+  } catch (e) {
+    res.status(500).json({ error: "Error al obtener datos de cama" });
+  }
+};
+
+
 
 
 

@@ -14,40 +14,30 @@ export async function mostrarFormularioYRegistrarAdmision(
   edad,
   sector_nombre
 ) {
-  const responseMotivos = await fetch('/api/motivos_ingreso');
-  const motivos = await responseMotivos.json();
 
-  const responseObras = await fetch('/api/obras-sociales');
-  const obras = await responseObras.json();
+  // Traer información real de la cama
+  const camaInfo = await fetch(`/api/admisiones/cama/${id_cama}`)
+    .then(r => r.json())
+    .catch(() => null);
 
-  const responseMedicos = await fetch('/api/usuarios/medicos');
-  const medicos = await responseMedicos.json();
+  const nombreHabitacion = camaInfo?.habitacion || id_habitacion;
+  const nombreCama = camaInfo?.cama || id_cama;
+  const nombreSector = camaInfo?.sector || sector_nombre;
+
+  const motivos = await (await fetch('/api/motivos_ingreso')).json();
+  const obras = await (await fetch('/api/obras-sociales')).json();
+  const medicos = await (await fetch('/api/usuarios/medicos')).json();
 
   const motivosOptions = motivos
-    .map(
-      (m) =>
-        `<option value="${m.id_motivo}" ${
-          m.tipo === 'Internación' ? 'selected' : ''
-        }>${m.tipo}</option>`
-    )
+    .map(m => `<option value="${m.id_motivo}" ${m.tipo === 'Internación' ? 'selected' : ''}>${m.tipo}</option>`)
     .join('');
 
   const obrasOptions = obras
-    .map(
-      (o) =>
-        `<option value="${o.id_obra_social}" ${
-          o.nombre === 'Sin obra social' ? 'selected' : ''
-        }>${o.nombre}</option>`
-    )
+    .map(o => `<option value="${o.id_obra_social}" ${o.nombre === 'Sin obra social' ? 'selected' : ''}>${o.nombre}</option>`)
     .join('');
 
   const medicosOptions = medicos
-    .map(
-      (m) =>
-        `<option value="${m.id_usuario}">
-          ${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula} - ${m.especialidad}
-        </option>`
-    )
+    .map(m => `<option value="${m.id_usuario}">${m.apellido}, ${m.nombre} - Matrícula: ${m.matricula} - ${m.especialidad}</option>`)
     .join('');
 
   const fechaIngresoDefault = fechaDashboard
@@ -59,9 +49,15 @@ export async function mostrarFormularioYRegistrarAdmision(
     html: `
       <div class="text-start">
         <p><strong>Paciente:</strong> ${paciente.apellido_p}, ${paciente.nombre_p} - ${edad} años</p>
-        <p><strong>Habitación:</strong> ${id_habitacion} | <strong>Cama:</strong> ${id_cama} | <strong>Sector:</strong> ${sector_nombre}</p>
+        <p>
+          <strong>Habitación:</strong> ${nombreHabitacion} |
+          <strong>Cama:</strong> ${nombreCama} |
+          <strong>Sector:</strong> ${nombreSector}
+        </p>
       </div>
+
       <form id="formAdmision" class="text-start">
+
         <label>Motivo ingreso</label>
         <select id="motivo" class="swal2-input" required>${motivosOptions}</select>
 
@@ -76,7 +72,7 @@ export async function mostrarFormularioYRegistrarAdmision(
         <label>Descripción</label>
         <input id="descripcion" class="swal2-input" placeholder="Descripción (opcional)">
 
-        <label>Fecha egreso (auto)</label>
+        <label>Fecha egreso</label>
         <input id="fecha_hora_egreso" type="datetime-local" class="swal2-input">
 
         <label>Motivo egreso</label>
@@ -92,9 +88,8 @@ export async function mostrarFormularioYRegistrarAdmision(
     showCancelButton: true,
     confirmButtonText: 'Registrar',
     cancelButtonText: 'Cancelar',
-    customClass: {
-      popup: 'swal2-card-style'
-    },
+    customClass: { popup: 'swal2-card-style' },
+
     didOpen: () => {
       const inputIngreso = document.getElementById('fecha_hora_ingreso');
       const inputEgreso = document.getElementById('fecha_hora_egreso');
@@ -110,12 +105,10 @@ export async function mostrarFormularioYRegistrarAdmision(
         aplicarReservaSemanal(inputIngreso, inputEgreso, inputMotivoEgr);
       } else {
         inputEgreso.disabled = false;
-        inputEgreso.removeAttribute('title');
         inputMotivoEgr.disabled = false;
-        inputMotivoEgr.placeholder = 'Motivo de egreso (opcional)';
-        inputMotivoEgr.removeAttribute('title');
       }
     },
+
     preConfirm: () => {
       const motivo = document.getElementById('motivo').value;
       const obra_social = document.getElementById('obra_social').value;
@@ -126,6 +119,7 @@ export async function mostrarFormularioYRegistrarAdmision(
       const motivo_egr = document.getElementById('motivo_egr').value;
       const id_usuario = document.getElementById('id_usuario').value;
 
+      // Validación fecha
       const error = validarFechaNoPasada(fechaIngreso);
       if (error) {
         Swal.showValidationMessage(error);
@@ -139,6 +133,7 @@ export async function mostrarFormularioYRegistrarAdmision(
       hoy.setHours(0, 0, 0, 0);
 
       let id_mov = 1;
+
       if (ingreso > hoy) {
         const errorReserva = validarFechaReservaRango(fechaIngreso);
         if (errorReserva) {
@@ -148,6 +143,12 @@ export async function mostrarFormularioYRegistrarAdmision(
         id_mov = 3;
       }
 
+      // VALIDACIÓN DE NÚMERO DE ASOCIADO
+      if (obra_social !== "10" && (!num_asociado || num_asociado.trim() === "")) {
+        Swal.showValidationMessage("Debe ingresar un número de asociado para esta obra social.");
+        return false;
+      }
+
       return {
         id_paciente: paciente.id_paciente,
         id_cama,
@@ -155,8 +156,8 @@ export async function mostrarFormularioYRegistrarAdmision(
         id_motivo: motivo,
         id_obra_social: obra_social,
         num_asociado,
-        fecha_hora_ingreso: toUTC(fechaIngreso),
-        fecha_hora_egreso: fechaEgreso ? toUTC(fechaEgreso) : null,
+        fecha_hora_ingreso: fechaIngreso,
+        fecha_hora_egreso: fechaEgreso || null,
         descripcion,
         motivo_egr,
         id_usuario: id_usuario || null,
@@ -168,10 +169,33 @@ export async function mostrarFormularioYRegistrarAdmision(
   if (!result) return;
 
   try {
+    // Ajustar horas SI ES RESERVA
+    let ingresoDate = new Date(result.fecha_hora_ingreso);
+    let egresoDate = result.fecha_hora_egreso ? new Date(result.fecha_hora_egreso) : null;
+
+    if (result.id_mov === 3) {
+      ingresoDate.setHours(5, 0, 0, 0);        // 05:00 AM
+      egresoDate = new Date(ingresoDate);
+      egresoDate.setHours(20, 59, 0, 0);       // 20:59 PM
+    }
+
+    // Convertir num_asociado vacío a null
+    const numAsociadoFinal =
+      !result.num_asociado || result.num_asociado.trim() === ''
+        ? null
+        : result.num_asociado.trim();
+
+    const payload = {
+      ...result,
+      num_asociado: numAsociadoFinal,
+      fecha_hora_ingreso: toUTC(ingresoDate),
+      fecha_hora_egreso: egresoDate ? toUTC(egresoDate) : null
+    };
+
     const res = await fetch('/api/admisiones', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(result)
+      body: JSON.stringify(payload)
     });
 
     const json = await res.json();
@@ -180,6 +204,7 @@ export async function mostrarFormularioYRegistrarAdmision(
 
     await Swal.fire('Éxito', 'Admisión registrada correctamente', 'success');
     location.reload();
+
   } catch (err) {
     Swal.fire('Error', err.message, 'error');
   }
