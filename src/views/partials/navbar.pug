@@ -1,0 +1,38 @@
+nav.navbar.navbar-expand.navbar-dark.bg-primary.sb-topnav
+  .container-fluid
+    a.navbar-brand.ps-3(href="/home")
+      img(src="/img/logo5.png", alt="Logo", width="40", height="30", class="d-inline-block align-text-top me-2")
+      | Clínica Santa María
+
+    if typeof autenticado !== 'undefined' && autenticado
+      button#sidebarToggle.btn.btn-link.btn-sm.order-1.order-lg-0.me-4.me-lg-0
+        i.fas.fa-bars
+
+    span.text-white.ms-auto.me-3.fw-semibold.d-none.d-md-block#reloj
+
+    ul.navbar-nav.ms-auto.ms-md-0.me-3.me-lg-4
+      li.nav-item.dropdown
+        a.nav-link.dropdown-toggle(
+          href="#",
+          id="navbarDropdown",
+          role="button",
+          data-bs-toggle="dropdown",
+          aria-expanded="false"
+        )
+          i.fa-solid.fa-circle-user.me-1
+          if autenticado
+            span.d-none.d-md-inline Hola #{usuario.nombre}
+          else
+            span.d-none.d-md-inline Usuario
+
+        ul.dropdown-menu.dropdown-menu-end(aria-labelledby="navbarDropdown")
+          if !autenticado
+            li
+              a.dropdown-item(href="/login") Iniciar sesión
+          else
+            li
+              a.dropdown-item(href="/api/usuarios/perfil") Mi perfil
+            li
+              hr.dropdown-divider
+            li
+              a.dropdown-item(href="/logout") Cerrar sesión

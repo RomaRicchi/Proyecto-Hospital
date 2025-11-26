@@ -1,0 +1,103 @@
+/* Animación para cards expandibles */
+.card.expandible {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+.card.expandible:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+.card.expandible.expandida {
+  transform: scale(1.1);
+  background-color: #f8f9fc;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+.card.expandible.expandida:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Sidebar */
+#sidenavAccordion {
+  background-color: rgba(13, 110, 253, 0.2);
+  transition: margin-left 0.3s;
+}
+#sidenavAccordion .nav-link {
+  font-size: 1.2rem;
+  padding: 15px 20px;
+  color: #000;
+}
+#sidenavAccordion .nav-link:hover {
+  background-color: rgba(13, 110, 253, 0.4);
+  color: #000;
+}
+#sidenavAccordion .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s, color 0.3s;
+}
+#sidenavAccordion .nav-link.active i {
+  color: #fff;
+}
+.sidebar-collapsed {
+  margin-left: -350px;
+}
+
+/* Topnav */
+.sb-topnav {
+  background-color: #0d6efd;
+}
+#sidebarToggle {
+  border: none;
+  background: none;
+  color: white;
+  font-size: 1.5rem;
+}
+
+/* Swal2 Card personalizado */
+.swal2-card-style {
+  border-radius: 12px;
+  background: #0f4b90;
+  color: white;
+  font-family: 'Roboto', sans-serif;
+}
+.swal2-card-style .swal2-title {
+  background: #0f4b90;
+  padding-top: 20px;
+  font-size: 20px;
+  color: white;
+  text-align: center !important;
+}
+.swal2-card-style .swal2-html-container {
+  padding: 20px;
+  text-align: center !important;
+}
+.swal2-card-style .swal2-input,
+.swal2-card-style select,
+.swal2-card-style input[type="time"],
+.swal2-card-style textarea {
+  background-color: #fff !important;
+  color: #000 !important;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px 14px !important;
+  margin: 16px auto !important;
+  width: 90% !important;
+  max-width: 360px;
+  display: block;
+  box-sizing: border-box;
+}
+.swal2-card-style .swal2-confirm {
+  background-color: #198754 !important;
+}
+.swal2-actions {
+  margin-top: 10px !important;
+  padding-bottom: 20px;
+}
+.swal2-popup {
+  max-width: 420px !important;
+  overflow-x: hidden !important;
+}
+

@@ -1,0 +1,82 @@
+/* Fondo blanco + borde rosa alrededor del calendario */
+#calendar {
+  background-color: rgb(161, 210, 247);
+  border: 5px solid #ff3cac; /* rosa brillante */
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 1rem;
+  box-shadow: 0 0 15px #f73ed5c0;
+  overflow: hidden;
+}
+
+/* Ajustes de evento */
+.fc-event {
+  border-left: 5px solid #ff3cac;
+  background-color: #ffe0f0 !important;
+  color: #333;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Eventos "background" de agenda recurrente */
+.fc-bg-event {
+  background-color: #bf7efb !important;
+  opacity: 0.3;
+  border-radius: 4px;
+}
+
+/* Día y fecha en encabezado */
+.fc-col-header-cell-cushion {
+  font-weight: bold;
+  color: #007bff;
+}
+
+/* Botones del calendario */
+.fc .fc-button {
+  background-color: #ff3cac;
+  border: none;
+  color: rgb(237, 169, 234);
+  font-weight: bold;
+}
+.fc .fc-button:hover {
+  background-color: #e22590;
+}
+
+/* Ocultar borde interno innecesario del calendario */
+.fc-scrollgrid,
+.fc-scrollgrid-sync-table {
+  border: none !important;
+}
+
+/* Suavizar fondo al pasar por encima */
+.fc-event:hover {
+  filter: brightness(0.95);
+  cursor: pointer;
+}
+
+/* Label de filtro de profesional */
+#filtroProfesionalLabel {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #212529;
+  margin-top: 1rem;
+  display: block;
+}
+
+/* Select estilizado con mayor prioridad */
+#filtroProfesional.select-estilizado {
+  font-weight: bold !important;
+  border: 2px solid #d087e8 !important;
+  background-color: #fffdf0 !important;
+  color: #333 !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  transition: border-color 0.3s ease-in-out;
+  width: 300px !important;
+}
+
+#filtroProfesional.select-estilizado:focus {
+  outline: none;
+  border-color: #ff4081 !important;
+  box-shadow: 0 0 5px #e65ce280 !important;
+}

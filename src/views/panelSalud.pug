@@ -1,0 +1,49 @@
+extends layout_modular
+
+block content
+  .admin-hero
+    h1.text-center.px-4.text-primary.fw-bold Panel de Salud
+    #usuarioData(data-id_personal_salud=usuario.id_personal_salud style="display: none")
+
+    if usuario
+      p.text-end.text-muted
+        strong Usuario: 
+        | #{usuario.nombre} #{usuario.apellido}
+
+    if usuario.id_rol_usuario === 4
+      .row.mt-3.justify-content-center
+        .col-xl-3.col-md-6
+          a.card.h-100.bg-success.text-white.text-center.mb-4(href="/turnos", style="text-decoration:none;")
+            .card-body.d-flex.flex-column.justify-content-center
+              i.fas.fa-user-clock.fa-2x.mb-2
+              h5 Turnos
+
+        .col-xl-3.col-md-6
+          a.card.h-100.bg-info.text-white.text-center.mb-4(href="/calendario", style="text-decoration:none;")
+            .card-body.d-flex.flex-column.justify-content-center
+              i.fas.fa-calendar-alt.fa-2x.mb-2
+              h5 Calendario
+
+
+    h4.mt-4.mb-3.text-center.fw-bold Internaciones asignadas
+
+    .table-responsive
+      table#tablaPacientes.table.table-striped.table-bordered.w-100
+        thead
+          tr
+            th DNI
+            th Nombre completo
+            th Cama
+            th Fecha de ingreso
+            th Motivo ingreso
+            th Acciones
+        tbody
+
+
+      // Scripts
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      script(src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")
+      link(rel="stylesheet", href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css")
+      script(src="/js/panelSalud.js")

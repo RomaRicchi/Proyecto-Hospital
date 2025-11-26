@@ -1,0 +1,41 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1 Agenda de Profesionales
+      button.btn.btn-success#btnNuevaAgenda Nueva Agenda
+      // 👇 Esto debe estar en la vista Pug que renderiza el frontend
+      div#usuarioData(
+        data-rol=usuario.rol
+        data-id-personal-salud=usuario.id_personal_salud
+        data-nombre=usuario.nombre
+        data-apellido=usuario.apellido
+      )
+
+      label#filtroProfesionalLabel(for="filtroProfesional") Filtrar por profesional
+      select#filtroProfesional.select-estilizado
+
+
+      #vistaTabla
+        table#tablaAgendas.table.table-striped
+          thead
+            tr
+              th Profesional
+              th Día
+              th Hora inicio
+              th Hora fin
+              th Duración de turnos
+              th Acciones
+          tbody#tbodyAgendas
+
+      #calendar(style="max-width: 100%; margin-top: 2rem; display:none")
+
+      link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css")
+      script(src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js")
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+      link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css")
+      script(src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js")
+      script(type="module", src="/js/agenda.js")

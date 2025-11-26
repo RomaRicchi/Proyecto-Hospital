@@ -1,0 +1,35 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Gestión de Admisiones
+
+      .table-responsive
+        table#tablaAdmisiones.table.table-striped.table-bordered
+          thead
+            tr
+            
+              th Paciente
+              th DNI
+              th Obra Social
+              th N° Asociado
+              th Motivo Ingreso
+              th Descripción
+              th Fecha Ingreso
+              th Fecha Egreso
+              th Motivo Egreso
+              th Personal de Salud
+              th Acciones
+          tbody#tbodyAdmisiones
+      
+      .text-center.mt-4
+        button#btn-actualizar-emergencia.btn.btn-warning
+          i.fas.fa-sync-alt.me-1
+          |  Actualizar datos de emergencia
+          
+
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+      script(type="module" src="/js/admisiones.js")

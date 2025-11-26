@@ -1,0 +1,29 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Reserva de Camas
+
+      .table-responsive
+        table#tablaReservas.table.table-striped.table-bordered
+          thead
+            tr
+              th Fecha de Reserva
+              th Sector
+              th Habitación
+              th Cama
+              th Paciente
+              th Motivo de Ingreso
+              th Acción
+          tbody#tbodyReservas
+
+      button#btnEliminarVencidas.btn.btn-danger.mb-3 Eliminar reservas vencidas
+      
+      script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")
+      script(src="/js/reservar.js")
+
+

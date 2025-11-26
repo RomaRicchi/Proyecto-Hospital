@@ -1,0 +1,33 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Gestión de Localidades
+
+      .table-responsive
+        table#tablaLocalidades.table.table-striped.table-bordered
+          thead
+            tr
+              th Nombre
+              th Acciones
+          tbody
+            if localidades && localidades.length
+              each localidad in localidades
+                tr
+                  td= localidad.nombre
+                  td
+                    button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=localidad.id_localidad)
+                      i.fas.fa-pen
+                    button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=localidad.id_localidad)
+                      i.fas.fa-trash
+            else
+              h1 No hay localidades registradas.
+
+      
+
+      // Librerías DataTables y jQuery
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+      script(type="module", src="/js/localidades.js")

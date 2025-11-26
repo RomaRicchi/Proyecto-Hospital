@@ -1,0 +1,35 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Gestión de Habitaciones
+
+      .table-responsive
+        table#tablaHabitacion.table.table-striped.table-bordered
+          thead
+            tr
+              th Sector
+              th Número hab
+              th Camas
+              th Acciones
+          tbody
+            if habitaciones && habitaciones.length
+              each habitacion in habitaciones
+                tr
+                  td #{habitacion.sector}
+                  td #{habitacion.num}
+                  td #{habitacion.camas}
+                  td
+                    button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=habitacion.id_habitacion)
+                      i.fas.fa-pen
+                    button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=habitacion.id_habitacion)
+                      i.fas.fa-trash
+            else
+              h1 No hay habitaciones registradas.
+
+      // Librerías necesarias
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      script(type="module", src="/js/habitacion.js")

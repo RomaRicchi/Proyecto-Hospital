@@ -1,0 +1,63 @@
+extends layout_modular
+
+block content
+
+  .admin-hero
+    h1.text-black Panel de Administración
+    p.text-black Bienvenido/a al sistema de gestión.
+    ol.breadcrumb.mb-4
+
+    // 🔹 Cards (dentro del hero)
+    .row.mt-3.justify-content-center
+      .col-xl-3.col-md-6
+        a.card.h-100.bg-danger.text-white.text-center.mb-4(href="/emergencias", style="text-decoration:none;")
+          .card-body.d-flex.flex-column.justify-content-center
+            i.fas.fa-ambulance.fa-2x.mb-2
+            h5 Emergencias
+
+      .col-xl-3.col-md-6
+        a.card.h-100.bg-warning.text-white.text-center.mb-4(href="/reserva-cama", style="text-decoration:none;")
+          .card-body.d-flex.flex-column.justify-content-center
+            i.fas.fa-calendar-day.fa-2x.mb-2
+            h5 Reservas
+
+      .col-xl-3.col-md-6
+        a.card.h-100.bg-success.text-white.text-center.mb-4(href="/turnos", style="text-decoration:none;")
+          .card-body.d-flex.flex-column.justify-content-center
+            i.fas.fa-user-clock.fa-2x.mb-2
+            h5 Turnos
+
+      .col-xl-3.col-md-6
+        a.card.h-100.bg-info.text-white.text-center.mb-4(href="/calendario", style="text-decoration:none;")
+          .card-body.d-flex.flex-column.justify-content-center
+            i.fas.fa-calendar-alt.fa-2x.mb-2
+            h5 Calendario
+
+    // 🔹 Nueva Internación
+    h1.mt-4 Nueva Internacion
+    .row.mb-4
+      .col-12
+        .card
+          .card-header.bg-info.text-white
+            h5.mb-0 Buscar camas disponibles
+          .card-body
+            form#formBuscarCamas
+              .row.g-2.align-items-end
+                .col-md-4
+                  label(for="fecha_busqueda") Fecha de internación
+                  input#fecha_busqueda.form-control(type="date" required)
+                .col-md-2
+                  button#btnBuscarCamas.btn.btn-primary(type="submit")
+                    i.fas.fa-search.me-1
+                    | Buscar camas libres
+
+    .row
+      .col-12
+        #tablaCamasContainer
+
+    // Scripts
+    script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+    script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+    link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")        
+    script(type="module", src="/js/dashboard.js") 
+    script(type="module", src="/js/utils/btn.asignarPaciente.js")

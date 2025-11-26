@@ -1,0 +1,31 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-content
+      #usuarioData(
+        data-id=usuario.id_personal_salud ? usuario.id_personal_salud : ''
+        data-username=usuario.username
+        style="display: none"
+      )
+
+      h1.text-center.px-4.pt-5 Alta de Paciente
+
+      form#buscarPacienteForm
+        .mb-3
+          label.fw-bold.text-primary(for='busqueda') Buscar Paciente por DNI 
+          input#busqueda.form-control(type='text', name='busqueda', required)
+
+        button.btn.btn-primary.mb-4(type='submit')
+          i.fas.fa-search.me-1
+          | Buscar
+
+      // 📋 Resultado dinámico (paciente + admisión + formulario alta)
+      #resultadoBusqueda
+
+
+    script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+    script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+    link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+    script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
+    script(type="module", src="/js/altaPaciente.js")

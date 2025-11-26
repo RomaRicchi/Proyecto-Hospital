@@ -1,0 +1,41 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Gestión de Familiares
+
+      .table-responsive
+        table#tablaFamiliar.table.table-striped.table-bordered
+          thead
+            tr
+              th Nombre
+              th Apellido
+              th Teléfono
+              th Paciente
+              th DNI Paciente
+              th Parentesco
+              th Acciones
+          tbody
+            if familiares && familiares.length
+              each familiar in familiares
+                tr
+                  td #{familiar.nombre}
+                  td #{familiar.apellido}
+                  td #{familiar.telefono}
+                  td #{familiar.paciente} 
+                  td #{familiar.dni_paciente}
+                  td #{familiar.parentesco}
+                  td
+                    button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=familiar.id_familiar)
+                      i.fas.fa-pen
+                    button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=familiar.id_familiar)
+                      i.fas.fa-trash
+            else
+              h1 No hay familiares registrados.
+
+      // Librerías DataTables y jQuery
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+      script(type="module", src="/js/familiar.js")

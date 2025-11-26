@@ -1,0 +1,58 @@
+.dataTables_length select {
+  background-color: #fff !important;  
+  border: 1px solid #ced4da !important; 
+  color: #212529 !important;          
+  padding: 0.25rem 0.5rem !important;  
+  border-radius: 0.25rem !important;  /
+}
+
+
+.dataTables_filter input {
+  background-color: #fff !important; 
+  border: 1px solid #ced4da !important;
+  color: #212529 !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 0.25rem !important;
+}
+
+
+.dataTables_filter label::before {
+  content: "\f002";                   
+  font-family: "Font Awesome 6 Free"; 
+  font-weight: 900;
+  margin-right: 0.5rem;
+  color: #6c757d;
+}
+.table-responsive {
+  overflow-x: hidden !important;
+}
+
+.dataTables_length select {
+  background-color: #fff !important;
+  border: 1px solid #ced4da !important;
+  color: #212529 !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 0.25rem !important;
+  min-width: 70px !important; 
+  appearance: none !important; 
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+.dataTables_length label {
+  font-weight: bold !important;
+}
+
+.dataTables_filter label {
+  font-weight: bold !important; 
+}
+
+.dataTables_filter input {
+  font-weight: bold !important; 
+}
+
+
+.dataTables_wrapper .dataTables_scrollBody,
+.dataTables_wrapper .table-responsive {
+  overflow-x: hidden !important;
+}

@@ -1,0 +1,172 @@
+.hero {
+  position: relative;
+  min-height: 1000px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.hero-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.4); 
+  z-index: 1;
+}
+
+.hero .container {
+  z-index: 2;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('/img/medicina.webp') center/cover no-repeat;
+  z-index: -1;      
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  color: #e91e63; 
+  font-weight: 600;
+}
+
+.hero-subtitle {
+  font-family: 'Raleway', sans-serif;
+  font-size: 2.0rem;
+  color: #6c1a42;
+
+}
+.hero-subtitle1 {
+  font-weight: bold; 
+  font-family: 'Raleway', sans-serif;
+  font-size: 2.0rem;
+  color: #6c1a42;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.2rem;
+  }
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+}
+
+.admin-hero {
+  position: relative;
+  padding: 3rem 1rem;
+  height: auto;
+  min-height: 100vh;
+  color: rgb(31, 94, 165);
+  overflow: hidden; 
+}
+
+.admin-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('/img/doctor1.webp') center/cover no-repeat;
+  z-index: -1;      
+}
+
+.login-hero {
+  background-image: url('/img/manos.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: calc(100vh - 56px); 
+  margin-top: 0;             
+  padding: 0;                  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 0;                  
+}
+
+.gral-hero {
+  background-image: url('/img/estetoscopio.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: repeat;
+  min-height: 100vh;
+  height: auto;
+  margin-top: 0;             
+  padding: 0;                  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 0; 
+  text-align: center;
+  
+}
+
+.gral-hero-content {
+  color: rgb(31, 94, 165);
+  max-width: 600px;
+  width: 100%;
+}
+
+.gral-hero-cont {
+  color: rgb(31, 94, 165);
+  width: 100%; 
+  max-width: none; 
+  padding: 2rem; 
+}
+
+.gral-hero .card {
+  border-radius: 1rem;
+  overflow: hidden;
+  background-color: rgb(31, 94, 165);
+  box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.gral-hero .card:hover {
+  transform: translateY(-4px);
+}
+
+.gral-hero .card-body {
+  padding: 2rem;
+}
+
+.gral-hero h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.gral-hero p.lead {
+  font-size: 1.2rem;
+  font-weight: 300;
+}
+
+@media (max-width: 576px) {
+  .gral-hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .gral-hero p.lead {
+    font-size: 1rem;
+  }
+
+  .gral-hero .card-body {
+    padding: 1.5rem;
+  }
+}
+

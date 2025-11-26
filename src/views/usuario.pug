@@ -1,0 +1,30 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Gestión de Usuarios
+      #btnAgregarContainer.text-center.mt-3
+        button#btnAgregarUsuario.btn.btn-success
+          i.fas.fa-user-plus.me-1
+          | Agregar nuevo usuario
+      .table-responsive
+        table#tablaUsuarios.table.table-striped.table-bordered
+          thead
+            tr
+              th Username
+              th Nombre completo
+              th Email
+              th Tipo
+              th Rol
+              th Especialidad
+              th Estado
+              th Acciones
+          tbody
+
+     
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css")
+      script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js")
+      script(src="/js/usuario.js")

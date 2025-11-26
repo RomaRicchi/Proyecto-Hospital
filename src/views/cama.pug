@@ -1,0 +1,47 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Gestión de Camas
+
+      .table-responsive
+        table#tablaCamas.table.table-striped.table-bordered
+          thead
+            tr
+              th Habitación
+              th Nombre Cama
+              th Desinfección
+              th Estado
+              th Acciones
+          tbody
+            if camas && camas.length
+              each cama in camas
+                tr
+                  td #{cama.descripcionHabitacion}
+                  td #{cama.nombre}
+                  td
+                    if cama.desinfeccion
+                      span.badge.bg-success Sí
+                    else
+                      span.badge.bg-secondary No
+                  td
+                    if cama.estado
+                      span.badge.bg-danger Ocupada
+                    else
+                      span.badge.bg-info Disponible
+                  td
+                    button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=cama.id_cama)
+                      i.fas.fa-pen
+                    button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=cama.id_cama)
+                      i.fas.fa-trash
+            else
+              h1 No hay camas registradas.
+
+      // Librerías necesarias
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+      script(src="/js/cama.js")
+
+      

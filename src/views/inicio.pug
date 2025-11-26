@@ -1,0 +1,39 @@
+extends layout_modular
+
+block content
+  .hero.position-relative
+    .hero-overlay
+    .container.text-center.position-relative
+      h1.hero-title.mt-4 Bienvenido a nuestra Clínica
+      h1.display-4.hero-title Cuidamos tu salud, acompañamos tu vida
+      p.lead.hero-subtitle Más de 25 años de experiencia brindando atención médica integral.
+
+      .row.text-center.mt-4
+        .col-12.col-md-6
+          h2.hero-subtitle1 Obras sociales:
+          ul.list-unstyled
+            each obra in listaObras
+              li= obra
+        .col-12.col-md-6
+          h2.hero-subtitle1 Especialidades:
+          ul.list-unstyled
+            each esp in listaEsp
+              li= esp
+
+  h2.mt-5.text-center Nuestros Profesionales
+  .row.row-cols-2.row-cols-sm-3.row-cols-md-4.row-cols-lg-5.g-4.mt-3.justify-content-center
+    each medico in medicos
+      .col
+        .card.expandible.h-100.shadow-sm.text-center.d-flex.flex-column(style="cursor: pointer; padding: 10px;")
+          img.card-img-top.mx-auto.mt-3.mb-2.rounded-circle(
+            src=medico.foto, 
+            alt=`Foto de ${medico.nombre}`, 
+            title=medico.nombre,
+            style="width: 80px; height: 80px; object-fit: cover;"
+          )
+          .card-body.p-2.mt-auto
+            h6.card-title.mb-1= medico.nombre
+            p.card-text.text-muted.small= medico.especialidad
+
+
+        

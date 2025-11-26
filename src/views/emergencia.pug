@@ -1,0 +1,46 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-content
+      h1.text-white.mb-2 Ingreso por Emergencia
+      p.text-white.lead.mb-4 Complete los datos para admitir al paciente
+
+      .card.shadow.mx-auto(style="max-width: 500px;")
+        .card-body
+          h4.text-center.mb-4 Datos del Ingreso
+
+          form#formEmergencia(method="POST", action="/emergencia")
+            .mb-3
+              label.form-label(for="fecha_hora_ingreso") Fecha y hora de ingreso
+              input#fecha_hora_ingreso.form-control(type="datetime-local", name="fecha_hora_ingreso", required)
+
+            .mb-3
+              label.form-label(for="tipo_emergencia") Tipo de emergencia
+              select#tipo_emergencia.form-select(name="tipo_emergencia" required)
+                option(value="" disabled selected) Seleccione tipo
+                option(value="adulto") Adulto
+                option(value="niño") Niño
+
+            .mb-3
+              label.form-label(for="sexo") Sexo
+              select#sexo.form-select(name="sexo" required)
+                option(value="" disabled selected) Cargando géneros...
+
+            .mb-3
+              label.form-label(for="identificador") Numero identificador (DNI temporal)
+              input#identificador.form-control(type="number", name="identificador", required, min="1")
+
+            .mb-3
+              label(for="id_usuario") Medico responsable
+              select#id_usuario.form-control(name="id_usuario" required)
+                option(value="" disabled selected) Cargando medicos...
+
+            button.btn.btn-success.w-100.mt-2(type="submit")
+              i.fas.fa-hospital.me-2
+              | Admitir paciente de emergencia
+
+  // Librerías opcionales
+  link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css")
+  script(src="https://code.jquery.com/jquery-3.6.0.min.js")  
+  script(type= "module", src="/js/emergencia.js")

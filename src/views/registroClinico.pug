@@ -1,0 +1,39 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1 Registros Clínicos
+
+      // 🔍 Campo para buscar por DNI
+      .mb-4.text-center
+        label.fw-bold(for="dniBuscar") DNI del paciente:
+        input#dniBuscar.form-control.mx-auto(style="width: 40%;" type="text", placeholder="Ingrese DNI", value=dni)
+        button#btnBuscar.btn.btn-primary.mt-2 Buscar
+
+      // 👤 Info del paciente
+      #infoPaciente.mt-4.text-start
+      #accionesRegistro.mt-3
+
+      // ⬇️ Select de filtro (oculto inicialmente)
+      #filtroTipoRegistro.d-none.mb-3.text-center
+        label.fw-bold(for="selectTipo") Filtrar por tipo:
+        select#selectTipo.form-select.mx-auto.mt-2(style="width: 40%;")
+          option(value="Todos") Todos
+
+      div#usuarioData(
+        data-username=usuario.username
+        data-id=usuario.id
+        data-rol=usuario.id_rol_usuario
+        style="display: none"
+      )
+
+      .table-responsive.mt-3
+        #tablaRegistrosContainer
+
+      // 📦 Scripts
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css")
+      script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
+      script(type="module", src="/js/registroClinico.js")

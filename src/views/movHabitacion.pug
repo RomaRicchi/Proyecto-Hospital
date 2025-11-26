@@ -1,0 +1,54 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Movimientos de Habitación
+
+      .table-responsive
+        table#tablaMovimientosHabitacion.table.table-striped.table-bordered
+          thead
+            tr
+              th Paciente
+              th Habitación
+              th Sector
+              th Cama
+              th Tipo Movimiento
+              th Fecha Ingreso
+              th Fecha Egreso
+              th Estado
+              th Acciones
+          tbody
+            if movimientos && movimientos.length
+              each m in movimientos
+                tr
+                  td= m.admision && m.admision.paciente ? m.admision.paciente.apellido_p + ', ' + m.admision.paciente.nombre_p : ''
+                  td= m.habitacion ? m.habitacion.num : ''
+                  td= m.habitacion && m.habitacion.sector ? m.habitacion.sector.nombre : ''
+                  td= m.cama && m.cama.nombre ? m.cama.nombre : ''
+                  td= m.tipo_movimiento ? m.tipo_movimiento.nombre : ''
+                  td= m.fecha_hora_ingreso
+                  td= m.fecha_hora_egreso ? m.fecha_hora_egreso : ''
+                  td= m.estado === 1 ? 'Activo' : 'Inactivo'
+                  td
+                    if usuario.rol === 3
+                      button.btn.btn-sm.btn-warning.trasladar-btn(data-id=m.id_movimiento)
+                        i.fas.fa-exchange-alt
+                    button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=m.id_movimiento)
+                      i.fas.fa-pen
+                    button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=m.id_movimiento)
+                      i.fas.fa-trash
+            else
+              h1 No hay movimientos registrados.
+
+        // Librerías DataTables y jQuery
+        script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+        script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+        link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+        script.
+          window.usuario = {
+            rol: !{usuario.rol},
+            id_personal_salud: !{usuario.id_personal_salud || 'null'}
+          };
+        script(type="module", src="/js/movimiento_habitacion.js")
+        

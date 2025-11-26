@@ -1,0 +1,56 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      h1.text-center.px-4.pt-5 Lista de Pacientes
+
+      .mb-3
+        button#btnAgregarPaciente.btn.btn-success
+          i.fas.fa-plus.me-1
+          | Agregar Paciente
+
+      .table-responsive
+        table#tablaPacientes.table.table-striped.table-bordered
+          thead
+            tr
+              th DNI
+              th Apellido
+              th Nombre
+              th Fecha Nacimiento
+              th Género
+              th Teléfono
+              th Dirección
+              th Localidad
+              th Email
+              th Acciones
+          tbody
+            if pacientes && pacientes.length
+              each paciente in pacientes
+                tr(style="white-space: nowrap;")
+                  td= paciente.dni_paciente
+                  td= paciente.apellido_p
+                  td= paciente.nombre_p
+                  td= paciente.fecha_nac
+                  td= paciente.genero
+                  td= paciente.telefono
+                  td= paciente.direccion
+                  td= paciente.localidad
+                  td= paciente.email
+                  td
+                    button.btn.btn-sm.btn-primary.me-1.edit-btn(data-id=paciente.id_paciente)
+                      i.fas.fa-pen
+                    button.btn.btn-sm.btn-danger.me-1.delete-btn(data-id=paciente.id_paciente)
+                      i.fas.fa-trash
+                    button.btn.btn-sm.btn-secondary.details-btn(data-id=paciente.id_paciente)
+                      i.fas.fa-eye
+                    a.btn.btn-sm.btn-success.ms-1(href=`/familiar?idPaciente=${paciente.id_paciente}` title="Agregar familiar")
+                      i.fas.fa-user-plus
+            else
+              h1 No hay pacientes registrados.
+
+      // Librerías
+      script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+      script(src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js")
+      link(rel="stylesheet", href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css") 
+      script(type="module", src="/js/pacientes.js")

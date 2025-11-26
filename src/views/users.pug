@@ -1,0 +1,25 @@
+extends layout_modular
+
+block content
+  .gral-hero.d-flex.align-items-center.justify-content-center.text-center
+    .gral-hero-cont
+      .d-flex.justify-content-center.align-items-center.w-100
+        .card.shadow.p-4.swal2-card-style(style="max-width: 400px; width: 100%; background-color: #1a73e8; color: white; border-radius: 1rem;")
+          h3.text-center.mb-3.text-white Iniciar sesión
+
+          form(action="/login" method="POST")
+            .mb-3
+              label.form-label(for="usuario") Usuario
+              input.form-control(type="text" name="usuario" id="usuario" required placeholder="Usuario")
+            .mb-3
+              label.form-label(for="password") Contraseña
+              input.form-control(type="password" name="password" id="password" required placeholder="Contraseña")
+            button.btn.btn-success.w-100(type="submit") Ingresar
+
+          button#btnRecuperarPassword.btn.btn-link.mt-2.text-white(style="font-size: 0.9rem") ¿Olvidaste tu contraseña?
+
+          if error
+            .alert.alert-danger.mt-3.text-center= error
+
+        script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
+        script(src="/js/recuperarPassword.js")

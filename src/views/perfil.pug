@@ -1,0 +1,38 @@
+extends layout_modular
+
+block content
+  .hero.position-relative
+    .hero-overlay
+    .container.text-center.position-relative
+      .card.card-perfil.shadow-lg.mx-auto
+        .card-body.perfil-body.text-center
+
+          img.foto-perfil.rounded-circle.mb-3(src=foto, width="120", height="120")
+
+          form(action="/api/usuarios/perfil" method="POST" class="text-start mt-3")
+            .mb-3
+              label.form-label(for="nombre") Nombre
+              input.form-control.shadow-sm(type="text" id="nombre" name="nombre" required value=usuario.nombre)
+
+            .mb-3
+              label.form-label(for="apellido") Apellido
+              input.form-control.shadow-sm(type="text" id="apellido" name="apellido" required value=usuario.apellido)
+
+            .mb-3
+              label.form-label(for="username") Usuario
+              input.form-control.shadow-sm(type="text" id="username" name="username" readonly value=usuario.username)
+
+            if especialidad
+              .mb-3
+                label.form-label(for="especialidad") Especialidad
+                input.form-control.shadow-sm(type="text" id="especialidad" readonly value=especialidad)
+
+            button.btn.btn-success.w-100.btn-rounded(type="submit") Guardar cambios
+
+          a.btn.btn-success.mt-3#btnCambiarPassword.btn-rounded
+            i.fas.fa-key.me-1
+            | Cambiar contraseña
+
+
+    script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
+    script(type="module", src="/js/perfil.js")
